@@ -5,7 +5,7 @@ using System.IO.Pipelines;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpanTest
+namespace CodeFragments
 {
     public static class PipelinesTest
     {

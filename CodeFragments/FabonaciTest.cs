@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SpanTest
+namespace CodeFragments
 {
     public static class FabonaciTest
     {
