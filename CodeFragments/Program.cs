@@ -9,8 +9,13 @@ namespace CodeFragments
         {
             Console.WriteLine("Hello World!");
             //await PipelinesTest.Show();
-            var cardid = "61021118850526301x";
-            Console.WriteLine(cardid.IsChineseIDCard());
+
+            //var cardid = "61021118850526301x";
+            //Console.WriteLine(cardid.IsChineseIDCard());
+
+            var pro = new DiagnosticsTools();
+            pro.Run();
+
             Console.ReadLine();
         }
     }
