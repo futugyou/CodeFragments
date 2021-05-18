@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  daprfrontend:
+    image: ${DOCKER_REGISTRY-}daprfrontend
+    build:
+      context: .
+      dockerfile: DaprFrontEnd/Dockerfile
+    ports:
+      - "51000:50001"
+
+  daprfrontend-dapr:
+    image: "daprio/daprd:latest"
+    command: [ "./daprd", "-app-id", "daprfrontend", "-app-port", "80" ]
+    depends_on:
+      - daprfrontend
+    network_mode: "service:daprfrontend"
+
+  daprbackend:
+    image: ${DOCKER_REGISTRY-}daprbackend
+    build:
+      context: .
+      dockerfile: DaprBackEnd/Dockerfile
+    ports:
+      - "52000:50001"
+
+  daprbackend-dapr:
+    image: "daprio/daprd:latest"
+    command: [ "./daprd", "-app-id", "daprbackend", "-app-port", "80" ]
+    depends_on:
+      - daprfrontend
+    network_mode: "service:daprbackend"
