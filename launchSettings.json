@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "serviceActions": {
+        "daprbackend": "StartWithoutDebugging",
+        "daprbackend-dapr": "StartWithoutDebugging",
+        "daprfrontend": "StartWithoutDebugging",
+        "daprfrontend-dapr": "StartWithoutDebugging"
+      },
+      "commandVersion": "1.0"
+    }
+  }
+}

@@ -7,15 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeFragments", "CodeFragme
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Generators", "Generators\Generators.csproj", "{5D813AB0-0A63-4299-A6AB-FBEC777EA4FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprCounter", "DaprCounter\DaprCounter.csproj", "{5B489656-144B-4C26-80CA-DE4A6170432C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprCounter", "DaprCounter\DaprCounter.csproj", "{5B489656-144B-4C26-80CA-DE4A6170432C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprBackEnd", "DaprBackEnd\DaprBackEnd.csproj", "{BDC4EAA2-A045-413B-8F6F-4DED4A63D4A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprBackEnd", "DaprBackEnd\DaprBackEnd.csproj", "{BDC4EAA2-A045-413B-8F6F-4DED4A63D4A7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dapr", "Dapr", "{69944263-AF01-460F-B70B-6815DC09F542}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{E6477054-221A-48BD-B813-C139DEB959A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprFrontEnd", "DaprFrontEnd\DaprFrontEnd.csproj", "{9E2C2324-25B9-42D8-977A-F22EEDD86142}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprFrontEnd", "DaprFrontEnd\DaprFrontEnd.csproj", "{9E2C2324-25B9-42D8-977A-F22EEDD86142}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoDome", "..\CryptoDome\CryptoDome.csproj", "{EE466A2F-F670-4662-87E2-8EC2C488A02A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{9E2C2324-25B9-42D8-977A-F22EEDD86142}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E2C2324-25B9-42D8-977A-F22EEDD86142}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E2C2324-25B9-42D8-977A-F22EEDD86142}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
