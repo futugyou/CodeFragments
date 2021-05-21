@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Mastercard.Model.v60;
+using Mastercard.Proxy;
+using Mastercard.ViewModel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,29 +14,36 @@ namespace Mastercard.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IMastercardProxy _mastercardProxy;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IMastercardProxy mastercardProxy)
         {
             _logger = logger;
+            _mastercardProxy = mastercardProxy;
         }
 
+
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<CreateSessionViewModel> Get()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            var order = new Order
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+                Id = Guid.NewGuid().ToString().Replace("-", string.Empty),
+                Amount = 1M,
+                Currency = "THB",
+            };
+            var model = new CreateSessionViewModel()
+            {
+                OrderId = order.Id,
+                Currency = order.Currency,
+            };
+            var request = new CreateCheckoutSessionRequest { Order = order };
+            var response = await _mastercardProxy.CreateCheckoutSession(request);
+            model.Merchant = response.Merchant;
+            model.Session = response.Session;
+            model.SuccessIndicator = response.SuccessIndicator;
+            return model;
         }
     }
 }

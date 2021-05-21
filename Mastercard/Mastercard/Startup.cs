@@ -1,3 +1,4 @@
+using Mastercard.Proxy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
@@ -30,11 +32,12 @@ namespace Mastercard
             services.Configure<MastercardOptions>(Configuration.GetSection("Mastercard"));
             services.AddHttpClient("mastercard", (sp, httpClient) =>
             {
-                var options = sp.GetRequiredService<MastercardOptions>();
+                var options = sp.GetRequiredService<IOptionsMonitor<MastercardOptions>>().CurrentValue;
                 string credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes(options.Username + ":" + options.Password));
                 httpClient.BaseAddress = new Uri(options.BaseUrl);
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
             });
+            services.AddScoped<IMastercardProxy, MastercardProxy>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -53,9 +56,11 @@ namespace Mastercard
             }
 
             app.UseRouting();
-
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin();
+            });
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
