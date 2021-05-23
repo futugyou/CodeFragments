@@ -39,8 +39,8 @@ namespace Mastercard.Proxy
             var httpclient = CreateHttpClient();
             var content = new StringContent(JsonSerializer.Serialize(request));
             var responseMessage = await httpclient.PostAsync($"api/rest/version/{options.Version}/merchant/{options.MerchantId}/session", content);
-            var stream = await responseMessage.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<CreateCheckoutSessionResponse>(stream);
+            var stream = await responseMessage.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<CreateCheckoutSessionResponse>(stream);
         }
 
         public Task<MerchantInfo> GetMerchantInfo()
