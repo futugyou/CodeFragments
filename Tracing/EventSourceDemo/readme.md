@@ -1,0 +1,1 @@
+﻿dotnet-counters monitor --process-id 23312 --counters Api.EventCounter,System.Runtime[cpu-usage]

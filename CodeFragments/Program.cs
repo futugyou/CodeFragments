@@ -12,10 +12,6 @@ namespace CodeFragments
 
             //var cardid = "61021118850526301x";
             //Console.WriteLine(cardid.IsChineseIDCard());
-
-            var pro = new DiagnosticsTools();
-            pro.Run();
-
             Console.ReadLine();
         }
     }

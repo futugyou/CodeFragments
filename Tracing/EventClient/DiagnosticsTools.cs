@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeFragments
+namespace EventClient
 {
     public class ProcessInfos
     {
@@ -29,7 +29,7 @@ namespace CodeFragments
         public string PhysicalMemory { get; internal set; }
         public string VirtualMemory { get; internal set; }
     }
-   
+
     public class DiagnosticsTools
     {
         private IEnumerable<Process> PrintProcessStatus()
@@ -76,8 +76,23 @@ namespace CodeFragments
             {
                 var providers = new List<EventPipeProvider>()
                 {
-                    new EventPipeProvider("Microsoft-Windows-DotNETRuntime",EventLevel.Informational, (long)ClrTraceEventParser.Keywords.Default),
-                    new EventPipeProvider("System.Runtime",EventLevel.Informational,(long)ClrTraceEventParser.Keywords.None, new Dictionary<string, string>() {{ "EventCounterIntervalSec", "1" }})
+                    new EventPipeProvider(
+                        "Microsoft-Windows-DotNETRuntime",
+                        EventLevel.Informational,
+                        (long)ClrTraceEventParser.Keywords.Default),
+
+                    new EventPipeProvider(
+                        "System.Runtime",
+                        EventLevel.Informational,
+                        (long)ClrTraceEventParser.Keywords.None,
+                        new Dictionary<string, string>() {{ "EventCounterIntervalSec", "1" }}),
+
+                    // Out-process use
+                    new EventPipeProvider(
+                        "Api.EventCounter",
+                        EventLevel.Informational,
+                        (long)ClrTraceEventParser.Keywords.None,
+                        new Dictionary<string, string>() {{ "EventCounterIntervalSec", "1" }})
                 };
 
                 DiagnosticsClient client = new DiagnosticsClient(processId);
