@@ -1,3 +1,4 @@
+using EventSourceDemo.Diagnostic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +40,8 @@ namespace EventSourceDemo
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseDiagnosticListener(Configuration);
+            _ = new DatabaseSourceListener();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
