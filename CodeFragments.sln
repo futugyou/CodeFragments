@@ -17,7 +17,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprFrontEnd", "Dapr\DaprFrontEnd\DaprFrontEnd.csproj", "{9E2C2324-25B9-42D8-977A-F22EEDD86142}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoDome", "..\CryptoDome\CryptoDome.csproj", "{EE466A2F-F670-4662-87E2-8EC2C488A02A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoDome", "CryptoDome\CryptoDome.csproj", "{EE466A2F-F670-4662-87E2-8EC2C488A02A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mastercard", "Mastercard", "{2EC22CB7-FE81-4B68-9CE7-FE1DF10B332F}"
 EndProject
