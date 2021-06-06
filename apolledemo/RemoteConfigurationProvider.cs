@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace apolledemo
 {
     public class RemoteConfigurationProvider : ConfigurationProvider

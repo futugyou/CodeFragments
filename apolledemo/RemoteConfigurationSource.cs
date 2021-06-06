@@ -1,8 +1,10 @@
+using Microsoft.Extensions.Configuration;
+
 namespace apolledemo
 {
     public class RemoteConfigurationSource : IConfigurationSource
     {
-        public RemoteConfigurationProvider _provider;
+        public RemoteConfigurationProvider? _provider;
         public RemoteConfigurationProvider Provider
         {
             get
