@@ -2,12 +2,12 @@
 {
     public class MastercardOptions
     {
-        public string BaseUrl { get; set; }
-        public string Version { get; set; } = "60";
-        public string Currency { get; set; } = "THB";
-        public string MerchantId { get; set; }
-        public string Password { get; set; }
+        public string BaseUrl { get; private set; }
+        public string Version { get; private set; } = "60";
+        public string Currency { get; private set; } = "THB";
+        public string MerchantId { get; private set; }
+        public string Password { get; private set; }
         public string Username => "merchant." + MerchantId;
-        public bool AuthenticationByCertificate { get; set; } = false;
+        public bool AuthenticationByCertificate { get; private set; } = false;
     }
 }

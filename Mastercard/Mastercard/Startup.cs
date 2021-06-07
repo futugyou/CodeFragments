@@ -29,7 +29,10 @@ namespace Mastercard
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<MastercardOptions>(Configuration.GetSection("Mastercard"));
+            services.Configure<MastercardOptions>(Configuration.GetSection("Mastercard"), BinderOptions =>
+            {
+                BinderOptions.BindNonPublicProperties = true;
+            });
             services.AddHttpClient("mastercard", (sp, httpClient) =>
             {
                 var options = sp.GetRequiredService<IOptionsMonitor<MastercardOptions>>().CurrentValue;
