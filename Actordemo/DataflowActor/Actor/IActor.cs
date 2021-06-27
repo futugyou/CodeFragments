@@ -2,6 +2,6 @@
 {
     public interface IActor
     {
-        void Send(IMessage message);
+        void Send(IMessage message);        
     }
 }

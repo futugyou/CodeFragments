@@ -43,7 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "apolledemo", "apolledemo\ap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actordemo", "Actordemo", "{C096AEEE-D9D8-440A-8043-4068F6BCF98D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataflowActor", "Actordemo\DataflowActor\DataflowActor.csproj", "{459E7719-F027-4E46-8EEF-9223988963F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataflowActor", "Actordemo\DataflowActor\DataflowActor.csproj", "{459E7719-F027-4E46-8EEF-9223988963F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueActor", "Actordemo\QueueActor\QueueActor.csproj", "{FE9E40F4-5F99-4B2B-88D8-7C911B5068D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +113,10 @@ Global
 		{459E7719-F027-4E46-8EEF-9223988963F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{459E7719-F027-4E46-8EEF-9223988963F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{459E7719-F027-4E46-8EEF-9223988963F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE9E40F4-5F99-4B2B-88D8-7C911B5068D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE9E40F4-5F99-4B2B-88D8-7C911B5068D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE9E40F4-5F99-4B2B-88D8-7C911B5068D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE9E40F4-5F99-4B2B-88D8-7C911B5068D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -126,6 +132,7 @@ Global
 		{0E469342-957F-4000-8346-6530D6B237E6} = {B45C379A-34CD-4260-8811-E71BD6613C53}
 		{EC4F225F-D7B4-424E-8D1D-6114AAE1212E} = {B45C379A-34CD-4260-8811-E71BD6613C53}
 		{459E7719-F027-4E46-8EEF-9223988963F4} = {C096AEEE-D9D8-440A-8043-4068F6BCF98D}
+		{FE9E40F4-5F99-4B2B-88D8-7C911B5068D7} = {C096AEEE-D9D8-440A-8043-4068F6BCF98D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
