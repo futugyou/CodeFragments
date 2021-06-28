@@ -15,11 +15,11 @@ namespace DataflowActor
         {
             _action = new ActionBlock<IMessage>(message =>
             {
-                dynamic self = this;
-                dynamic mess = message;
-                self.Handle(mess);
+                Handle(message);
             });
         }
+
+        public abstract void Handle(IMessage message);
 
         public void Send(IMessage message)
         {

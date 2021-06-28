@@ -8,15 +8,18 @@ namespace DataflowActor
 {
     public class AccountActor : AbstractActor
     {
-        private decimal _balance;
-        public void Handle(DepositMessage message)
-        {
-            _balance += message.Amount;
-        }
+        private decimal _balance; 
 
-        public void Handle(QueryBalanceMessage message)
+        public override void Handle(IMessage message)
         {
-            message.Receiver.Send(new BalanceMessage { Amount = _balance });
+            if (message is QueryBalanceMessage)
+            {
+                (message as QueryBalanceMessage).Receiver.Send(new BalanceMessage { Amount = _balance });
+            }
+            if (message is DepositMessage)
+            {
+                _balance += (message as DepositMessage).Amount;
+            }
         }
     }
 }

@@ -8,9 +8,12 @@ namespace DataflowActor
 {
     public class OutputActor : AbstractActor
     {
-        public void Handle(BalanceMessage message)
+        public override void Handle(IMessage message)
         {
-            Console.WriteLine("Balance is {0}", message.Amount);
+            if (message is BalanceMessage)
+            {
+                Console.WriteLine("Balance is {0}", (message as BalanceMessage).Amount);
+            }
         }
     }
 }
