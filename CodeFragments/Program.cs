@@ -12,6 +12,10 @@ namespace CodeFragments
 
             //var cardid = "61021118850526301x";
             //Console.WriteLine(cardid.IsChineseIDCard());
+
+            var pool = new ObjectPoolTest();
+            pool.DefalultPolicy();
+            pool.CustomPolicy();
             Console.ReadLine();
         }
     }
