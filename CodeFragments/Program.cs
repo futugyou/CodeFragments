@@ -20,7 +20,9 @@ namespace CodeFragments
             //await JsonAsyncEnumerable.Deserialize();
             //await JsonAsyncEnumerable.Serialize();
 
-            JsonNodeDemo.Test();
+            //JsonNodeDemo.Test();
+
+            NewLinqApiDemo.Test();
             Console.ReadLine();
         }
     }
