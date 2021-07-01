@@ -17,8 +17,10 @@ namespace CodeFragments
             //pool.DefalultPolicy();
             //pool.CustomPolicy();
 
-            await JsonAsyncEnumerable.Deserialize();
-            await JsonAsyncEnumerable.Serialize();
+            //await JsonAsyncEnumerable.Deserialize();
+            //await JsonAsyncEnumerable.Serialize();
+
+            JsonNodeDemo.Test();
             Console.ReadLine();
         }
     }
