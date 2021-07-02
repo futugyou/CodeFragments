@@ -9,7 +9,10 @@ namespace DailyCodingProblem
             //D00917 d00917 = new D00917();
             //d00917.Partition(6);
 
-            D00919.Exection();
+            //D00919.Exection();
+
+            D00920.Exection();
+
             Console.WriteLine("Hello World!");
         }
     }
