@@ -17,7 +17,7 @@ namespace QuicListenerDemo
             options.ApplicationProtocols = new System.Collections.Generic.List<System.Net.Security.SslApplicationProtocol> { System.Net.Security.SslApplicationProtocol.Http2 };
             QuicListener quicListener = new(System.Net.IPEndPoint.Parse("192.168.15.135:666"), options);
 
-            quicListener.Start();
+            //quicListener.Start();
 
             QuicConnection quicConnection = await quicListener.AcceptConnectionAsync();
 
