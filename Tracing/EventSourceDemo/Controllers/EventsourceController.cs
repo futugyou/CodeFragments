@@ -15,7 +15,7 @@ namespace EventSourceDemo.Controllers
     public class EventsourceController : ControllerBase
     {
         [HttpPost]
-        public void SaveCustomer(EventViewModel request)
+        public void SaveCustomer([FromBody]EventViewModel request)
         {
             var sub = new SubPayload(request.Id, request.Name);
             var payload = new Payload

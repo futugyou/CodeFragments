@@ -1,4 +1,5 @@
 using EventSourceDemo.Diagnostic;
+using EventSourceDemo.ModelBinder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,7 @@ namespace EventSourceDemo
 
             services.AddControllers(options =>
             {
+                options.ModelBinderProviders.Insert(0, new CustomModelBinderProvider(options));
                 options.Filters.Add(typeof(ApiRequestTimeFilterAttribute));
             });
             services.AddSwaggerGen(c =>
