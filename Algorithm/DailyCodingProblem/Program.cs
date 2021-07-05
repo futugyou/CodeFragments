@@ -11,7 +11,12 @@ namespace DailyCodingProblem
 
             //D00919.Exection();
 
-            D00920.Exection();
+            //D00920.Exection();
+
+            //for (int i = 0; i < 4097; i++)
+            //{
+            //    Console.WriteLine(i + "  " + D00923.Exection(i));
+            //}
 
             Console.WriteLine("Hello World!");
         }
