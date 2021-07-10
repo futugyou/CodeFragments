@@ -22,7 +22,9 @@ namespace DailyCodingProblem
 
             //D00925.Exection();
 
-            D00926.Exection();
+            //D00926.Exection();
+
+            D00927.Exection();
             Console.WriteLine("Hello World!");
         }
     }
