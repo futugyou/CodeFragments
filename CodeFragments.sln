@@ -53,7 +53,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Algorithm", "Algorithm", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DailyCodingProblem", "Algorithm\DailyCodingProblem\DailyCodingProblem.csproj", "{2A4A6C24-01BC-4583-8455-7DC7906E6BA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Other", "Algorithm\Other\Other.csproj", "{2621C99C-DEB8-4935-A456-0084C850828C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Other", "Algorithm\Other\Other.csproj", "{2621C99C-DEB8-4935-A456-0084C850828C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetwork", "Algorithm\NeuralNetwork\NeuralNetwork.csproj", "{5006EAEC-346E-4906-BA27-1384B9272BB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +139,10 @@ Global
 		{2621C99C-DEB8-4935-A456-0084C850828C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2621C99C-DEB8-4935-A456-0084C850828C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2621C99C-DEB8-4935-A456-0084C850828C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5006EAEC-346E-4906-BA27-1384B9272BB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5006EAEC-346E-4906-BA27-1384B9272BB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5006EAEC-346E-4906-BA27-1384B9272BB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5006EAEC-346E-4906-BA27-1384B9272BB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -156,6 +162,7 @@ Global
 		{963E95B8-2A97-4F13-AD12-6DCEBD1D55D4} = {C096AEEE-D9D8-440A-8043-4068F6BCF98D}
 		{2A4A6C24-01BC-4583-8455-7DC7906E6BA2} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
 		{2621C99C-DEB8-4935-A456-0084C850828C} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
+		{5006EAEC-346E-4906-BA27-1384B9272BB3} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
