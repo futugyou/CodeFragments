@@ -8,6 +8,21 @@ namespace NeuralNetwork
 {
     public class Network
     {
+        private int numInputParameters;
+        private int numHiddenLayers;
+        private int numOutpurParameters;
+
+        public Network(int numInputParameters, int numHiddenLayers, int numOutpurParameters)
+        {
+            this.numInputParameters = numInputParameters;
+            this.numHiddenLayers = numHiddenLayers;
+            this.numOutpurParameters = numOutpurParameters;
+        }
+
+        public Network()
+        {
+        }
+
         public double LeatningRate { get; set; }
         public double Momentum { get; set; }
         public List<Neuron> InputLayer { get; set; }
@@ -15,6 +30,7 @@ namespace NeuralNetwork
         public List<Neuron> OutputLayer { get; set; }
         public List<Neuron> MirrorLayer { get; set; }
         public List<Neuron> CanonicalLayer { get; set; }
+        public IEnumerable<Synapse> Synapses { get; set; }
 
         private void ForwardPropagate(params double[] inputs)
         {
