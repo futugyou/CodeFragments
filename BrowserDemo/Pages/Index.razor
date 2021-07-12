@@ -1,0 +1,21 @@
+﻿@page "/index.html"
+@inherits IndexPage
+
+<h1>Hello, from Blazor.</h1>
+@foreach (var item in RawData)
+{
+    <h1>@item </h1>
+}
+
+@code {
+    private List<int> RawData = new List<int> { };
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Random random = new Random();
+        for (int i = 0; i < 5; i++)
+        {
+            RawData.Add(random.Next(5, 100));
+        }
+    }
+}
