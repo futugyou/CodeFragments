@@ -6,6 +6,7 @@ namespace Other
     {
         static void Main(string[] args)
         {
+            SkipList.Exection();
             Console.WriteLine("Hello World!");
         }
     }
