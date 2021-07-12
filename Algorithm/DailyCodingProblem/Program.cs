@@ -24,7 +24,10 @@ namespace DailyCodingProblem
 
             //D00926.Exection();
 
-            D00927.Exection();
+            //D00927.Exection();
+
+            D00928.Exection();
+
             Console.WriteLine("Hello World!");
         }
     }
