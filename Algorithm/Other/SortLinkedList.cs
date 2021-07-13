@@ -17,22 +17,22 @@ namespace Other
     }
     public class SortLinkedList
     {
-        public static void TestInsertSort()
+        public static void TestSort()
         {
             var head = new LinkedList(5)
             {
-                Next = new LinkedList(3)
+                Next = new LinkedList(4)
                 {
-                    Next = new LinkedList(4)
+                    Next = new LinkedList(3)
                     {
-                        Next = new LinkedList(1)
+                        Next = new LinkedList(2)
                         {
-                            Next = new LinkedList(2)
+                            Next = new LinkedList(1)
                         }
                     }
                 }
             };
-            head = InsertSort(head);
+            head = SelectSort(head);
         }
 
         public static LinkedList InsertSort(LinkedList head)
@@ -85,6 +85,44 @@ namespace Other
                 curr = cn;
             }
             return head;
+        }
+
+        public static LinkedList SelectSort(LinkedList head)
+        {
+            if (head == null || head.Next == null) return head;
+
+            LinkedList virtualNode = new LinkedList(int.MinValue);
+            virtualNode.Next = head;
+            LinkedList curr = virtualNode;
+
+            while (curr != null && curr.Next != null)
+            {
+                var tmp = curr.Next;
+                var min = curr.Next;
+                LinkedList minPre = virtualNode;
+                while (tmp != null && tmp.Next != null)
+                {
+                    if (tmp.Next.Value < min.Value)
+                    {
+                        min = tmp.Next;
+                        minPre = tmp;
+                    }
+                    tmp = tmp.Next;
+                }
+                if (minPre == virtualNode)
+                {
+                    curr = curr.Next;
+                }
+                else
+                {
+                    var minnext = min.Next;
+                    minPre.Next = minnext;
+                    min.Next = curr.Next;
+                    curr.Next = min;
+                    curr = curr.Next;
+                }
+            }
+            return virtualNode.Next;
         }
     }
 }
