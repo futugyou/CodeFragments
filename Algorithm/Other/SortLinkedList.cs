@@ -32,7 +32,7 @@ namespace Other
                     }
                 }
             };
-            head = SelectSort(head);
+            head = QuickSort(head);
         }
 
         public static LinkedList InsertSort(LinkedList head)
@@ -123,6 +123,52 @@ namespace Other
                 }
             }
             return virtualNode.Next;
+        }
+
+        public static LinkedList QuickSort(LinkedList head)
+        {
+            if (head == null || head.Next == null) return head;
+            LinkedList virtualNode = new LinkedList(int.MinValue);
+            virtualNode.Next = head;
+            QuickSort(virtualNode, head, null);
+            return virtualNode.Next;
+        }
+
+        private static void QuickSort(LinkedList preHead, LinkedList head, LinkedList tail)
+        {
+            if (head != tail && head.Next != tail)
+            {
+                LinkedList mid = PartitionList(preHead, head, tail);
+                QuickSort(preHead, preHead.Next, mid);
+                QuickSort(mid, mid.Next, tail);
+            }
+        }
+
+        private static LinkedList PartitionList(LinkedList prelow, LinkedList low, LinkedList high)
+        {
+            int key = low.Value;
+            LinkedList presmall = new LinkedList(0);
+            LinkedList small = presmall;
+            LinkedList prebig = new LinkedList(0);
+            LinkedList big = prebig;
+            for (var i = low.Next; i != high; i = i.Next)
+            {
+                if (i.Value < key)
+                {
+                    small.Next = i;
+                    small = i;
+                }
+                else
+                {
+                    big.Next = i;
+                    big = i;
+                }
+            }
+            big.Next = high;
+            small.Next = low;
+            low.Next = prebig.Next;
+            prelow.Next = presmall.Next;
+            return low;
         }
     }
 }
