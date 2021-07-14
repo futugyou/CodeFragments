@@ -170,5 +170,59 @@ namespace Other
             prelow.Next = presmall.Next;
             return low;
         }
+
+        public static LinkedList MergeSort(LinkedList head)
+        {
+            if (head == null && head.Next == null) return head;
+            LinkedList fast = head;
+            LinkedList slow = head;
+            while (fast.Next != null && fast.Next.Next != null)
+            {
+                fast = fast.Next.Next;
+                slow = slow.Next;
+            }
+            fast = slow;
+            slow = slow.Next;
+            fast.Next = null;
+            fast = MergeSort(head);
+            slow = MergeSort(slow);
+            return MergeSort(fast, slow);
+
+        }
+        public static LinkedList MergeSort(LinkedList left, LinkedList right)
+        {
+            if (left == null) return right;
+            if (right == null) return left;
+            LinkedList result = null;
+            if (left.Value < right.Value)
+            {
+                result = left;
+                left = left.Next;
+            }
+            else
+            {
+                result = right;
+                right = right.Next;
+            }
+
+            LinkedList tmp = result;
+            while (left != null && right != null)
+            {
+                if (left.Value < right.Value)
+                {
+                    tmp.Next = left;
+                    left = left.Next;
+                }
+                else
+                {
+                    tmp.Next = right;
+                    right = right.Next;
+                }
+                tmp = tmp.Next;
+            }
+            if (left == null) tmp.Next = right;
+            if (right == null) tmp.Next = left;
+            return result;
+        }
     }
 }
