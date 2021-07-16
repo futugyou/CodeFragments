@@ -34,6 +34,43 @@ namespace DailyCodingProblem
             {26, 27, 28, 29, 30 },
             {31, 32, 33, 34, 35 },
             };
+            Exectwo(nums);
+        }
+        private static void Exectwo(int[,] nums)
+        {
+            int left = 0;
+            int right = nums.GetUpperBound(1) + 1;
+            int up = 0;
+            int down = nums.GetUpperBound(0) + 1;
+            var result = new List<int>(nums.Length);
+            while (result.Count < nums.Length)
+            {
+                for (int i = left; i < right && result.Count < nums.Length; i++)
+                {
+                    result.Add(nums[up, i]);
+                }
+                up++;
+                for (int i = up; i < down && result.Count < nums.Length; i++)
+                {
+                    result.Add(nums[i, right - 1]);
+                }
+                right--;
+                for (int i = right - 1; i >= left && result.Count < nums.Length; i--)
+                {
+                    result.Add(nums[down - 1, i]);
+                }
+                down--;
+                for (int i = down - 1; i >= up && result.Count < nums.Length; i--)
+                {
+                    result.Add(nums[i, left]);
+                }
+                left++;
+            }
+            Console.WriteLine(string.Join(" ,", result));
+        }
+
+        private static void Execone(int[,] nums)
+        {
             var count = nums.Length;
             var horizontal = nums.GetUpperBound(1);
             var vertical = nums.GetUpperBound(0);
