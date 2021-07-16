@@ -29,4 +29,41 @@ namespace Other
             return prefix[j + 1] - prefix[i];
         }
     }
+
+    public class DiffArray
+    {
+        private int[] diff;
+        public DiffArray(int[] nums)
+        {
+            diff = new int[nums.Length];
+            diff[0] = nums[0];
+            for (int i = 1; i < nums.Length; i++)
+            {
+                diff[i] = nums[i] - nums[i - 1];
+            }
+        }
+
+        /// <summary>
+        /// increment [i,j] value
+        /// </summary>
+        public void Increment(int i, int j, int value)
+        {
+            diff[i] += value;
+            if (j + i < diff.Length)
+            {
+                diff[j + 1] -= value;
+            }
+        }
+
+        public int[] Rebuild()
+        {
+            var result = new int[diff.Length];
+            result[0] = diff[0];
+            for (int i = 1; i < diff.Length; i++)
+            {
+                result[i] = result[i - 1] + diff[i];
+            }
+            return result;
+        }
+    }
 }
