@@ -61,6 +61,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrowserDemo", "BrowserDemo\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labuladong", "Algorithm\Labuladong\Labuladong.csproj", "{BFD0C03D-A142-468C-841A-FCB87F93FDFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Leetcode", "Algorithm\Leetcode\Leetcode.csproj", "{DE8F09DB-C36F-4DC3-B28B-6B8996965307}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,10 @@ Global
 		{BFD0C03D-A142-468C-841A-FCB87F93FDFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFD0C03D-A142-468C-841A-FCB87F93FDFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFD0C03D-A142-468C-841A-FCB87F93FDFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE8F09DB-C36F-4DC3-B28B-6B8996965307}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE8F09DB-C36F-4DC3-B28B-6B8996965307}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE8F09DB-C36F-4DC3-B28B-6B8996965307}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE8F09DB-C36F-4DC3-B28B-6B8996965307}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,6 +182,7 @@ Global
 		{2621C99C-DEB8-4935-A456-0084C850828C} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
 		{5006EAEC-346E-4906-BA27-1384B9272BB3} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
 		{BFD0C03D-A142-468C-841A-FCB87F93FDFF} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
+		{DE8F09DB-C36F-4DC3-B28B-6B8996965307} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
