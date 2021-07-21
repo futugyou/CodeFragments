@@ -13,7 +13,11 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.0-preview.5.21301.17" />
 		<PackageReference Include="System.IO.Pipelines" Version="6.0.0-preview.5.21301.5" />
 	</ItemGroup>

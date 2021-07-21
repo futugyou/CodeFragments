@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BenchmarkDotNet.Running;
+using System;
 using System.Tools;
 
 namespace CodeFragments
@@ -22,7 +23,9 @@ namespace CodeFragments
 
             //JsonNodeDemo.Test();
 
-            NewLinqApiDemo.Test();
+            //NewLinqApiDemo.Test();
+            //BufferDemo.Exection();
+            var summary = BenchmarkRunner.Run<SpanTest>();
             Console.ReadLine();
         }
     }
