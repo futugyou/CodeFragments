@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Labuladong
 {
-    public class Code322
+    public class Code0322
     {
         public static int CoinChange(int[] coins, int amount)
         {

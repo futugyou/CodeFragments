@@ -1,0 +1,50 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Labuladong
+{
+    public class Code0277
+    {
+        public static int FindCelebrity()
+        {
+            int[,] nums =  {
+            {1, 1, 1, 0 },
+            {1, 1, 1, 1 },
+            {0, 0, 1, 0 },
+            {0, 0, 1, 1 },
+            };
+            var result = ExecOne(nums);
+            Console.WriteLine(result);
+            return result;
+        }
+
+        private static int ExecOne(int[,] nums)
+        {
+            int n = (int)Math.Sqrt(nums.Length);
+            for (int i = 0; i < n; i++)
+            {
+                bool allknow = false;
+                for (int j = 0; j < n; j++)
+                {
+                    if (i != j)
+                    {
+                        if (nums[i, j] == 1 || nums[j, i] == 0)
+                        {
+                            allknow = false;
+                            break;
+                        }
+                    }
+                    allknow = true;
+                }
+                if (allknow)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+    }
+}

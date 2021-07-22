@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Labuladong
 {
-    public class Code124
+    public class Code0124
     {
         private static int result = int.MinValue;
         public static void Exection()
