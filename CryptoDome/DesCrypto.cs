@@ -21,7 +21,7 @@ namespace CryptoDome
             {
                 byte[] buffer1 = Convert.FromBase64String(key);
                 byte[] buffer2 = Convert.FromBase64String(IV);
-                DESCryptoServiceProvider provider1 = new DESCryptoServiceProvider();
+                var provider1 = DES.Create();
                 provider1.Mode = CipherMode.ECB;
                 provider1.Key = buffer1;
                 provider1.IV = buffer2;
@@ -56,7 +56,7 @@ namespace CryptoDome
                 byte[] buffer2 = Convert.FromBase64String(IV);
 
 
-                DESCryptoServiceProvider provider1 = new DESCryptoServiceProvider();
+                var provider1 = DES.Create();
                 provider1.Mode = CipherMode.ECB;
                 provider1.Key = buffer1;
                 provider1.IV = buffer2;
@@ -69,7 +69,7 @@ namespace CryptoDome
                 stream2.Close();
                 return Convert.ToBase64String(stream1.ToArray());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return "";
             }

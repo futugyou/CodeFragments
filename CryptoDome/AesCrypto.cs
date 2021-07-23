@@ -15,7 +15,7 @@ namespace CryptoDome
       /// <returns></returns>
         public static string AESEncrypt(string text, string password, string iv)
         {
-            RijndaelManaged rijndaelCipher = new RijndaelManaged();
+            var rijndaelCipher = Aes.Create();
             rijndaelCipher.Mode = CipherMode.ECB;
             rijndaelCipher.Padding = PaddingMode.PKCS7;
             rijndaelCipher.KeySize = 128;
@@ -47,7 +47,7 @@ namespace CryptoDome
         /// <returns></returns>
         public static string AESDecrypt(string text, string password, string iv)
         {
-            RijndaelManaged rijndaelCipher = new RijndaelManaged();
+            var rijndaelCipher = Aes.Create();
             rijndaelCipher.Mode = CipherMode.ECB;
             rijndaelCipher.Padding = PaddingMode.PKCS7;
             rijndaelCipher.KeySize = 128;

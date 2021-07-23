@@ -11,7 +11,7 @@ namespace CryptoDome
         public static string GetSHA256(string strData)
         {
             byte[] bytValue = System.Text.Encoding.UTF8.GetBytes(strData);
-            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            var sha256 =   SHA256.Create();
 
             byte[] retVal = sha256.ComputeHash(bytValue);
             StringBuilder sb = new StringBuilder();
@@ -24,7 +24,7 @@ namespace CryptoDome
 
         public static string GetSHA256(byte[] bytValue)
         {
-            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            var sha256 = SHA256.Create();
 
             byte[] retVal = sha256.ComputeHash(bytValue);
             StringBuilder sb = new StringBuilder();
@@ -46,7 +46,7 @@ namespace CryptoDome
         public static string GetSHA256Base64urlEncoding(string strData)
         {
             byte[] bytValue = System.Text.Encoding.UTF8.GetBytes(strData);
-            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            var sha256 = SHA256.Create();
             return Base64Crypto.Base64UrlEncode(sha256.ComputeHash(bytValue));
         }
 
@@ -54,13 +54,13 @@ namespace CryptoDome
         {
             /// SHA256CryptoServiceProvider 使用FIPS 140-2验证(FIPS =联邦信息处理标准)加密服务提供程序(CSP)
             /// 值与SHA256Managed一致的.
-            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            var sha256 = SHA256.Create();
             return Base64Crypto.Base64UrlEncode(sha256.ComputeHash(bytValue));
         }
         public static string SHA256WithManaged(string source)
         {
             /// SHA256Managed 完全使用.NET托管代码，
-            using (SHA256 sha256 = new SHA256Managed())
+            using (var sha256 = SHA256.Create())
             {
                 byte[] buffer = new ASCIIEncoding().GetBytes(source);
                 byte[] temp = sha256.ComputeHash(buffer);
