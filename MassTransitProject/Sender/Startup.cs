@@ -28,17 +28,29 @@ namespace Sender
         public void ConfigureServices(IServiceCollection services)
         {
 
-            #region in memory and hostedwork
+            #region hostedwork
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<MessageConsumer>();
 
-                x.UsingInMemory((context, cfg) =>
+                // in memory 
+                //x.UsingInMemory((context, cfg) =>
+                //{
+                //    cfg.ConfigureEndpoints(context);
+                //});
+
+                // in rabbitmq
+                x.UsingRabbitMq((context, cfg) =>
                 {
+                    cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
+                    {
+                        h.Username(Configuration["RabbitmqConfig:Username"]);
+                        h.Password(Configuration["RabbitmqConfig:Password"]);
+                    });
                     cfg.ConfigureEndpoints(context);
                 });
             });
-            services.AddMassTransitHostedService(true);
+            services.AddMassTransitHostedService();
             services.AddHostedService<Worker>();
             #endregion
 
