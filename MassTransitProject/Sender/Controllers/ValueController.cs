@@ -1,5 +1,6 @@
 ﻿using Contracts;
 using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -13,11 +14,15 @@ namespace Sender.Controllers
     [ApiController]
     public class ValueController : ControllerBase
     {
-        readonly IPublishEndpoint _publishEndpoint;
-        public ValueController(IPublishEndpoint publishEndpoint)
+        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IMediator _mediator;
+
+        public ValueController(IPublishEndpoint publishEndpoint, IMediator mediator)
         {
             _publishEndpoint = publishEndpoint;
+            _mediator = mediator;
         }
+
         [HttpPost]
         public async Task<ActionResult> Post(string value)
         {
@@ -25,6 +30,14 @@ namespace Sender.Controllers
             {
                 Value = value
             });
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Put(string value)
+        {
+            Guid orderId = NewId.NextGuid();
+            await _mediator.Send<SubmitOrder>(new { OrderId = orderId });
             return Ok();
         }
     }

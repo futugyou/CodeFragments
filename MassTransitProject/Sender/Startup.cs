@@ -74,6 +74,19 @@ namespace Sender
             services.AddGenericRequestClient();
             #endregion
 
+            #region add mediator
+            services.AddMediator(cfg =>
+            {
+                cfg.AddConsumer<SubmitOrderConsumer>();
+                cfg.AddConsumer<OrderStatusConsumer>();
+                
+                cfg.ConfigureMediator((context, mcfg) =>
+                {
+                    mcfg.UseSendFilter(typeof(ValidateOrderStatusFilter<>), context);
+                });
+            });
+            #endregion
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
