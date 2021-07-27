@@ -29,7 +29,10 @@ namespace Receiver
         {
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<ValueEnteredEventConsumer>();
+                x.AddConsumer<EventConsumer>();
+
+                x.SetKebabCaseEndpointNameFormatter();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
@@ -37,13 +40,17 @@ namespace Receiver
                         h.Username(Configuration["RabbitmqConfig:Username"]);
                         h.Password(Configuration["RabbitmqConfig:Password"]);
                     });
-                    cfg.ReceiveEndpoint("events-valueentered", e =>
-                    {
-                        e.ConfigureConsumer<ValueEnteredEventConsumer>(context);
-                    });
+
+                    //cfg.ReceiveEndpoint("events-valueentered", e =>
+                    //{
+                    //    e.ConfigureConsumer<EventConsumer>(context);
+                    //});
+
+                    cfg.ConfigureEndpoints(context); 
                 });
             });
             services.AddMassTransitHostedService();
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

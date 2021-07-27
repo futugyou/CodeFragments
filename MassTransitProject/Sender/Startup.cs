@@ -29,33 +29,17 @@ namespace Sender
         {
 
             #region hostedwork
-            services.AddMassTransit(x =>
-            {
-                x.AddConsumer<MessageConsumer>();
-
-                // in memory 
-                //x.UsingInMemory((context, cfg) =>
-                //{
-                //    cfg.ConfigureEndpoints(context);
-                //});
-
-                // in rabbitmq
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
-                    {
-                        h.Username(Configuration["RabbitmqConfig:Username"]);
-                        h.Password(Configuration["RabbitmqConfig:Password"]);
-                    });
-                    cfg.ConfigureEndpoints(context);
-                });
-            });
-            services.AddMassTransitHostedService();
-            services.AddHostedService<Worker>();
-            #endregion
-
             //services.AddMassTransit(x =>
             //{
+            //    x.AddConsumer<MessageConsumer>();
+
+            //    // in memory 
+            //    //x.UsingInMemory((context, cfg) =>
+            //    //{
+            //    //    cfg.ConfigureEndpoints(context);
+            //    //});
+
+            //    // in rabbitmq
             //    x.UsingRabbitMq((context, cfg) =>
             //    {
             //        cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
@@ -63,11 +47,32 @@ namespace Sender
             //            h.Username(Configuration["RabbitmqConfig:Username"]);
             //            h.Password(Configuration["RabbitmqConfig:Password"]);
             //        });
+            //        cfg.ConfigureEndpoints(context);
             //    });
-            //    x.AddRequestClient<ValueEntered>();
             //});
             //services.AddMassTransitHostedService();
+            //services.AddHostedService<Worker>();
+            #endregion
 
+            #region publish messages from a controller
+            services.AddMassTransit(x =>
+            {
+                x.SetKebabCaseEndpointNameFormatter();
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
+                    {
+                        h.Username(Configuration["RabbitmqConfig:Username"]);
+                        h.Password(Configuration["RabbitmqConfig:Password"]);
+
+                    });
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+            services.AddMassTransitHostedService();
+            services.AddGenericRequestClient();
+            #endregion
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

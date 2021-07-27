@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sender", "MassTransitProjec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Receiver", "MassTransitProject\Receiver\Receiver.csproj", "{65EAD950-B4FB-432F-BB8B-3B9F97700553}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "MassTransitProject\Contracts\Contracts.csproj", "{F9492D64-3C56-4678-BC63-2A1B6FA74257}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +177,10 @@ Global
 		{65EAD950-B4FB-432F-BB8B-3B9F97700553}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65EAD950-B4FB-432F-BB8B-3B9F97700553}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65EAD950-B4FB-432F-BB8B-3B9F97700553}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9492D64-3C56-4678-BC63-2A1B6FA74257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9492D64-3C56-4678-BC63-2A1B6FA74257}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9492D64-3C56-4678-BC63-2A1B6FA74257}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9492D64-3C56-4678-BC63-2A1B6FA74257}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -199,6 +205,7 @@ Global
 		{DE8F09DB-C36F-4DC3-B28B-6B8996965307} = {8EC8B2F8-620D-42F8-B216-EEA53B360C97}
 		{9F7A3E32-BBD1-4426-B057-95C3DAA2857A} = {BD416F91-2C2F-4E40-9359-F8C3D01546C1}
 		{65EAD950-B4FB-432F-BB8B-3B9F97700553} = {BD416F91-2C2F-4E40-9359-F8C3D01546C1}
+		{F9492D64-3C56-4678-BC63-2A1B6FA74257} = {BD416F91-2C2F-4E40-9359-F8C3D01546C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}

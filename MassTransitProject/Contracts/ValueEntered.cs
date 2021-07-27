@@ -1,4 +1,6 @@
-﻿namespace Receiver
+﻿using System;
+
+namespace Contracts
 {
     public class ValueEntered
     {
