@@ -26,9 +26,9 @@ namespace CodeFragments
             //NewLinqApiDemo.Test();
             //BufferDemo.Exection();
             //var summary = BenchmarkRunner.Run<SpanTest>();
-            //await AsyncEnumerableDemo.Exection();
+            await AsyncEnumerableDemo.Exection();
 
-            PriorityQueueDemo.Exection();
+            //PriorityQueueDemo.Exection();
             Console.ReadLine();
         }
     }

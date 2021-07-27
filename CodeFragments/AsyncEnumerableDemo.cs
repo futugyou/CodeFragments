@@ -18,6 +18,15 @@ namespace CodeFragments
                 Console.WriteLine(DateTime.Now + $"\tThreadId:{Thread.CurrentThread.ManagedThreadId}\t" + $"\toutput:{html}");
             }
             Console.WriteLine("\r\n" + DateTime.Now + $"\tThreadId:{Thread.CurrentThread.ManagedThreadId}\t");
+            Console.WriteLine($"-------------------------------");
+            await Parallel.ForEachAsync(Enumerable.Range(1, 100), new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 10
+            }, async (i, _) =>
+            {
+                await Task.Delay(1000);
+                Console.WriteLine(i);
+            });
 
         }
         static async IAsyncEnumerable<string> FetchAllHtml()
