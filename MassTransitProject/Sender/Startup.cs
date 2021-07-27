@@ -75,6 +75,7 @@ namespace Sender
             #endregion
 
             #region add mediator
+            services.AddHttpContextAccessor();
             services.AddMediator(cfg =>
             {
                 cfg.AddConsumer<SubmitOrderConsumer>();
@@ -83,6 +84,7 @@ namespace Sender
                 cfg.ConfigureMediator((context, mcfg) =>
                 {
                     mcfg.UseSendFilter(typeof(ValidateOrderStatusFilter<>), context);
+                    mcfg.UseHttpContextScopeFilter(context);
                 });
             });
             #endregion
