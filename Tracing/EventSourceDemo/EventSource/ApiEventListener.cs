@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace EventSourceDemo
 {
+    public delegate void WriteContent(string key, string value);
     /// <summary>
     /// In-process use
     /// </summary>
     public class ApiEventListener : EventListener
     {
+        public event WriteContent WriteEvent;
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
             if (!eventSource.Name.Equals("Api.EventCounter"))
@@ -37,6 +39,7 @@ namespace EventSourceDemo
                 {
                     var (counterName, counterValue) = GetRelevantMetric(eventPayload);
                     Console.WriteLine($"{counterName} : {counterValue}");
+                    WriteEvent?.Invoke(counterName, counterValue);
                 }
             }
         }
