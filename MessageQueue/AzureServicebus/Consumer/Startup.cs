@@ -1,5 +1,5 @@
-using MessageConsumer;
-using MessageConsumer.Azure.Queue;
+using EventConsumer;
+using EventConsumer.Azure.Queue;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;

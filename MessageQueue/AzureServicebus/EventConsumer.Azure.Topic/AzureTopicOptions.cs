@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EventConsumer.Azure.Queue
+namespace EventConsumer.Azure.Topic
 {
-    public class AzureQueueOptions
+    public class AzureTopicOptions
     {
-        public string QueueName { get; set; }
+        public string SubscriptionName { get; set; }
+        public string TopicName { get; set; }
         public string ConnectionString { get; set; }
     }
 }

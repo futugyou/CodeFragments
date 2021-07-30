@@ -1,5 +1,5 @@
 ﻿using CloudNative.CloudEvents;
-using MessageConsumer;
+using EventConsumer;
 using System;
 using System.Collections.Generic;
 using System.Linq;

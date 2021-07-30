@@ -1,30 +1,33 @@
 ﻿using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
 using CloudNative.CloudEvents;
 using CloudNative.CloudEvents.SystemTextJson;
 using EventConsumer.Azure.Extension;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
 using System.Threading.Tasks;
 
-namespace EventConsumer.Azure.Queue
+namespace EventConsumer.Azure.Topic
 {
-    public class AzureQueueEventConsunmer : IEventConsunmer
+    public class AzureTopicEventConsunmer : IEventConsunmer
     {
-        private readonly ServiceBusClient _client;
-        private readonly ILogger<AzureQueueEventConsunmer> _logger;
+        private readonly ILogger<AzureTopicEventConsunmer> _logger;
+        private readonly AzureTopicOptions _options;
         private readonly IEventHandler _eventHandler;
-        private readonly AzureQueueOptions _options;
-        private ServiceBusProcessor _processor;
+        private readonly ServiceBusClient _client;
+        private readonly ServiceBusAdministrationClient _adminClient;
 
+        private ServiceBusProcessor _processor;
         private readonly CloudEventFormatter _formatter = new JsonEventFormatter();
 
-        public AzureQueueEventConsunmer(ILogger<AzureQueueEventConsunmer> logger, IOptionsMonitor<AzureQueueOptions> options, IEventHandler eventHandler)
+        public AzureTopicEventConsunmer(ILogger<AzureTopicEventConsunmer> logger, IOptionsMonitor<AzureTopicOptions> options, IEventHandler eventHandler)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _eventHandler = eventHandler;
+            _logger = logger;
             _options = options.CurrentValue;
+            _eventHandler = eventHandler;
+
             _client = new ServiceBusClient(_options.ConnectionString);
+            _adminClient = new ServiceBusAdministrationClient(_options.ConnectionString);
         }
 
         public async Task CloseAsync()
@@ -55,8 +58,12 @@ namespace EventConsumer.Azure.Queue
                 MaxConcurrentCalls = 1,
                 AutoCompleteMessages = false,
             };
-
-            _processor = _client.CreateProcessor(_options.QueueName, _serviceBusProcessorOptions);
+            var exist = await _adminClient.SubscriptionExistsAsync(_options.TopicName, _options.SubscriptionName);
+            if (!exist)
+            {
+                await _adminClient.CreateSubscriptionAsync(_options.TopicName, _options.SubscriptionName);
+            }
+            _processor = _client.CreateProcessor(_options.TopicName, _options.SubscriptionName, _serviceBusProcessorOptions);
             _processor.ProcessMessageAsync += ProcessMessagesAsync;
             _processor.ProcessErrorAsync += ProcessErrorAsync;
             await _processor.StartProcessingAsync().ConfigureAwait(false);

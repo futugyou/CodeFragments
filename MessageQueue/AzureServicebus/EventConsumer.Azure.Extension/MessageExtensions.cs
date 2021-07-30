@@ -1,14 +1,13 @@
 ﻿using Azure.Messaging.ServiceBus;
 using CloudNative.CloudEvents;
-using CloudNative.CloudEvents.Core;
-using EventConsumer.Azure.Queue;
+using CloudNative.CloudEvents.Core; 
 using System;
 using System.Collections.Generic;
 using System.Net.Mime;
 
-namespace MessageConsumer.Azure.Queue
+namespace EventConsumer.Azure.Extension
 {
-    internal static class MessageExtensions
+    public static class MessageExtensions
     {
         private static readonly string FAKE_SOURCE = "urn:example-com:mysource:abc";
         /// <summary>

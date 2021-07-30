@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace MessageConsumer
+namespace EventConsumer
 {
     public interface IEventConsunmer
     {

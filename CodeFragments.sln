@@ -81,6 +81,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventConsumer.Azure.Queue",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consumer", "MessageQueue\AzureServicebus\Consumer\Consumer.csproj", "{7063E766-6F73-412A-B7AC-D6DB8A9EE27E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventConsumer.Azure.Topic", "MessageQueue\AzureServicebus\EventConsumer.Azure.Topic\EventConsumer.Azure.Topic.csproj", "{36C1E5DC-592F-47F0-B98C-2F65EA2B7393}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventConsumer.Azure.Extension", "MessageQueue\AzureServicebus\EventConsumer.Azure.Extension\EventConsumer.Azure.Extension.csproj", "{FF07A3DF-782D-425F-9055-FBC9836CE71F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -203,6 +207,14 @@ Global
 		{7063E766-6F73-412A-B7AC-D6DB8A9EE27E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7063E766-6F73-412A-B7AC-D6DB8A9EE27E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7063E766-6F73-412A-B7AC-D6DB8A9EE27E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36C1E5DC-592F-47F0-B98C-2F65EA2B7393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36C1E5DC-592F-47F0-B98C-2F65EA2B7393}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36C1E5DC-592F-47F0-B98C-2F65EA2B7393}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36C1E5DC-592F-47F0-B98C-2F65EA2B7393}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -233,6 +245,8 @@ Global
 		{B4858A93-B25B-43CF-9C32-AEA110F371BF} = {BE90355D-230F-408D-8810-EF184CBA4F86}
 		{F7438F1B-9043-41DA-8BFB-3FEB1F5F2937} = {BE90355D-230F-408D-8810-EF184CBA4F86}
 		{7063E766-6F73-412A-B7AC-D6DB8A9EE27E} = {BE90355D-230F-408D-8810-EF184CBA4F86}
+		{36C1E5DC-592F-47F0-B98C-2F65EA2B7393} = {BE90355D-230F-408D-8810-EF184CBA4F86}
+		{FF07A3DF-782D-425F-9055-FBC9836CE71F} = {BE90355D-230F-408D-8810-EF184CBA4F86}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
