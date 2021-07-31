@@ -55,40 +55,63 @@ namespace Sender
             #endregion
 
             #region publish messages from a controller
-            services.AddMassTransit(x =>
-            {
-                x.SetKebabCaseEndpointNameFormatter();
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
-                    {
-                        h.Username(Configuration["RabbitmqConfig:Username"]);
-                        h.Password(Configuration["RabbitmqConfig:Password"]);
+            //services.AddMassTransit(x =>
+            //{
+            //    x.SetKebabCaseEndpointNameFormatter();
+            //    x.UsingRabbitMq((context, cfg) =>
+            //    {
+            //        cfg.Host(Configuration["RabbitmqConfig:HostIP"], h =>
+            //        {
+            //            h.Username(Configuration["RabbitmqConfig:Username"]);
+            //            h.Password(Configuration["RabbitmqConfig:Password"]);
 
-                    });
-                    cfg.ConfigureEndpoints(context);
-                });
-            });
+            //        });
+            //        cfg.ConfigureEndpoints(context);
+            //    });
+            //});
 
-            services.AddMassTransitHostedService();
-            services.AddGenericRequestClient();
+            //services.AddMassTransitHostedService();
+            //services.AddGenericRequestClient();
             #endregion
 
             #region add mediator
             services.AddHttpContextAccessor();
-            services.AddMediator(cfg =>
+            //services.AddMediator(cfg =>
+            //{
+            //    cfg.AddConsumer<SubmitOrderConsumer>();
+            //    cfg.AddConsumer<OrderStatusConsumer>();
+
+            //    cfg.ConfigureMediator((context, mcfg) =>
+            //    {
+            //        mcfg.UseSendFilter(typeof(ValidateOrderStatusFilter<>), context);
+            //        mcfg.UseHttpContextScopeFilter(context);
+            //    });
+            //});
+            #endregion
+
+            #region servicebus
+            services.AddMassTransit(x =>
             {
-                cfg.AddConsumer<SubmitOrderConsumer>();
-                cfg.AddConsumer<OrderStatusConsumer>();
-                
-                cfg.ConfigureMediator((context, mcfg) =>
+                x.UsingAzureServiceBus((context, cfg) =>
                 {
-                    mcfg.UseSendFilter(typeof(ValidateOrderStatusFilter<>), context);
-                    mcfg.UseHttpContextScopeFilter(context);
+                    cfg.Host(Configuration["azure:url"]);
+                    cfg.ReceiveEndpoint("input-queue", e =>
+                    {
+                        // all of these are optional!!
+                        e.PrefetchCount = 100;
+
+                        // number of "threads" to run concurrently
+                        e.MaxConcurrentCalls = 100;
+
+                        // default, but shown for example
+                        e.LockDuration = TimeSpan.FromMinutes(5);
+
+                        // lock will be renewed up to 30 minutes
+                        e.MaxAutoRenewDuration = TimeSpan.FromMinutes(30);
+                    });
                 });
             });
             #endregion
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
