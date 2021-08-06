@@ -16,13 +16,24 @@ namespace EventSourceDemo
     {
         public static readonly ApiEventCounterSource Log = new ApiEventCounterSource();
 
+        /// <summary>
+        /// 统计指标收集器，比如平均值，最大值，最小值
+        /// </summary>
         private EventCounter _requestCounter;
-
+        /// <summary>
+        /// 自定义统计指标收集器，通过自定义统计方法的方式实现对指标的统计
+        /// </summary>
         private PollingCounter _workingSetCounter;
 
         private PollingCounter _totalRequestsCounter;
-
+        /// <summary>
+        /// 自定义累加指标收集器，通过自定义累函数，实现指标收集
+        /// </summary>
         private IncrementingPollingCounter _incrementingPollingCounter;
+        /// <summary>
+        /// 累加指标收集器，采集一定时间段内的指标汇总
+        /// </summary>
+        private IncrementingEventCounter _incrementingEventCounter;
 
         private long _totalRequests;
 
@@ -67,6 +78,12 @@ namespace EventSourceDemo
                     //时间间隔1s
                     DisplayRateTimeScale = new TimeSpan(0, 0, 1)
                 };
+
+                _incrementingEventCounter = new IncrementingEventCounter("working-time", this)
+                {
+                    DisplayName = "Request Processing Time",
+                    DisplayUnits = "ms"
+                };
             }
         }
 
@@ -78,6 +95,7 @@ namespace EventSourceDemo
             //写入指标值(请求处理耗时)
             _requestCounter?.WriteMetric(elapsedMilliseconds);
 
+            _incrementingEventCounter.Increment(elapsedMilliseconds);
         }
 
         protected override void Dispose(bool disposing)
@@ -93,6 +111,9 @@ namespace EventSourceDemo
 
             _incrementingPollingCounter?.Dispose();
             _incrementingPollingCounter = null;
+
+            _incrementingEventCounter?.Dispose();
+            _incrementingEventCounter = null;
 
             base.Dispose(disposing);
         }
