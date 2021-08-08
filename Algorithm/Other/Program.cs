@@ -7,7 +7,8 @@ namespace Other
         static void Main(string[] args)
         {
             //SkipList.Exection();
-            SortLinkedList.TestSort();
+            //SortLinkedList.TestSort();
+            CountSort.Sort();
             Console.WriteLine("Hello World!");
         }
     }
