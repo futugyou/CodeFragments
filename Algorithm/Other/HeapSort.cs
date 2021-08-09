@@ -10,7 +10,7 @@ namespace Other
     {
         public static void Sort()
         {
-            int[] nums = { 25, 6, 7, 4, 2, 5, 7, 0 };
+            int[] nums = { 2, 6, 7, 4, 3, 5, 7, 0 };
             int n = nums.Length;
             for (int i = n / 2 - 1; i >= 0; i--)
             {
