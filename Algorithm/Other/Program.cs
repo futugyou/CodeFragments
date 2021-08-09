@@ -8,7 +8,7 @@ namespace Other
         {
             //SkipList.Exection();
             //SortLinkedList.TestSort();
-            CountSort.Sort();
+            HeapSort.Sort();
             Console.WriteLine("Hello World!");
         }
     }
