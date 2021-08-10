@@ -9,7 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace kong1
+namespace KongDemo
 {
     public static class KongExtension
     {

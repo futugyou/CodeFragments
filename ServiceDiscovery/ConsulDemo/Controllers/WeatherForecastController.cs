@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace kong1.Controllers
+namespace ConsulDemo.Controllers
 {
     [ApiController]
     [Route("[controller]")]

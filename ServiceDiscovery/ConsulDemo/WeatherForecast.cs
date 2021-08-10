@@ -1,6 +1,6 @@
 using System;
 
-namespace kong1
+namespace ConsulDemo
 {
     public class WeatherForecast
     {

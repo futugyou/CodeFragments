@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace kong1
+namespace KongDemo
 {
     public static class PassportConfig
     {

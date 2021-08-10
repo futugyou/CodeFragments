@@ -29,9 +29,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tracing", "Tracing", "{08DA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventClient", "Tracing\EventClient\EventClient.csproj", "{DFF792A2-6E3A-455C-9D0E-B3B9DD65EC00}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Kong", "Kong", "{18BEC41E-16CA-401F-8FD3-0286BCCDAC3E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateway", "ApiGateway", "{18BEC41E-16CA-401F-8FD3-0286BCCDAC3E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kong1", "kong\kong1\kong1.csproj", "{3FD94743-6931-44CE-B569-41007078AB65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KongDemo", "ApiGateway\KongDemo\KongDemo.csproj", "{3FD94743-6931-44CE-B569-41007078AB65}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Quic", "Quic", "{B45C379A-34CD-4260-8811-E71BD6613C53}"
 EndProject
@@ -86,6 +86,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventConsumer.Azure.Extension", "MessageQueue\AzureServicebus\EventConsumer.Azure.Extension\EventConsumer.Azure.Extension.csproj", "{FF07A3DF-782D-425F-9055-FBC9836CE71F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceDiscovery", "ServiceDiscovery", "{F45DC3FA-27B1-4534-B8CA-E84EDD3B134B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsulDemo", "ServiceDiscovery\ConsulDemo\ConsulDemo.csproj", "{371A56DA-FE04-4A91-9D49-1C65772A3E87}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -217,6 +219,10 @@ Global
 		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF07A3DF-782D-425F-9055-FBC9836CE71F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{371A56DA-FE04-4A91-9D49-1C65772A3E87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{371A56DA-FE04-4A91-9D49-1C65772A3E87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{371A56DA-FE04-4A91-9D49-1C65772A3E87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{371A56DA-FE04-4A91-9D49-1C65772A3E87}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -249,6 +255,7 @@ Global
 		{7063E766-6F73-412A-B7AC-D6DB8A9EE27E} = {BE90355D-230F-408D-8810-EF184CBA4F86}
 		{36C1E5DC-592F-47F0-B98C-2F65EA2B7393} = {BE90355D-230F-408D-8810-EF184CBA4F86}
 		{FF07A3DF-782D-425F-9055-FBC9836CE71F} = {BE90355D-230F-408D-8810-EF184CBA4F86}
+		{371A56DA-FE04-4A91-9D49-1C65772A3E87} = {F45DC3FA-27B1-4534-B8CA-E84EDD3B134B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
