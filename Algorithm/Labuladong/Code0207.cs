@@ -46,6 +46,8 @@ namespace Labuladong
         //onpath record the 'node' foreach 'path'
         private static bool[] onPath;
         private static bool hasCycle;
+
+        //拓扑排序 Topological sort 
         private static List<int> postorder = new List<int>();
         private static void Traverse(Dictionary<int, List<int>> dic, int key)
         {
