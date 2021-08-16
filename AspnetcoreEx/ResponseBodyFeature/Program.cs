@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "ResponseBodyFeature", Version = "v1" });
@@ -27,24 +28,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.UseMiddleware<ResponseCustomMiddleware>();
-//app.Use(async (context, next) =>
-//{
-//    var newContent = string.Empty;
-
-//    using (var newBody = new MemoryStream())
-//    {
-//        context.Response.Body = newBody;
-
-//        await next();
-
-//        context.Response.Body = new MemoryStream();
-
-//        newBody.Seek(0, SeekOrigin.Begin);
-
-//        newContent = new StreamReader(newBody).ReadToEnd();
-
-//        newContent += ", World!";
-//        await context.Response.WriteAsync(newContent);
-//    }
-//});
 app.Run();

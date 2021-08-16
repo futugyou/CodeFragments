@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using System.IO.Pipelines;
+using System.Text.Json.Nodes;
 
 public class ResponseCustomBody : Stream, IHttpResponseBodyFeature
 {
@@ -70,9 +71,25 @@ public class ResponseCustomBody : Stream, IHttpResponseBodyFeature
 
     public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
-        var json = System.Text.Encoding.UTF8.GetString(buffer).TrimEnd('\0');
-        json = "{\"Status\":0, \"Info\":" + json + " }";
-        buffer = System.Text.Encoding.UTF8.GetBytes(json);
+        // the buffer length is 16384, it include valid data and many many '\0' and other word like \u0001 
+        var json = System.Text.Encoding.UTF8.GetString(buffer, offset, count).TrimEnd('\0');
+        //json = $"{{\"Status\":0, \"Info\":{json}}}";
+        //json = "{\"Status\":0, \"Info\":" + json + "}";
+        if (string.IsNullOrEmpty(json))
+        {
+            return;
+        }
+        JsonNode jNode = JsonNode.Parse(json);
+        if (jNode == null)
+        {
+            return;
+        }
+        var jObject = new JsonObject
+        {
+            ["Status"] = 0,
+            ["Info"] = jNode,
+        };
+        buffer = System.Text.Encoding.UTF8.GetBytes(jObject.ToJsonString());
         count = buffer.Length;
         await _innerStream.WriteAsync(buffer, offset, count, cancellationToken);
     }
