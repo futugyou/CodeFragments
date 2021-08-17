@@ -1,9 +1,13 @@
 using Microsoft.OpenApi.Models;
+using ResponseBodyFeature.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Host.ConfigureAppConfiguration(config =>
+{
+    config.AddJsonFileExtensions("appsettings.json", true, true);
+});
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();
 builder.Services.AddEndpointsApiExplorer();
