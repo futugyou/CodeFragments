@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IdentityServer4.EntityFramework.DbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityCenter
 {
@@ -44,6 +45,7 @@ namespace IdentityCenter
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            MigrateDatabase(app);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -56,6 +58,21 @@ namespace IdentityCenter
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void MigrateDatabase(IApplicationBuilder app)
+        {
+            var scopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+            if (scopeFactory != null)
+            {
+                using (var serviceScope = scopeFactory.CreateScope())
+                {
+                    serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+
+                    var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                    context.Database.Migrate();
+                }
+            }
         }
     }
 }
