@@ -27,16 +27,17 @@ namespace IdentityCenter
             var serverVersion = new MySqlServerVersion(new Version(Configuration["MysqlVersion"]));
 
             services.AddIdentityServer()
-                 .AddConfigurationStore(options =>
-                 {
-                     options.ConfigureDbContext = builder => builder.UseMySql(
-                         Configuration.GetConnectionString("IdentityConfigure"),
-                         serverVersion,
-                         ob =>
-                         {
-                             ob.MigrationsAssembly(migrationsAssembly);
-                         });
-                 })
+                .AddSigningCredential(Certificate.Certificate.Get())
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = builder => builder.UseMySql(
+                        Configuration.GetConnectionString("IdentityConfigure"),
+                        serverVersion,
+                        ob =>
+                        {
+                            ob.MigrationsAssembly(migrationsAssembly);
+                        });
+                })
                 .AddOperationalStore(options =>
                 {
                     options.ConfigureDbContext = builder => builder.UseMySql(
