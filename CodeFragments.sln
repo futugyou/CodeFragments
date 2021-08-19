@@ -95,7 +95,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResponseBodyFeature", "Aspn
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{209660A2-2BD1-4716-8B33-AF9384341593}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityCenter", "Identity\IdentityCenter\IdentityCenter.csproj", "{3D437D1E-01E8-4D24-8D96-1F91D0495D48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityCenter", "Identity\IdentityCenter\IdentityCenter.csproj", "{3D437D1E-01E8-4D24-8D96-1F91D0495D48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtApi", "Identity\JwtApi\JwtApi.csproj", "{987D9E60-A818-4D16-81BF-7489F873A39F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -239,6 +241,10 @@ Global
 		{3D437D1E-01E8-4D24-8D96-1F91D0495D48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D437D1E-01E8-4D24-8D96-1F91D0495D48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D437D1E-01E8-4D24-8D96-1F91D0495D48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987D9E60-A818-4D16-81BF-7489F873A39F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987D9E60-A818-4D16-81BF-7489F873A39F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987D9E60-A818-4D16-81BF-7489F873A39F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987D9E60-A818-4D16-81BF-7489F873A39F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -274,6 +280,7 @@ Global
 		{371A56DA-FE04-4A91-9D49-1C65772A3E87} = {F45DC3FA-27B1-4534-B8CA-E84EDD3B134B}
 		{8D294489-E874-40D7-AF18-CE6AA94FE3E9} = {D607523F-DBAF-4545-88C3-706748EF7B93}
 		{3D437D1E-01E8-4D24-8D96-1F91D0495D48} = {209660A2-2BD1-4716-8B33-AF9384341593}
+		{987D9E60-A818-4D16-81BF-7489F873A39F} = {209660A2-2BD1-4716-8B33-AF9384341593}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
