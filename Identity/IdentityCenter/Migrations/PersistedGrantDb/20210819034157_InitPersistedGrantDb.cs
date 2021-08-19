@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace IdentityCenter.Migrations.PersistedGrantDb
 {
-    public partial class initPersistedGrantDb : Migration
+    public partial class InitPersistedGrantDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

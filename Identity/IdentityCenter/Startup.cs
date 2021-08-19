@@ -1,5 +1,8 @@
-﻿using IdentityServer4.EntityFramework.DbContexts;
+﻿using IdentityCenter.Data;
+using IdentityCenter.Models;
+using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -26,6 +29,21 @@ namespace IdentityCenter
             var migrationsAssembly = typeof(Startup).Assembly.FullName;
             var serverVersion = new MySqlServerVersion(new Version(Configuration["MysqlVersion"]));
 
+            // this is Microsoft.AspNetCore.Identity
+            services.AddDbContext<ApplicationDbContext>(options =>
+                   options.UseMySql(
+                        Configuration.GetConnectionString("Identity"),
+                        serverVersion,
+                        ob =>
+                        {
+                            ob.MigrationsAssembly(migrationsAssembly);
+                        })
+                   );
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            // this is identity server 4
             services.AddIdentityServer()
                 .AddSigningCredential(Certificate.Certificate.Get())
                 .AddConfigurationStore(options =>
@@ -62,6 +80,7 @@ namespace IdentityCenter
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "KongDemo v1"));
 
             app.UseRouting();
+            // this is identity server 4
             app.UseIdentityServer();
             app.UseAuthorization();
 
@@ -78,6 +97,7 @@ namespace IdentityCenter
             {
                 using var serviceScope = scopeFactory.CreateScope();
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
                 context.Database.Migrate();
 

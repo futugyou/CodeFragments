@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IdentityCenter.Migrations.PersistedGrantDb
 {
     [DbContext(typeof(PersistedGrantDbContext))]
-    [Migration("20210818102547_initPersistedGrantDb")]
-    partial class initPersistedGrantDb
+    [Migration("20210819034157_InitPersistedGrantDb")]
+    partial class InitPersistedGrantDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

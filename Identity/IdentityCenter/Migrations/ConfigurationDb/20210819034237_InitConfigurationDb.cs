@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace IdentityCenter.Migrations.ConfigurationDb
 {
-    public partial class initConfigurationDb : Migration
+    public partial class InitConfigurationDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
