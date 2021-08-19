@@ -1,8 +1,10 @@
 ﻿using IdentityCenter.Data;
 using IdentityCenter.Models;
+using IdentityCenter.Services;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -20,7 +22,10 @@ namespace IdentityCenter
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddSingleton<IEmailSender, EmailSender>();
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "KongDemo", Version = "v1" });
@@ -78,7 +83,7 @@ namespace IdentityCenter
             }
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "KongDemo v1"));
-
+            app.UseStaticFiles();
             app.UseRouting();
             // this is identity server 4
             app.UseIdentityServer();
@@ -86,6 +91,7 @@ namespace IdentityCenter
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });
         }

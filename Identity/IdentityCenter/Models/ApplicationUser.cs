@@ -6,5 +6,5 @@ namespace IdentityCenter.Models;
 public class ApplicationUser : IdentityUser
 {
     [Required]
-    public string Card { get; set; }
+    public string Card { get; set; } = Guid.NewGuid().ToString();
 }
