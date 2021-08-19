@@ -1,5 +1,6 @@
 ﻿using IdentityServer4.EntityFramework.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace IdentityCenter
 {
@@ -16,6 +17,11 @@ namespace IdentityCenter
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "KongDemo", Version = "v1" });
+            });
+
             var migrationsAssembly = typeof(Startup).Assembly.FullName;
             var serverVersion = new MySqlServerVersion(new Version(Configuration["MysqlVersion"]));
 
@@ -50,6 +56,9 @@ namespace IdentityCenter
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "KongDemo v1"));
+
             app.UseRouting();
             app.UseIdentityServer();
             app.UseAuthorization();
