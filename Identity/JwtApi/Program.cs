@@ -1,3 +1,4 @@
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,32 +21,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
          };
      });
 
+//'Code Flow'
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "oidc";
+})
+    .AddCookie("Cookies")
+    .AddOpenIdConnect("oidc", options =>
+    {
+        options.Authority = "https://localhost:5001";
+        options.ClientId = "openidapi";
+        options.ClientSecret = "openidapi";
+        options.ResponseType = "code";
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+        // mapping claimtype to jwttype
+        options.TokenValidationParameters.NameClaimType = JwtClaimTypes.Name;
+    });
 
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultScheme = "Cookies";
-//    options.DefaultChallengeScheme = "oidc";
-//})
-//    .AddCookie("Cookies")
-// // 'Code Flow'
-// //.AddOpenIdConnect("oidc", options =>
-// //{
-// //    options.Authority = "https://localhost:5001";
-// //    options.ClientId = "openidapi";
-// //    options.ClientSecret = "openidapi";
-// //    options.ResponseType = "code";
-// //    options.SaveTokens = true;
-// //    options.GetClaimsFromUserInfoEndpoint = true;
-// //});
-
-// // 'Implicit Flow'
-// .AddOpenIdConnect("oidc", options =>
-//  {
-//      options.Authority = "https://localhost:5001";
-//      options.ClientId = "openidapi_implicit";
-//      options.ClientSecret = "openidapi";
-//      options.ResponseType = "id_token token"; 
-//  });
+// 'Implicit Flow'
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "oidc";
+})
+    .AddCookie("Cookies")
+    .AddOpenIdConnect("oidc", options =>
+    {
+        options.Authority = "https://localhost:5001";
+        options.ClientId = "openidapi_implicit";
+        options.ClientSecret = "openidapi";
+        options.ResponseType = "id_token token";
+    });
 
 // add cors
 builder.Services.AddCors(options =>
