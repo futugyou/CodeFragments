@@ -18,3 +18,5 @@ curl --location --request POST 'https://localhost:5001/connect/token' \
 7. AddDbContext and AddIdentity, then add migration.
     Add-Migration InitIdentityDb -c ApplicationDbContext -o Migrations/IdentityDb
 8. Add [identity scaffolded](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-6.0&tabs=visual-studio)
+
+8. link id4 and identity, Add IdentityServer4.AspNetIdentity package. 
