@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "JwtApi", Version = "v1" });
 });
+
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 //     {
@@ -20,21 +21,32 @@ builder.Services.AddSwaggerGen(c =>
 //         };
 //     });
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = "Cookies";
     options.DefaultChallengeScheme = "oidc";
 })
     .AddCookie("Cookies")
-    .AddOpenIdConnect("oidc", options =>
-    {
-        options.Authority = "https://localhost:5001";
-        options.ClientId = "openidapi";
-        options.ClientSecret = "openidapi";
-        options.ResponseType = "code";
-        options.SaveTokens = true;
-        options.GetClaimsFromUserInfoEndpoint = true;
-    });
+ // 'Code Flow'
+ //.AddOpenIdConnect("oidc", options =>
+ //{
+ //    options.Authority = "https://localhost:5001";
+ //    options.ClientId = "openidapi";
+ //    options.ClientSecret = "openidapi";
+ //    options.ResponseType = "code";
+ //    options.SaveTokens = true;
+ //    options.GetClaimsFromUserInfoEndpoint = true;
+ //});
+
+ // 'Implicit Flow'
+ .AddOpenIdConnect("oidc", options =>
+  {
+      options.Authority = "https://localhost:5001";
+      options.ClientId = "openidapi_implicit";
+      options.ClientSecret = "openidapi";
+      options.ResponseType = "id_token token"; 
+  });
 
 var app = builder.Build();
 

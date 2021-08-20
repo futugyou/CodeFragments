@@ -1,4 +1,5 @@
 ﻿
+using IdentityServer4;
 using IdentityServer4.Models;
 
 namespace IdentityCenter;
@@ -17,30 +18,40 @@ public static class Config
             {
                 ClientId = "client",
                 // no interactive user, use the clientid/secret for authentication
-                AllowedGrantTypes = GrantTypes.ClientCredentials,                
-                // secret for authentication                
+                AllowedGrantTypes = GrantTypes.ClientCredentials,
+                // secret for authentication
                 ClientSecrets =
                 {
                     new Secret("secret".Sha256())
-                },                
+                },
                 // scopes that client has access to
                 AllowedScopes = { "api1" }
             },
             new Client
             {
                 ClientId = "openidapi",
-                // no interactive user, use the clientid/secret for authentication
-                AllowedGrantTypes = GrantTypes.Code,                
-                // secret for authentication                
+                AllowedGrantTypes = GrantTypes.Code,
                 ClientSecrets =
                 {
                     new Secret("openidapi".Sha256())
-                },                
+                },
                 // "profile" and "openid" IS MUST
                 // IdentityServerConstants.StandardScopes.OpenId,
                 // IdentityServerConstants.StandardScopes.Profile
                 AllowedScopes = { "api1", "profile", "openid" },
                 RedirectUris = { "https://localhost:5003/signin-oidc" },
+            },
+            new Client
+            {
+                ClientId = "openidapi_implicit",
+                AllowedGrantTypes = GrantTypes.Implicit,  
+                ClientSecrets =
+                {
+                    new Secret("openidapi".Sha256())
+                },
+                AllowedScopes = { "api1", IdentityServerConstants.StandardScopes.OpenId,  IdentityServerConstants.StandardScopes.Profile },
+                RedirectUris = { "https://localhost:5003/signin-oidc" },
+                AllowAccessTokensViaBrowser = true,
             }
         };
 
