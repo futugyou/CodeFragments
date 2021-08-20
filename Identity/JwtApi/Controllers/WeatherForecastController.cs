@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JwtApi.Controllers;
@@ -20,8 +21,12 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public IEnumerable<WeatherForecast> Get()
+    public async Task<IEnumerable<WeatherForecast>> Get()
     {
+        var accessToken = await HttpContext.GetTokenAsync("access_token");
+        var idtoken = await HttpContext.GetTokenAsync("id_token");
+        Console.WriteLine(accessToken);
+        Console.WriteLine(idtoken);
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
             Date = DateTime.Now.AddDays(index),
