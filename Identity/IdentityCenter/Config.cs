@@ -5,10 +5,20 @@ using IdentityServer4.Models;
 namespace IdentityCenter;
 public static class Config
 {
+    public static IEnumerable<ApiResource> ApiResources =>
+        new List<ApiResource>
+        {
+            new ApiResource("user_manage","user_manage"){
+                Scopes = { "user_read", "user_edit" }
+            },
+        };
+
     public static IEnumerable<ApiScope> ApiScopes =>
            new List<ApiScope>
            {
-               new ApiScope("api1", "My API")
+               new ApiScope("api1", "My API"),
+               new ApiScope("user_read", "user_read"),
+               new ApiScope("user_edit", "user_edit"),
            };
 
     public static IEnumerable<Client> Clients =>
@@ -63,7 +73,7 @@ public static class Config
                 RedirectUris = { "https://localhost:5005/html/callback.html" },
                 PostLogoutRedirectUris = { "https://localhost:5005/html/index.html" },
                 AllowedCorsOrigins = { "https://localhost:5005" },
-            }
+            },
         };
 
     public static IEnumerable<IdentityResource> IdentityResources =>
@@ -73,4 +83,3 @@ public static class Config
             new IdentityResources.Profile(),
         };
 }
- 
