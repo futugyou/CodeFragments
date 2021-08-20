@@ -44,7 +44,7 @@ public static class Config
             new Client
             {
                 ClientId = "openidapi_implicit",
-                AllowedGrantTypes = GrantTypes.Implicit,  
+                AllowedGrantTypes = GrantTypes.Implicit,
                 ClientSecrets =
                 {
                     new Secret("openidapi".Sha256())
@@ -52,6 +52,17 @@ public static class Config
                 AllowedScopes = { "api1", IdentityServerConstants.StandardScopes.OpenId,  IdentityServerConstants.StandardScopes.Profile },
                 RedirectUris = { "https://localhost:5003/signin-oidc" },
                 AllowAccessTokensViaBrowser = true,
+            },
+            new Client
+            {
+                ClientId = "spa",
+                ClientName = "spa client",
+                AllowedGrantTypes = GrantTypes.Code,
+                RequireClientSecret = false,
+                AllowedScopes = { "api1", IdentityServerConstants.StandardScopes.OpenId,  IdentityServerConstants.StandardScopes.Profile },
+                RedirectUris = { "https://localhost:5005/html/callback.html" },
+                PostLogoutRedirectUris = { "https://localhost:5005/html/index.html" },
+                AllowedCorsOrigins = { "https://localhost:5005" },
             }
         };
 
@@ -62,3 +73,4 @@ public static class Config
             new IdentityResources.Profile(),
         };
 }
+ 
