@@ -90,6 +90,6 @@ app.UseCors("default");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers().RequireAuthorization("ApiScope");
+app.MapControllers();
 
 app.Run();

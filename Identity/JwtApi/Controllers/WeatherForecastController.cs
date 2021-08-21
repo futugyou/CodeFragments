@@ -20,7 +20,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [Authorize("ApiScope")]
     public async Task<IEnumerable<WeatherForecast>> Get()
     {
         var accessToken = await HttpContext.GetTokenAsync("access_token");
