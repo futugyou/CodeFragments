@@ -1,9 +1,9 @@
-﻿using IdentityCenter.Data;
+﻿using Duende.IdentityServer;
+using Duende.IdentityServer.EntityFramework.DbContexts;
+using Duende.IdentityServer.EntityFramework.Mappers;
+using IdentityCenter.Data;
 using IdentityCenter.Models;
 using IdentityCenter.Services;
-using IdentityServer4;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
