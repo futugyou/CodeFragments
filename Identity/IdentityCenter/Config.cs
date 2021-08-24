@@ -49,7 +49,7 @@ public static class Config
                 // IdentityServerConstants.StandardScopes.OpenId,
                 // IdentityServerConstants.StandardScopes.Profile
                 AllowedScopes = { "api1", "profile", "openid" },
-                RedirectUris = { "https://localhost:5003/signin-oidc" },
+                RedirectUris = { "https://localhost:5007/signin-oidc" },
             },
             new Client
             {
@@ -60,7 +60,7 @@ public static class Config
                     new Secret("openidapi".Sha256())
                 },
                 AllowedScopes = { "api1", IdentityServerConstants.StandardScopes.OpenId,  IdentityServerConstants.StandardScopes.Profile },
-                RedirectUris = { "https://localhost:5003/signin-oidc" },
+                RedirectUris = { "https://localhost:5009/signin-oidc" },
                 AllowAccessTokensViaBrowser = true,
             },
             new Client

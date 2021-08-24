@@ -39,7 +39,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuicListener", "Quic\QuicLi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuicConnectionDemo", "Quic\QuicConnectionDemo\QuicConnectionDemo.csproj", "{EC4F225F-D7B4-424E-8D1D-6114AAE1212E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "apolledemo", "apolledemo\apolledemo.csproj", "{31EEEBB8-5A2E-4651-9E4D-D34F46724984}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apolledemo", "Apolledemo\Apolledemo.csproj", "{31EEEBB8-5A2E-4651-9E4D-D34F46724984}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Actordemo", "Actordemo", "{C096AEEE-D9D8-440A-8043-4068F6BCF98D}"
 EndProject
@@ -97,11 +97,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{20
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityCenter", "Identity\IdentityCenter\IdentityCenter.csproj", "{3D437D1E-01E8-4D24-8D96-1F91D0495D48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtApi", "Identity\JwtApi\JwtApi.csproj", "{987D9E60-A818-4D16-81BF-7489F873A39F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JwtApi", "Identity\JwtApi\JwtApi.csproj", "{987D9E60-A818-4D16-81BF-7489F873A39F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spa", "Identity\Spa\Spa.csproj", "{C7AC2F92-D8DE-47A2-8AE6-75539777CF11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spa", "Identity\Spa\Spa.csproj", "{C7AC2F92-D8DE-47A2-8AE6-75539777CF11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Identity\Client\Client.csproj", "{3E732C3E-A75A-4F06-8908-3367578F7D94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Identity\Client\Client.csproj", "{3E732C3E-A75A-4F06-8908-3367578F7D94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OidcCodeApi", "Identity\OidcCodeApi\OidcCodeApi.csproj", "{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OidcImplicitApi", "Identity\OidcImplicitApi\OidcImplicitApi.csproj", "{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -257,6 +261,14 @@ Global
 		{3E732C3E-A75A-4F06-8908-3367578F7D94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E732C3E-A75A-4F06-8908-3367578F7D94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E732C3E-A75A-4F06-8908-3367578F7D94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -295,6 +307,8 @@ Global
 		{987D9E60-A818-4D16-81BF-7489F873A39F} = {209660A2-2BD1-4716-8B33-AF9384341593}
 		{C7AC2F92-D8DE-47A2-8AE6-75539777CF11} = {209660A2-2BD1-4716-8B33-AF9384341593}
 		{3E732C3E-A75A-4F06-8908-3367578F7D94} = {209660A2-2BD1-4716-8B33-AF9384341593}
+		{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC} = {209660A2-2BD1-4716-8B33-AF9384341593}
+		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400} = {209660A2-2BD1-4716-8B33-AF9384341593}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}

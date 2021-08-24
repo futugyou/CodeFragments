@@ -8,7 +8,7 @@ var config = {
     client_id: "spa",
     redirect_uri: "https://localhost:5005/html/callback.html",
     response_type: "code",
-    scope: "openid profile",
+    scope: "openid profile api1",
     post_logout_redirect_uri: "https://localhost:5005/html/index.html",
 };
 var mge = new Oidc.UserManager(config);
