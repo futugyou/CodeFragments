@@ -107,6 +107,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OidcCodeApi", "Identity\Oid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OidcImplicitApi", "Identity\OidcImplicitApi\OidcImplicitApi.csproj", "{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpaWithBackend", "Identity\SpaWithBackend\SpaWithBackend.csproj", "{0635B5C2-007C-4B5E-B096-040A3C060CB0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -269,6 +271,10 @@ Global
 		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0635B5C2-007C-4B5E-B096-040A3C060CB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0635B5C2-007C-4B5E-B096-040A3C060CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0635B5C2-007C-4B5E-B096-040A3C060CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0635B5C2-007C-4B5E-B096-040A3C060CB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -309,6 +315,7 @@ Global
 		{3E732C3E-A75A-4F06-8908-3367578F7D94} = {209660A2-2BD1-4716-8B33-AF9384341593}
 		{056EB1F8-82BF-4E9A-AAD5-67E0F826E9EC} = {209660A2-2BD1-4716-8B33-AF9384341593}
 		{EEBA32C9-8B6C-4723-8BBE-A5BCFD5D1400} = {209660A2-2BD1-4716-8B33-AF9384341593}
+		{0635B5C2-007C-4B5E-B096-040A3C060CB0} = {209660A2-2BD1-4716-8B33-AF9384341593}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}

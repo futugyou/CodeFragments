@@ -50,6 +50,7 @@ public static class Config
                 // IdentityServerConstants.StandardScopes.Profile
                 AllowedScopes = { "api1", "profile", "openid" },
                 RedirectUris = { "https://localhost:5007/signin-oidc" },
+                AllowOfflineAccess = true,
             },
             new Client
             {
@@ -63,6 +64,7 @@ public static class Config
                 RedirectUris = { "https://localhost:5009/signin-oidc" },
                 AllowAccessTokensViaBrowser = true,
             },
+            // JavaScript client
             new Client
             {
                 ClientId = "spa",
@@ -74,6 +76,28 @@ public static class Config
                 PostLogoutRedirectUris = { "https://localhost:5005/html/index.html" },
                 AllowedCorsOrigins = { "https://localhost:5005" },
             },
+            // JavaScript BFF client
+            new Client
+            {
+                ClientId = "bff",
+                ClientSecrets = { new Secret("secret".Sha256()) },
+
+                AllowedGrantTypes = GrantTypes.Code,
+    
+                // where to redirect to after login
+                RedirectUris = { "https://localhost:5011/signin-oidc" },
+
+                // where to redirect to after logout
+                PostLogoutRedirectUris = { "https://localhost:5011/signout-callback-oidc" },
+
+                AllowedScopes = new List<string>
+                {
+                    IdentityServerConstants.StandardScopes.OpenId,
+                    IdentityServerConstants.StandardScopes.Profile,
+                    "api1"
+                }
+            }
+
         };
 
     public static IEnumerable<IdentityResource> IdentityResources =>
