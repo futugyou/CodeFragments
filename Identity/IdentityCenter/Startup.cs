@@ -51,7 +51,22 @@ namespace IdentityCenter
                 .AddDefaultTokenProviders();
 
             // this is identity server 4
-            services.AddIdentityServer()
+            services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+
+                // see https://docs.duendesoftware.com/identityserver/v5/fundamentals/resources/
+                options.EmitStaticAudienceClaim = true;
+                options.Authentication.CookieLifetime = TimeSpan.FromHours(1);
+                options.Authentication.CookieSlidingExpiration = false;
+
+                options.EmitScopesAsSpaceDelimitedStringInJwt = true;
+                options.Endpoints.EnableJwtRequestUri = true;
+            })
+                .AddJwtBearerClientAuthentication()
                 .AddSigningCredential(Certificate.Certificate.Get())
                 .AddConfigurationStore(options =>
                 {
@@ -75,6 +90,9 @@ namespace IdentityCenter
                 })
                 // link id4 and identity
                 .AddAspNetIdentity<ApplicationUser>();
+
+            // configures the OpenIdConnect handlers to persist the state parameter into the server-side IDistributedCache.
+            services.AddOidcStateDataFormatterCache();
 
             services.AddAuthentication()
                 .AddGoogle("Google", options =>
