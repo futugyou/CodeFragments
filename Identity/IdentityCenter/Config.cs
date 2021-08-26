@@ -28,6 +28,7 @@ public static class Config
             {
                 ClientId = "client",
                 // no interactive user, use the clientid/secret for authentication
+                // Client cannot request a refresh token in client credentials flow
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
                 // secret for authentication
                 ClientSecrets =
@@ -50,6 +51,7 @@ public static class Config
                 // IdentityServerConstants.StandardScopes.Profile
                 AllowedScopes = { "api1", "profile", "openid" },
                 RedirectUris = { "https://localhost:5007/signin-oidc" },
+                // Refreshing Token
                 AllowOfflineAccess = true,
             },
             new Client
@@ -63,6 +65,7 @@ public static class Config
                 AllowedScopes = { "api1", IdentityServerConstants.StandardScopes.OpenId,  IdentityServerConstants.StandardScopes.Profile },
                 RedirectUris = { "https://localhost:5009/signin-oidc" },
                 AllowAccessTokensViaBrowser = true,
+                AlwaysIncludeUserClaimsInIdToken = true,
             },
             // JavaScript client
             new Client
@@ -96,8 +99,20 @@ public static class Config
                     IdentityServerConstants.StandardScopes.Profile,
                     "api1"
                 }
-            }
-
+            },
+            new Client
+            {
+                ClientId = "jwtapiswaggerui",
+                ClientName = "JwtApi Swagger UI",
+                AllowedGrantTypes = GrantTypes.Implicit,
+                AllowAccessTokensViaBrowser = true,
+                RedirectUris = { $"https://localhost:5003/swagger/oauth2-redirect.html" },
+                PostLogoutRedirectUris = { $"https://localhost:5003/swagger/" },
+                AllowedScopes =
+                {
+                    "api1"
+                }
+            },
         };
 
     public static IEnumerable<IdentityResource> IdentityResources =>
