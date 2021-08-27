@@ -1,16 +1,16 @@
 ﻿using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
-namespace IdentityCenter.Certificate;
+namespace Client.Certificate;
 public static class Certificate
 {
     public static X509Certificate2 Get()
     {
         var assembly = typeof(Certificate).GetTypeInfo().Assembly;
         // this is only for dev env.
-        using var stream = assembly.GetManifestResourceStream("IdentityCenter.Certificate.IdentityCenter.pfx");
+        using var stream = assembly.GetManifestResourceStream("Client.Certificate.Clientone.p12");
         if (stream == null) throw new Exception("no certificate!");
-        var certificate = new X509Certificate2(ReadStream(stream), "identitycenter");
+        var certificate = new X509Certificate2(ReadStream(stream), "password");
         return certificate;
     }
 

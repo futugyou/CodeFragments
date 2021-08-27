@@ -1,6 +1,7 @@
 ﻿
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
+using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace IdentityCenter;
 public static class Config
@@ -33,7 +34,18 @@ public static class Config
                 // secret for authentication
                 ClientSecrets =
                 {
-                    new Secret("secret".Sha256())
+                    //new Secret("secret".Sha256()),
+                    // name based
+                    //new Secret(@"CN=clientone, OU=clientone, O=cxagroup", "client.dn")
+                    //{
+                    //    Type = SecretTypes.X509CertificateName
+                    //},
+
+                    // or thumbprint based
+                    new Secret("13EABFEAE46BC2E93BDB85BC05BF64AC1C74A475")
+                    {
+                        Type = SecretTypes.X509CertificateThumbprint
+                    },
                 },
                 // scopes that client has access to
                 AllowedScopes = { "api1" }

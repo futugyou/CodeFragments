@@ -4,11 +4,13 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using IdentityCenter.Data;
 using IdentityCenter.Models;
 using IdentityCenter.Services;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Cryptography.X509Certificates;
 
 namespace IdentityCenter
 {
@@ -65,8 +67,17 @@ namespace IdentityCenter
 
                 options.EmitScopesAsSpaceDelimitedStringInJwt = true;
                 options.Endpoints.EnableJwtRequestUri = true;
+
+                // associate a client certificate with a client in your IdentityServer and enable MTLS support on the options.
+                options.MutualTls.Enabled = true;
             })
+                // Parses a JWT on the client_assertion body field. Can be enabled by calling the AddJwtBearerClientAuthentication DI extension method.
+                // Validates JWTs that are signed with either X.509 certificates or keys wrapped in a JWK. Can be enabled by calling the AddJwtBearerClientAuthentication DI extension method.
                 .AddJwtBearerClientAuthentication()
+                // Parses the client_id body field and TLS client certificate. Can be enabled by calling the AddMutualTlsSecretValidators DI extension method.
+                // Validates X.509 client certificates based on a thumbprint. Can be enabled by calling the AddMutualTlsSecretValidators DI extension method.
+                // Validates X.509 client certificates based on a common name. Can be enabled by calling the AddMutualTlsSecretValidators DI extension method.
+                .AddMutualTlsSecretValidators()
                 .AddSigningCredential(Certificate.Certificate.Get())
                 .AddConfigurationStore(options =>
                 {
@@ -94,6 +105,35 @@ namespace IdentityCenter
             // configures the OpenIdConnect handlers to persist the state parameter into the server-side IDistributedCache.
             services.AddOidcStateDataFormatterCache();
 
+
+            services.AddAuthentication(options=> 
+            {
+                options.DefaultAuthenticateScheme = CertificateAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CertificateAuthenticationDefaults.AuthenticationScheme;    
+            })
+                .AddCertificate(options =>
+                {
+                    options.AllowedCertificateTypes = CertificateTypes.All;
+                    options.RevocationMode = X509RevocationMode.NoCheck;
+                    options.Events = new CertificateAuthenticationEvents
+                    {
+                        OnAuthenticationFailed = context =>
+                        {
+                            return Task.CompletedTask;
+                        },
+                        OnCertificateValidated = context =>
+                        {
+                            return Task.CompletedTask;
+                        },
+                        OnChallenge = context =>
+                        {
+                            return Task.CompletedTask;
+                        },
+                    };
+                })
+               // Adding an ICertificateValidationCache results in certificate auth caching the results.
+               // The default implementation uses a memory cache.
+               .AddCertificateCache();
             services.AddAuthentication()
                 .AddGoogle("Google", options =>
                 {
@@ -132,6 +172,7 @@ namespace IdentityCenter
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "KongDemo v1"));
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseCertificateForwarding();
             // this is identity server 4
             app.UseIdentityServer();
             app.UseAuthorization();
