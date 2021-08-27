@@ -70,6 +70,15 @@ namespace IdentityCenter
 
                 // associate a client certificate with a client in your IdentityServer and enable MTLS support on the options.
                 options.MutualTls.Enabled = true;
+
+                options.KeyManagement.KeyPath = "/keys";
+                // new key every 10 days
+                options.KeyManagement.RotationInterval = TimeSpan.FromDays(10);
+                // announce new key 2 days in advance in discovery
+                options.KeyManagement.PropagationTime = TimeSpan.FromDays(2);
+                // keep old key for 7 days in discovery for validation of tokens
+                options.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
+
             })
                 // Parses a JWT on the client_assertion body field. Can be enabled by calling the AddJwtBearerClientAuthentication DI extension method.
                 // Validates JWTs that are signed with either X.509 certificates or keys wrapped in a JWK. Can be enabled by calling the AddJwtBearerClientAuthentication DI extension method.
@@ -78,7 +87,7 @@ namespace IdentityCenter
                 // Validates X.509 client certificates based on a thumbprint. Can be enabled by calling the AddMutualTlsSecretValidators DI extension method.
                 // Validates X.509 client certificates based on a common name. Can be enabled by calling the AddMutualTlsSecretValidators DI extension method.
                 .AddMutualTlsSecretValidators()
-                .AddSigningCredential(Certificate.Certificate.Get())
+                //.AddSigningCredential(Certificate.Certificate.Get())
                 .AddConfigurationStore(options =>
                 {
                     options.ConfigureDbContext = builder => builder.UseMySql(
