@@ -105,12 +105,8 @@ namespace IdentityCenter
             // configures the OpenIdConnect handlers to persist the state parameter into the server-side IDistributedCache.
             services.AddOidcStateDataFormatterCache();
 
-
-            services.AddAuthentication(options=> 
-            {
-                options.DefaultAuthenticateScheme = CertificateAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = CertificateAuthenticationDefaults.AuthenticationScheme;    
-            })
+            // TLS Client Certificates Authentication
+            services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
                 .AddCertificate(options =>
                 {
                     options.AllowedCertificateTypes = CertificateTypes.All;
@@ -131,9 +127,10 @@ namespace IdentityCenter
                         },
                     };
                 })
-               // Adding an ICertificateValidationCache results in certificate auth caching the results.
-               // The default implementation uses a memory cache.
-               .AddCertificateCache();
+                // Adding an ICertificateValidationCache results in certificate auth caching the results.
+                // The default implementation uses a memory cache.
+                .AddCertificateCache();
+
             services.AddAuthentication()
                 .AddGoogle("Google", options =>
                 {
