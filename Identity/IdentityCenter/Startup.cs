@@ -1,4 +1,5 @@
 ﻿using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using IdentityCenter.Data;
@@ -78,6 +79,15 @@ namespace IdentityCenter
                 options.KeyManagement.PropagationTime = TimeSpan.FromDays(2);
                 // keep old key for 7 days in discovery for validation of tokens
                 options.KeyManagement.RetentionDuration = TimeSpan.FromDays(7);
+                options.KeyManagement.SigningAlgorithms = new[]
+                {
+                    // RS256 for older clients (with additional X.509 wrapping)
+                    new SigningAlgorithmOptions(SecurityAlgorithms.RsaSha256) { UseX509Certificate = true },    
+                    // PS256
+                    new SigningAlgorithmOptions(SecurityAlgorithms.RsaSsaPssSha256),    
+                    // ES256
+                    new SigningAlgorithmOptions(SecurityAlgorithms.EcdsaSha256)
+                };
 
             })
                 // Parses a JWT on the client_assertion body field. Can be enabled by calling the AddJwtBearerClientAuthentication DI extension method.
