@@ -40,6 +40,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
      {
          options.Authority = "https://localhost:5001";
+         // this is scope
+         options.Audience = "api1";
+         // if does not need https 
+         //options.RequireHttpsMetadata = false;
          options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
          {
              ValidateAudience = false
