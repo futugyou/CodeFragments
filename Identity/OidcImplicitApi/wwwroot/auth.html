@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script type="text/javascript">
+        var token = null;
+        window.onload = function () {
+            var url = window.location.href;
+
+            var array = url.split("#");
+            if (array.length > 1) {
+                token = array[1];
+             document.getElementById("content").innerHTML = token;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="content"></div>
+</body>
+</html>

@@ -75,7 +75,8 @@ public static class Config
                     new Secret("openidapi".Sha256())
                 },
                 AllowedScopes = { "api1", IdentityServerConstants.StandardScopes.OpenId,  IdentityServerConstants.StandardScopes.Profile },
-                RedirectUris = { "https://localhost:5009/signin-oidc" },
+                // I want redirect to auth.html, but it always signin-oidc
+                RedirectUris = { "https://localhost:5009/auth.html", "https://localhost:5009/signin-oidc" },
                 AllowAccessTokensViaBrowser = true,
                 AlwaysIncludeUserClaimsInIdToken = true,
             },
