@@ -1,6 +1,8 @@
 ﻿
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
+using IdentityCenter.Models;
+using Microsoft.AspNetCore.Identity;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace IdentityCenter;
@@ -134,4 +136,39 @@ public static class Config
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
         };
+
+    private static IPasswordHasher<ApplicationUser> _passwordHasher = new PasswordHasher<ApplicationUser>();
+    public static IEnumerable<ApplicationUser> ApplicationUsers()
+    {
+        var user = new ApplicationUser()
+        {
+            Id = Guid.NewGuid().ToString(),
+            Card = Guid.NewGuid().ToString(),
+            PhoneNumber = "1234567890",
+            UserName = "demouser@microsoft.com",
+            NormalizedEmail = "DEMOUSER@MICROSOFT.COM",
+            NormalizedUserName = "DEMOUSER@MICROSOFT.COM",
+            SecurityStamp = Guid.NewGuid().ToString("D"),
+        };
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, "1qaz@WSX");
+
+        var tang = new ApplicationUser()
+        {
+            Id = Guid.NewGuid().ToString(),
+            Card = Guid.NewGuid().ToString(),
+            PhoneNumber = "15222226652",
+            UserName = "tang@tang.com",
+            NormalizedEmail = "TANG@TANG.COM",
+            NormalizedUserName = "TANG@TANG.COM",
+            SecurityStamp = Guid.NewGuid().ToString("D"),
+        };
+        tang.PasswordHash = _passwordHasher.HashPassword(user, "1qaz@WSX");
+
+        return new List<ApplicationUser>
+        {
+           user,tang
+        };
+    }
+
 }

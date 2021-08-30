@@ -200,14 +200,13 @@ namespace IdentityCenter
             });
         }
 
-        private void MigrateDatabase(IApplicationBuilder app)
+        private static void MigrateDatabase(IApplicationBuilder app)
         {
             var scopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
             if (scopeFactory != null)
             {
                 using var serviceScope = scopeFactory.CreateScope();
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
-                serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
                 context.Database.Migrate();
 
@@ -244,6 +243,14 @@ namespace IdentityCenter
                         context.ApiResources.Add(resource.ToEntity());
                     }
                     context.SaveChanges();
+                }
+
+                var applicationDbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                applicationDbContext.Database.Migrate();
+                if (!applicationDbContext.Users.Any())
+                {
+                    applicationDbContext.Users.AddRange(Config.ApplicationUsers());
+                    applicationDbContext.SaveChanges();
                 }
             }
         }
