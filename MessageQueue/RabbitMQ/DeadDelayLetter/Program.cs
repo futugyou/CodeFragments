@@ -7,6 +7,10 @@ using System.Text;
 
 Console.WriteLine("Hello, World!"); 
 NomalDeadLetter.Consumer();
-NomalDeadLetter.SendMessage(); 
+NomalDeadLetter.SendMessage();
+Console.WriteLine("-------------------------------------------");
+DelayDeadLetter.Consumer();
+DelayDeadLetter.SendMessage();
+Console.WriteLine("-------------------------------------------");
 Console.ReadLine();
 
