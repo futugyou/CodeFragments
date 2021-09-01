@@ -3,6 +3,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using IdentityCenter.Data;
+using IdentityCenter.Extensions;
 using IdentityCenter.Models;
 using IdentityCenter.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -55,6 +56,8 @@ namespace IdentityCenter
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, AdditionalUserClaimsPrincipalFactory>();
 
             // this is identity server 4
             services.AddIdentityServer(options =>

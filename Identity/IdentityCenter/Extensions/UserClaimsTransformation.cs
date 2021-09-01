@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
-namespace IdentityCenter;
+namespace IdentityCenter.Extensions;
 public class UserClaimsTransformation : IClaimsTransformation
 {
     /// <summary>
