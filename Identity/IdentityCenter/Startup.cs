@@ -5,12 +5,14 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using IdentityCenter.Data;
 using IdentityCenter.Models;
 using IdentityCenter.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 
 namespace IdentityCenter
@@ -27,6 +29,7 @@ namespace IdentityCenter
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IClaimsTransformation, UserClaimsTransformation>();
             services.AddSingleton<IEmailSender, EmailSender>();
 
             services.AddControllersWithViews();
@@ -212,7 +215,7 @@ namespace IdentityCenter
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            MigrateDatabase(app);
+            MigrateDatabase(app).Wait();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -233,7 +236,7 @@ namespace IdentityCenter
             });
         }
 
-        private static void MigrateDatabase(IApplicationBuilder app)
+        private static async Task MigrateDatabase(IApplicationBuilder app)
         {
             var scopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
             if (scopeFactory != null)
@@ -284,6 +287,14 @@ namespace IdentityCenter
                 {
                     applicationDbContext.Users.AddRange(Config.ApplicationUsers());
                     applicationDbContext.SaveChanges();
+                }
+                var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                if (!applicationDbContext.UserClaims.Any())
+                {
+                    foreach (var user in applicationDbContext.Users.ToList())
+                    {
+                        await userManager.AddClaimAsync(user, new Claim("card", user.Card));
+                    }
                 }
             }
         }

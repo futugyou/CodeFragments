@@ -63,7 +63,7 @@ public static class Config
                 // "profile" and "openid" IS MUST
                 // IdentityServerConstants.StandardScopes.OpenId,
                 // IdentityServerConstants.StandardScopes.Profile
-                AllowedScopes = { "api1", "profile", "openid" },
+                AllowedScopes = { "api1", "profile", "openid", "card"},
                 RedirectUris = { "https://localhost:5007/signin-oidc" },
                 // Refreshing Token
                 AllowOfflineAccess = true,
@@ -135,6 +135,7 @@ public static class Config
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
+            new IdentityResource("card","User's card",new List<string>(){ "card" }),
         };
 
     private static IPasswordHasher<ApplicationUser> _passwordHasher = new PasswordHasher<ApplicationUser>();

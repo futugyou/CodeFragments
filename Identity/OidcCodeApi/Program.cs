@@ -1,5 +1,8 @@
 using IdentityModel;
-using Microsoft.OpenApi.Models; 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "OidcCodeApi", Version = "v1" });
 });
 
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 //'Code Flow'
 builder.Services.AddAuthentication(options =>
 {
@@ -26,8 +30,16 @@ builder.Services.AddAuthentication(options =>
         options.ResponseType = "code";
         options.SaveTokens = true;
         options.GetClaimsFromUserInfoEndpoint = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            NameClaimType = "card",
+            // RoleClaimType = "role"
+        };
+        options.Scope.Add("profile");
         options.Scope.Add("api1");
         options.Scope.Add("offline_access");
+        options.Scope.Add("card");
+        options.ClaimActions.MapUniqueJsonKey("card", "card");
         // mapping claimtype to jwttype
         options.TokenValidationParameters.NameClaimType = JwtClaimTypes.Name;
     });
