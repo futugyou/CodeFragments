@@ -2,12 +2,13 @@ using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OidcCodeApi.Extensions;
 using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddScoped<CustomCookieAuthenticationEvents>();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -21,7 +22,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = "Cookies";
     options.DefaultChallengeScheme = "oidc";
 })
-    .AddCookie("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.EventsType = typeof(CustomCookieAuthenticationEvents);
+    })
     .AddOpenIdConnect("oidc", options =>
     {
         options.Authority = "https://localhost:5001";
