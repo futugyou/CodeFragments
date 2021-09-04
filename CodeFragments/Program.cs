@@ -17,6 +17,7 @@ namespace CodeFragments
             //var pool = new ObjectPoolTest();
             //pool.DefalultPolicy();
             //pool.CustomPolicy();
+            ObjectPoolTest2.Exection();
 
             //await JsonAsyncEnumerable.Deserialize();
             //await JsonAsyncEnumerable.Serialize();
