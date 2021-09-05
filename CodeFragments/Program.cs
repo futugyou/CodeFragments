@@ -17,7 +17,8 @@ namespace CodeFragments
             //var pool = new ObjectPoolTest();
             //pool.DefalultPolicy();
             //pool.CustomPolicy();
-            ObjectPoolTest2.Exection();
+            //ObjectPoolTest2.Exection();
+            StringBuilderPool.Exection();
 
             //await JsonAsyncEnumerable.Deserialize();
             //await JsonAsyncEnumerable.Serialize();
@@ -27,7 +28,7 @@ namespace CodeFragments
             //NewLinqApiDemo.Test();
             //BufferDemo.Exection();
             //var summary = BenchmarkRunner.Run<SpanTest>();
-            await AsyncEnumerableDemo.Exection();
+            //await AsyncEnumerableDemo.Exection();
 
             //PriorityQueueDemo.Exection();
             Console.ReadLine();

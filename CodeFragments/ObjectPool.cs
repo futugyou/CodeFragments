@@ -8,6 +8,28 @@ using System.Threading.Tasks;
 
 namespace CodeFragments
 {
+    public class StringBuilderPool
+    {
+        public static void Exection()
+        {
+            var pool = new DefaultObjectPoolProvider();
+            var objectPool = pool.CreateStringBuilderPool(1024, 1024 * 1024); 
+            var builder = objectPool.Get();
+            try
+            {
+                for (int index = 0; index < 100; index++)
+                {
+                    builder.Append(index);
+                }
+                Console.WriteLine(builder);
+            }
+            finally
+            {
+                objectPool.Return(builder);
+            }
+        }
+    }
+
     public class ObjectPoolTest2
     {
         public static void Exection()
