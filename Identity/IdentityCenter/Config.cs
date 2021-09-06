@@ -54,6 +54,17 @@ public static class Config
             },
             new Client
             {
+                ClientId = "resource_owner_client",
+                AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                ClientSecrets =
+                {
+                     new Secret("secret".Sha256()),
+                },
+                // scopes that client has access to
+                AllowedScopes = { "api1", "openid", "profile" }
+            },
+            new Client
+            {
                 ClientId = "openidapi",
                 AllowedGrantTypes = GrantTypes.Code,
                 ClientSecrets =
