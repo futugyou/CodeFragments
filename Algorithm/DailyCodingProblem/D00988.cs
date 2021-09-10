@@ -16,13 +16,25 @@ namespace DailyCodingProblem
         public static List<List<int>> results = new List<List<int>>();
         public static void Exection()
         {
-            var n = 27;
+            var n = 91;
             var list = new List<int>();
-            DoExec(n, list);
+            DoExec2(n, list);
+            //DoExec(n, list);
             foreach (var item in results)
             {
                 Console.WriteLine(string.Join(",", item));
             }
+        }
+
+        private static void DoExec2(int n, List<int> list)
+        {
+            while (n > 0)
+            {
+                int i = (int)Math.Sqrt(n);
+                list.Add(i);
+                n = n - i * i;
+            }
+            results.Add(list);
         }
 
         private static void DoExec(int n, List<int> list)
