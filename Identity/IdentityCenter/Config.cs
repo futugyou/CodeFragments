@@ -14,6 +14,9 @@ public static class Config
             new ApiResource("user_manage","user_manage"){
                 Scopes = { "user_read", "user_edit" }
             },
+            new ApiResource("IdentityApiGateway","IdentityApiGateway"){
+                Scopes = { "api1"  }
+            },
         };
 
     public static IEnumerable<ApiScope> ApiScopes =>
@@ -50,7 +53,7 @@ public static class Config
                     },
                 },
                 // scopes that client has access to
-                AllowedScopes = { "api1" }
+                AllowedScopes = { "api1" , "IdentityApiGateway" }
             },
             new Client
             {

@@ -45,7 +45,7 @@ async Task MtlsEndpointClientCredentials()
     var apiClient = new HttpClient();
     apiClient.SetBearerToken(tokenResponse.AccessToken);
 
-    var response = await apiClient.GetAsync("https://localhost:5003/WeatherForecast");
+    var response = await apiClient.GetAsync("https://localhost:5101/api/WeatherForecast");
     if (!response.IsSuccessStatusCode)
     {
         Console.WriteLine(response.StatusCode);
@@ -97,7 +97,7 @@ async Task ResourceOwnerPasswordModel()
 
     apiClient.SetBearerToken(tokenResponse.AccessToken);
 
-    var response = await apiClient.GetAsync("https://localhost:5003/WeatherForecast");
+    var response = await apiClient.GetAsync("https://localhost:5101/api/JwtApi/WeatherForecast");
     if (!response.IsSuccessStatusCode)
     {
         Console.WriteLine(response.StatusCode);

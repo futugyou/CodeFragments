@@ -37,7 +37,7 @@ namespace IdentityCenter
             services.AddRazorPages();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "KongDemo", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "IdentityDemo", Version = "v1" });
             });
 
             var migrationsAssembly = typeof(Startup).Assembly.FullName;
@@ -72,7 +72,7 @@ namespace IdentityCenter
                 options.Authentication.CookieLifetime = TimeSpan.FromHours(1);
                 options.Authentication.CookieSlidingExpiration = false;
 
-                options.EmitScopesAsSpaceDelimitedStringInJwt = true;
+                options.EmitScopesAsSpaceDelimitedStringInJwt = false;
                 options.Endpoints.EnableJwtRequestUri = true;
 
                 // associate a client certificate with a client in your IdentityServer and enable MTLS support on the options.
