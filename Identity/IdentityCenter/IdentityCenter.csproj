@@ -16,20 +16,20 @@
 		<PackageReference Include="Duende.IdentityServer" Version="5.2.2" />
 		<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="5.2.2" />
 		<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="5.2.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="5.0.9" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.9" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.9" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
 	</ItemGroup>
 </Project>
