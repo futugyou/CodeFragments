@@ -115,7 +115,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RabbitMQ", "RabbitMQ", "{D9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeadDelayLetter", "MessageQueue\RabbitMQ\DeadDelayLetter\DeadDelayLetter.csproj", "{CB7058CC-C23A-4C1D-B318-4209C3D35CF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityApiGateway", "Identity\IdentityApiGateway\IdentityApiGateway.csproj", "{C3257E74-3990-4D69-A388-99937F52089A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityApiGateway", "Identity\IdentityApiGateway\IdentityApiGateway.csproj", "{C3257E74-3990-4D69-A388-99937F52089A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{535440C7-1D2D-47BE-81A4-C53B3FA26EC1}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

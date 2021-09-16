@@ -3,6 +3,7 @@
 using Client.Certificate;
 using IdentityModel.Client;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 
 Console.WriteLine("Hello, World!");
