@@ -2,15 +2,16 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Certificate\IdentityCenter.pfx" />
+		<None Remove="Certificate\IdentityCenter.pfx" />
 	</ItemGroup>
 	<ItemGroup>
-	  <EmbeddedResource Include="Certificate\IdentityCenter.pfx" />
+		<EmbeddedResource Include="Certificate\IdentityCenter.pfx" />
 	</ItemGroup>
-	 
+
 	<ItemGroup>
 		<PackageReference Include="Duende.IdentityServer" Version="5.2.2" />
 		<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="5.2.2" />

@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Blazor.BrowserExtension" Version="0.6.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.*-*" PrivateAssets="all" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazor.BrowserExtension" Version="0.6.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.*-*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.*-*" PrivateAssets="all" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="wwwroot\**\*" CopyToOutputDirectory="Always" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\**\*" CopyToOutputDirectory="Always" />
+	</ItemGroup>
 
 </Project>
