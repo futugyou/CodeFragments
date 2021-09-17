@@ -16,7 +16,7 @@ builder.Services.AddAuthentication("Bearer")
          options.RequireHttpsMetadata = Convert.ToBoolean(configuration["AuthServer:RequireHttpsMetadata"]);
          options.SupportedTokens = SupportedTokens.Both;
      });
-builder.Services.AddOcelot();
+builder.Services.AddOcelot(configuration);
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
 {
