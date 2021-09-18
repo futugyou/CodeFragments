@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<AssemblyName>Volo.Abp.Account.HttpApi</AssemblyName>
+		<RootNamespace />
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Volo.Abp.Account.Application.Contracts\Volo.Abp.Account.Application.Contracts.csproj" />
+		<PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="4.4.2" />
+		<PackageReference Include="Volo.Abp.Identity.HttpApi" Version="4.4.2" />
+	</ItemGroup>
+
+</Project>
