@@ -1,8 +1,8 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using HashidsNet;
 
-namespace ResponseBodyFeature.Extensions;
+namespace AspnetcoreEx.Extensions;
 
 public class HashIdJsonConverter : JsonConverter<int>
 {

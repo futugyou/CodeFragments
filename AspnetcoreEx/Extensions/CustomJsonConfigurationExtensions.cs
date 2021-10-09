@@ -1,5 +1,5 @@
-﻿
-namespace ResponseBodyFeature.Extensions;
+﻿namespace AspnetcoreEx.Extensions;
+
 public static class CustomJsonConfigurationExtensions
 {
     public static IConfigurationBuilder AddJsonFileExtensions(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)

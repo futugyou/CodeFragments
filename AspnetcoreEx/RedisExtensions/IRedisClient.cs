@@ -1,12 +1,14 @@
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
-namespace ResponseBodyFeature.RedisExtensions;
+namespace AspnetcoreEx.RedisExtensions;
 
 public interface IRedisClient
 {
     Task<bool> Lock(string key, string value, int expireMilliSeconds);
     Task<bool> UnLock(string key, string value);
+    Task<long> Publish(string key, string value);
+    Task Subscribe(string key, Func<string, Task> handle);
 }
 
 public class RedisClient : IRedisClient
@@ -15,6 +17,7 @@ public class RedisClient : IRedisClient
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _db;
     private readonly IServer _server;
+    private readonly ISubscriber _sub;
 
     private const string LOCKSTRING = @"local isnx = redis.call('SETNX',@key,@value)
                                         if isnx ==1 then
@@ -36,6 +39,11 @@ public class RedisClient : IRedisClient
         _redis = ConnectionMultiplexer.Connect(_redisConnection.Host);
         _server = _redis.GetServer(_redisConnection.Host);
         _db = _redis.GetDatabase(_redisConnection.DatabaseNumber);
+        _sub = _redis.GetSubscriber();
+        _sub.Subscribe("messages", (channel, message) =>
+        {
+            Console.WriteLine((string)message);
+        });
     }
 
     public async Task<bool> Lock(string key, string value, int expireMilliSeconds)
@@ -52,5 +60,20 @@ public class RedisClient : IRedisClient
         var loaded = prepared.Load(_server);
         var result = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value });
         return "1".Equals(result?.ToString());
+    }
+
+    public async Task<long> Publish(string key, string value)
+    {
+        return await _sub.PublishAsync(key, value);
+    }
+
+    public async Task Subscribe(string key, Func<string, Task> handle)
+    {
+        var messageQueue = await _sub.SubscribeAsync(key);
+        messageQueue.OnMessage(async channelMessage =>
+        {
+            var message = (string)channelMessage.Message;
+            await handle(message);
+        });
     }
 }

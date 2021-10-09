@@ -1,6 +1,6 @@
 using Microsoft.OpenApi.Models;
-using ResponseBodyFeature.Extensions;
-using ResponseBodyFeature.RedisExtensions;
+using AspnetcoreEx.Extensions;
+using AspnetcoreEx.RedisExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;

@@ -1,4 +1,4 @@
-namespace ResponseBodyFeature;
+namespace AspnetcoreEx;
 
 public class WeatherForecast
 {

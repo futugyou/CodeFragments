@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using ResponseBodyFeature.Extensions;
+using AspnetcoreEx.Extensions;
 
-namespace ResponseBodyFeature.Controllers;
+namespace AspnetcoreEx.Controllers;
 
 [ApiController]
 [Route("[controller]")]

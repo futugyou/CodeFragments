@@ -1,4 +1,4 @@
-namespace ResponseBodyFeature.RedisExtensions;
+namespace AspnetcoreEx.RedisExtensions;
 
 public class RedisConnection
 {

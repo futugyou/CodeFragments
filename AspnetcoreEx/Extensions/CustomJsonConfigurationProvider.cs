@@ -1,7 +1,7 @@
-﻿
-using Microsoft.Extensions.Configuration.Json;
+﻿using Microsoft.Extensions.Configuration.Json;
 
-namespace ResponseBodyFeature.Extensions;
+namespace AspnetcoreEx.Extensions;
+
 public class CustomJsonConfigurationProvider : JsonConfigurationProvider
 {
     public CustomJsonConfigurationProvider(CustomJsonConfigurationSource source) : base(source)
