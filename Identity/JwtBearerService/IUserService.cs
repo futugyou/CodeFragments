@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace JwtBearerService;
@@ -10,16 +11,20 @@ public interface IUserService
 {
     Task<TokenResult> RegisterAsync(string username, string password, string address);
     Task<TokenResult> LoginAsync(string username, string password);
+    Task<TokenResult> RefreshTokenAsync(string token, string refreshToken);
 }
 
 public class UserService : IUserService
 {
     private readonly JwtSettings _jwtSettings;
     private readonly UserManager<AppUser> _userManager;
-    public UserService(JwtSettings jwtSettings, UserManager<AppUser> userManager)
+    private readonly AppDbContext _appDbContext;
+
+    public UserService(JwtSettings jwtSettings, UserManager<AppUser> userManager, AppDbContext appDbContext)
     {
         _jwtSettings = jwtSettings;
         _userManager = userManager;
+        _appDbContext = appDbContext;
     }
     public async Task<TokenResult> RegisterAsync(string username, string password, string address)
     {
@@ -40,7 +45,7 @@ public class UserService : IUserService
                 Errors = isCreated.Errors.Select(p => p.Description)
             };
         }
-        return GenerateJwtToken(newUser);
+        return await GenerateJwtToken(newUser);
     }
 
     public async Task<TokenResult> LoginAsync(string username, string password)
@@ -61,10 +66,10 @@ public class UserService : IUserService
                 Errors = new[] { "wrong user name or password!" }, //用户名或密码错误
             };
         }
-        return GenerateJwtToken(existingUser);
+        return await GenerateJwtToken(existingUser);
     }
 
-    private TokenResult GenerateJwtToken(AppUser user)
+    private async Task<TokenResult> GenerateJwtToken(AppUser user)
     {
         var key = Encoding.ASCII.GetBytes(_jwtSettings.SecurityKey);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -83,10 +88,137 @@ public class UserService : IUserService
         var jwtTokenHandler = new JwtSecurityTokenHandler();
         var securityToken = jwtTokenHandler.CreateToken(tokenDescriptor);
         var token = jwtTokenHandler.WriteToken(securityToken);
+
+        var refreshToken = new RefreshToken()
+        {
+            JwtId = securityToken.Id,
+            UserId = user.Id,
+            CreationTime = DateTime.UtcNow,
+            ExpiryTime = DateTime.UtcNow.AddMonths(6),
+            Token = Util.GenerateRandomNumber()
+        };
+
+        await _appDbContext.RefreshTokens.AddAsync(refreshToken);
+        await _appDbContext.SaveChangesAsync();
+
         return new TokenResult()
         {
             AccessToken = token,
-            TokenType = "Bearer"
+            TokenType = "Bearer",
+            RefreshToken = refreshToken.Token,
+            ExpiresIn = (int)_jwtSettings.ExpiresIn.TotalSeconds,
         };
+    }
+
+    public async Task<TokenResult> RefreshTokenAsync(string token, string refreshToken)
+    {
+        var claimsPrincipal = GetClaimsPrincipalByToken(token);
+        if (claimsPrincipal == null)
+        {
+            // 无效的token...
+            return new TokenResult()
+            {
+                Errors = new[] { "1: Invalid request!" },
+            };
+        }
+
+        var expiryDateUnix =
+            long.Parse(claimsPrincipal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+        var expiryDateTimeUtc = Util.UnixTimeStampToDateTime(expiryDateUnix);
+        if (expiryDateTimeUtc > DateTime.UtcNow)
+        {
+            // token未过期...
+            return new TokenResult()
+            {
+                Errors = new[] { "2: Invalid request!" },
+            };
+        }
+
+        var jti = claimsPrincipal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+
+        var storedRefreshToken =
+            await _appDbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken);
+        if (storedRefreshToken == null)
+        {
+            // 无效的refresh_token...
+            return new TokenResult()
+            {
+                Errors = new[] { "3: Invalid request!" },
+            };
+        }
+
+        if (storedRefreshToken.ExpiryTime < DateTime.UtcNow)
+        {
+            // refresh_token已过期...
+            return new TokenResult()
+            {
+                Errors = new[] { "4: Invalid request!" },
+            };
+        }
+
+        if (storedRefreshToken.Invalidated)
+        {
+            // refresh_token已失效...
+            return new TokenResult()
+            {
+                Errors = new[] { "5: Invalid request!" },
+            };
+        }
+
+        if (storedRefreshToken.Used)
+        {
+            // refresh_token已使用...
+            return new TokenResult()
+            {
+                Errors = new[] { "6: Invalid request!" },
+            };
+        }
+
+        if (storedRefreshToken.JwtId != jti)
+        {
+            // refresh_token与此token不匹配...
+            return new TokenResult()
+            {
+                Errors = new[] { "7: Invalid request!" },
+            };
+        }
+
+        storedRefreshToken.Used = true;
+        //_userDbContext.RefreshTokens.Update(storedRefreshToken);
+        await _appDbContext.SaveChangesAsync();
+
+        var dbUser = await _userManager.FindByIdAsync(storedRefreshToken.UserId.ToString());
+        return await GenerateJwtToken(dbUser);
+    }
+
+    private ClaimsPrincipal? GetClaimsPrincipalByToken(string token)
+    {
+        try
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.SecurityKey)),
+                ClockSkew = TimeSpan.Zero,
+                ValidateLifetime = false // 不验证过期时间！！！
+            };
+
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+            var claimsPrincipal =
+                jwtTokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
+
+            var validatedSecurityAlgorithm = validatedToken is JwtSecurityToken jwtSecurityToken
+                                             && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                                                 StringComparison.InvariantCultureIgnoreCase);
+
+            return validatedSecurityAlgorithm ? claimsPrincipal : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
