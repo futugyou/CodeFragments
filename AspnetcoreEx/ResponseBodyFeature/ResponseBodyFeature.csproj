@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Hashids.net" Version="1.4.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
+		<PackageReference Include="StackExchange.Redis" Version="2.2.50" />
 	</ItemGroup>
 
 </Project>

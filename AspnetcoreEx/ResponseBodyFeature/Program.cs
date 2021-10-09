@@ -1,13 +1,18 @@
 using Microsoft.OpenApi.Models;
 using ResponseBodyFeature.Extensions;
+using ResponseBodyFeature.RedisExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var configuration = builder.Configuration;
 // Add services to the container.
 builder.Host.ConfigureAppConfiguration(config =>
 {
     config.AddJsonFileExtensions("appsettings.json", true, true);
 });
+
+builder.Services.Configure<RedisConnection>(configuration.GetSection("RedisConnection"));
+builder.Services.AddSingleton<IRedisClient, RedisClient>();
+
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();
 builder.Services.AddEndpointsApiExplorer();

@@ -78,14 +78,14 @@ public class ResponseCustomBody : Stream, IHttpResponseBodyFeature
     public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         // the buffer length is 16384, it include valid data and many many '\0' and other word like \u0001 
-        var json = System.Text.Encoding.UTF8.GetString(buffer, offset, count).TrimEnd('\0');
+        string json = System.Text.Encoding.UTF8.GetString(buffer, offset, count).TrimEnd('\0');
         //json = $"{{\"Status\":0, \"Info\":{json}}}";
         //json = "{\"Status\":0, \"Info\":" + json + "}";
         if (string.IsNullOrEmpty(json))
         {
             return;
         }
-        JsonNode jNode = JsonNode.Parse(json);
+        var jNode = JsonNode.Parse(json);
         if (jNode == null)
         {
             return;
@@ -111,9 +111,11 @@ public class ResponseCustomMiddleware : IMiddleware
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         var originalBodyFeature = context.Features.Get<IHttpResponseBodyFeature>();
-
-        var customBody = new ResponseCustomBody(context, originalBodyFeature);
-        context.Features.Set<IHttpResponseBodyFeature>(customBody);
+        if (originalBodyFeature != null)
+        {
+            var customBody = new ResponseCustomBody(context, originalBodyFeature);
+            context.Features.Set<IHttpResponseBodyFeature>(customBody);
+        }
 
         try
         {
