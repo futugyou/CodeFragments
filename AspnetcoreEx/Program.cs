@@ -10,7 +10,7 @@ builder.Host.ConfigureAppConfiguration(config =>
     config.AddJsonFileExtensions("appsettings.json", true, true);
 });
 
-builder.Services.Configure<RedisConnection>(configuration.GetSection("RedisConnection"));
+builder.Services.Configure<RedisOptions>(configuration.GetSection("RedisOptions"));
 builder.Services.AddSingleton<IRedisClient, RedisClient>();
 builder.Services.AddSingleton<RedisProfiler>();
 builder.Services.AddHttpContextAccessor();

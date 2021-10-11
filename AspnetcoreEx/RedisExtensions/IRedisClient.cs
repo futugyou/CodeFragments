@@ -9,12 +9,15 @@ public interface IRedisClient
     Task<bool> UnLock(string key, string value);
     Task<long> Publish(string key, string value);
     Task Subscribe(string key, Func<string, Task> handle);
+    Task<string> WriteStream(string streamKey, string fieldName, string value);
+    Task<string> WriteStream(string streamKey, Dictionary<string, string> streamPairs);
+    Task<Dictionary<string, Dictionary<string, string>>> ReadStream(string streamKey, string position, int maxCount = 0);
 }
 
 public class RedisClient : IRedisClient, IDisposable
 {
     private readonly ILogger<RedisClient> _logger;
-    private readonly RedisConnection _redisConnection;
+    private readonly RedisOptions _redisOptions;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _db;
     private readonly List<IServer> _servers = new List<IServer>();
@@ -37,17 +40,17 @@ public class RedisClient : IRedisClient, IDisposable
 
     public RedisClient(
         ILogger<RedisClient> logger,
-        IOptionsMonitor<RedisConnection> optionsMonitor,
+        IOptionsMonitor<RedisOptions> optionsMonitor,
         RedisProfiler redisProfiler)
     {
         _logger = logger;
-        _redisConnection = optionsMonitor.CurrentValue;
-        _redis = ConnectionMultiplexer.Connect(_redisConnection.Host);
-        foreach (var host in _redisConnection.Host.Split(','))
+        _redisOptions = optionsMonitor.CurrentValue;
+        _redis = ConnectionMultiplexer.Connect(_redisOptions.Host);
+        foreach (var host in _redisOptions.Host.Split(','))
         {
             _servers.Add(_redis.GetServer(host));
         }
-        _db = _redis.GetDatabase(_redisConnection.DatabaseNumber);
+        _db = _redis.GetDatabase(_redisOptions.DatabaseNumber);
         _sub = _redis.GetSubscriber();
         _redisProfiler = redisProfiler;
         _redisProfiler.CreateSessionForCurrentRequest();
@@ -114,5 +117,36 @@ public class RedisClient : IRedisClient, IDisposable
             _logger.LogInformation(string.Join(",", timings.ToList().Select(p => p.Command)));
             // do what you will with `timings` here
         }
+    }
+
+    public async Task<string> WriteStream(string streamKey, string fieldName, string value)
+    {
+        var messageId = await _db.StreamAddAsync(streamKey, fieldName, value);
+        return messageId;
+    }
+
+    public async Task<string> WriteStream(string streamKey, Dictionary<string, string> streamPairs)
+    {
+        var values = new NameValueEntry[streamPairs.Count];
+        foreach (var item in streamPairs)
+        {
+            values.Append(new NameValueEntry(item.Key, item.Value));
+        }
+        var messageId = await _db.StreamAddAsync(streamKey, values);
+        return messageId;
+    }
+
+    public async Task<Dictionary<string, Dictionary<string, string>>> ReadStream(string streamKey, string position, int maxCount = 0)
+    {
+        var result = new Dictionary<string, Dictionary<string, string>>();
+        int? count = maxCount == 0 ? null : maxCount;
+        var messages = await _db.StreamReadAsync(streamKey, position, count);
+        foreach (var message in messages)
+        {
+            var d = new Dictionary<string, string>();
+            message.Values.ToList().ForEach(p => d.Add(p.Name, p.Value));
+            result.Add(message.Id, d);
+        }
+        return result;
     }
 }
