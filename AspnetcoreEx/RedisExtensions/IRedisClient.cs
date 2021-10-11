@@ -57,27 +57,37 @@ public class RedisClient : IRedisClient, IDisposable
     public async Task<bool> Lock(string key, string value, int expireMilliSeconds)
     {
         var _server = _servers.FirstOrDefault();
+        RedisResult redisResult;
         if (_server == null)
         {
-            return false;
+            var prepared = LuaScript.Prepare(LOCKSTRING);
+            redisResult = await _db.ScriptEvaluateAsync(prepared, new { key = (RedisKey)key, value = value, time = expireMilliSeconds });
         }
-        var prepared = LuaScript.Prepare(LOCKSTRING);
-        var loaded = prepared.Load(_server);
-        var result = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value, time = expireMilliSeconds });
-        return "1".Equals(result?.ToString());
+        else
+        {
+            var prepared = LuaScript.Prepare(LOCKSTRING);
+            var loaded = prepared.Load(_server);
+            redisResult = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value, time = expireMilliSeconds });
+        }
+        return "1".Equals(redisResult?.ToString());
     }
 
     public async Task<bool> UnLock(string key, string value)
     {
         var _server = _servers.FirstOrDefault();
+        RedisResult redisResult;
         if (_server == null)
         {
-            return false;
+            var prepared = LuaScript.Prepare(UNLOCKSTRING);
+            redisResult = await _db.ScriptEvaluateAsync(prepared, new { key = (RedisKey)key, value = value });
         }
-        var prepared = LuaScript.Prepare(UNLOCKSTRING);
-        var loaded = prepared.Load(_server);
-        var result = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value });
-        return "1".Equals(result?.ToString());
+        else
+        {
+            var prepared = LuaScript.Prepare(UNLOCKSTRING);
+            var loaded = prepared.Load(_server);
+            redisResult = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value });
+        }
+        return "1".Equals(redisResult?.ToString());
     }
 
     public async Task<long> Publish(string key, string value)
