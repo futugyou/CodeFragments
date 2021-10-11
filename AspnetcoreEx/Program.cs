@@ -12,6 +12,8 @@ builder.Host.ConfigureAppConfiguration(config =>
 
 builder.Services.Configure<RedisConnection>(configuration.GetSection("RedisConnection"));
 builder.Services.AddSingleton<IRedisClient, RedisClient>();
+builder.Services.AddSingleton<RedisProfiler>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();

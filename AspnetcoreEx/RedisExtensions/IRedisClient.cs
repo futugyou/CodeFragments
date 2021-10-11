@@ -11,13 +11,15 @@ public interface IRedisClient
     Task Subscribe(string key, Func<string, Task> handle);
 }
 
-public class RedisClient : IRedisClient
+public class RedisClient : IRedisClient, IDisposable
 {
+    private readonly ILogger<RedisClient> _logger;
     private readonly RedisConnection _redisConnection;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _db;
     private readonly List<IServer> _servers = new List<IServer>();
     private readonly ISubscriber _sub;
+    private readonly RedisProfiler _redisProfiler;
 
     private const string LOCKSTRING = @"local isnx = redis.call('SETNX', @key, @value)
                                         if isnx == 1 then
@@ -33,8 +35,12 @@ public class RedisClient : IRedisClient
                                             end
                                             return 0";
 
-    public RedisClient(IOptionsMonitor<RedisConnection> optionsMonitor)
+    public RedisClient(
+        ILogger<RedisClient> logger,
+        IOptionsMonitor<RedisConnection> optionsMonitor,
+        RedisProfiler redisProfiler)
     {
+        _logger = logger;
         _redisConnection = optionsMonitor.CurrentValue;
         _redis = ConnectionMultiplexer.Connect(_redisConnection.Host);
         foreach (var host in _redisConnection.Host.Split(','))
@@ -43,6 +49,9 @@ public class RedisClient : IRedisClient
         }
         _db = _redis.GetDatabase(_redisConnection.DatabaseNumber);
         _sub = _redis.GetSubscriber();
+        _redisProfiler = redisProfiler;
+        _redisProfiler.CreateSessionForCurrentRequest();
+        _redis.RegisterProfiler(() => _redisProfiler.GetSession());
     }
 
     public async Task<bool> Lock(string key, string value, int expireMilliSeconds)
@@ -84,5 +93,16 @@ public class RedisClient : IRedisClient
             var message = (string)channelMessage.Message;
             await handle(message);
         });
+    }
+
+    public void Dispose()
+    {
+        var session = _redisProfiler.GetSession();
+        if (session != null)
+        {
+            var timings = session.FinishProfiling();
+            _logger.LogInformation(string.Join(",", timings.ToList().Select(p => p.Command)));
+            // do what you will with `timings` here
+        }
     }
 }
