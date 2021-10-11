@@ -16,19 +16,19 @@ public class RedisClient : IRedisClient
     private readonly RedisConnection _redisConnection;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _db;
-    private readonly IServer _server;
+    private readonly List<IServer> _servers = new List<IServer>();
     private readonly ISubscriber _sub;
 
-    private const string LOCKSTRING = @"local isnx = redis.call('SETNX',@key,@value)
-                                        if isnx ==1 then
+    private const string LOCKSTRING = @"local isnx = redis.call('SETNX', @key, @value)
+                                        if isnx == 1 then
                                             redis.call('PEXPIRE',@key,@time)
                                             return 1
                                         end
                                         return 0";
 
-    private const string UNLOCKSTRING = @"local getlock = redis.call('GET',@key)
+    private const string UNLOCKSTRING = @"local getlock = redis.call('GET', @key)
                                             if getlock == @value then
-                                                redis.call('DEL',@key)
+                                                redis.call('DEL', @key)
                                                 return 1
                                             end
                                             return 0";
@@ -37,17 +37,21 @@ public class RedisClient : IRedisClient
     {
         _redisConnection = optionsMonitor.CurrentValue;
         _redis = ConnectionMultiplexer.Connect(_redisConnection.Host);
-        _server = _redis.GetServer(_redisConnection.Host);
+        foreach (var host in _redisConnection.Host.Split(','))
+        {
+            _servers.Add(_redis.GetServer(host));
+        }
         _db = _redis.GetDatabase(_redisConnection.DatabaseNumber);
         _sub = _redis.GetSubscriber();
-        _sub.Subscribe("messages", (channel, message) =>
-        {
-            Console.WriteLine((string)message);
-        });
     }
 
     public async Task<bool> Lock(string key, string value, int expireMilliSeconds)
     {
+        var _server = _servers.FirstOrDefault();
+        if (_server == null)
+        {
+            return false;
+        }
         var prepared = LuaScript.Prepare(LOCKSTRING);
         var loaded = prepared.Load(_server);
         var result = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value, time = expireMilliSeconds });
@@ -56,6 +60,11 @@ public class RedisClient : IRedisClient
 
     public async Task<bool> UnLock(string key, string value)
     {
+        var _server = _servers.FirstOrDefault();
+        if (_server == null)
+        {
+            return false;
+        }
         var prepared = LuaScript.Prepare(UNLOCKSTRING);
         var loaded = prepared.Load(_server);
         var result = await loaded.EvaluateAsync(_db, new { key = (RedisKey)key, value = value });
