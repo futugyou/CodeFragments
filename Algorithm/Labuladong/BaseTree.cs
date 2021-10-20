@@ -26,6 +26,9 @@ namespace Labuladong
         {
             Value = n;
         }
+        public BaseTree()
+        {
+        }
         public BaseTree Left { get; set; }
         public BaseTree Right { get; set; }
     }
