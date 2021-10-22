@@ -9,7 +9,7 @@ namespace DailyCodingProblem;
 public class D01022
 {
     public static void Exection()
-    {   
+    {
         /// ab表示三进制，因此只有00，01，10，ra/rb表示%3的结果。
         /// a	b	c	rA	rB
         /// 0	0	0	0	0
@@ -23,15 +23,15 @@ public class D01022
         /// 真值表求逻辑代数的求解方法
         /// rA = (a&~b&~c) | (~a&b&c)
         /// rB = (~a&b&~c) | (~a&~b&c)
-        var nums = new int[] {6,6,6,3,3,3,4}; 
+        var nums = new int[] { 6, 6, 6, 3, 3, 3, 4 };
         var a = 0;
         var b = 0;
         var rA = 0;
         var rB = 0;
         foreach (var c in nums)
         {
-            rA = (a&~b&~c) | (~a&b&c);
-            rB = (~a&b&~c) | (~a&~b&c);
+            rA = (a & ~b & ~c) | (~a & b & c);
+            rB = (~a & b & ~c) | (~a & ~b & c);
             a = rA;
             b = rB;
         }
