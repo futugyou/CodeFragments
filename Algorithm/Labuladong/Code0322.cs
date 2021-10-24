@@ -18,7 +18,7 @@ namespace Labuladong
             int[] dp = new int[coins.Length + 1];
             for (int i = 0; i < dp.Length; i++)
             {
-                dp[i] = -1;
+                dp[i] = amount + 1;
             }
             dp[0] = 0;
             for (int i = 1; i <= amount; i++)
