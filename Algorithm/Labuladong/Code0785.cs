@@ -16,7 +16,8 @@ public class Code0785
         {
             if (!visited[i])
             {
-                DFS(graph, i);
+                //DFS(graph, i);
+                BFS(graph, i);
             }
         }
         Console.WriteLine(ok);
@@ -43,6 +44,33 @@ public class Code0785
                 if (color[n] == color[w])
                 {
                     ok = false;
+                }
+            }
+        }
+    }
+
+    private static void BFS(int[][] graph, int n)
+    {
+        Queue<int> q = new Queue<int>();
+        visited[n] = true;
+        q.Enqueue(n);
+        while (q.Any() && ok)
+        {
+            var v = q.Dequeue();
+            foreach (var w in graph[v])
+            {
+                if (!visited[w])
+                {
+                    color[w] = !color[v];
+                    visited[w] = true;
+                    q.Enqueue(w);
+                }
+                else
+                {
+                    if (color[v] == color[w])
+                    {
+                        ok = false;
+                    }
                 }
             }
         }
