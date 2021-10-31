@@ -3,6 +3,13 @@ public class Code1631
 {
     public static void Exection()
     {
+        var heights = new int[][] {
+            new int[]{1,2,2},
+            new int[]{3,8,2},
+            new int[]{5,3,5},
+         };
+        var result = MinimumEffortPath(heights);
+        Console.WriteLine(result);
     }
 
     public static int MinimumEffortPath(int[][] heights)
