@@ -13,13 +13,21 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IGitHubApi _gitHubApi;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger ,IConfiguration configuration)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration, IGitHubApi gitHubApi)
     {
         _logger = logger;
         _configuration = configuration;
+        _gitHubApi = gitHubApi;
     }
 
+
+    [HttpGet("/refit")]
+    public async Task<dynamic> Refit()
+    {
+        return await _gitHubApi.GetUser("mojombo");
+    }
     [HttpGet]
     public IEnumerable<WeatherForecast> Get()
     {

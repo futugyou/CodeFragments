@@ -1,6 +1,11 @@
 using Microsoft.OpenApi.Models;
+using AspnetcoreEx;
 using AspnetcoreEx.Extensions;
 using AspnetcoreEx.RedisExtensions;
+using Polly.Timeout;
+using Polly;
+using Polly.Extensions.Http;
+using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -19,6 +24,18 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "ResponseBodyFeature", Version = "v1" });
 });
+
+var retryPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .Or<TimeoutRejectedException>()
+    .WaitAndRetryAsync(10, _ => TimeSpan.FromMilliseconds(5000));
+
+var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(30000));
+
+builder.Services.AddRefitClient<IGitHubApi>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"))
+    .AddPolicyHandler(retryPolicy)
+    .AddPolicyHandler(timeoutPolicy);
 
 var app = builder.Build();
 
