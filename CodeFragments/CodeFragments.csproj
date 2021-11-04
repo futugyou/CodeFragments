@@ -23,8 +23,4 @@
 		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
 		<PackageReference Include="System.IO.Pipelines" Version="6.0.0-preview.6.21352.12" />
 	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\Generators\Generators.csproj" OutputItemType="Analyzer" />
-	</ItemGroup>
-
 </Project>
