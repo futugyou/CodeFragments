@@ -6,6 +6,7 @@ using Polly.Timeout;
 using Polly;
 using Polly.Extensions.Http;
 using Refit;
+using AspnetcoreEx.GraphQL;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -37,6 +38,9 @@ builder.Services.AddRefitClient<IGitHubApi>()
     .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(timeoutPolicy);
 
+builder.Services.AddGraphQLServer().AddQueryType<Query>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -51,6 +55,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.MapGraphQL();
 app.MapControllers();
-app.UseMiddleware<ResponseCustomMiddleware>();
+//app.UseMiddleware<ResponseCustomMiddleware>();
 app.Run();

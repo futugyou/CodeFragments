@@ -12,6 +12,7 @@
 		<PackageReference Include="StackExchange.Redis" Version="2.2.50" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="6.1.15" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
+		<PackageReference Include="HotChocolate.AspNetCore" Version="12.1.0-preview.5" />
 	</ItemGroup>
 
 </Project>
