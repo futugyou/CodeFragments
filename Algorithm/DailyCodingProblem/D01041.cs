@@ -15,6 +15,35 @@ public class D01041
     {
         var nums = new int[] { 3, 0, 1, 3, 0, 5 };
         ExecOne(nums);
+        ExecTwo(nums);
+    }
+
+    private static void ExecTwo(int[] nums)
+    {
+        var n = nums.Length;
+        var leftmax = nums[0];
+        var rightmax = nums[n - 1];
+        var sum = 0;
+        var left = 0;
+        var right = n - 1;
+        while (left <= right)
+        {
+            leftmax = Math.Max(leftmax, nums[left]);
+            rightmax = Math.Max(rightmax, nums[right]);
+
+            if (leftmax < rightmax)
+            {
+                sum += leftmax - nums[left];
+                left++;
+            }
+            else
+            {
+                sum += right - nums[right];
+                right--;
+            }
+        }
+
+        Console.WriteLine(sum);
     }
 
     private static void ExecOne(int[] nums)
