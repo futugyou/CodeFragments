@@ -16,7 +16,7 @@ namespace DailyCodingProblem
 
             //D00924.Exection(new int[] { 3, 7, 5, 6, 9 }); 
 
-            D01036.Exection();
+            D01041.Exection();
 
             Console.WriteLine("Hello World!");
         }
