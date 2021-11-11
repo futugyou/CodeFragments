@@ -4,6 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>AspnetcoreEx</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,6 +14,9 @@
 		<PackageReference Include="Refit.HttpClientFactory" Version="6.1.15" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
 		<PackageReference Include="HotChocolate.AspNetCore" Version="12.1.0-preview.5" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="5.0.1" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="5.0.1" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="5.0.1" />
 	</ItemGroup>
 
 </Project>

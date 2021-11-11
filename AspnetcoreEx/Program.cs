@@ -7,6 +7,8 @@ using Polly;
 using Polly.Extensions.Http;
 using Refit;
 using AspnetcoreEx.GraphQL;
+using AspnetcoreEx.HealthCheckExtensions;
+using HealthChecks.UI.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -40,6 +42,8 @@ builder.Services.AddRefitClient<IGitHubApi>()
 
 builder.Services.AddGraphQLServer().AddQueryType<Query>();
 
+builder.Services.AddHealthChecksUI().AddInMemoryStorage();
+builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
 
 var app = builder.Build();
 
@@ -57,5 +61,11 @@ app.UseAuthorization();
 
 app.MapGraphQL();
 app.MapControllers();
+app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+});
+app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 //app.UseMiddleware<ResponseCustomMiddleware>();
 app.Run();
