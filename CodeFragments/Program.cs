@@ -18,7 +18,7 @@ namespace CodeFragments
             //pool.DefalultPolicy();
             //pool.CustomPolicy();
             //ObjectPoolTest2.Exection();
-            FileChangeDemo.Exection();
+            CommandDemo.Exection();
 
             //await JsonAsyncEnumerable.Deserialize();
             //await JsonAsyncEnumerable.Serialize();
