@@ -1,11 +1,12 @@
 namespace Labuladong;
-public class Code0076
+public class Code0438
 {
     public static void Exection()
     {
-        var s = "qwertyuio";
-        var t = "rtuy";
+        var s = "abcababa";
+        var t = "ab";
         var need = new Dictionary<char, int>();
+        var windows = new Dictionary<char, int>();
         foreach (var item in t)
         {
             if (need.ContainsKey(item))
@@ -17,58 +18,53 @@ public class Code0076
                 need.Add(item, 1);
             }
         }
-        var windows = new Dictionary<char, int>();
+        var result = new List<int>();
         var left = 0;
         var right = 0;
         var valid = 0;
-        var start = 0;
-        var len = int.MaxValue;
         while (right < s.Length)
         {
             var c = s[right];
             right++;
+
             if (need.ContainsKey(c))
             {
                 if (windows.ContainsKey(c))
                 {
-                    windows[c] = 1 + windows[c];
+                    windows[c]++;
                 }
                 else
                 {
-                    windows[c] = 1;
+                    windows.Add(c, 1);
                 }
-                if (windows[c] == need[c])
+                if (need[c] == windows[c])
                 {
                     valid++;
                 }
             }
 
-            while (valid == need.Count)
+            while (right - left >= t.Length)
             {
-                if (right - left < len)
+                if (valid == need.Count)
                 {
-                    len = right - left;
-                    start = left;
+                    result.Add(left);
                 }
+
                 var d = s[left];
                 left++;
                 if (need.ContainsKey(d))
                 {
-                    if (windows[d] == need[d])
+                    if (windows.ContainsKey(d))
                     {
-                        valid--;
+                        if (windows[d] == need[d])
+                        {
+                            valid--;
+                        }
+                        windows[d]--;
                     }
-                    windows[d]--;
                 }
             }
         }
-        if (len != int.MaxValue)
-        {
-            Console.WriteLine(s.Substring(start, len));
-        }
-        else
-        {
-            Console.WriteLine("null");
-        }
+        Console.WriteLine(string.Join(",", result));
     }
 }
