@@ -7,7 +7,7 @@ namespace Labuladong
         static void Main(string[] args)
         {
             //Code0277.FindCelebrity();
-            Code1541.Exection();
+            Code0225.Exection();
             Console.WriteLine("Hello World!");
         }
     }
