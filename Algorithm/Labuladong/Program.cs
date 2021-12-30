@@ -1,14 +1,10 @@
-﻿using System;
-
-namespace Labuladong
+﻿namespace Labuladong;
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            //Code0277.FindCelebrity();
-            Code0022.Exection();
-            Console.WriteLine("Hello World!");
-        }
+        //Code0277.FindCelebrity();
+        Code0215.Exection();
+        Console.WriteLine("Hello World!");
     }
 }
