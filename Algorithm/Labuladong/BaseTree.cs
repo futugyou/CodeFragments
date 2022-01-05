@@ -31,5 +31,6 @@ namespace Labuladong
         }
         public BaseTree Left { get; set; }
         public BaseTree Right { get; set; }
+        public BaseTree Next { get; set; }
     }
 }
