@@ -8,10 +8,6 @@ namespace Labuladong
 {
     public class Dijkstra
     {
-        public static void Exection()
-        {
-        }
-
         private static List<List<int>> graph = new List<List<int>>();
 
         public static List<int> Adj(int s)
