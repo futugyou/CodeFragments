@@ -33,7 +33,7 @@ public class Code0077
             if (!res.Contains(i))
             {
                 res.Add(i);
-                BackTrack(res, start + 1, n, k);
+                BackTrack(res, i + 1, n, k);
                 res.RemoveAt(res.Count - 1);
             }
         }
