@@ -53,7 +53,8 @@ public class Code0752
 
     private static string DownOne(string curr, int j)
     {
-        var c = curr[j];
+        var t = curr.ToArray();
+        var c = t[j];
         if (c == '0')
         {
             c = '9';
@@ -62,12 +63,13 @@ public class Code0752
         {
             c = (char)(c - 1);
         }
-        return curr;
+        return string.Join("", t);
     }
 
     private static string UpOne(string curr, int j)
     {
-        var c = curr[j];
+        var t = curr.ToArray();
+        var c = t[j];
         if (c == '9')
         {
             c = '0';
@@ -76,6 +78,6 @@ public class Code0752
         {
             c = (char)(c + 1);
         }
-        return curr;
+        return string.Join("", t);
     }
 }
