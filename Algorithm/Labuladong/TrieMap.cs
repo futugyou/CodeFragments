@@ -207,7 +207,7 @@ public class TrieMap<T>
         {
             node = new TrieNode<T>();
         }
-        if (1 == key.Length)
+        if (i == key.Length)
         {
             node.Value = val;
             return node;
