@@ -9,6 +9,7 @@ public class Code0122
         Console.WriteLine(res);
     }
 
+    // buy infinity, sell infinity 
     private static int MaxProfit(int[] prices)
     {
         var n = prices.Length;
