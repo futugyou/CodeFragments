@@ -105,7 +105,6 @@ public class TrieMap<T>
         if (node.Value != null)
         {
             result.Add(path.ToString());
-            return;// TODO: 
         }
         for (int i = 0; i < R; i++)
         {
