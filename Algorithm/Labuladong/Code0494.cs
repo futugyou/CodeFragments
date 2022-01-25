@@ -1,6 +1,6 @@
 namespace Labuladong;
 
-public class Code0464
+public class Code0494
 {
     public static void Exection()
     {
