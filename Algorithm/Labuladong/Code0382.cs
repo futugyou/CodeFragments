@@ -32,11 +32,11 @@ public class Code0382
             root = root.Next;
         }
 
-        var i = k;
+        var ii = k;
         while (root != null)
         {
-            i++;
-            var t = rand.Next(i);
+            ii++;
+            var t = rand.Next(ii);
             if (t < k)
             {
                 nums[t] = root.Value;
