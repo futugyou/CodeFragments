@@ -23,14 +23,14 @@ public class RandomizedSet
             return false;
         }
         var index = dic[val];
-        dic[list.Last()] = index;
-
         var t = list.Last();
+        dic[t] = index;
+        dic.Remove(val);
+
         list[list.Count - 1] = list[index];
         list[index] = t;
 
         list.RemoveAt(list.Count - 1);
-        dic.Remove(val);
         return true;
     }
 
