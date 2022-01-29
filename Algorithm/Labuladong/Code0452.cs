@@ -17,6 +17,8 @@ public class Code0452
     {
         var list = new List<int[]>();
         var tmp = intervals.ToList().OrderBy(o => o[0]).ThenByDescending(o => o[1]).ToList();
+        // or 
+        // var tmp = intervals.ToList().OrderBy(o => o[1]).ToList();
         list.Add(tmp.First());
         for (int i = 1; i < tmp.Count; i++)
         {
