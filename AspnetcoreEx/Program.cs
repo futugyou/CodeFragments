@@ -41,7 +41,10 @@ builder.Services.AddRefitClient<IGitHubApi>()
     .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(timeoutPolicy);
 
-builder.Services.AddGraphQLServer().AddQueryType<Query>();
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddType<UserConfigure>();
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
@@ -59,11 +62,11 @@ if (builder.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-app.UseRouting().UseEndpoints(endpoints =>
-{
-    endpoints.MapGraphQL();
-});
-// app.MapGraphQL();
+// app.UseRouting().UseEndpoints(endpoints =>
+// {
+//     endpoints.MapGraphQL();
+// });
+app.MapGraphQL();
 app.UseGraphQLVoyager(new VoyagerOptions { GraphQLEndPoint = "/graphql" }, "/graphql-voyager");
 
 app.MapControllers();
