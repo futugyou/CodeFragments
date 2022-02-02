@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcServer";
+
+package four;
+
+service FourType {
+  // Unary
+  rpc UnaryCall (FourTypeRequest) returns (FourTypeResponse);
+
+  // Server streaming
+  rpc StreamingFromServer (FourTypeRequest) returns (stream FourTypeResponse);
+
+  // Client streaming
+  rpc StreamingFromClient (stream FourTypeRequest) returns (FourTypeResponse);
+
+  // Bi-directional streaming
+  rpc StreamingBothWays (stream FourTypeRequest) returns (stream FourTypeResponse);
+}
+
+message FourTypeRequest {
+    int32 pageIndex = 1;
+    int32 pageSize = 2;
+    bool isDescending = 3;
+}
+
+message FourTypeResponse {
+}
