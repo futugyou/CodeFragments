@@ -43,6 +43,7 @@ builder.Services.AddRefitClient<IGitHubApi>()
 
 builder.Services
     .AddGraphQLServer()
+    .AddProjections() // AddProjections can get include data like ef.
     .AddQueryType<Query>()
     .AddType<UserConfigure>();
 
