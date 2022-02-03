@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcServer";
+
+import "google/protobuf/duration.proto";  
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+package protobuftype;
+
+service ProtobufType {
+  rpc BaseCall (ProtobufTypeRequest) returns (ProtobufTypeResponse);
+}
+
+message ProtobufTypeRequest {
+    string subject = 1;
+    google.protobuf.Timestamp start = 2;
+    google.protobuf.Duration duration = 3;
+}  
+
+message ProtobufTypeResponse { 
+    google.protobuf.Timestamp start = 1;
+    google.protobuf.Duration duration = 2;
+    google.protobuf.Int32Value age = 3;
+    bytes files = 4;
+    repeated string roles = 5;
+    map<string, string> attributes = 6;
+}  
