@@ -21,7 +21,8 @@ public class FourTypeService : FourType.FourTypeBase
     {
         for (var i = 0; i < 5; i++)
         {
-            await responseStream.WriteAsync(new FourTypeResponse());
+            var t = i;
+            await responseStream.WriteAsync(new FourTypeResponse() { Seq = t });
             await Task.Delay(TimeSpan.FromSeconds(1));
         }
     }
@@ -33,14 +34,16 @@ public class FourTypeService : FourType.FourTypeBase
             var message = requestStream.Current;
             logger.LogInformation("StreamingFromClient: message is " + message);
         }
-        return new FourTypeResponse();
+        return new FourTypeResponse() { Seq = 999 };
     }
 
     public override async Task StreamingBothWays(IAsyncStreamReader<FourTypeRequest> requestStream, IServerStreamWriter<FourTypeResponse> responseStream, ServerCallContext context)
     {
+        var index = 10;
         await foreach (var message in requestStream.ReadAllAsync())
         {
-            await responseStream.WriteAsync(new FourTypeResponse());
+            await responseStream.WriteAsync(new FourTypeResponse() { Seq = index });
+            index++;
         }
     }
 }
