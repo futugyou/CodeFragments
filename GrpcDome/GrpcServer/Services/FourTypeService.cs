@@ -42,6 +42,7 @@ public class FourTypeService : FourType.FourTypeBase
         var index = 10;
         await foreach (var message in requestStream.ReadAllAsync())
         {
+            logger.LogInformation("StreamingBothWays get message: " + message);
             await responseStream.WriteAsync(new FourTypeResponse() { Seq = index });
             index++;
         }
