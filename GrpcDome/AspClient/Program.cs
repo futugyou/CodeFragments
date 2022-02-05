@@ -12,11 +12,13 @@ builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
 {
     o.Address = new Uri("http://localhost:50001");
 })
+.EnableCallContextPropagation()
 .ConfigurePrimaryHttpMessageHandler(() =>
 {
     var handler = new HttpClientHandler();
     return handler;
-});
+})
+;
 
 var app = builder.Build();
 
