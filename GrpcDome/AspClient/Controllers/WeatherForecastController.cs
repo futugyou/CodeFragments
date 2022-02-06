@@ -26,7 +26,8 @@ public class WeatherForecastController : ControllerBase
     public async Task<string> Get()
     {
         var request = new HelloRequest { Name = "AspClient" };
-        var call = await _client.SayHelloAsync(request, deadline: DateTime.UtcNow.AddSeconds(5));
+        var call = await _client.SayHelloAsync(request);
+        //var call = await _client.SayHelloAsync(request, deadline: DateTime.UtcNow.AddSeconds(5));
         return call.Message;
     }
 }

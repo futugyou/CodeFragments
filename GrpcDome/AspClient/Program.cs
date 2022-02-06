@@ -1,5 +1,6 @@
 using Grpc.Core;
 using Grpc.Net.Client.Configuration;
+using Grpc.Net.Client.Web;
 using GrpcClient;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
         };
     });
 })
+.ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(new HttpClientHandler()))
 .EnableCallContextPropagation(o => o.SuppressContextNotFoundErrors = true)
 .ConfigurePrimaryHttpMessageHandler(() =>
 {

@@ -1,10 +1,14 @@
 ﻿using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Grpc.Net.Client.Web;
 using GrpcClient;
 
 // The port number must match the port of the gRPC server.
-using var channel = GrpcChannel.ForAddress("http://localhost:50001");
+using var channel = GrpcChannel.ForAddress("http://localhost:50001", new GrpcChannelOptions
+{
+    HttpHandler = new GrpcWebHandler(new HttpClientHandler())
+});
 
 // 1. base demo
 var client = new Greeter.GreeterClient(channel);
