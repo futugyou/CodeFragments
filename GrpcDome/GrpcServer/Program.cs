@@ -14,14 +14,22 @@ builder.WebHost.ConfigureKestrel(op =>
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+{
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader()
+           .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
+}));
 
 var app = builder.Build();
 app.UseRouting();
 app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
+app.UseCors();
 // Configure the HTTP request pipeline.
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapGrpcService<GreeterService>();
+    endpoints.MapGrpcService<GreeterService>().RequireCors("AllowAll");
     endpoints.MapGrpcService<FourTypeService>();
     endpoints.MapGrpcService<ProtoTypeService>();
 });
