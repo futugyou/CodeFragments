@@ -34,6 +34,11 @@ builder.Services.AddGrpcClient<Greeter.GreeterClient>(o =>
         {
             MethodConfigs = { defaultMethodConfig }
         };
+        channelOp.MaxRetryAttempts = 5; // default  5
+        channelOp.MaxSendMessageSize = 5 * 1024 * 1024; // 5 MB, default no limit
+        channelOp.MaxReceiveMessageSize = 2 * 1024 * 1024; // 2 MB, default 4 MB
+        channelOp.MaxRetryBufferSize = 16 * 1024 * 1024; // 16 MB, default 16 MB
+        channelOp.MaxRetryBufferPerCallSize = 2 * 1024 * 1024; // 2 MB, default 1 MB
     });
 })
 .ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(new HttpClientHandler()))

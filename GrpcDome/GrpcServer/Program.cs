@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using GrpcServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,13 @@ builder.WebHost.ConfigureKestrel(op =>
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
 
 // Add services to the container.
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(options =>
+{
+    options.MaxSendMessageSize = 5 * 1024 * 1024; // 5 MB, default no limit
+    options.MaxReceiveMessageSize = 2 * 1024 * 1024; // 2 MB, default 4 MB
+    options.EnableDetailedErrors = true; // default false
+    options.ResponseCompressionLevel = CompressionLevel.SmallestSize; // default null 
+});
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
 {
     builder.AllowAnyOrigin()
