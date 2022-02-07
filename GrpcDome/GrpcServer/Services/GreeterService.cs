@@ -1,4 +1,5 @@
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GrpcServer.Services;
 
@@ -10,13 +11,15 @@ public class GreeterService : Greeter.GreeterBase
         _logger = logger;
     }
 
+    [Authorize]
     public override async Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
     {
+        var user = context.GetHttpContext().User;
         _logger.LogInformation("Got Message: " + request.Name);
-        await Task.Delay(6000);
+        await Task.Delay(1000);
         return new HelloReply
         {
-            Message = "Hello " + request.Name
+            Message = "Hello " + request.Name + ", auth User: " + user.Identity!.Name
         };
     }
 }
