@@ -3,7 +3,6 @@ using System.IO.Compression;
 using System.Security.Claims;
 using GrpcServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
@@ -15,6 +14,10 @@ builder.WebHost.ConfigureKestrel(op =>
     op.ListenLocalhost(50001, a =>
     {
         a.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+    op.ListenLocalhost(50002, a =>
+    {
+        a.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2;
     });
 });
 // Additional configuration is required to successfully run gRPC on macOS.

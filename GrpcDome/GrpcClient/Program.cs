@@ -11,10 +11,10 @@ using var channel = GrpcChannel.ForAddress("http://localhost:50001", new GrpcCha
 });
 
 // 1. base demo
-var client = new Greeter.GreeterClient(channel);
-var reply = await client.SayHelloAsync(
-                  new HelloRequest { Name = "MessageFromClient" });
-Console.WriteLine("Greeting: " + reply.Message);
+// var client = new Greeter.GreeterClient(channel);
+// var reply = await client.SayHelloAsync(
+//                   new HelloRequest { Name = "MessageFromClient" });
+// Console.WriteLine("Greeting: " + reply.Message);
 
 // 2. StreamingFromServer demo
 var client2 = new FourType.FourTypeClient(channel);
