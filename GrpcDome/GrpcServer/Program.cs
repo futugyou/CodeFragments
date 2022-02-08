@@ -34,6 +34,7 @@ builder.Services.AddGrpc(options =>
     options.MaxReceiveMessageSize = 2 * 1024 * 1024; // 2 MB, default 4 MB
     options.EnableDetailedErrors = true; // default false
     options.ResponseCompressionLevel = CompressionLevel.SmallestSize; // default null 
+    options.Interceptors.Add<ServerLoggerInterceptor>();
 });
 builder.Services.AddGrpcHttpApi();
 

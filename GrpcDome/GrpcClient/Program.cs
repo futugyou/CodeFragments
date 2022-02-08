@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Grpc.Core;
+using Grpc.Core.Interceptors;
 using Grpc.Health.V1;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
@@ -12,7 +13,7 @@ using var channel = GrpcChannel.ForAddress("http://localhost:50001", new GrpcCha
 {
     HttpHandler = new GrpcWebHandler(new HttpClientHandler())
 });
-
+var invoker = channel.Intercept(new ClientLoggerInterceptor());
 // 1. base demo
 // var client = new Greeter.GreeterClient(channel);
 // var reply = await client.SayHelloAsync(
@@ -20,7 +21,8 @@ using var channel = GrpcChannel.ForAddress("http://localhost:50001", new GrpcCha
 // Console.WriteLine("Greeting: " + reply.Message);
 
 // 2. StreamingFromServer demo
-var client2 = new FourType.FourTypeClient(channel);
+// var client2 = new FourType.FourTypeClient(channel);
+var client2 = new FourType.FourTypeClient(invoker);
 var call2 = client2.StreamingFromServer(new FourTypeRequest
 {
     PageIndex = 1,
