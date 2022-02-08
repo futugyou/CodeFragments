@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Security.Claims;
 using GrpcServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProtoBuf.Grpc.Server;
@@ -48,6 +49,13 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
            .AllowAnyHeader()
            .WithExposedHeaders("Grpc-Status", "Grpc-Message", "Grpc-Encoding", "Grpc-Accept-Encoding");
 }));
+builder.Services
+.AddGrpcHealthChecks()
+.AddAsyncCheck("", () =>
+{
+    var result = HealthCheckResult.Healthy();
+    return Task.FromResult(result);
+}, new string[] { "ok" });
 
 builder.Services.AddAuthorization(options =>
 {
@@ -70,6 +78,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = SecurityKey
         };
 });
+
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -84,6 +93,7 @@ app.UseAuthorization();
 // Configure the HTTP request pipeline.
 app.UseEndpoints(endpoints =>
 {
+    endpoints.MapGrpcHealthChecksService();
     endpoints.MapGrpcService<GreeterService>().RequireCors("AllowAll");
     endpoints.MapGrpcService<FourTypeService>();
     endpoints.MapGrpcService<ProtoTypeService>();
@@ -94,7 +104,7 @@ app.UseEndpoints(endpoints =>
     });
     endpoints.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 });
-
+app.MapGrpcHealthChecksService();
 app.Run();
 
 

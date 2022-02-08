@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Grpc.Core;
+using Grpc.Health.V1;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
 using GrpcClient;
@@ -61,7 +62,13 @@ await readTask;
 // 5. code first
 var client5 = channel.CreateGrpcService<IOrderService>();
 var reply5 = await client5.GetOrders(new OrderRequest { OrderId = 10 });
-
 Console.WriteLine("Code First Response : " + reply5.Amount);
+
+// 6. Health Check
+var client6 = new Health.HealthClient(channel);
+var response = await client6.CheckAsync(new HealthCheckRequest());
+var status = response.Status;
+Console.WriteLine("Health Check Response : " + status);
+
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();
