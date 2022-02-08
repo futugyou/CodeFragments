@@ -25,5 +25,5 @@ message FourTypeRequest {
 }
 
 message FourTypeResponse {
-    int32 seq =1;
+    int32 seq = 1;
 }

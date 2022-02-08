@@ -4,6 +4,7 @@ using System.Security.Claims;
 using GrpcServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
 JwtSecurityTokenHandler JwtTokenHandler = new JwtSecurityTokenHandler();
@@ -31,7 +32,13 @@ builder.Services.AddGrpc(options =>
     options.EnableDetailedErrors = true; // default false
     options.ResponseCompressionLevel = CompressionLevel.SmallestSize; // default null 
 });
+builder.Services.AddGrpcHttpApi();
 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+});
+builder.Services.AddGrpcSwagger();
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", builder =>
 {
     builder.AllowAnyOrigin()
@@ -62,6 +69,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
 });
 var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+});
 app.UseRouting();
 app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 app.UseCors();
