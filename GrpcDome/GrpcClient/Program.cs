@@ -3,6 +3,8 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
 using GrpcClient;
+using GrpcServer.Model;
+using ProtoBuf.Grpc.Client;
 
 // The port number must match the port of the gRPC server.
 using var channel = GrpcChannel.ForAddress("http://localhost:50001", new GrpcChannelOptions
@@ -55,5 +57,11 @@ for (int i = 0; i < 3; i++)
 }
 await call4.RequestStream.CompleteAsync();
 await readTask;
+
+// 5. code first
+var client5 = channel.CreateGrpcService<IOrderService>();
+var reply5 = await client5.GetOrders(new OrderRequest { OrderId = 10 });
+
+Console.WriteLine("Code First Response : " + reply5.Amount);
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();

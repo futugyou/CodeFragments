@@ -5,6 +5,7 @@ using GrpcServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using ProtoBuf.Grpc.Server;
 
 SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
 JwtSecurityTokenHandler JwtTokenHandler = new JwtSecurityTokenHandler();
@@ -25,6 +26,7 @@ builder.WebHost.ConfigureKestrel(op =>
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
 
 // Add services to the container.
+builder.Services.AddCodeFirstGrpc();
 builder.Services.AddGrpc(options =>
 {
     options.MaxSendMessageSize = 5 * 1024 * 1024; // 5 MB, default no limit
@@ -85,6 +87,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapGrpcService<GreeterService>().RequireCors("AllowAll");
     endpoints.MapGrpcService<FourTypeService>();
     endpoints.MapGrpcService<ProtoTypeService>();
+    endpoints.MapGrpcService<OrderService>();
     endpoints.MapGet("/generateJwtToken", context =>
     {
         return context.Response.WriteAsync(GenerateJwtToken(context.Request.Query["name"]));
