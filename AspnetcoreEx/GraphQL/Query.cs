@@ -28,4 +28,18 @@ public class Query
         }
         return await Task.FromResult(user);
     }
+
+    ///
+    ///query {
+    /// allUser(where: { id: { eq: 2 } }) {
+    ///     id
+    ///     name
+    ///     orders {
+    ///         orderTime
+    ///     }
+    /// }
+    ///}
+    [UseProjection]
+    [UseFiltering]
+    public Task<List<User>> GetAllUser() => Task.FromResult(DefaultUsers);
 }

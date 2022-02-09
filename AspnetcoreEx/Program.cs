@@ -43,6 +43,7 @@ builder.Services.AddRefitClient<IGitHubApi>()
 
 builder.Services
     .AddGraphQLServer()
+    .AddFiltering()
     .AddProjections() // AddProjections can get include data like ef.
     .AddQueryType<Query>()
     .AddType<UserConfigure>();
@@ -60,7 +61,7 @@ if (builder.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ResponseBodyFeature v1"));
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 // app.UseRouting().UseEndpoints(endpoints =>
