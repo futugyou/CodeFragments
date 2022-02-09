@@ -29,9 +29,9 @@ public class Query
         return await Task.FromResult(user);
     }
 
-    ///
+    /// DESC/ASC MUST BE UPPER
     ///query {
-    /// allUser(where: { id: { eq: 2 } }) {
+    /// allUser(where: { id: { eq: 2 } }, order: {id: DESC/ASC}) {
     ///     id
     ///     name
     ///     orders {
@@ -41,5 +41,6 @@ public class Query
     ///}
     [UseProjection]
     [UseFiltering]
+    [UseSorting]
     public Task<List<User>> GetAllUser() => Task.FromResult(DefaultUsers);
 }

@@ -45,6 +45,7 @@ builder.Services
     .AddGraphQLServer()
     .AddFiltering()
     .AddProjections() // AddProjections can get include data like ef.
+    .AddSorting()
     .AddQueryType<Query>()
     .AddType<UserConfigure>();
 
