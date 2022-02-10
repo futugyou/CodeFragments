@@ -10,6 +10,7 @@ using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
 using GraphQL.Server.Ui.Voyager;
+using HotChocolate.Types.Pagination;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -46,6 +47,11 @@ builder.Services
     .AddFiltering()
     .AddProjections() // AddProjections can get include data like ef.
     .AddSorting()
+    .SetPagingOptions(new PagingOptions
+    {
+        MaxPageSize = 50,
+        IncludeTotalCount = true
+    })
     .AddQueryType<Query>()
     .AddType<UserConfigure>();
 

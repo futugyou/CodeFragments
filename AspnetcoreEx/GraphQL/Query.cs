@@ -43,4 +43,41 @@ public class Query
     [UseFiltering]
     [UseSorting]
     public Task<List<User>> GetAllUser() => Task.FromResult(DefaultUsers);
+
+    /// query {
+    ///     takeSkipUser(take: 1, skip: 1) {
+    ///         pageInfo {
+    ///             hasNextPage
+    ///             hasPreviousPage
+    ///         }
+    ///     totalCount
+    ///     items {
+    ///         id
+    ///         name
+    ///         age
+    ///         }
+    ///     }
+    /// }
+    [UseOffsetPaging]
+    public Task<List<User>> GetTakeSkipUser() => Task.FromResult(DefaultUsers);
+
+    ///query {
+    /// pagingUser(first: 2) {
+    ///     pageInfo {
+    ///         hasNextPage
+    ///         hasPreviousPage
+    ///     }
+    /// totalCount
+    /// edges {
+    ///     cursor
+    ///     node {
+    ///         id
+    ///         name
+    ///         age
+    ///         }
+    ///     }
+    /// }
+    ///}
+    [UsePaging]
+    public Task<List<User>> GetPagingUser() => Task.FromResult(DefaultUsers);
 }
