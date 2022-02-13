@@ -3,6 +3,7 @@ namespace AspnetcoreEx.GraphQL;
 public interface IUserRepository
 {
     List<User> GetAllUser();
+    List<User> AddUser(User user);
 }
 public class UserRepository : IUserRepository
 {
@@ -23,6 +24,12 @@ public class UserRepository : IUserRepository
         new User { Id = 1, Name = "tony", Age = 28, Secret = "not like tom", Orders = DefaultOrders.Take(2).ToList()},
         new User { Id = 2, Name = "tom", Age = 23, Secret = "not like tony", Orders = DefaultOrders.Skip(2).Take(2).ToList()},
     };
+
+    public List<User> AddUser(User user)
+    {
+        DefaultUsers.Add(user);
+        return DefaultUsers;
+    }
 
     public List<User> GetAllUser()
     {

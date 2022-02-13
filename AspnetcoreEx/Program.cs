@@ -53,6 +53,16 @@ builder.Services
         IncludeTotalCount = true
     })
     .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    // .AddMutationConventions(new MutationConventionOptions
+    // {
+    //     ApplyToAllMutations = true,
+    //     InputArgumentName = "input",
+    //     InputTypeNamePattern = "{MutationName}Input",
+    //     PayloadTypeNamePattern = "{MutationName}Payload",
+    //     PayloadErrorTypeNamePattern = "{MutationName}Error",
+    //     PayloadErrorsFieldName = "errors"
+    // })
     .AddType<UserConfigure>();
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
