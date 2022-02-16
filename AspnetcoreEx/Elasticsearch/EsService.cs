@@ -4,7 +4,12 @@ namespace AspnetcoreEx.Elasticsearch;
 
 public class EsService
 {
+    public EsService(ILogger<EsService> log)
+    {
+        this.log = log;
+    }
     private static ElasticClient client = new ElasticClient(new Uri("http://localhost:9200"));
+    private readonly ILogger<EsService> log;
 
     // create index mapping
     public void Mapping()
@@ -37,5 +42,42 @@ public class EsService
             }
         };
         var response = client.Bulk(b => b.Index("order").IndexMany(orers));
+    }
+
+    public void GetAll()
+    {
+        var query = new MatchAllQuery();
+        var response = client.Search<OrderInfo>(s => s.Index("order").Query(p => query));
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+    }
+
+    public void GetPage()
+    {
+        var query = new MatchAllQuery();
+        var response = client.Search<OrderInfo>(p => p.Index("order").Query(_ => query).Skip(1).Take(2));//TODO: From Size?
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+    }
+
+    public void ScrollGet()
+    {
+        var query = new MatchAllQuery();
+        var response = client.Search<OrderInfo>(p => p.Index("order").Query(_ => query).Size(2).Scroll("10s"));
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+        var scrollid = response.ScrollId;
+        response = client.Scroll<OrderInfo>("10s", scrollid);
+        list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+    }
+
+    public void Search()
+    {
+        var response = client.Search<OrderInfo>(p => p.Index("order").Query(
+            p => (p.Term(o => o.Name, "tom") || p.Term(o => o.Name, "tony")) && p.Term(o => o.GoodsName, "phone")
+            ));
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
     }
 }

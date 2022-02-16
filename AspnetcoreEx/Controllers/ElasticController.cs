@@ -18,8 +18,13 @@ public class ElasticController : ControllerBase
     [HttpGet]
     public void Insert()
     {
+        esService.Mapping();
         esService.Insert();
         esService.InsertMany();
+        esService.GetAll();
+        esService.GetPage();
+        esService.ScrollGet();
+        esService.Search();
     }
 
 }
