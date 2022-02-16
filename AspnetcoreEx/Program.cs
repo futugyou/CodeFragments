@@ -11,6 +11,7 @@ using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
 using GraphQL.Server.Ui.Voyager;
 using HotChocolate.Types.Pagination;
+using AspnetcoreEx.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -19,6 +20,8 @@ builder.Host.ConfigureAppConfiguration(config =>
 {
     config.AddJsonFileExtensions("appsettings.json", true, true);
 });
+
+builder.Services.AddSingleton<EsService>();//
 
 builder.Services.AddRedisExtension(configuration);
 builder.Services.AddScoped<IUserRepository, UserRepository>();//
