@@ -24,4 +24,18 @@ public class EsService
         };
         var response = client.Index(order, i => i.Index("order"));
     }
+
+    public void InsertMany()
+    {
+        var orers = new List<OrderInfo>{
+            new OrderInfo{
+                Id = Guid.NewGuid().ToString(),
+                Name = "tom",
+                CreateTime = DateTime.Now,
+                Status = "chart",
+                GoodsName = "phone",
+            }
+        };
+        var response = client.Bulk(b => b.Index("order").IndexMany(orers));
+    }
 }

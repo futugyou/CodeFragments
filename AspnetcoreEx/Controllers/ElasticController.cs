@@ -19,6 +19,7 @@ public class ElasticController : ControllerBase
     public void Insert()
     {
         esService.Insert();
+        esService.InsertMany();
     }
 
 }
