@@ -13,4 +13,5 @@ public class OrderInfo
     [Text]
     public string GoodsName { get; set; }
     public string Status { get; set; }
+    public double Price { get; set; }
 }

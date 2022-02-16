@@ -25,6 +25,6 @@ public class ElasticController : ControllerBase
         esService.GetPage();
         esService.ScrollGet();
         esService.Search();
+        esService.Aggs();
     }
-
 }

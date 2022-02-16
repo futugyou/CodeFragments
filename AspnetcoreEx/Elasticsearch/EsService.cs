@@ -26,6 +26,7 @@ public class EsService
             CreateTime = DateTime.Now,
             Status = "chart",
             GoodsName = "phone",
+            Price = 10,
         };
         var response = client.Index(order, i => i.Index("order"));
     }
@@ -39,6 +40,7 @@ public class EsService
                 CreateTime = DateTime.Now,
                 Status = "chart",
                 GoodsName = "phone",
+                Price = 12,
             }
         };
         var response = client.Bulk(b => b.Index("order").IndexMany(orers));
@@ -78,6 +80,30 @@ public class EsService
             p => (p.Term(o => o.Name, "tom") || p.Term(o => o.Name, "tony")) && p.Term(o => o.GoodsName, "phone")
             ));
         var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+    }
+
+    public void Aggs()
+    {
+        var response = client.Search<object>(s => s
+            .Index("order")
+            .Size(0)
+            .Aggregations(a => a
+                .Average("price", avg => avg.Field("price"))
+                .Max("maxprice", m => m.Field("price"))
+            )
+        );
+        var list = response.Aggregations;
+        log.LogInformation("list count " + list.Count);
+
+        response = client.Search<object>(s => s
+            .Index("order")
+            .Size(0)
+            .Aggregations(a => a
+                .Terms("goodsgroup", group => group.Field("goodsName"))
+            )
+        );
+        list = response.Aggregations;
         log.LogInformation("list count " + list.Count);
     }
 }
