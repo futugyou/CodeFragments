@@ -12,7 +12,6 @@ using HealthChecks.UI.Client;
 using GraphQL.Server.Ui.Voyager;
 using HotChocolate.Types.Pagination;
 using AspnetcoreEx.Elasticsearch;
-using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -22,9 +21,7 @@ builder.Host.ConfigureAppConfiguration(config =>
     config.AddJsonFileExtensions("appsettings.json", true, true);
 });
 
-builder.Services.AddSingleton<ElasticClient>(_ => new ElasticClient(new Uri(configuration["ElasticServer:Uri"])));
-builder.Services.AddSingleton<EsService>();//
-
+builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
 builder.Services.AddScoped<IUserRepository, UserRepository>();//
 builder.Services.AddControllers();
