@@ -12,6 +12,7 @@ using HealthChecks.UI.Client;
 using GraphQL.Server.Ui.Voyager;
 using HotChocolate.Types.Pagination;
 using AspnetcoreEx.Elasticsearch;
+using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -21,6 +22,7 @@ builder.Host.ConfigureAppConfiguration(config =>
     config.AddJsonFileExtensions("appsettings.json", true, true);
 });
 
+builder.Services.AddSingleton<ElasticClient>(_ => new ElasticClient(new Uri(configuration["ElasticServer:Uri"])));
 builder.Services.AddSingleton<EsService>();//
 
 builder.Services.AddRedisExtension(configuration);
@@ -38,7 +40,7 @@ var retryPolicy = HttpPolicyExtensions
     .Or<TimeoutRejectedException>()
     .WaitAndRetryAsync(10, _ => TimeSpan.FromMilliseconds(5000));
 
-var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(30000));
+var timeoutPolicy = Polly.Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(30000));
 
 builder.Services.AddRefitClient<IGitHubApi>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"))

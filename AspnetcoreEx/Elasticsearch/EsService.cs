@@ -4,11 +4,12 @@ namespace AspnetcoreEx.Elasticsearch;
 
 public class EsService
 {
-    public EsService(ILogger<EsService> log)
+    public EsService(ILogger<EsService> log, ElasticClient client)
     {
         this.log = log;
+        this.client = client;
     }
-    private static ElasticClient client = new ElasticClient(new Uri("http://localhost:9200"));
+    private readonly ElasticClient client;
     private readonly ILogger<EsService> log;
 
     // create index mapping
