@@ -26,23 +26,47 @@ public static class ElasticClientExtensions
             throw new ArgumentNullException(nameof(configuration));
         }
 
-        var urilist = configuration.GetValue<string[]>("ElasticServer:Uris");
-        if (urilist is null)
+        // services.AddOptions<ElasticOptions>().Bind(configuration.GetSection("ElasticServer"));
+        // services.Configure<ElasticOptions>(configuration.GetSection("ElasticServer"));
+
+        var elasticOptions = configuration.GetSection("ElasticServer").Get<ElasticOptions>() ?? new ElasticOptions();
+
+        if (elasticOptions.Uris == null || !elasticOptions.Uris.Any())
         {
             throw new ArgumentNullException("ElasticServer:Uris");
         }
 
-        var uris = urilist.Select(p => new Uri(p)).ToList();
-        var connectionPool = new SniffingConnectionPool(uris);
-
+        var connectionPool = new SniffingConnectionPool(elasticOptions.UriList);
         var settings = new ConnectionSettings(connectionPool);
-        var defaultIndex = configuration["ElasticServer:DefaultIndex"];
-        if (!string.IsNullOrEmpty(defaultIndex))
+        if (!string.IsNullOrEmpty(elasticOptions.DefaultIndex))
         {
-            settings.DefaultIndex(defaultIndex);
+            settings.DefaultIndex(elasticOptions.DefaultIndex);
         }
-        var client = new ElasticClient(settings);
-        services.AddSingleton<ElasticClient>(_ => client);
+        if (elasticOptions.ConnectionLimit > 0)
+        {
+            settings.ConnectionLimit(elasticOptions.ConnectionLimit);
+        }
+        if (!string.IsNullOrEmpty(elasticOptions.ApiID) && !string.IsNullOrEmpty(elasticOptions.ApiKey))
+        {
+            settings.ApiKeyAuthentication(elasticOptions.ApiID, elasticOptions.ApiKey);
+        }
+        if (!string.IsNullOrEmpty(elasticOptions.Base64EncodedApiKey))
+        {
+            settings.ApiKeyAuthentication(new ApiKeyAuthenticationCredentials(elasticOptions.Base64EncodedApiKey));
+        }
+        if (!string.IsNullOrEmpty(elasticOptions.Username) && !string.IsNullOrEmpty(elasticOptions.Password))
+        {
+            settings.BasicAuthentication(elasticOptions.Username, elasticOptions.Password);
+        }
+        if (!string.IsNullOrEmpty(elasticOptions.CertificatePath))
+        {
+            settings.ClientCertificate(elasticOptions.CertificatePath);
+        }
+#if DEBUG
+        settings.EnableDebugMode();
+        settings.PrettyJson(true);
+#endif
+        services.AddSingleton<ElasticClient>(new ElasticClient(settings));
         services.AddSingleton<EsService>();
         return services;
     }

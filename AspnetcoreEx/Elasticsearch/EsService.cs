@@ -30,6 +30,7 @@ public class EsService
             Price = 10,
         };
         var response = client.Index(order, i => i.Index("order"));
+        response = client.IndexDocument(order);// it wil use default index. in this case is "demo"
     }
 
     public void InsertMany()
@@ -81,6 +82,20 @@ public class EsService
             p => (p.Term(o => o.Name, "tom") || p.Term(o => o.Name, "tony")) && p.Term(o => o.GoodsName, "phone")
             ));
         var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+
+        response = client.Search<OrderInfo>(p => p
+        //.AllIndices()
+       .From(0)
+       .Size(10)
+       .Query(q => q
+           .Match(m => m
+               .Field(f => f.Name)
+               .Query("tom")
+           )
+           )
+        );
+        list = response.Documents.ToList();
         log.LogInformation("list count " + list.Count);
     }
 
