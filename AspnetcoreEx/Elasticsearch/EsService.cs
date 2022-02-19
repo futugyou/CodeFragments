@@ -16,6 +16,7 @@ public class EsService
     public void Mapping()
     {
         client.Indices.Create("order", c => c.Map<OrderInfo>(m => m.AutoMap()));
+        client.Indices.Create("order_propert_visitor", c => c.Map<OrderInfo>(m => m.AutoMap(new DisableDocValuesPropertyVisitor())));
         client.Indices.Create("company", c => c
             .Map<Company>(m => m
                 .Properties(ps => ps
