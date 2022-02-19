@@ -1,7 +1,9 @@
+using System.Runtime.Serialization;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;
 
+[ElasticsearchType(RelationName = "order")]
 public class OrderInfo
 {
     [Keyword(Name = "Id")]
@@ -10,7 +12,9 @@ public class OrderInfo
     public DateTime CreateTime { get; set; }
     [Keyword]
     public string Name { get; set; }
-    [Text]
+    //[PropertyName("goods_name")]
+    //[DataMember(Name = "goods_name")]
+    [Text(Name = "goods_name")]
     public string GoodsName { get; set; }
     public string Status { get; set; }
     public double Price { get; set; }
