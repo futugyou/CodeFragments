@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;
@@ -106,7 +107,7 @@ public class EsService
 
     public void InsertMany()
     {
-        var orers = new List<OrderInfo>{
+        var orders = new List<OrderInfo>{
             new OrderInfo{
                 Id = Guid.NewGuid().ToString(),
                 Name = "tom",
@@ -116,7 +117,8 @@ public class EsService
                 Price = 12,
             }
         };
-        var response = client.IndexMany(orers);
+        // 1. IndexMany
+        var response = client.IndexMany(orders);
         if (response.Errors)
         {
             foreach (var itemWithError in response.ItemsWithErrors)
@@ -124,8 +126,12 @@ public class EsService
                 Console.WriteLine($"Failed to index document {itemWithError.Id}: {itemWithError.Error}");
             }
         }
-        var responseBulk = client.Bulk(b => b.Index("order").IndexMany(orers));
-        var bulkAllObservable = client.BulkAll(orers, b => b
+
+        // 2. Bulk
+        var responseBulk = client.Bulk(b => b.Index("order").IndexMany(orders));
+
+        // 3. BulkAll
+        var bulkAllObservable1 = client.BulkAll(orders, b => b
             .Index("order")
             .BackOffTime("30s") // how long to wait between retries
             .BackOffRetries(2) // how many retries are attempted if a failure occurs
@@ -140,6 +146,51 @@ public class EsService
             Console.WriteLine($"next.Page: {next.Page}");
             // do something e.g. write number of pages to console
         });
+
+        // 4. BulkAll with more option
+        var bulkAllObservable2 = client.BulkAll(orders, b => b
+        .BufferToBulk((descriptor, buffer) => // Customise each bulk operation before it is dispatched
+        {
+            foreach (var order in buffer)
+            {
+                descriptor.Index<OrderInfo>(bi => bi
+                    .Index(order.Price % 2 == 0 ? "even-index" : "odd-index") // Index each document into either even-index or odd-index
+                    .Document(order)
+                );
+            }
+        })
+        .RetryDocumentPredicate((bulkResponseItem, order) => // Decide if a document should be retried in the event of a failure
+        {
+            return bulkResponseItem.Error.Index == "even-index" && order.Name == "Martijn";
+        })
+        .DroppedDocumentCallback((bulkResponseItem, order) => // If a document cannot be indexed this delegate is called
+        {
+            Console.WriteLine($"Unable to index: {bulkResponseItem} {order}");
+        }));
+
+        var waitHandle = new ManualResetEvent(false);
+        ExceptionDispatchInfo exceptionDispatchInfo = null;
+
+        var observer = new BulkAllObserver(
+            onNext: response =>
+            {
+                // do something e.g. write number of pages to console
+            },
+            onError: exception =>
+            {
+                exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
+                waitHandle.Set();
+            },
+            onCompleted: () => waitHandle.Set());
+
+        // Subscribe to the observable, which will initiate the bulk indexing process
+        bulkAllObservable2.Subscribe(observer);
+
+        // Block the current thread until a signal is received
+        waitHandle.WaitOne();
+
+        // If an exception was captured during the bulk indexing process, throw it
+        exceptionDispatchInfo?.Throw();
     }
 
     public void GetAll()
