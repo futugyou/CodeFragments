@@ -100,6 +100,7 @@ public class EsService
             Price = 10,
         };
         var response = client.Index(order, i => i.Index("order"));
+        // var response = client.Index(new IndexRequest<OrderInfo>(order, "order"));
         response = client.IndexDocument(order);// it wil use default index. in this case is "demo"
     }
 
@@ -115,7 +116,30 @@ public class EsService
                 Price = 12,
             }
         };
-        var response = client.Bulk(b => b.Index("order").IndexMany(orers));
+        var response = client.IndexMany(orers);
+        if (response.Errors)
+        {
+            foreach (var itemWithError in response.ItemsWithErrors)
+            {
+                Console.WriteLine($"Failed to index document {itemWithError.Id}: {itemWithError.Error}");
+            }
+        }
+        var responseBulk = client.Bulk(b => b.Index("order").IndexMany(orers));
+        var bulkAllObservable = client.BulkAll(orers, b => b
+            .Index("order")
+            .BackOffTime("30s") // how long to wait between retries
+            .BackOffRetries(2) // how many retries are attempted if a failure occurs
+            .RefreshOnCompleted()
+            .MaxDegreeOfParallelism(Environment.ProcessorCount)
+            .Size(1000) // items per bulk request
+        )
+        // perform the indexing and wait up to 15 minutes, 
+        // whilst the BulkAll calls are asynchronous this is a blocking operation
+        .Wait(TimeSpan.FromMinutes(15), next =>
+        {
+            Console.WriteLine($"next.Page: {next.Page}");
+            // do something e.g. write number of pages to console
+        });
     }
 
     public void GetAll()

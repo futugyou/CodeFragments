@@ -2,7 +2,7 @@ namespace AspnetcoreEx.Elasticsearch;
 
 public class ElasticOptions
 {
-    public string[] Uris { get; set; } = new string[] { "" };
+    public string[] Uris { get; set; }
     public string DefaultIndex { get; set; }
     public int ConnectionLimit { get; set; } = 80;
     public Uri[] UriList => Uris.Select(p => new Uri(p)).ToArray();
