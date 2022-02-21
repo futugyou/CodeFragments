@@ -87,6 +87,33 @@ public class EsService
                 )
             )
         );
+
+        client.Indices.Create("people", c => c
+            .Map<Person>(p => p
+                .AutoMap() // automatically create the mapping from the type
+                .Properties(props => props
+                    .Keyword(t => t.Name("initials")) // create an additional field to store the initials
+                    .Ip(t => t.Name(dv => dv.IpAddress)) // map field as IP Address type
+                    .Object<GeoIp>(t => t.Name(dv => dv.GeoIp)) // map GeoIp as object
+                )
+            )
+        );
+
+        client.Ingest.PutPipeline("person-pipeline", p => p
+            .Processors(ps => ps
+                .Uppercase<Person>(s => s
+                    .Field(t => t.LastName) // uppercase the lastname
+                )
+                .Script(s => s
+                    .Lang("painless") // use a painless script to populate the new field
+                    .Source("ctx.initials = ctx.firstName.substring(0,1) + ctx.lastName.substring(0,1)")
+                )
+                .GeoIp<Person>(s => s // use ingest-geoip plugin to enrich the GeoIp object from the supplied IP Address
+                    .Field(i => i.IpAddress)
+                    .TargetField(i => i.GeoIp)
+                )
+            )
+        );
     }
 
     public void Insert()
@@ -169,7 +196,7 @@ public class EsService
         }));
 
         var waitHandle = new ManualResetEvent(false);
-        ExceptionDispatchInfo exceptionDispatchInfo = null;
+        ExceptionDispatchInfo? exceptionDispatchInfo = null;
 
         var observer = new BulkAllObserver(
             onNext: response =>
@@ -191,6 +218,19 @@ public class EsService
 
         // If an exception was captured during the bulk indexing process, throw it
         exceptionDispatchInfo?.Throw();
+    }
+
+    public void Pipeline()
+    {
+        var person = new Person
+        {
+            Id = 1,
+            FirstName = "Martijn",
+            LastName = "Laarman",
+            IpAddress = "139.130.4.5"
+        };
+        // index the document using the created pipeline
+        var indexResponse = client.Index(person, p => p.Index("people").Pipeline("person-pipeline"));
     }
 
     public void GetAll()
