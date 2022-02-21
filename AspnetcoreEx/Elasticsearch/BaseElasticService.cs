@@ -3,10 +3,10 @@ using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;
 
-public class EsService
+public class BaseElasticService
 {
-    public EsService(
-        ILogger<EsService> log,
+    public BaseElasticService(
+        ILogger<BaseElasticService> log,
         ElasticClient client,
         IndexService indexService,
         ReindexService reindexService,
@@ -26,7 +26,7 @@ public class EsService
     private readonly ReindexService reindexService;
     private readonly InsertService insertService;
     private readonly PipelineService pipelineService;
-    private readonly ILogger<EsService> log;
+    private readonly ILogger<BaseElasticService> log;
 
 
     public void GetAll()

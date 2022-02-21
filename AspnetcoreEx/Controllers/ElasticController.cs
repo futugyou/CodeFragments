@@ -9,9 +9,9 @@ namespace AspnetcoreEx.Controllers;
 [Route("[controller]")]
 public class ElasticController : ControllerBase
 {
-    private readonly EsService esService;
+    private readonly BaseElasticService esService;
 
-    public ElasticController(EsService esService)
+    public ElasticController(BaseElasticService esService)
     {
         this.esService = esService;
     }
