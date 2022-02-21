@@ -67,6 +67,10 @@ public static class ElasticClientExtensions
         settings.PrettyJson(true);
 #endif
         services.AddSingleton<ElasticClient>(new ElasticClient(settings));
+        services.AddSingleton<IndexService>();
+        services.AddSingleton<PipelineService>();
+        services.AddSingleton<InsertService>();
+        services.AddSingleton<ReindexService>();
         services.AddSingleton<EsService>();
         return services;
     }

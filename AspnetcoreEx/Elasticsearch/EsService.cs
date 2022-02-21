@@ -5,233 +5,29 @@ namespace AspnetcoreEx.Elasticsearch;
 
 public class EsService
 {
-    public EsService(ILogger<EsService> log, ElasticClient client)
+    public EsService(
+        ILogger<EsService> log,
+        ElasticClient client,
+        IndexService indexService,
+        ReindexService reindexService,
+        InsertService insertService,
+        PipelineService pipelineService
+    )
     {
         this.log = log;
         this.client = client;
+        this.indexService = indexService;
+        this.reindexService = reindexService;
+        this.insertService = insertService;
+        this.pipelineService = pipelineService;
     }
     private readonly ElasticClient client;
+    private readonly IndexService indexService;
+    private readonly ReindexService reindexService;
+    private readonly InsertService insertService;
+    private readonly PipelineService pipelineService;
     private readonly ILogger<EsService> log;
 
-    // create index mapping
-    public void Mapping()
-    {
-        client.Indices.Create("order", c => c.Map<OrderInfo>(m => m.AutoMap()));
-        client.Indices.Create("order_propert_visitor", c => c.Map<OrderInfo>(m => m.AutoMap(new DisableDocValuesPropertyVisitor())));
-        client.Indices.Create("company", c => c
-            .Map<Company>(m => m
-                .Properties(ps => ps
-                    .Text(s => s
-                        .Name(n => n.Name)
-                    )
-                    .Object<Employee>(o => o
-                        .Name(n => n.Employees)
-                        .Properties(eps => eps
-                            .Text(s => s
-                                .Name(e => e.FirstName)
-                            )
-                            .Text(s => s
-                                .Name(e => e.LastName)
-                            )
-                            .Number(n => n
-                                .Name(e => e.Salary)
-                                .Type(NumberType.Integer)
-                            )
-                        )
-                    )
-                )
-            )
-        );
-        client.Indices.Create("company1", c => c
-            .Map<Company>(m => m
-                .AutoMap()
-                .Properties(ps => ps
-                    .Nested<Employee>(n => n
-                        .Name(nn => nn.Employees)
-                    )
-                )
-            )
-        );
-
-        client.Indices.Create("company2", c => c
-            .Map<CompanyWithAttributes>(m => m
-                .AutoMap()
-                .Properties(ps => ps
-                    .Nested<EmployeeWithAttributes>(n => n
-                        .Name(nn => nn.Employees)
-                        .AutoMap()
-                        .Properties(pps => pps
-                            .Text(s => s
-                                .Name(e => e.FirstName)
-                                .Fields(fs => fs
-                                    .Keyword(ss => ss
-                                        .Name("firstNameRaw")
-                                    )
-                                    .TokenCount(t => t
-                                        .Name("length")
-                                        .Analyzer("standard")
-                                    )
-                                )
-                            )
-                            .Number(nu => nu
-                                .Name(e => e.Salary)
-                                .Type(NumberType.Double)
-                                .IgnoreMalformed(false)
-                            )
-                            .Date(d => d
-                                .Name(e => e.Birthday)
-                                .Format("MM-dd-yy")
-                            )
-                        )
-                    )
-                )
-            )
-        );
-
-        client.Indices.Create("people", c => c
-            .Map<Person>(p => p
-                .AutoMap() // automatically create the mapping from the type
-                .Properties(props => props
-                    .Keyword(t => t.Name("initials")) // create an additional field to store the initials
-                    .Ip(t => t.Name(dv => dv.IpAddress)) // map field as IP Address type
-                    .Object<GeoIp>(t => t.Name(dv => dv.GeoIp)) // map GeoIp as object
-                )
-            )
-        );
-
-        client.Ingest.PutPipeline("person-pipeline", p => p
-            .Processors(ps => ps
-                .Uppercase<Person>(s => s
-                    .Field(t => t.LastName) // uppercase the lastname
-                )
-                .Script(s => s
-                    .Lang("painless") // use a painless script to populate the new field
-                    .Source("ctx.initials = ctx.firstName.substring(0,1) + ctx.lastName.substring(0,1)")
-                )
-                .GeoIp<Person>(s => s // use ingest-geoip plugin to enrich the GeoIp object from the supplied IP Address
-                    .Field(i => i.IpAddress)
-                    .TargetField(i => i.GeoIp)
-                )
-            )
-        );
-    }
-
-    public void Insert()
-    {
-        var order = new OrderInfo
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "tom",
-            CreateTime = DateTime.Now,
-            Status = "chart",
-            GoodsName = "phone",
-            Price = 10,
-        };
-        var response = client.Index(order, i => i.Index("order"));
-        // var response = client.Index(new IndexRequest<OrderInfo>(order, "order"));
-        response = client.IndexDocument(order);// it wil use default index. in this case is "demo"
-    }
-
-    public void InsertMany()
-    {
-        var orders = new List<OrderInfo>{
-            new OrderInfo{
-                Id = Guid.NewGuid().ToString(),
-                Name = "tom",
-                CreateTime = DateTime.Now,
-                Status = "chart",
-                GoodsName = "phone",
-                Price = 12,
-            }
-        };
-        // 1. IndexMany
-        var response = client.IndexMany(orders);
-        if (response.Errors)
-        {
-            foreach (var itemWithError in response.ItemsWithErrors)
-            {
-                Console.WriteLine($"Failed to index document {itemWithError.Id}: {itemWithError.Error}");
-            }
-        }
-
-        // 2. Bulk
-        var responseBulk = client.Bulk(b => b.Index("order").IndexMany(orders));
-
-        // 3. BulkAll
-        var bulkAllObservable1 = client.BulkAll(orders, b => b
-            .Index("order")
-            .BackOffTime("30s") // how long to wait between retries
-            .BackOffRetries(2) // how many retries are attempted if a failure occurs
-            .RefreshOnCompleted()
-            .MaxDegreeOfParallelism(Environment.ProcessorCount)
-            .Size(1000) // items per bulk request
-        )
-        // perform the indexing and wait up to 15 minutes, 
-        // whilst the BulkAll calls are asynchronous this is a blocking operation
-        .Wait(TimeSpan.FromMinutes(15), next =>
-        {
-            Console.WriteLine($"next.Page: {next.Page}");
-            // do something e.g. write number of pages to console
-        });
-
-        // 4. BulkAll with more option
-        var bulkAllObservable2 = client.BulkAll(orders, b => b
-        .BufferToBulk((descriptor, buffer) => // Customise each bulk operation before it is dispatched
-        {
-            foreach (var order in buffer)
-            {
-                descriptor.Index<OrderInfo>(bi => bi
-                    .Index(order.Price % 2 == 0 ? "even-index" : "odd-index") // Index each document into either even-index or odd-index
-                    .Document(order)
-                );
-            }
-        })
-        .RetryDocumentPredicate((bulkResponseItem, order) => // Decide if a document should be retried in the event of a failure
-        {
-            return bulkResponseItem.Error.Index == "even-index" && order.Name == "Martijn";
-        })
-        .DroppedDocumentCallback((bulkResponseItem, order) => // If a document cannot be indexed this delegate is called
-        {
-            Console.WriteLine($"Unable to index: {bulkResponseItem} {order}");
-        }));
-
-        var waitHandle = new ManualResetEvent(false);
-        ExceptionDispatchInfo? exceptionDispatchInfo = null;
-
-        var observer = new BulkAllObserver(
-            onNext: response =>
-            {
-                // do something e.g. write number of pages to console
-            },
-            onError: exception =>
-            {
-                exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
-                waitHandle.Set();
-            },
-            onCompleted: () => waitHandle.Set());
-
-        // Subscribe to the observable, which will initiate the bulk indexing process
-        bulkAllObservable2.Subscribe(observer);
-
-        // Block the current thread until a signal is received
-        waitHandle.WaitOne();
-
-        // If an exception was captured during the bulk indexing process, throw it
-        exceptionDispatchInfo?.Throw();
-    }
-
-    public void Pipeline()
-    {
-        var person = new Person
-        {
-            Id = 1,
-            FirstName = "Martijn",
-            LastName = "Laarman",
-            IpAddress = "139.130.4.5"
-        };
-        // index the document using the created pipeline
-        var indexResponse = client.Index(person, p => p.Index("people").Pipeline("person-pipeline"));
-    }
 
     public void GetAll()
     {
@@ -239,6 +35,33 @@ public class EsService
         var response = client.Search<OrderInfo>(s => s.Index("order").Query(p => query));
         var list = response.Documents.ToList();
         log.LogInformation("list count " + list.Count);
+    }
+
+    internal void InsertMany()
+    {
+        insertService.InsertManyData();
+        insertService.InsertManyWithBulk();
+    }
+
+    internal void Pipeline()
+    {
+        pipelineService.CreatePipeline();
+        pipelineService.InsertDataWithPipline();
+    }
+
+    internal void Reindex()
+    {
+        reindexService.CreateReindex();
+    }
+
+    internal void Insert()
+    {
+        insertService.InsertData();
+    }
+
+    internal void Mapping()
+    {
+        indexService.CreteElasticIndex();
     }
 
     public void GetPage()
@@ -308,102 +131,5 @@ public class EsService
         log.LogInformation("list count " + list.Count);
     }
 
-    public void Reindex()
-    {
-        // 1. base reindex(use reindexOnServer)
-        var reindexResponse = client.ReindexOnServer(r => r
-            .Source(s => s
-                .Index("source_index")
-            )
-            .Destination(d => d
-                .Index("destination_index")
-            )
-            .WaitForCompletion()
-        );
 
-        // 2. use redinx
-        // Number of slices to split each scroll into
-        var slices = Environment.ProcessorCount;
-        var reindexObserver = client.Reindex<Person>(r => r
-            .ScrollAll("5s", slices, s => s // How to fetch documents to be reindexed
-                .Search(ss => ss
-                    .Index("source_index")
-                )
-            )
-            .BulkAll(b => b // How to index fetched documents
-                .Index("destination_index")
-            )
-        )
-        // Wait up to 15 minutes for the reindex process to complete
-        .Wait(TimeSpan.FromMinutes(15), response =>
-        {
-            // do something with each bulk response e.g. accumulate number of indexed documents
-        });
-
-        // 3. using Reindex create index
-        // Get the settings for the source index
-        var getIndexResponse = client.Indices.Get("source_index");
-        var indexSettings = getIndexResponse.Indices["source_index"];
-        // Get the mapping for the lastName property
-        var lastNameProperty = indexSettings.Mappings.Properties["lastName"];
-        // If the lastName property is a text datatype, add a keyword multi-field
-        if (lastNameProperty is TextProperty textProperty)
-        {
-            if (textProperty.Fields == null)
-                textProperty.Fields = new Properties();
-            textProperty.Fields.Add("keyword", new KeywordProperty());
-        }
-        var reindexObserver2 = client.Reindex<Person>(r => r
-            .CreateIndex(c => c
-                // Use the index settings to create the destination index
-                .InitializeUsing(indexSettings)
-            )
-            .ScrollAll("5s", Environment.ProcessorCount, s => s
-                .Search(ss => ss
-                    .Index("source_index")
-                )
-            )
-            .BulkAll(b => b
-                .Index("destination_index")
-            )
-        )
-        .Wait(TimeSpan.FromMinutes(15), response =>
-        {
-            // do something with each bulk response e.g. accumulate number of indexed documents
-        });
-
-        // 4. use ReindexObserver directly.
-        var reindexObservable = client.Reindex<Person, Person>(
-            // a function to define how source documents are mapped to destination documents
-            person => person,
-            r => r
-            .ScrollAll("5s", Environment.ProcessorCount, s => s
-                .Search(ss => ss
-                    .Index("source_index")
-                )
-            )
-            .BulkAll(b => b
-                .Index("destination_index")
-            )
-        );
-        var waitHandle = new ManualResetEvent(false);
-        ExceptionDispatchInfo? exceptionDispatchInfo = null;
-        var observer = new ReindexObserver(
-            onNext: response =>
-            {
-                // do something e.g. write number of pages to console
-            },
-            onError: exception =>
-            {
-                exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
-                waitHandle.Set();
-            },
-            onCompleted: () => waitHandle.Set());
-        // Subscribe to the observable, which will initiate the reindex process
-        reindexObservable.Subscribe(observer);
-        // Block the current thread until a signal is received
-        waitHandle.WaitOne();
-        // If an exception was captured during the reindex process, throw it
-        exceptionDispatchInfo?.Throw();
-    }
 }
