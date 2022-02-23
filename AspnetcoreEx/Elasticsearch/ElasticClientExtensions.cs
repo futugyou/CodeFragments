@@ -72,6 +72,8 @@ public static class ElasticClientExtensions
         services.AddSingleton<InsertService>();
         services.AddSingleton<ReindexService>();
         services.AddSingleton<AnalyzerService>();
+        services.AddSingleton<TestAnalyzerService>();
+        services.AddSingleton<SearchService>();
         services.AddSingleton<BaseElasticService>();
         return services;
     }

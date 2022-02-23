@@ -7,6 +7,7 @@ public class Person
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string IpAddress { get; set; }
+    public DateTime BrithDay { get; set; }
     public GeoIp GeoIp { get; set; }
 }
 
