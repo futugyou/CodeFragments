@@ -179,4 +179,60 @@ public class SearchService
         // });
 
     }
+
+    public void StoredField()
+    {
+        var searchResponse = client.Search<Person>(s => s
+            .StoredFields(sf => sf
+                .Fields(
+                    f => f.LastName,
+                    f => f.BrithDay,
+                    f => f.FirstName
+                )
+            )
+            .Query(q => q
+                .MatchAll()
+            )
+        );
+        foreach (var fieldValues in searchResponse.Fields)
+        {
+            var document = new
+            {
+                LastName = fieldValues.ValueOf<Person, string>(p => p.LastName),
+                BrithDay = fieldValues.Value<DateTime>(Infer.Field<Person>(p => p.BrithDay)),
+                FirstName = fieldValues.ValueOf<Person, string>(p => p.FirstName)
+            };
+        }
+    }
+
+    public void SourceFilter()
+    {
+        var searchResponse = client.Search<Person>(s => s
+            .Source(sf => sf
+                // Include the following fields
+                .Includes(i => i
+                    .Fields(
+                        f => f.FirstName,
+                        f => f.BrithDay
+                    )
+                )
+                // Exclude the following fields
+                .Excludes(e => e
+                    // Fields can be included or excluded through wildcard patterns
+                    .Fields("num*")
+                )
+            )
+            .Query(q => q
+                .MatchAll()
+            )
+        );
+
+        // exclude _source
+        searchResponse = client.Search<Person>(s => s
+           .Source(false)
+           .Query(q => q
+               .MatchAll()
+           )
+        );
+    }
 }
