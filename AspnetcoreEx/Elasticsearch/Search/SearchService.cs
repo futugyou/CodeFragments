@@ -149,4 +149,34 @@ public class SearchService
         //     new TermQuery { Field = Field<Person>(p => p.LastName), Value = "y" }
         // });
     }
+
+    public void UnaryOperator()
+    {
+        // 1. NOT Fluent API == must_not 
+        var firstNotSearchResponse = client.Search<Person>(s => s
+            .Query(q => !q
+                .Term(p => p.LastName, "x")
+            )
+        );
+
+        // // 2. NOT Object Initializer syntax == must_not 
+        // var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        // {
+        //     Query = !new TermQuery { Field = Field<Person>(p => p.LastName), Value = "x" }
+        // });
+
+        // 3. + Fluent API == filter
+        var firstSearchResponse = client.Search<Person>(s => s
+            .Query(q => +q
+                .Term(p => p.LastName, "x")
+            )
+        );
+
+        // // 4. + Object Initializer syntax == filter
+        // var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        // {
+        //     Query = +new TermQuery { Field = Field<Person>(p => p..LastName), Value = "x" }
+        // });
+
+    }
 }
