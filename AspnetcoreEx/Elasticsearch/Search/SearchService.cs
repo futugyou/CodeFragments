@@ -119,4 +119,34 @@ public class SearchService
         );
     }
 
+    public void BinaryOperator()
+    {
+        // 1. OR Fluent API == should
+        var firstOrSearchResponse = client.Search<Person>(s => s
+            .Query(q => q
+                .Term(p => p.LastName, "x") || q
+                .Term(p => p.LastName, "y")
+            )
+        );
+        // // 2. OR Object Initializer syntax == should
+        // var secondOrSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        // {
+        //     Query = new TermQuery { Field = Field<Person>(p => p.Name), Value = "x" } ||
+        //     new TermQuery { Field = Field<Person>(p => p.Name), Value = "y" }
+        // });
+
+        // 3. AND Fluent API == must
+        var firstAndSearchResponse = client.Search<Person>(s => s
+            .Query(q => q
+                .Term(p => p.LastName, "x") && q
+                .Term(p => p.LastName, "y")
+            )
+        );
+        // // 4. AND Object Initializer syntax == must
+        // var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        // {
+        //     Query = new TermQuery { Field = Field<Person>(p => p.LastName), Value = "x" } &&
+        //     new TermQuery { Field = Field<Person>(p => p.LastName), Value = "y" }
+        // });
+    }
 }
