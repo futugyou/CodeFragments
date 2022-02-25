@@ -1,4 +1,5 @@
 
+using System.Runtime.ExceptionServices;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;
@@ -234,5 +235,59 @@ public class SearchService
                .MatchAll()
            )
         );
+    }
+
+    public void ScrollingSearch()
+    {
+        var searchResponse = client.Search<Person>(s => s
+            .Query(q => q
+                .Term(f => f.FirstName, "Russ")
+            )
+            // Specify a scroll time for how long Elasticsearch should keep this scroll open on the server side. 
+            // The time specified should be sufficient to process the response on the client side.
+            .Scroll("10s")
+        );
+        // make subsequent requests to the scroll API to keep fetching documents, whilst documents are returned
+        while (searchResponse.Documents.Any())
+        {
+            searchResponse = client.Scroll<Person>("10s", searchResponse.ScrollId);
+        }
+    }
+
+    public void ScrollAllObservableSearch()
+    {
+        int numberOfSlices = Environment.ProcessorCount;
+
+        var scrollAllObservable = client.ScrollAll<Person>("10s", numberOfSlices, sc => sc
+            .MaxDegreeOfParallelism(numberOfSlices)
+            .Search(s => s
+                .Query(q => q
+                    .Term(f => f.FirstName, "Russ")
+                )
+            )
+        );
+
+        var waitHandle = new ManualResetEvent(false);
+        ExceptionDispatchInfo? info = null;
+
+        var scrollAllObserver = new ScrollAllObserver<Person>(
+            onNext: response => ProcessResponse(response.SearchResponse),
+            onError: e =>
+            {
+                info = ExceptionDispatchInfo.Capture(e);
+                waitHandle.Set();
+            },
+            onCompleted: () => waitHandle.Set()
+        );
+
+        scrollAllObservable.Subscribe(scrollAllObserver);
+
+        waitHandle.WaitOne();
+        info?.Throw();
+    }
+
+    private void ProcessResponse(ISearchResponse<Person> searchResponse)
+    {
+
     }
 }
