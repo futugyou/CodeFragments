@@ -30,8 +30,51 @@ public class SearchService
         {
             Query = new MatchAllQuery()
         };
-
         searchResponse = client.Search<Person>(searchRequest);
+        //4 
+        var query = new MatchAllQuery();
+        var response = client.Search<OrderInfo>(s => s.Index("order").Query(p => query));
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+    }
+
+    public void PageSearch()
+    {
+        //1
+        var query = new MatchAllQuery();
+        var response = client.Search<OrderInfo>(p => p
+            .Index("order")
+            .Query(_ => query)
+            .From(1)
+            .Size(2)
+        );
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+
+        //2
+        response = client.Search<OrderInfo>(p => p
+            .Index("order")
+            .Query(p =>
+                (p.Term(o => o.Name, "tom")
+                || p.Term(o => o.Name, "tony")
+                ) && p.Term(o => o.GoodsName, "phone")
+            )
+        );
+        list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+        response = client.Search<OrderInfo>(p => p
+        //.AllIndices()
+            .From(0)
+            .Size(10)
+            .Query(q => q
+                .Match(m => m
+                    .Field(f => f.Name)
+                    .Query("tom")
+                )
+           )
+        );
+        list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
     }
 
     public void StructuredSearch()
@@ -239,6 +282,22 @@ public class SearchService
 
     public void ScrollingSearch()
     {
+        // 1
+        var query = new MatchAllQuery();
+        var response = client.Search<OrderInfo>(p => p
+            .Index("order")
+            .Query(_ => query)
+            .Size(2)
+            .Scroll("10s")
+        );
+        var list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+        var scrollid = response.ScrollId;
+        response = client.Scroll<OrderInfo>("10s", scrollid);
+        list = response.Documents.ToList();
+        log.LogInformation("list count " + list.Count);
+
+        // 2
         var searchResponse = client.Search<Person>(s => s
             .Query(q => q
                 .Term(f => f.FirstName, "Russ")
