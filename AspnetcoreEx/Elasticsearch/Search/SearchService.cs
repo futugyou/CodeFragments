@@ -1,4 +1,5 @@
 
+using System.Linq.Expressions;
 using System.Runtime.ExceptionServices;
 using Nest;
 
@@ -172,12 +173,12 @@ public class SearchService
                 .Term(p => p.LastName, "y")
             )
         );
-        // // 2. OR Object Initializer syntax == should
-        // var secondOrSearchResponse = client.Search<Person>(new SearchRequest<Person>
-        // {
-        //     Query = new TermQuery { Field = Field<Person>(p => p.Name), Value = "x" } ||
-        //     new TermQuery { Field = Field<Person>(p => p.Name), Value = "y" }
-        // });
+        // 2. OR Object Initializer syntax == should
+        var secondOrSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        {
+            Query = new TermQuery { Field = Infer.Field<Person>(p => p.LastName), Value = "x" } ||
+            new TermQuery { Field = Infer.Field<Person>(p => p.LastName), Value = "y" }
+        });
 
         // 3. AND Fluent API == must
         var firstAndSearchResponse = client.Search<Person>(s => s
@@ -186,12 +187,14 @@ public class SearchService
                 .Term(p => p.LastName, "y")
             )
         );
-        // // 4. AND Object Initializer syntax == must
-        // var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
-        // {
-        //     Query = new TermQuery { Field = Field<Person>(p => p.LastName), Value = "x" } &&
-        //     new TermQuery { Field = Field<Person>(p => p.LastName), Value = "y" }
-        // });
+        // 4. AND Object Initializer syntax == must
+        var fieldString = new Field("lastName");
+        var fieldProperty = new Field(typeof(Person).GetProperty(nameof(Person.LastName)));
+        var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        {
+            Query = new TermQuery { Field = fieldString, Value = "x" } &&
+            new TermQuery { Field = fieldProperty, Value = "y" }
+        });
     }
 
     public void UnaryOperator()
@@ -203,24 +206,25 @@ public class SearchService
             )
         );
 
-        // // 2. NOT Object Initializer syntax == must_not 
-        // var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
-        // {
-        //     Query = !new TermQuery { Field = Field<Person>(p => p.LastName), Value = "x" }
-        // });
+        // 2. NOT Object Initializer syntax == must_not 
+        Expression<Func<Person, object>> expression = p => p.LastName;
+        var secondNotSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        {
+            Query = !new TermQuery { Field = new Field(expression), Value = "x" }
+        });
 
         // 3. + Fluent API == filter
-        var firstSearchResponse = client.Search<Person>(s => s
+        var firstEqSearchResponse = client.Search<Person>(s => s
             .Query(q => +q
                 .Term(p => p.LastName, "x")
             )
         );
 
-        // // 4. + Object Initializer syntax == filter
-        // var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
-        // {
-        //     Query = +new TermQuery { Field = Field<Person>(p => p..LastName), Value = "x" }
-        // });
+        // 4. + Object Initializer syntax == filter
+        var secondEqSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        {
+            Query = +new TermQuery { Field = Infer.Field<Person>(p => p.LastName), Value = "x" }
+        });
 
     }
 
