@@ -65,6 +65,8 @@ public static class ElasticClientExtensions
         settings.DefaultMappingFor<Company>(m => m
             .IdProperty(p => p.Name)
         );
+        // TODO: can not find WithPropertyMappingProvider
+        //settings.WithPropertyMappingProvider(new CustomPropertyMappingProvider());
 #if DEBUG
         settings.EnableDebugMode();
         settings.PrettyJson(true);
