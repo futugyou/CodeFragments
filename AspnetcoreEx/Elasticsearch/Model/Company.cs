@@ -1,5 +1,8 @@
+using Nest;
+
 namespace AspnetcoreEx.Elasticsearch;
 
+[ElasticsearchType(IdProperty = nameof(Name))]
 public class Company
 {
     public string Name { get; set; }

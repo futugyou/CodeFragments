@@ -62,6 +62,9 @@ public static class ElasticClientExtensions
         {
             settings.ClientCertificate(elasticOptions.CertificatePath);
         }
+        settings.DefaultMappingFor<Company>(m => m
+            .IdProperty(p => p.Name)
+        );
 #if DEBUG
         settings.EnableDebugMode();
         settings.PrettyJson(true);
