@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using Elasticsearch.Net;
 using Nest;
@@ -102,6 +103,8 @@ public static class ElasticClientExtensions
         {
             //requestData.RequestMetaData
         });
+        var listenerObserver = new ElasticListenerObserver();
+        DiagnosticListener.AllListeners.Subscribe(listenerObserver);
         services.AddSingleton<ElasticClient>(new ElasticClient(settings));
         services.AddSingleton<IndexService>();
         services.AddSingleton<PipelineService>();
