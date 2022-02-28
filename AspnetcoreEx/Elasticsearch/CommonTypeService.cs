@@ -1,4 +1,6 @@
+using System.Net.NetworkInformation;
 using System.Reflection;
+using Elasticsearch.Net.Diagnostics;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;
@@ -71,6 +73,13 @@ public class CommonTypeService
             DateMathTime thirteenMonthsFromString = "13M";
             DateMathTime fiftyTwoWeeks = "52w";
             Console.WriteLine(thirteenMonths);//13M
+        }
+        {
+#if DEBUG
+            var tcpStatistics = TcpStats.GetActiveTcpConnections();
+            var ipv4Stats = TcpStats.GetTcpStatistics(NetworkInterfaceComponent.IPv4);
+            var ipv6Stats = TcpStats.GetTcpStatistics(NetworkInterfaceComponent.IPv6);
+#endif
         }
     }
 }

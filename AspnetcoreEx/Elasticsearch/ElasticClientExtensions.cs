@@ -70,8 +70,16 @@ public static class ElasticClientExtensions
         // TODO: can not find WithPropertyMappingProvider
         //settings.WithPropertyMappingProvider(new CustomPropertyMappingProvider());
 #if DEBUG
-        settings.EnableDebugMode();
-        settings.PrettyJson(true);
+        settings.EnableDebugMode(apiCallDetails =>
+        {
+
+        });
+        //EnableDebugMode include all
+        // settings.PrettyJson(true);
+        // settings.IncludeServerStackTraceOnError();
+        // settings.DisableDirectStreaming();
+        // settings.EnableTcpStats();
+        // settings.EnableThreadPoolStats();
 #endif
         var list = new List<string>();
         settings.OnRequestCompleted(apiCallDetails =>
