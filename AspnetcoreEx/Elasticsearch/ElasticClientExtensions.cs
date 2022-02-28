@@ -1,3 +1,4 @@
+using System.Text;
 using Elasticsearch.Net;
 using Nest;
 
@@ -71,6 +72,36 @@ public static class ElasticClientExtensions
         settings.EnableDebugMode();
         settings.PrettyJson(true);
 #endif
+        var list = new List<string>();
+        settings.OnRequestCompleted(apiCallDetails =>
+        {
+            // log out the request and the request body, if one exists for the type of request
+            if (apiCallDetails.RequestBodyInBytes != null)
+            {
+                list.Add(
+                    $"{apiCallDetails.HttpMethod} {apiCallDetails.Uri} " +
+                    $"{Encoding.UTF8.GetString(apiCallDetails.RequestBodyInBytes)}");
+            }
+            else
+            {
+                list.Add($"{apiCallDetails.HttpMethod} {apiCallDetails.Uri}");
+            }
+
+            // log out the response and the response body, if one exists for the type of response
+            if (apiCallDetails.ResponseBodyInBytes != null)
+            {
+                list.Add($"Status: {apiCallDetails.HttpStatusCode}" +
+                         $"{Encoding.UTF8.GetString(apiCallDetails.ResponseBodyInBytes)}");
+            }
+            else
+            {
+                list.Add($"Status: {apiCallDetails.HttpStatusCode}");
+            }
+        });
+        settings.OnRequestDataCreated(requestData =>
+        {
+            //requestData.RequestMetaData
+        });
         services.AddSingleton<ElasticClient>(new ElasticClient(settings));
         services.AddSingleton<IndexService>();
         services.AddSingleton<PipelineService>();
