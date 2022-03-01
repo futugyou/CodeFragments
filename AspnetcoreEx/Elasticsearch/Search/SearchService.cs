@@ -353,4 +353,41 @@ public class SearchService
     {
 
     }
+
+    public void Highlight()
+    {
+        var searchResponse = client.Search<Company>(s => s
+            .IndicesBoost(b => b
+                .Add("company_index_1", 2.0)
+                .Add("company_index_2", 1.0)
+            )
+            .Query(q => q
+                .Match(m => m
+                    .Field(f => f.Name.Suffix("company"))
+                    .Query("Upton Sons Shield Rice Rowe Roberts")
+                )
+            )
+            .Highlight(h => h
+                .PreTags("<tag1>")
+                .PostTags("</tag1>")
+                .Encoder(HighlighterEncoder.Html)
+                .HighlightQuery(q => q
+                    .Match(m => m
+                        .Field(f => f.Name.Suffix("company"))
+                        .Query("Upton Sons Shield Rice Rowe Roberts")
+                    )
+                )
+                .Fields(
+                    fs => fs
+                        .Field(p => p.Name.Suffix("company"))
+                        .Type("plain")
+                        .ForceSource()
+                        .FragmentSize(150)
+                        .Fragmenter(HighlighterFragmenter.Span)
+                        .NumberOfFragments(3)
+                        .NoMatchSize(150)
+                )
+            )
+        );
+    }
 }
