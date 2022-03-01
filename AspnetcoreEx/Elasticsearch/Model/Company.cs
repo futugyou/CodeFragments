@@ -6,6 +6,7 @@ namespace AspnetcoreEx.Elasticsearch;
 public class Company
 {
     public string Name { get; set; }
+    public double Assets { get; set; }
     public List<Employee> Employees { get; set; }
 }
 

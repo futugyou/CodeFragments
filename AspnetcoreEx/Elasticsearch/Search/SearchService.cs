@@ -390,4 +390,27 @@ public class SearchService
             )
         );
     }
+
+    public void ScriptFields()
+    {
+         var searchResponse = client.Search<Company>(s => s
+            .ScriptFields(sf => sf
+                .ScriptField("test1", sc => sc
+                    .Source("doc['assets'].value * 2")
+                )
+                .ScriptField("test2", sc => sc
+                    .Source("doc['assets'].value * params.factor")
+                    .Params(p => p
+                        .Add("factor", 2.0)
+                    )
+                )
+            )
+         );
+
+        foreach (var fields in searchResponse.Fields)
+        {
+            Console.WriteLine( fields.Value<int>("test1") );
+            Console.WriteLine( fields.Value<int>("test2") );
+        }
+    }
 }
