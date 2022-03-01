@@ -6,7 +6,9 @@ namespace AspnetcoreEx.Elasticsearch;
 public class Company
 {
     public string Name { get; set; }
+    public DateTime CreateAt { get; set; }
     public double Assets { get; set; }
+    public GeoLocation LocationPoint { get; set; }
     public List<Employee> Employees { get; set; }
 }
 

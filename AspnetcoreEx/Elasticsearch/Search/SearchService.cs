@@ -393,24 +393,72 @@ public class SearchService
 
     public void ScriptFields()
     {
-         var searchResponse = client.Search<Company>(s => s
-            .ScriptFields(sf => sf
-                .ScriptField("test1", sc => sc
-                    .Source("doc['assets'].value * 2")
-                )
-                .ScriptField("test2", sc => sc
-                    .Source("doc['assets'].value * params.factor")
-                    .Params(p => p
-                        .Add("factor", 2.0)
-                    )
-                )
-            )
-         );
+        var searchResponse = client.Search<Company>(s => s
+           .ScriptFields(sf => sf
+               .ScriptField("test1", sc => sc
+                   .Source("doc['assets'].value * 2")
+               )
+               .ScriptField("test2", sc => sc
+                   .Source("doc['assets'].value * params.factor")
+                   .Params(p => p
+                       .Add("factor", 2.0)
+                   )
+               )
+           )
+        );
 
         foreach (var fields in searchResponse.Fields)
         {
-            Console.WriteLine( fields.Value<int>("test1") );
-            Console.WriteLine( fields.Value<int>("test2") );
+            Console.WriteLine(fields.Value<int>("test1"));
+            Console.WriteLine(fields.Value<int>("test2"));
         }
+    }
+
+    public void Sorting()
+    {
+        var searchResponse = client.Search<Company>(s => s
+            .Sort(ss => ss
+                .Ascending(p => p.CreateAt)
+                .Descending(p => p.Name)
+                .Descending(SortSpecialField.Score)
+                .Ascending(SortSpecialField.DocumentIndexOrder)
+                .Field(f => f
+                    .Field(p => p.Employees.First().Salary)
+                    .Order(SortOrder.Descending)
+                    .MissingLast()
+                    .UnmappedType(FieldType.Date)
+                    .Mode(SortMode.Average)
+                    .Nested(n => n
+                        .Path(p => p.Employees)
+                        .Filter(q => q.MatchAll())
+                    )
+                )
+                .Field(f => f
+                    .Field(p => p.Assets)
+                    .Order(SortOrder.Descending)
+                    .Missing(-1)
+                )
+                .GeoDistance(g => g
+                    .Field(p => p.LocationPoint)
+                    .DistanceType(GeoDistanceType.Arc)
+                    .Order(SortOrder.Ascending)
+                    .Unit(DistanceUnit.Centimeters)
+                    .Mode(SortMode.Min)
+                    .Points(new GeoLocation(70, -70), new GeoLocation(-12, 12))
+                )
+                .GeoDistance(g => g
+                    .Field(p => p.LocationPoint)
+                    .Points(new GeoLocation(70, -70), new GeoLocation(-12, 12))
+                )
+                .Script(sc => sc
+                    .Type("number")
+                    .Ascending()
+                    .Script(script => script
+                        .Source("doc['assets'].value * params.factor")
+                        .Params(p => p.Add("factor", 1.1))
+                    )
+                )
+            )
+        );
     }
 }
