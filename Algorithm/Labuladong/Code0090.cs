@@ -1,10 +1,10 @@
 namespace Labuladong;
 
-public class Code0078
+public class Code0090
 {
     public static void Exection()
     {
-        var nums = new int[] { 1, 2, 3 };
+        var nums = new int[] { 1, 2, 2 };
         Sub(nums);
         foreach (var item in result)
         {
@@ -15,6 +15,7 @@ public class Code0078
     private static void Sub(int[] nums)
     {
         var res = new List<int>();
+        Array.Sort(nums);
         BackTrack(res, 0, nums);
     }
 
@@ -25,12 +26,13 @@ public class Code0078
         result.Add(t.ToList());
         for (int i = v; i < nums.Length; i++)
         {
-            // if (!res.Contains(nums[i]))
-            // {
+            if (i > v && nums[i] == nums[i - 1])
+            {
+                continue;
+            }
             res.Add(nums[i]);
             BackTrack(res, i + 1, nums);
             res.RemoveAt(res.Count - 1);
-            // }
         }
     }
 
