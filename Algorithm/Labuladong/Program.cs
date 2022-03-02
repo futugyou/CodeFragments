@@ -4,7 +4,7 @@ class Program
     static void Main(string[] args)
     {
         //Code0277.FindCelebrity();
-        Code0040.Exection();
+        Code0047.Exection();
         Console.WriteLine("Hello World!");
     }
 }
