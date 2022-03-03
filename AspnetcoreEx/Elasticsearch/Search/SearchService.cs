@@ -461,4 +461,22 @@ public class SearchService
             )
         );
     }
+
+    public void CombinedFields()
+    {
+        var searchResponse = client.Search<Person>(s => s
+            .Query(q => q
+                .CombinedFields(c => c
+                    .Fields(f => f.Field(p => p.FirstName).Field("lastName"))
+                    .Query("tom")
+                    .Boost(1.1)
+                    .Operator(Operator.Or)
+                    .MinimumShouldMatch("2")
+                    .ZeroTermsQuery(ZeroTermsQuery.All)
+                    .Name("combined_fields")
+                    .AutoGenerateSynonymsPhraseQuery(false)
+                )
+            )
+        );
+    }
 }
