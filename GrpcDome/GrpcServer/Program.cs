@@ -99,6 +99,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapGrpcService<FourTypeService>();
     endpoints.MapGrpcService<ProtoTypeService>();
     endpoints.MapGrpcService<OrderService>();
+    endpoints.MapGrpcService<MaskFieldService>();
     endpoints.MapGet("/generateJwtToken", context =>
     {
         return context.Response.WriteAsync(GenerateJwtToken(context.Request.Query["name"]));

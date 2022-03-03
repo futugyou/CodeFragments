@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Health.V1;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
 using GrpcClient;
+using GrpcServer;
 using GrpcServer.Model;
 using ProtoBuf.Grpc.Client;
 
@@ -67,10 +69,23 @@ var reply5 = await client5.GetOrders(new OrderRequest { OrderId = 10 });
 Console.WriteLine("Code First Response : " + reply5.Amount);
 
 // 6. Health Check
-var client6 = new Health.HealthClient(channel);
-var response = await client6.CheckAsync(new HealthCheckRequest());
-var status = response.Status;
-Console.WriteLine("Health Check Response : " + status);
+// var client6 = new Health.HealthClient(channel);
+// var response = await client6.CheckAsync(new HealthCheckRequest());
+// var status = response.Status;
+// Console.WriteLine("Health Check Response : " + status);
 
+// 7 field mask 
+var client7 = new GrpcServer.FieldMaskService.FieldMaskServiceClient(channel);
+var fieldMask = new FieldMask();
+fieldMask.Paths.AddRange(new string[] { "seq", "like" });
+var maskRequest = new FieldMaskRequest
+{
+    Message = "ok",
+};
+maskRequest.FieldMask = fieldMask;
+var maskresponse = client7.UnaryCall(maskRequest);
+Console.WriteLine("mask reply seq " + maskresponse.Seq);
+Console.WriteLine("mask reply replay " + maskresponse.Replay);
+Console.WriteLine("mask reply like " + string.Join(",", maskresponse.Like));
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();

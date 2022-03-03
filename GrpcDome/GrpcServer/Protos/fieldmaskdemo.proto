@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcServer";
+import "google/protobuf/field_mask.proto";
+package field.mask.demo;
+
+service FieldMaskService { 
+  rpc UnaryCall (FieldMaskRequest) returns (FieldMaskResponse); 
+}
+
+message FieldMaskRequest {
+    string message = 1;
+    google.protobuf.FieldMask field_mask = 2;
+}
+
+message FieldMaskResponse {
+    int32 seq = 1;
+    string replay = 2;
+    repeated string like = 3;
+}
