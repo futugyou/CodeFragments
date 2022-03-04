@@ -14,8 +14,14 @@ public class Mutation
     ///         }
     ///     }
     /// }
+    [Error(typeof(DuplicateException))]
     public Task<AddUserResponse> AddUser(AddUserRequest user, [Service] IUserRepository repository)
     {
+        var raw = repository.GetUserById(user.id);
+        if (raw != null)
+        {
+            throw new DuplicateException(user.id);
+        }
         User u = new User
         {
             Id = user.id,

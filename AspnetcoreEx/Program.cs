@@ -56,6 +56,10 @@ builder.Services
     })
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
+    .ModifyRequestOptions(option =>
+    {
+        option.IncludeExceptionDetails = true;
+    })
     // .AddMutationConventions(new MutationConventionOptions
     // {
     //     ApplyToAllMutations = true,

@@ -2,6 +2,7 @@ namespace AspnetcoreEx.GraphQL;
 
 public interface IUserRepository
 {
+    User? GetUserById(int id);
     List<User> GetAllUser();
     List<User> AddUser(User user);
 }
@@ -34,5 +35,10 @@ public class UserRepository : IUserRepository
     public List<User> GetAllUser()
     {
         return DefaultUsers;
+    }
+
+    public User? GetUserById(int id)
+    {
+        return DefaultUsers.FirstOrDefault(p => p.Id == id);
     }
 }
