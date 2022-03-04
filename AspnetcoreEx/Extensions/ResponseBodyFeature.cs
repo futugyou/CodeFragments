@@ -1,7 +1,92 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
+﻿using Microsoft.AspNetCore.Http.Features;
 using System.IO.Pipelines;
 using System.Text.Json.Nodes;
+
+namespace AspnetcoreEx.Extensions;
+
+public class ReadCacheProxyStream : Stream
+{
+    private readonly Stream _innerStream;
+
+    public MemoryStream CachedStream { get; } = new MemoryStream(1024);
+
+    public override bool CanRead => _innerStream.CanRead;
+
+    public override bool CanSeek => false;
+
+    public override bool CanWrite => false;
+
+    public override long Length => _innerStream.Length;
+
+    public override long Position { get => _innerStream.Length; set => throw new NotSupportedException(); }
+
+    public ReadCacheProxyStream(Stream innerStream)
+    {
+        _innerStream = innerStream;
+    }
+
+    public override void Flush() => throw new NotSupportedException();
+
+    public override Task FlushAsync(CancellationToken cancellationToken) => _innerStream.FlushAsync(cancellationToken);
+
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        var len = await _innerStream.ReadAsync(buffer, cancellationToken);
+        if (len > 0)
+        {
+            CachedStream.Write(buffer.Span.Slice(0, len));
+        }
+        return len;
+    }
+
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+    public override void SetLength(long value) => throw new NotSupportedException();
+
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+}
+
+public class WriteCacheProxyStream : Stream
+{
+    private readonly Stream _innerStream;
+
+    public MemoryStream CachedStream { get; } = new MemoryStream(1024);
+
+    public override bool CanRead => false;
+
+    public override bool CanSeek => false;
+
+    public override bool CanWrite => _innerStream.CanWrite;
+
+    public override long Length => _innerStream.Length;
+
+    public override long Position { get => _innerStream.Length; set => throw new NotSupportedException(); }
+
+    public WriteCacheProxyStream(Stream innerStream)
+    {
+        _innerStream = innerStream;
+    }
+
+    public override void Flush() => throw new NotSupportedException();
+
+    public override Task FlushAsync(CancellationToken cancellationToken) => _innerStream.FlushAsync(cancellationToken);
+
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+    public override void SetLength(long value) => throw new NotSupportedException();
+
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+    public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        await _innerStream.WriteAsync(buffer, cancellationToken);
+        CachedStream.Write(buffer.Span);
+    }
+}
 
 public class ResponseCustomBody : Stream, IHttpResponseBodyFeature
 {
