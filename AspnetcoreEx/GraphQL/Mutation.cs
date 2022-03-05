@@ -1,4 +1,5 @@
 namespace AspnetcoreEx.GraphQL;
+using HotChocolate.Subscriptions;
 
 public record AddUserRequest(int id, string name, int age);
 public record AddUserResponse(User use);
@@ -15,7 +16,7 @@ public class Mutation
     ///     }
     /// }
     [Error(typeof(DuplicateException))]
-    public Task<AddUserResponse> AddUser(AddUserRequest user, [Service] IUserRepository repository)
+    public async Task<AddUserResponse> AddUser(AddUserRequest user, [Service] IUserRepository repository, [Service] ITopicEventSender sender)
     {
         var raw = repository.GetUserById(user.id);
         if (raw != null)
@@ -29,7 +30,9 @@ public class Mutation
             Age = user.age,
         };
         var uselist = repository.AddUser(u);
-        return Task.FromResult(new AddUserResponse(uselist.FirstOrDefault(o => o.Id == user.id)!));
+        Console.WriteLine("send user create message, user id: " + u.Id);
+        await sender.SendAsync("userCreated", u);
+        return new AddUserResponse(uselist.FirstOrDefault(o => o.Id == user.id)!);
     }
 }
 
@@ -38,8 +41,9 @@ public class MutationType : ObjectType<Mutation>
     protected override void Configure(IObjectTypeDescriptor<Mutation> descriptor)
     {
         descriptor
-        .Field(f => f.AddUser(default!, default!))
+        .Field(f => f.AddUser(default!, default!, default!))
         .Argument("user", a => a.Description("this is user input parameter description!"))
+        //.Error<DuplicateException>()
         .UseMutationConvention();
     }
 }

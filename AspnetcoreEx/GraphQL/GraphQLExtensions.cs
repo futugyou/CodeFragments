@@ -1,4 +1,6 @@
 using HotChocolate.Types.Pagination;
+using HotChocolate.Subscriptions.Redis;
+using StackExchange.Redis;
 
 namespace AspnetcoreEx.GraphQL;
 
@@ -16,8 +18,12 @@ public static class GraphQLExtensions
             MaxPageSize = 50,
             IncludeTotalCount = true
         })
-        .AddQueryType<QueryType>()
-        .AddMutationType<MutationType>()
+        .AddQueryType<Query>()
+        .AddMutationType<Mutation>()
+        .AddSubscriptionType<Subscription>()
+        // .AddQueryType<QueryType>()
+        // .AddMutationType<MutationType>()
+        // .AddMutationType<SubscriptionType>()
         .ModifyRequestOptions(option =>
         {
             option.IncludeExceptionDetails = true;
@@ -31,6 +37,8 @@ public static class GraphQLExtensions
         //     PayloadErrorTypeNamePattern = "{MutationName}Error",
         //     PayloadErrorsFieldName = "errors"
         // })
+        .AddInMemorySubscriptions()
+        //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
     }

@@ -66,6 +66,8 @@ app.UseAuthorization();
 // {
 //     endpoints.MapGraphQL();
 // });
+app.UseRouting();
+app.UseWebSockets();
 app.MapGraphQL();
 app.UseGraphQLVoyager(new VoyagerOptions { GraphQLEndPoint = "/graphql" }, "/graphql-voyager");
 
