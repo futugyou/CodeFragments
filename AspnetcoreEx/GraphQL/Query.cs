@@ -2,7 +2,6 @@ namespace AspnetcoreEx.GraphQL;
 
 public class Query
 {
-
     public async Task<User?> GetUser(int id, [Service] IUserRepository repository)
     {
         var user = repository.GetAllUser().FirstOrDefault(p => p.Id == id);
@@ -64,4 +63,18 @@ public class Query
     ///}
     [UsePaging]
     public Task<List<User>> GetPagingUser([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
+}
+
+
+public class QueryType : ObjectType<Query>
+{
+    protected override void Configure(IObjectTypeDescriptor<Query> descriptor)
+    {
+        descriptor
+            .Field(f => f.GetPagingUser(default!))
+            .Type<UserType>();
+        descriptor
+            .Field(f => f.GetTakeSkipUser(default!))
+            .Type<UserType>();
+    }
 }

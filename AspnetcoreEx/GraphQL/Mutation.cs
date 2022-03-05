@@ -32,3 +32,14 @@ public class Mutation
         return Task.FromResult(new AddUserResponse(uselist.FirstOrDefault(o => o.Id == user.id)!));
     }
 }
+
+public class MutationType : ObjectType<Mutation>
+{
+    protected override void Configure(IObjectTypeDescriptor<Mutation> descriptor)
+    {
+        descriptor
+        .Field(f => f.AddUser(default!, default!))
+        .Argument("user", a => a.Description("this is user input parameter description!"))
+        .UseMutationConvention();
+    }
+}

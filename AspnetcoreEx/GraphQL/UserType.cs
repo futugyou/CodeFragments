@@ -1,6 +1,6 @@
 namespace AspnetcoreEx.GraphQL;
 
-public class UserConfigure : ObjectType<User>
+public class UserType : ObjectType<User>
 {
     protected override void Configure(IObjectTypeDescriptor<User> descriptor)
     {

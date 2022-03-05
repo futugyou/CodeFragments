@@ -44,32 +44,7 @@ builder.Services.AddRefitClient<IGitHubApi>()
     .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(timeoutPolicy);
 
-builder.Services
-    .AddGraphQLServer()
-    .AddFiltering()
-    .AddProjections() // AddProjections can get include data like ef.
-    .AddSorting()
-    .SetPagingOptions(new PagingOptions
-    {
-        MaxPageSize = 50,
-        IncludeTotalCount = true
-    })
-    .AddQueryType<Query>()
-    .AddMutationType<Mutation>()
-    .ModifyRequestOptions(option =>
-    {
-        option.IncludeExceptionDetails = true;
-    })
-    // .AddMutationConventions(new MutationConventionOptions
-    // {
-    //     ApplyToAllMutations = true,
-    //     InputArgumentName = "input",
-    //     InputTypeNamePattern = "{MutationName}Input",
-    //     PayloadTypeNamePattern = "{MutationName}Payload",
-    //     PayloadErrorTypeNamePattern = "{MutationName}Error",
-    //     PayloadErrorsFieldName = "errors"
-    // })
-    .AddType<UserConfigure>();
+builder.Services.AddGraphQL(configuration);
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
