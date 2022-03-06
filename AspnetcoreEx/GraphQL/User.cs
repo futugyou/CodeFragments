@@ -1,10 +1,14 @@
 namespace AspnetcoreEx.GraphQL;
 
+// [GraphQLName("user")]
 public class User
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    // [GraphQLName("age")]
     public int Age { get; set; }
+    // [GraphQLIgnore]
+    // [GraphQLType(typeof(StringType))]
     public string Secret { get; set; }
     public List<Order> Orders { get; set; }
 }
