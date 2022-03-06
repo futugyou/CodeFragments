@@ -2,7 +2,11 @@ namespace AspnetcoreEx.GraphQL;
 
 public class GenericResponse<T>
 {
+    [GraphQLType(typeof(IdType))]
+    public int Id { get; set; }
     public string Status { get; set; }
+    [GraphQLType(typeof(EmailAddressType))]
+    public string Email { get; set; }
     public T Payload { get; set; }
 }
 
@@ -13,7 +17,7 @@ public class GenericResponseType<TSchemaType, TRuntimeType> : ObjectType<Generic
         IObjectTypeDescriptor<GenericResponse<TRuntimeType>> descriptor)
     {
         descriptor.Field(f => f.Status);
-
+        descriptor.Field(f => f.Id).Type<IdType>();
         descriptor
             .Field(f => f.Payload)
             .Type<TSchemaType>();
@@ -26,8 +30,10 @@ public class GenericQuery
     {
         return new GenericResponse<int>
         {
+            Id = 100,
             Status = "OK",
-            Payload = 123
+            Payload = 123,
+            Email = "ab@cd.com"
         };
     }
 }

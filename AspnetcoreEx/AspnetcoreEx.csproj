@@ -21,6 +21,7 @@
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="5.2.0" />		
 		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="12.7.0-preview.3" />
 		<PackageReference Include="HotChocolate.AspNetCore" Version="12.7.0-preview.3" />
+		<PackageReference Include="HotChocolate.Types.Scalars" Version="12.7.0-preview.3" />
 		<PackageReference Include="HotChocolate.Data" Version="12.7.0-preview.3" />
 		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="12.7.0-preview.3" />
 	</ItemGroup>

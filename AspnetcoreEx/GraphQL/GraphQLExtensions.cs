@@ -39,6 +39,8 @@ public static class GraphQLExtensions
         //     PayloadErrorsFieldName = "errors"
         // })
         .AddInMemorySubscriptions()
+        .AddType(new UuidType('D'))
+        .BindRuntimeType<string, StringType>()
         //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
