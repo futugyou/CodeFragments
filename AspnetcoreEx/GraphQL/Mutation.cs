@@ -34,6 +34,15 @@ public class Mutation
         await sender.SendAsync("userCreated", u);
         return new AddUserResponse(uselist.FirstOrDefault(o => o.Id == user.id)!);
     }
+
+    public IPet? CreatePetAsync(PetInput input)
+    {
+        if (input.Cat != null)
+        {
+            return input.Cat;
+        }
+        return input.Dog;
+    }
 }
 
 public class MutationType : ObjectType<Mutation>

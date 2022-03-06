@@ -29,6 +29,10 @@ public static class GraphQLExtensions
         {
             option.IncludeExceptionDetails = true;
         })
+        .ModifyOptions(option =>
+        {
+            option.EnableOneOf = true;
+        })
         // .AddMutationConventions(new MutationConventionOptions
         // {
         //     ApplyToAllMutations = true,
@@ -39,8 +43,10 @@ public static class GraphQLExtensions
         //     PayloadErrorsFieldName = "errors"
         // })
         .AddInMemorySubscriptions()
-        .AddType(new UuidType('D'))
+        //.AddType(new UuidType('D'))
         .BindRuntimeType<string, StringType>()
+        .AddType<Dog>()
+        .AddType<Cat>()
         //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
