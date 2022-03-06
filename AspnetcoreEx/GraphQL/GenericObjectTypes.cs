@@ -1,30 +1,30 @@
 namespace AspnetcoreEx.GraphQL;
 
-public class GenericResponse
+public class GenericResponse<T>
 {
     public string Status { get; set; }
-    public object Payload { get; set; }
+    public T Payload { get; set; }
 }
 
-public class GenericResponseType<T> : ObjectType<GenericResponse>
-    where T : class, IOutputType
+public class GenericResponseType<TSchemaType, TRuntimeType> : ObjectType<GenericResponse<TRuntimeType>>
+    where TSchemaType : class, IOutputType
 {
     protected override void Configure(
-        IObjectTypeDescriptor<GenericResponse> descriptor)
+        IObjectTypeDescriptor<GenericResponse<TRuntimeType>> descriptor)
     {
         descriptor.Field(f => f.Status);
 
         descriptor
             .Field(f => f.Payload)
-            .Type<T>();
+            .Type<TSchemaType>();
     }
 }
 
 public class GenericQuery
 {
-    public GenericResponse GetGenericResponse()
+    public GenericResponse<int> GetGenericResponse()
     {
-        return new GenericResponse
+        return new GenericResponse<int>
         {
             Status = "OK",
             Payload = 123
@@ -38,7 +38,7 @@ public class GenericQueryType : ObjectType<GenericQuery>
     {
         descriptor
             .Field(f => f.GetGenericResponse())
-            .Type<GenericResponseType<IntType>>()
+            .Type<GenericResponseType<IntType, int>>()
             ;
     }
 }
