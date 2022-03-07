@@ -35,7 +35,7 @@ public class Mutation
         return new AddUserResponse(uselist.FirstOrDefault(o => o.Id == user.id)!);
     }
 
-    public IPet? CreatePetAsync(PetInput input)
+    public IPet? CreatePet(PetInput input)
     {
         if (input.Cat != null)
         {

@@ -47,7 +47,8 @@ public static class GraphQLExtensions
         .AddType<Dog>()
         .AddType<Cat>()
         .AddTypeExtension<UserExtension>()
-        .AddTypeExtension<QueryUserResolvers>();
+        .AddTypeExtension<QueryUserResolvers>()
+        .AddDirectiveType<CustomDirectiveType>()
         //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
