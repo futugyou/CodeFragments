@@ -18,8 +18,7 @@ public static class GraphQLExtensions
             MaxPageSize = 50,
             IncludeTotalCount = true
         })
-        //.AddQueryType<Query>()
-        .AddQueryType<GenericQueryType>()
+        .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddSubscriptionType<Subscription>()
         // .AddQueryType<QueryType>()
@@ -47,6 +46,8 @@ public static class GraphQLExtensions
         .BindRuntimeType<string, StringType>()
         .AddType<Dog>()
         .AddType<Cat>()
+        .AddTypeExtension<UserExtension>()
+        .AddTypeExtension<QueryUserResolvers>();
         //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
