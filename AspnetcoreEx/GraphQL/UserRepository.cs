@@ -5,6 +5,7 @@ public interface IUserRepository
     User? GetUserById(int id);
     List<User> GetAllUser();
     List<User> AddUser(User user);
+    Task<List<User>> GetUserByIds(IEnumerable<int> keys);
 }
 public class UserRepository : IUserRepository
 {
@@ -40,5 +41,10 @@ public class UserRepository : IUserRepository
     public User? GetUserById(int id)
     {
         return DefaultUsers.FirstOrDefault(p => p.Id == id);
+    }
+
+    public Task<List<User>> GetUserByIds(IEnumerable<int> keys)
+    {
+        return Task.FromResult(DefaultUsers.Where(p => keys.Contains(p.Id)).ToList());
     }
 }

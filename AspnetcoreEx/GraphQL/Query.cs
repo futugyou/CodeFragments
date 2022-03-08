@@ -2,10 +2,26 @@ namespace AspnetcoreEx.GraphQL;
 
 public class Query
 {
+    // query {
+    //   a: userWithDataLoader(id: 1)
+    //     {
+    //         id
+    //     }
+    //     b: userWithDataLoader(id: 2)
+    //     {
+    //         id
+    //         userName
+    //     }
+    // }
+    public async Task<User> GetUserWithDataLoader(int id, UserBatchDataLoader dataLoader)
+    {
+        return await dataLoader.LoadAsync(id);
+    }
+
     public async Task<User?> GetUser(
-        int id,
-        [Service] IUserRepository repository,
-        [Service] IHttpContextAccessor httpContextAccessor)
+    int id,
+    [Service] IUserRepository repository,
+    [Service] IHttpContextAccessor httpContextAccessor)
     {
         if (httpContextAccessor.HttpContext is not null)
         {
