@@ -1,3 +1,5 @@
+using HotChocolate.Types.Pagination;
+
 namespace AspnetcoreEx.GraphQL;
 
 public class Query
@@ -86,6 +88,43 @@ public class Query
     ///}
     [UsePaging]
     public Task<List<User>> GetPagingUser([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
+
+    // query {
+    //   customPagingUser(after: "1", first: 2, sortBy: "id")
+    //     {
+    //         pageInfo {
+    //             hasNextPage
+    //             hasPreviousPage
+    //         }
+    //         edges {
+    //             cursor
+    //             node {
+    //                 id
+    //                 age
+    //             }
+    //         }
+    //         nodes {
+    //             id
+    //             userName
+    //         }
+    //     }
+    // }
+    [UsePaging]
+    public Task<Connection<User>> CustomPagingUser(string? after, int? first, string sortBy, [Service] IUserRepository repository)
+    {
+        int.TryParse(after, out var afrinint);
+        IEnumerable<User> users = repository.GetAllUser().Skip(afrinint).Take(first == null ? 0 : first.Value);
+
+        var edges = users.Select(user => new Edge<User>(user, user.Id.ToString()))
+                            .ToList();
+        var pageInfo = new ConnectionPageInfo(false, false, null, null);
+
+        var connection = new Connection<User>(edges, pageInfo,
+                            ct => ValueTask.FromResult(0));
+
+        return Task.FromResult(connection);
+    }
+
 }
 
 
