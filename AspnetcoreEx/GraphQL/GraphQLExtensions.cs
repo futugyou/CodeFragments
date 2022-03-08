@@ -8,6 +8,7 @@ public static class GraphQLExtensions
 {
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddTransient<UserRefetchableService>();
         services
         .AddGraphQLServer()
         .AddFiltering()
@@ -46,9 +47,12 @@ public static class GraphQLExtensions
         .BindRuntimeType<string, StringType>()
         .AddType<Dog>()
         .AddType<Cat>()
+        .AddType<UserRefetchable>()
         .AddTypeExtension<UserExtension>()
         .AddTypeExtension<QueryUserResolvers>()
         .AddDirectiveType<CustomDirectiveType>()
+        .AddGlobalObjectIdentification()
+        // .AddQueryFieldToMutationPayloads()
         //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
