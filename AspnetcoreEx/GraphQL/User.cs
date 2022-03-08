@@ -11,6 +11,23 @@ public class User
     // [GraphQLType(typeof(StringType))]
     public string Secret { get; set; }
     public List<Order> Orders { get; set; }
+
+    // query {
+    //   user(id: 1)
+    //     {
+    //         friends {
+    //             id
+    //             age
+    //           userName
+    //         }
+    //     }
+    // }
+    public List<User> GetFriends([Service] IUserRepository repository)
+    {
+        var currentUserId = this.Id;
+        var all = repository.GetAllUser();
+        return all.Where(p => p.Id != currentUserId).ToList();
+    }
 }
 
 public class Order

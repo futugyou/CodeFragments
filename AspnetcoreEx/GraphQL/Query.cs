@@ -2,8 +2,15 @@ namespace AspnetcoreEx.GraphQL;
 
 public class Query
 {
-    public async Task<User?> GetUser(int id, [Service] IUserRepository repository)
+    public async Task<User?> GetUser(
+        int id,
+        [Service] IUserRepository repository,
+        [Service] IHttpContextAccessor httpContextAccessor)
     {
+        if (httpContextAccessor.HttpContext is not null)
+        {
+            Console.WriteLine("the getuser mothed path is " + httpContextAccessor.HttpContext.Request.Path);
+        }
         var user = repository.GetAllUser().FirstOrDefault(p => p.Id == id);
         if (user == null)
         {

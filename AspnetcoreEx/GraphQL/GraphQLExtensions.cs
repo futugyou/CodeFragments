@@ -9,6 +9,7 @@ public static class GraphQLExtensions
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<UserRefetchableService>();
+        services.AddHttpContextAccessor();
         services
         .AddGraphQLServer()
         .AddFiltering()
