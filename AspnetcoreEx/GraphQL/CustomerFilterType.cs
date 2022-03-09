@@ -24,7 +24,7 @@ public class CustomerFilterInputType : StringOperationFilterInputType
 }
 
 
-public class CustomConvention : FilterConvention
+public class CustomFilterConvention : FilterConvention
 {
     protected override void Configure(IFilterConventionDescriptor descriptor)
     {
@@ -32,12 +32,12 @@ public class CustomConvention : FilterConvention
         descriptor.AllowAnd(false).AllowOr(false);
     }
 }
-public class CustomConventionExtension : FilterConventionExtension
+public class CustomFilterConventionExtension : FilterConventionExtension
 {
     protected override void Configure(IFilterConventionDescriptor descriptor)
     {
         // this will instead of 'where'
-        descriptor.ArgumentName("testname");
+        descriptor.ArgumentName("filter");
         descriptor.AllowAnd(false).AllowOr(false);
     }
 }

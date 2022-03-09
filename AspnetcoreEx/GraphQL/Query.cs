@@ -37,7 +37,7 @@ public class Query
         return await Task.FromResult(user);
     }
 
-    /// DESC/ASC MUST BE UPPER
+    /// DESC/ASC MUST BE UPPER ! UsePaging > UseProjections > UseFiltering > UseSorting
     ///query {
     /// allUser(where: { id: { eq: 2 } }, order: {id: DESC/ASC}) {
     ///     id
@@ -53,11 +53,12 @@ public class Query
     public Task<List<User>> GetAllUser([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
 
     // query {
-    //   allUserWithCostomerFilter(where: { name: { eq: "tom" } }) {
+    //   allUserWithCostomerFilter(where: { name: { eq: "tom" } }, order: { name: ASC }) {
     //     userName
     //   }
     // }
     [UseFiltering(typeof(UserFilterType))]
+    [UseSorting(typeof(UserSortType))]
     public Task<List<User>> GetAllUserWithCostomerFilter([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
 
     /// query {
