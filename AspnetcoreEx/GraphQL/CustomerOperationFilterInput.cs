@@ -9,6 +9,7 @@ public class UserFilterType : FilterInputType<User>
         descriptor.Name("CustomerUserFilterInput");
         descriptor.BindFieldsExplicitly();
         descriptor.Field(f => f.Name).Type<CustomerFilterInputType>();
+        descriptor.AllowAnd(false).AllowOr(false);
     }
 }
 
@@ -19,5 +20,24 @@ public class CustomerFilterInputType : StringOperationFilterInputType
         descriptor.Name("CustomerFilterInputType");
         descriptor.Operation(DefaultFilterOperations.Equals).Type<StringType>();
         //descriptor.Operation(DefaultFilterOperations.NotEquals).Type<StringType>();
+    }
+}
+
+
+public class CustomConvention : FilterConvention
+{
+    protected override void Configure(IFilterConventionDescriptor descriptor)
+    {
+        descriptor.AddDefaults();
+        descriptor.AllowAnd(false).AllowOr(false);
+    }
+}
+public class CustomConventionExtension : FilterConventionExtension
+{
+    protected override void Configure(IFilterConventionDescriptor descriptor)
+    {
+        // this will instead of 'where'
+        descriptor.ArgumentName("testname");
+        descriptor.AllowAnd(false).AllowOr(false);
     }
 }

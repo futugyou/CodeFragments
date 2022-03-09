@@ -1,6 +1,7 @@
 using HotChocolate.Types.Pagination;
 using HotChocolate.Subscriptions.Redis;
 using StackExchange.Redis;
+using HotChocolate.Data.Filters;
 
 namespace AspnetcoreEx.GraphQL;
 
@@ -53,8 +54,10 @@ public static class GraphQLExtensions
         .AddTypeExtension<QueryUserResolvers>()
         .AddDirectiveType<CustomDirectiveType>()
         .AddGlobalObjectIdentification()
+        // .AddConvention<IFilterConvention, CustomConvention>()
+        // .AddConvention<IFilterConvention, CustomConventionExtension>()
         // .AddQueryFieldToMutationPayloads()
-        //.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
+        // .AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         return services;
     }
