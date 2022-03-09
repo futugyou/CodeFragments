@@ -52,6 +52,14 @@ public class Query
     [UseSorting]
     public Task<List<User>> GetAllUser([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
 
+    // query {
+    //   allUserWithCostomerFilter(where: { name: { eq: "tom" } }) {
+    //     userName
+    //   }
+    // }
+    [UseFiltering(typeof(UserFilterType))]
+    public Task<List<User>> GetAllUserWithCostomerFilter([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
+
     /// query {
     ///     takeSkipUser(take: 1, skip: 1) {
     ///         pageInfo {
