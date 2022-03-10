@@ -22,10 +22,10 @@ public static class GraphQLExtensions
             MaxPageSize = 50,
             IncludeTotalCount = true
         })
-        //.AddQueryType<Query>()
+        .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddSubscriptionType<Subscription>()
-         .AddQueryType<QueryType>()
+        // .AddQueryType<QueryType>()
         // .AddMutationType<MutationType>()
         // .AddMutationType<SubscriptionType>()
         .ModifyRequestOptions(option =>

@@ -50,6 +50,7 @@ public class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
+    [UseConsoleLog]
     public Task<List<User>> GetAllUser([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
 
     // query {
