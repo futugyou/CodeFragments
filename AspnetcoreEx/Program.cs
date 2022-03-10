@@ -21,7 +21,6 @@ builder.Host.ConfigureAppConfiguration(config =>
 
 builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
-builder.Services.AddScoped<IUserRepository, UserRepository>();//
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();
 builder.Services.AddEndpointsApiExplorer();

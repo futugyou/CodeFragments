@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspnetcoreEx.GraphQL;
 
-public interface IUserRepository
+public interface IUserRepository : IAsyncDisposable
 {
     User? GetUserById(int id);
     List<User> GetAllUser();
@@ -45,5 +45,10 @@ public class UserRepository : IUserRepository
     public IQueryable<User> GetAllUserQueryable()
     {
         return _dbSet;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return graphQLDbContext.DisposeAsync();
     }
 }

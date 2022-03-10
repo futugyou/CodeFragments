@@ -12,6 +12,7 @@ public static class GraphQLExtensions
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<UserRefetchableService>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddPooledDbContextFactory<GraphQLDbContext>(b =>
         {
             b.UseInMemoryDatabase("GraphQLDb");
@@ -60,6 +61,9 @@ public static class GraphQLExtensions
         .AddTypeExtension<QueryUserResolvers>()
         .AddDirectiveType<CustomDirectiveType>()
         .AddGlobalObjectIdentification()
+        .AddSpatialTypes()
+        .AddSpatialProjections()
+        .AddSpatialFiltering()
         // .AddConvention<IFilterConvention, CustomFilterConvention>()
         // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
         // .AddConvention<ISortConvention, CustomSortConvention>()

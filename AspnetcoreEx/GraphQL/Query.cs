@@ -37,7 +37,8 @@ public class Query
         return await Task.FromResult(user);
     }
 
-    /// DESC/ASC MUST BE UPPER ! UsePaging > UseProjections > UseFiltering > UseSorting
+    /// UseDbContext > UsePaging > UseProjections > UseFiltering > UseSorting
+    /// DESC/ASC MUST BE UPPER ! 
     ///query {
     /// allUser(where: { id: { eq: 2 } }, order: {id: DESC/ASC}) {
     ///     id
@@ -45,13 +46,23 @@ public class Query
     ///     orders {
     ///         orderTime
     ///     }
+    ///     location {
+    ///         coordinates
+    ///         type
+    ///         bbox
+    ///         crs
+    ///     }
     /// }
     ///}
+    [UseConsoleLog]
+    [UseGraphQLDb]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    [UseConsoleLog]
-    public Task<List<User>> GetAllUser([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
+    public IQueryable<User> GetAllUser([ScopedService] GraphQLDbContext dbContext)
+    {
+        return dbContext.Users;
+    }
 
     // query {
     //   allUserWithCostomerFilter(where: { name: { eq: "tom" } }, order: { name: ASC }) {
