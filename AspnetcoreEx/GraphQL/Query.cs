@@ -149,7 +149,8 @@ public class QueryType : ObjectType<Query>
             .Type<ListType<UserType>>();
         descriptor
             .Field(f => f.GetAllUser(default!))
-            .UseConsoleLogMiddleware()
+            //.UseConsoleLogMiddleware()
+            .Use<CustomLogMiddleware>()
             .Type<ListType<UserType>>();
     }
 }
