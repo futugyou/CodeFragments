@@ -1,4 +1,3 @@
-using Microsoft.OpenApi.Models;
 using AspnetcoreEx;
 using AspnetcoreEx.Extensions;
 using AspnetcoreEx.RedisExtensions;
@@ -10,7 +9,6 @@ using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
 using GraphQL.Server.Ui.Voyager;
-using HotChocolate.Types.Pagination;
 using AspnetcoreEx.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,4 +77,5 @@ app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
 });
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 //app.UseMiddleware<ResponseCustomMiddleware>();
+app.InitializeGraphQLDb();
 app.Run();

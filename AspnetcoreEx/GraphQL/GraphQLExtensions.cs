@@ -3,6 +3,7 @@ using HotChocolate.Subscriptions.Redis;
 using StackExchange.Redis;
 using HotChocolate.Data.Filters;
 using HotChocolate.Data.Sorting;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspnetcoreEx.GraphQL;
 
@@ -11,6 +12,10 @@ public static class GraphQLExtensions
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<UserRefetchableService>();
+        services.AddPooledDbContextFactory<GraphQLDbContext>(b =>
+        {
+            b.UseInMemoryDatabase("GraphQLDb");
+        });
         services.AddHttpContextAccessor();
         services
         .AddGraphQLServer()

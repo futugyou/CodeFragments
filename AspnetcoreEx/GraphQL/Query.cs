@@ -29,7 +29,7 @@ public class Query
         {
             Console.WriteLine("the getuser mothed path is " + httpContextAccessor.HttpContext.Request.Path);
         }
-        var user = repository.GetAllUser().FirstOrDefault(p => p.Id == id);
+        var user = repository.GetUserById(id);
         if (user == null)
         {
             return null;
@@ -123,7 +123,7 @@ public class Query
     public Task<Connection<User>> CustomPagingUser(string? after, int? first, string sortBy, [Service] IUserRepository repository)
     {
         int.TryParse(after, out var afrinint);
-        IEnumerable<User> users = repository.GetAllUser().Skip(afrinint).Take(first == null ? 0 : first.Value);
+        IEnumerable<User> users = repository.GetAllUserQueryable().Skip(afrinint).Take(first == null ? 0 : first.Value);
 
         var edges = users.Select(user => new Edge<User>(user, user.Id.ToString()))
                             .ToList();
