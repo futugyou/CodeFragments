@@ -143,9 +143,13 @@ public class QueryType : ObjectType<Query>
     {
         descriptor
             .Field(f => f.GetPagingUser(default!))
-            .Type<UserType>();
+            .Type<ListType<UserType>>();
         descriptor
             .Field(f => f.GetTakeSkipUser(default!))
-            .Type<UserType>();
+            .Type<ListType<UserType>>();
+        descriptor
+            .Field(f => f.GetAllUser(default!))
+            .UseConsoleLogMiddleware()
+            .Type<ListType<UserType>>();
     }
 }
