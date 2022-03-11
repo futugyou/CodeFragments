@@ -64,6 +64,8 @@ public static class GraphQLExtensions
         .AddSpatialTypes()
         .AddSpatialProjections()
         .AddSpatialFiltering()
+        .AddHttpRequestInterceptor<HttpRequestInterceptor>()
+        .AddSocketSessionInterceptor<SocketSessionInterceptor>()
         // .AddConvention<IFilterConvention, CustomFilterConvention>()
         // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
         // .AddConvention<ISortConvention, CustomSortConvention>()
