@@ -146,6 +146,18 @@ public class Query
         return Task.FromResult(connection);
     }
 
+    // query {
+    //    globalState
+    // }
+    // {
+    //   "data": {
+    //     "globalState": "testvalue"
+    //   }
+    // }
+    public string GlobalState([GlobalState("testname")] string message)
+    {
+        return message;
+    }
 }
 
 

@@ -9,7 +9,7 @@ namespace AspnetcoreEx.GraphQL;
 
 public static class GraphQLExtensions
 {
-    public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
     {
         services.AddTransient<UserRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();
@@ -66,6 +66,7 @@ public static class GraphQLExtensions
         .AddSpatialFiltering()
         .AddHttpRequestInterceptor<HttpRequestInterceptor>()
         .AddSocketSessionInterceptor<SocketSessionInterceptor>()
+        .AllowIntrospection(env.IsDevelopment());
         // .AddConvention<IFilterConvention, CustomFilterConvention>()
         // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
         // .AddConvention<ISortConvention, CustomSortConvention>()

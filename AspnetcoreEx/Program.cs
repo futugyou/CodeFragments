@@ -40,7 +40,7 @@ builder.Services.AddRefitClient<IGitHubApi>()
     .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(timeoutPolicy);
 
-builder.Services.AddGraphQL(configuration);
+builder.Services.AddGraphQL(configuration, builder.Environment);
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");

@@ -13,6 +13,17 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
     }
     public override ValueTask OnCreateAsync(HttpContext context, IRequestExecutor requestExecutor, IQueryRequestBuilder requestBuilder, CancellationToken cancellationToken)
     {
+        if (context.Request.Headers.ContainsKey("X-Allow-Introspection"))
+        {
+            requestBuilder.AllowIntrospection();
+        }
+        else
+        {
+            // the header is not present i.e. introspection continues
+            // to be disallowed
+            requestBuilder.SetIntrospectionNotAllowedMessage(
+                "Missing `X-Allow-Introspection` header");
+        }
         var properties = new Dictionary<string, object>
         {
             { "testname", "testvalue" }
