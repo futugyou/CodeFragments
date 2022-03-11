@@ -8,7 +8,6 @@ using Refit;
 using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
-using GraphQL.Server.Ui.Voyager;
 using AspnetcoreEx.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,14 +58,11 @@ if (builder.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 
 app.UseAuthorization();
-// app.UseRouting().UseEndpoints(endpoints =>
-// {
-//     endpoints.MapGraphQL();
-// });
+
 app.UseRouting();
+
 app.UseWebSockets();
-app.MapGraphQL();
-app.UseGraphQLVoyager(new VoyagerOptions { GraphQLEndPoint = "/graphql" }, "/graphql-voyager");
+app.UseGraphQLCustom();
 
 app.MapControllers();
 app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
@@ -76,5 +72,5 @@ app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
 });
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 //app.UseMiddleware<ResponseCustomMiddleware>();
-app.InitializeGraphQLDb();
+
 app.Run();
