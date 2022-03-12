@@ -14,6 +14,8 @@ public static class GraphQLExtensions
     {
         services.AddTransient<UserRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddHttpClient(WellKnownSchemaNames.Myself, c => c.BaseAddress = new Uri("http://localhost:5001/graphql"));
+        services.AddHttpClient(WellKnownSchemaNames.Myself2, c => c.BaseAddress = new Uri("http://localhost:5001/graphql"));
         services.AddPooledDbContextFactory<GraphQLDbContext>(b =>
         {
             b.UseInMemoryDatabase("GraphQLDb");
@@ -69,6 +71,8 @@ public static class GraphQLExtensions
         .AddSocketSessionInterceptor<SocketSessionInterceptor>()
         //.AllowIntrospection(env.IsDevelopment())
         .AddType<UploadType>()
+        .AddRemoteSchema(WellKnownSchemaNames.Myself)
+        .AddRemoteSchema(WellKnownSchemaNames.Myself2)
         // .AddConvention<IFilterConvention, CustomFilterConvention>()
         // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
         // .AddConvention<ISortConvention, CustomSortConvention>()
