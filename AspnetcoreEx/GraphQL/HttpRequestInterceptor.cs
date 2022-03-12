@@ -21,8 +21,7 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
         {
             // the header is not present i.e. introspection continues
             // to be disallowed
-            requestBuilder.SetIntrospectionNotAllowedMessage(
-                "Missing `X-Allow-Introspection` header");
+            // requestBuilder.SetIntrospectionNotAllowedMessage("Missing `X-Allow-Introspection` header");
         }
         var properties = new Dictionary<string, object>
         {

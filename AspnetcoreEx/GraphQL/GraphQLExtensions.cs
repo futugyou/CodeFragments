@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using HotChocolate.Data.Filters;
 using HotChocolate.Data.Sorting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace AspnetcoreEx.GraphQL;
 
@@ -66,7 +67,8 @@ public static class GraphQLExtensions
         .AddSpatialFiltering()
         .AddHttpRequestInterceptor<HttpRequestInterceptor>()
         .AddSocketSessionInterceptor<SocketSessionInterceptor>()
-        .AllowIntrospection(env.IsDevelopment());
+        //.AllowIntrospection(env.IsDevelopment())
+        .AddType<UploadType>()
         // .AddConvention<IFilterConvention, CustomFilterConvention>()
         // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
         // .AddConvention<ISortConvention, CustomSortConvention>()
@@ -74,6 +76,11 @@ public static class GraphQLExtensions
         // .AddQueryFieldToMutationPayloads()
         // .AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
+        services.Configure<FormOptions>(options =>
+        {
+            // Set the limit to 256 MB
+            options.MultipartBodyLengthLimit = 268435456;
+        });
         return services;
     }
 }
