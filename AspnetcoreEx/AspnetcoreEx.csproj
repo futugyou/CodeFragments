@@ -27,6 +27,7 @@
 		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="12.7.0-preview.3" />
 		<PackageReference Include="HotChocolate.Data.Spatial" Version="12.7.0-preview.3" />
 		<PackageReference Include="HotChocolate.Stitching" Version="12.7.0-preview.3" />
+		<PackageReference Include="HotChocolate.Stitching.Redis" Version="12.7.0-preview.3" />
 	</ItemGroup>
 
 </Project>

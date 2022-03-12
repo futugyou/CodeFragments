@@ -12,6 +12,9 @@ public static class GraphQLExtensions
 {
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
     {
+        services
+          // This is the connection multiplexer that redis will use
+          .AddSingleton(ConnectionMultiplexer.Connect("redisstring"));
         services.AddTransient<UserRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddHttpClient(WellKnownSchemaNames.Myself, c => c.BaseAddress = new Uri("http://localhost:5001/graphql"));
@@ -73,6 +76,22 @@ public static class GraphQLExtensions
         .AddType<UploadType>()
         .AddRemoteSchema(WellKnownSchemaNames.Myself)
         .AddRemoteSchema(WellKnownSchemaNames.Myself2)
+        .AddRemoteSchemasFromRedis("Demo", sp => sp.GetRequiredService<ConnectionMultiplexer>())
+        .InitializeOnStartup()
+        .PublishSchemaDefinition(c => c
+            // The name of the schema. This name should be unique
+            .SetName("users")
+            // Ignore the root types of accounts
+            .IgnoreRootTypes()
+            // Declares where the type extension is used
+            .AddTypeExtensionsFromFile("./Stitching.graphql")
+            .PublishToRedis(
+                // The configuration name under which the schema should be published
+                "Demo",
+                // The connection multiplexer that should be used for publishing
+                sp => sp.GetRequiredService<ConnectionMultiplexer>()
+                )
+        )
         // .AddConvention<IFilterConvention, CustomFilterConvention>()
         // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
         // .AddConvention<ISortConvention, CustomSortConvention>()
