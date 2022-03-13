@@ -57,9 +57,10 @@ if (builder.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.UseAuthorization();
-
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseWebSockets();
 app.UseGraphQLCustom();

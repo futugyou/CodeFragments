@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using HotChocolate.Types.Pagination;
 
 namespace AspnetcoreEx.GraphQL;
@@ -157,6 +158,12 @@ public class Query
     public string GlobalState([GlobalState("testname")] string message)
     {
         return message;
+    }
+
+    public AuthUser GetAuthUser(ClaimsPrincipal claimsPrincipal)
+    {
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        return new AuthUser { UserID = userId, Name = "tom" };
     }
 }
 

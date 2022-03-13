@@ -6,6 +6,11 @@ using HotChocolate.Data.Sorting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.Features;
 using HotChocolate.Language;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AspnetcoreEx.GraphQL;
 
@@ -13,6 +18,32 @@ public static class GraphQLExtensions
 {
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
     {
+        var signingKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes("MySuperSecretKey"));
+
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidIssuer = "https://auth.chillicream.com",
+                        ValidAudience = "https://graphql.chillicream.com",
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = signingKey
+                    };
+            });
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AtLeast21", policy =>
+                policy.Requirements.Add(new MinimumAgeRequirement(21)));
+
+            options.AddPolicy("HasCountry", policy =>
+                policy.RequireAssertion(context =>
+                    context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
+        });
+        services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
         // This is the connection multiplexer that redis will use
         // services.AddSingleton(ConnectionMultiplexer.Connect("redisstring"));
         services.AddTransient<UserRefetchableService>();
@@ -27,12 +58,13 @@ public static class GraphQLExtensions
         // Global Services
         services.AddMemoryCache();
         // choose one of the following providers
-        services.AddMD5DocumentHashProvider(HashFormat.Hex);
-        // services.AddSha256DocumentHashProvider();
+        // services.AddMD5DocumentHashProvider(HashFormat.Hex);
+        services.AddSha256DocumentHashProvider(HashFormat.Hex);
         // services.AddSha1DocumentHashProvider();
 
         services
         .AddGraphQLServer()
+        .AddAuthorization()
         .AddFiltering()
         .AddProjections() // AddProjections can get include data like ef.
         .AddSorting()
