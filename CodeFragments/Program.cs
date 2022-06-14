@@ -18,7 +18,7 @@ namespace CodeFragments
             //pool.DefalultPolicy();
             //pool.CustomPolicy();
             //ObjectPoolTest2.Exection();
-            CommandDemo.Exection();
+            //CommandDemo.Exection();
 
             //await JsonAsyncEnumerable.Deserialize();
             //await JsonAsyncEnumerable.Serialize();
@@ -31,6 +31,8 @@ namespace CodeFragments
             //await AsyncEnumerableDemo.Exection();
 
             //PriorityQueueDemo.Exection();
+            var m = new MetalamaTest();
+            Console.WriteLine(m.Add(1, 2));
             Console.ReadLine();
         }
     }

@@ -19,6 +19,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+		<PackageReference Include="Metalama.Framework" Version="0.5.23-preview" />
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.0-preview.6.21355.2" />
 		<PackageReference Include="Sharprompt" Version="2.3.7" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
