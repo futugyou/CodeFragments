@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrowserDemo", "BrowserDemo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Labuladong", "Algorithm\Labuladong\Labuladong.csproj", "{BFD0C03D-A142-468C-841A-FCB87F93FDFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Leetcode", "Algorithm\Leetcode\Leetcode.csproj", "{DE8F09DB-C36F-4DC3-B28B-6B8996965307}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Leetcode", "Algorithm\Leetcode\Leetcode.csproj", "{DE8F09DB-C36F-4DC3-B28B-6B8996965307}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MassTransitProject", "MassTransitProject", "{BD416F91-2C2F-4E40-9359-F8C3D01546C1}"
 EndProject
@@ -139,6 +139,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.Account.Web", "Identity\AbpIdentityService\AccountModule\Volo.Abp.Account.Web\Volo.Abp.Account.Web.csproj", "{446C4C98-F34B-46FC-89FA-DCB3EB2CB8F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volo.Abp.Account.Web.IdentityServer", "Identity\AbpIdentityService\AccountModule\Volo.Abp.Account.Web.IdentityServer\Volo.Abp.Account.Web.IdentityServer.csproj", "{735993E2-F093-42DE-9970-46E4B3F342E6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elsa", "Elsa", "{48635048-2F08-469F-9F3D-C3F712700985}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElsaCore.Server", "Elsademo\ElsaCore.Server\ElsaCore.Server.csproj", "{6AD6CA61-2491-4FDF-9888-84D605E35AAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -350,6 +354,10 @@ Global
 		{735993E2-F093-42DE-9970-46E4B3F342E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{735993E2-F093-42DE-9970-46E4B3F342E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{735993E2-F093-42DE-9970-46E4B3F342E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AD6CA61-2491-4FDF-9888-84D605E35AAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AD6CA61-2491-4FDF-9888-84D605E35AAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AD6CA61-2491-4FDF-9888-84D605E35AAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AD6CA61-2491-4FDF-9888-84D605E35AAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -404,6 +412,7 @@ Global
 		{AFE05BFE-ADC0-4BB9-8289-1B9C8341BC50} = {553FC2DB-A137-4729-8796-A239F35CB007}
 		{446C4C98-F34B-46FC-89FA-DCB3EB2CB8F2} = {553FC2DB-A137-4729-8796-A239F35CB007}
 		{735993E2-F093-42DE-9970-46E4B3F342E6} = {553FC2DB-A137-4729-8796-A239F35CB007}
+		{6AD6CA61-2491-4FDF-9888-84D605E35AAC} = {48635048-2F08-469F-9F3D-C3F712700985}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
