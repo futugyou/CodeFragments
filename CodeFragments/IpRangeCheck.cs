@@ -71,3 +71,30 @@ public class IpRangeCheck
         public uint RightRange { get; }
     }
 }
+
+
+/// <summary>
+/// This extensioin for check ip range from 
+/// http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest
+/// The format is like that:
+///  apnic|CN|ipv4|222.196.0.0|131072|20040610|allocated
+///  apnic|CN|ipv4|222.198.0.0|65536|20040610|allocated
+/// </summary>
+public static class IpRangeCheckExtensioins
+{
+    private const string DEFAULT_PATTERN = @"(apnic.CN.ipv4).(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}).(\d{0,9})";
+    public static void AddIpRangeWithApnicString(this IpRangeCheck check, string apnic, string pattern = "")
+    {
+        if (pattern == "")
+        {
+            pattern = DEFAULT_PATTERN;
+        }
+        Match match = Regex.Match(apnic, pattern, RegexOptions.IgnoreCase);
+        if (match.Success)
+        {
+            var ip = match.Groups[2].Value;
+            int ipcount = Convert.ToInt32(match.Groups[3].Value);
+            check.AddIpRangeWithIPCount(ip, ipcount);
+        }
+    }
+}
