@@ -1,6 +1,6 @@
 using Hangfire;
 using Hangfire.SqlServer;
-using HangfireDemo;
+using HangfireDemo.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
@@ -9,7 +9,9 @@ var Configuration = builder.Configuration;
 builder.Services.AddScoped<IDosomething, Dosomething>();
 
 // Add Hangfire services.
-builder.Services.AddHangfire(configuration => configuration
+builder.Services.AddHangfire(configuration =>
+{
+    configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
@@ -22,7 +24,8 @@ builder.Services.AddHangfire(configuration => configuration
         DisableGlobalLocks = true
     })
     // auto delete job,defatul 1 day
-    .WithJobExpirationTimeout(TimeSpan.FromDays(100)));
+    .WithJobExpirationTimeout(TimeSpan.FromDays(100));
+});
 
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer(options =>

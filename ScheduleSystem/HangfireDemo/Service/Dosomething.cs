@@ -1,15 +1,5 @@
-﻿namespace HangfireDemo;
+﻿namespace HangfireDemo.Service;
 
-public interface IDosomething
-{
-    Task ReadMessage(string message);
-    Task<int> HaveReturnValue();
-    Task Loopwork();
-    void Delaywork();
-    Task<string> DisplayTime();
-
-    Task<JobParaemter> ChangeAge(JobParaemter jobParaemter);
-}
 public class Dosomething : IDosomething
 {
     private readonly ILogger<Dosomething> logger;
@@ -38,6 +28,16 @@ public class Dosomething : IDosomething
         return Task.FromResult(time);
     }
 
+    public Task ErrorMethod()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ErrorMethodWithLimit()
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<int> HaveReturnValue()
     {
         await Task.Delay(1000);
@@ -57,11 +57,4 @@ public class Dosomething : IDosomething
         logger.LogInformation(message);
         return Task.FromResult(0);
     }
-}
-
-
-public class JobParaemter
-{
-    public int Age { get; set; }
-    public string Name { get; set; }
 }

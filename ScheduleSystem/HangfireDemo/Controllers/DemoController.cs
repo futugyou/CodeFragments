@@ -1,4 +1,5 @@
 using Hangfire;
+using HangfireDemo.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HangfireDemo.Controllers;
@@ -88,5 +89,16 @@ public class DemoController : ControllerBase
     public void Deletejob()
     {
         RecurringJob.RemoveIfExists("jobwithcron");
+    }
+
+    [HttpGet("error")]
+    public void Errorjob()
+    {
+        _backgroundJob.Enqueue<IDosomething>(x => x.ErrorMethod());
+    }
+    [HttpGet("error2")]
+    public void Errorjob2()
+    {
+        _backgroundJob.Enqueue<IDosomething>(x => x.ErrorMethodWithLimit());
     }
 }
