@@ -44,6 +44,11 @@ public class Dosomething : IDosomething
         return 110;
     }
 
+    public async Task LongRunningJob()
+    {
+        await Task.Delay(TimeSpan.FromSeconds(30));
+    }
+
     public Task Loopwork()
     {
         var time = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");

@@ -19,6 +19,8 @@ public interface IDosomething
 
     [AutomaticRetry(Attempts = 2, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ErrorMethodWithLimit();
+
+    Task LongRunningJob();
 }
 
 

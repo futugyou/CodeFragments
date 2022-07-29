@@ -30,8 +30,18 @@ builder.Services.AddHangfire(configuration =>
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer(options =>
 {
-    // default is 15 seconds
-    options.SchedulePollingInterval = TimeSpan.FromSeconds(10);
+    // all default value
+    options.WorkerCount = Math.Min(Environment.ProcessorCount * 5, 20);
+    // that means priority:  "alpha" > "beta" > "default"
+    // options.Queues = new[] { "alpha", "beta", "default" };
+    options.Queues = new string[1] { "default" };
+    options.StopTimeout = TimeSpan.FromMilliseconds(500.0);
+    options.ShutdownTimeout = TimeSpan.FromSeconds(15.0);
+    options.SchedulePollingInterval = TimeSpan.FromSeconds(15.0);
+    options.HeartbeatInterval = TimeSpan.FromSeconds(30.0);
+    options.ServerTimeout = TimeSpan.FromMinutes(5.0);
+    options.ServerCheckInterval = TimeSpan.FromMinutes(5.0);
+    options.CancellationCheckInterval = TimeSpan.FromSeconds(5.0);
 });
 
 builder.Services.AddControllers();

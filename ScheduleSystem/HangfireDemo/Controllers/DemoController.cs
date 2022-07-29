@@ -10,11 +10,13 @@ public class DemoController : ControllerBase
 {
     private readonly ILogger<DemoController> _logger;
     private readonly IBackgroundJobClient _backgroundJob;
+    private readonly IRecurringJobManager _recurringJobManager;
 
-    public DemoController(ILogger<DemoController> logger, IBackgroundJobClient backgroundJob)
+    public DemoController(ILogger<DemoController> logger, IBackgroundJobClient backgroundJob, IRecurringJobManager recurringJobManager)
     {
         _logger = logger;
         _backgroundJob = backgroundJob;
+        _recurringJobManager = recurringJobManager;
     }
 
     /// <summary>
@@ -26,6 +28,8 @@ public class DemoController : ControllerBase
     {
         // static method
         // var jobid1 = _backgroundJob.Enqueue(() => Console.WriteLine("Hello world from Hangfire!"));
+        
+        // this will not run, because not have queue named 'static_method'
         var jobname = _backgroundJob.Enqueue("static_method", () => Console.WriteLine("Hello world from Hangfire!"));
         Console.WriteLine(jobname);
         return jobname;
@@ -39,7 +43,8 @@ public class DemoController : ControllerBase
     public string FireAndForgot2()
     {
         // instance method 
-        var jobname = _backgroundJob.Enqueue<IDosomething>(x => x.HaveReturnValue());
+        var jobname = BackgroundJob.Enqueue<IDosomething>(x => x.HaveReturnValue());
+        //var jobname = _backgroundJob.Enqueue<IDosomething>(x => x.HaveReturnValue());
         Console.WriteLine(jobname);
         return jobname;
     }
@@ -67,7 +72,8 @@ public class DemoController : ControllerBase
     [HttpGet("cron1")]
     public string Cronjob1()
     {
-        RecurringJob.AddOrUpdate<IDosomething>("thisiscronjob", x => x.DisplayTime(), Cron.Minutely);
+        //RecurringJob.AddOrUpdate<IDosomething>("thisiscronjob", x => x.DisplayTime(), Cron.Minutely);
+        _recurringJobManager.AddOrUpdate<IDosomething>("thisiscronjob", x => x.DisplayTime(), Cron.Minutely);
         return "thisiscronjob";
     }
 
@@ -96,9 +102,16 @@ public class DemoController : ControllerBase
     {
         _backgroundJob.Enqueue<IDosomething>(x => x.ErrorMethod());
     }
+
     [HttpGet("error2")]
     public void Errorjob2()
     {
         _backgroundJob.Enqueue<IDosomething>(x => x.ErrorMethodWithLimit());
+    }
+
+    [HttpGet("long")]
+    public void LongRunning()
+    {
+        _recurringJobManager.AddOrUpdate<IDosomething>("LongRunning", x => x.LongRunningJob(), "0/10 * * * * ? ");
     }
 }
