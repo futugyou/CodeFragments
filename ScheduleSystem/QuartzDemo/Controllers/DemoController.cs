@@ -58,6 +58,7 @@ public class DemoController : ControllerBase
         var trigger = TriggerBuilder.Create()
             .WithIdentity("trigger1", "group1")
             .StartNow()
+            .WithPriority(10) // 10 > 5(default) > 1
             .WithCronSchedule("0/15 * * * * ? ")
             .Build();
 
@@ -73,6 +74,14 @@ public class DemoController : ControllerBase
         var scheduler = await schedulerFactory.GetScheduler();
         var jobkey = JobKey.Create("job1", "group1");
         await scheduler.DeleteJob(jobkey);
+        return "";
+    }
+
+    [HttpGet("clear")]
+    public async Task<string> Clear()
+    {
+        var scheduler = await schedulerFactory.GetScheduler();
+        await scheduler.Clear();
         return "";
     }
 
@@ -93,4 +102,24 @@ public class DemoController : ControllerBase
         await scheduler.ResumeJob(jobkey);
         return "";
     }
+
+
+    [HttpGet("paramerer")]
+    public async Task<string> Paramerer()
+    {
+        var job = JobBuilder.Create<ParameterJob>().WithIdentity("paramerer", "group1").Build();
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity("paramerer", "group1")
+            .StartNow()
+            .UsingJobData("name", "thisisname")
+            .UsingJobData("age", "90")
+            .WithSimpleSchedule(x => x.WithIntervalInSeconds(10).RepeatForever())
+            .Build();
+
+        var scheduler = await schedulerFactory.GetScheduler();
+
+        await scheduler.ScheduleJob(job, trigger);
+        return "";
+    }
+
 }
