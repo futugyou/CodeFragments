@@ -45,7 +45,7 @@ builder.Services.AddQuartz(q =>
     q.MaxBatchSize = 5;
 
     // we take this from appsettings.json, just show it's possible
-    // q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+    q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
 
     // this is default configuration if you don't alter it
     q.UseMicrosoftDependencyInjectionJobFactory();
@@ -148,7 +148,7 @@ builder.Services.AddQuartz(q =>
 
     q.UsePersistentStore(s =>
     {
-        s.UseProperties = true;
+        s.UseProperties = false;
         s.RetryInterval = TimeSpan.FromSeconds(15);
         s.UseSqlServer(sqlServer =>
         {

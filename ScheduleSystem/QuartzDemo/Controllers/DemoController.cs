@@ -104,14 +104,20 @@ public class DemoController : ControllerBase
     }
 
 
-    [HttpGet("paramerer")]
-    public async Task<string> Paramerer()
+    [HttpGet("parameter")]
+    public async Task<string> Parameter()
     {
-        var job = JobBuilder.Create<ParameterJob>().WithIdentity("paramerer", "group1").Build();
+        var job = JobBuilder.Create<ParameterJob>()
+            .WithIdentity("paramerer", "group1")
+            .UsingJobData("name", "name-from-job")
+            .UsingJobData("age", "80")
+            .RequestRecovery()
+            .Build();
+
         var trigger = TriggerBuilder.Create()
             .WithIdentity("paramerer", "group1")
             .StartNow()
-            .UsingJobData("name", "thisisname")
+            .UsingJobData("name", "name-from-job-trigger")
             .UsingJobData("age", "90")
             .WithSimpleSchedule(x => x.WithIntervalInSeconds(10).RepeatForever())
             .Build();

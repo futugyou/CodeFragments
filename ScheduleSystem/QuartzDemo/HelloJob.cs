@@ -20,21 +20,35 @@ public class HelloJob : IJob
     }
 }
 
-
+[PersistJobDataAfterExecution]
+[DisallowConcurrentExecution]
 public class ParameterJob : IJob
 {
-    private readonly ILogger<ParameterJob> logger;
+    public const string Name = "name";
+    public const string Age = "age";
 
+    private readonly ILogger<ParameterJob> logger;
+    private int counter = 1;
     public ParameterJob(ILogger<ParameterJob> logger)
     {
         this.logger = logger;
     }
-    public async Task Execute(IJobExecutionContext context)
+    public virtual async Task Execute(IJobExecutionContext context)
     {
+        var jdata = context.JobDetail.JobDataMap;
+        var tdata = context.Trigger.JobDataMap;
         var data = context.MergedJobDataMap;
-        var name = data.GetString("name");
-        var age = data.GetInt("age");
-        logger.LogInformation($"name: {name}, age: {age}.");
+        var jname = jdata.GetString(Name);
+        var jage = jdata.GetInt(Age);
+        var tname = tdata.GetString(Name);
+        var tage = tdata.GetInt(Age);
+        var name = data.GetString(Name);
+        var age = data.GetInt(Age);
+        jdata.Put(Age, jage + 2);
+        tdata.Put(Age, tage + 3);
+        data.Put(Age, age + 5);
+        counter++;
+        logger.LogInformation($"jname: {jname}, tname: {tname}, name: {name}, jage: {jage}, tage: {tage}, age: {age}, counter: {counter}.");
         await Task.Delay(3000);
     }
 }
