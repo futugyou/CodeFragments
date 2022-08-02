@@ -128,4 +128,24 @@ public class DemoController : ControllerBase
         return "";
     }
 
+
+
+    [HttpGet("misfire")]
+    public async Task<string> Misfire()
+    {
+        var job = JobBuilder.Create<MisfireJob>().WithIdentity("job1", "group1").StoreDurably().Build();
+        var trigger = (ISimpleTrigger)TriggerBuilder.Create()
+                .WithIdentity("trigger1", "group1")
+                .WithSimpleSchedule(x => x
+                    .WithIntervalInSeconds(3)
+                    .WithRepeatCount(5)
+                    .WithMisfireHandlingInstructionNowWithRemainingCount()
+                    )
+                .Build();
+
+        var scheduler = await schedulerFactory.GetScheduler();
+
+        await scheduler.ScheduleJob(job, trigger);
+        return "";
+    }
 }

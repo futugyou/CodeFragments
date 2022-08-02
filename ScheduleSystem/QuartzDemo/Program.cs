@@ -33,7 +33,7 @@ builder.Services.Configure<QuartzOptions>(options =>
 builder.Services.AddQuartz(q =>
 {
     // handy when part of cluster or you want to otherwise identify multiple schedulers
-    q.SchedulerId = "Scheduler-Core";
+    q.SchedulerId = "AUTO";
 
     // you can control whether job interruption happens for running jobs when scheduler is shutting down
     q.InterruptJobsOnShutdown = true;
@@ -45,7 +45,7 @@ builder.Services.AddQuartz(q =>
     q.MaxBatchSize = 5;
 
     // we take this from appsettings.json, just show it's possible
-    q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
+    //q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
 
     // this is default configuration if you don't alter it
     q.UseMicrosoftDependencyInjectionJobFactory();

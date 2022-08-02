@@ -52,3 +52,21 @@ public class ParameterJob : IJob
         await Task.Delay(3000);
     }
 }
+
+[PersistJobDataAfterExecution]
+[DisallowConcurrentExecution]
+public class MisfireJob : IJob
+{
+    private readonly ILogger<MisfireJob> logger;
+
+    public MisfireJob(ILogger<MisfireJob> logger)
+    {
+        this.logger = logger;
+    }
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        await Task.Delay(10000);
+        logger.LogInformation("fireat: {0:r}", DateTime.UtcNow);
+    }
+}
