@@ -1,6 +1,7 @@
 using Quartz;
 using Quartz.Impl.Calendar;
 using Quartz.Plugin.Interrupt;
+using SilkierQuartz;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -17,7 +18,21 @@ builder.Services.Configure<QuartzOptions>(options =>
     options.Scheduling.IgnoreDuplicates = true; // default: false
     options.Scheduling.OverWriteExistingData = true; // default: true
 });
-
+//builder.Services.AddSilkierQuartz(options =>
+//{
+//    options.VirtualPathRoot = "/quartz";
+//    options.UseLocalTime = true;
+//    options.DefaultDateFormat = "yyyy-MM-dd";
+//    options.DefaultTimeFormat = "HH:mm:ss";
+//    options.CronExpressionOptions = new CronExpressionDescriptor.Options()
+//    {
+//        DayOfWeekStartIndexZero = false //Quartz uses 1-7 as the range
+//    };
+//}, 
+//authenticationOptions =>
+//{
+//    authenticationOptions.AccessRequirement = SilkierQuartzAuthenticationOptions.SimpleAccessRequirement.AllowAnonymous;
+//});
 //var properties = new NameValueCollection
 //        {
 //             { "quartz.jobStore.type", "Quartz.Impl.AdoJobStore.JobStoreTX, Quartz"},
@@ -183,8 +198,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 
 app.UseAuthorization();
+//app.UseSilkierQuartz();
 
 app.MapControllers();
 

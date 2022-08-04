@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Quartz;
+using Quartz.Impl.Calendar;
 
 namespace QuartzDemo.Controllers;
 
@@ -156,13 +157,34 @@ public class DemoController : ControllerBase
         var job = JobBuilder.Create<ErrorJob>().WithIdentity("error", "group1").StoreDurably().Build();
         var trigger = TriggerBuilder.Create()
                 .WithIdentity("error", "group1")
-                .WithCalendarIntervalSchedule(o=>
+                .WithCalendarIntervalSchedule(o =>
                 {
                     o.WithIntervalInSeconds(10);
                 })
                 .Build();
 
         var scheduler = await schedulerFactory.GetScheduler();
+
+        await scheduler.ScheduleJob(job, trigger);
+        return "";
+    }
+
+    [HttpGet("calendar")]
+    public async Task<string> Calendars()
+    {
+        var job = JobBuilder.Create<HelloJob>().WithIdentity("job1", "group1").Build();
+        var trigger = TriggerBuilder.Create()
+            .WithIdentity("myTrigger")
+            .WithSchedule(CronScheduleBuilder.CronSchedule("0/5 * * * * ? "))
+            .ModifiedByCalendar("myHolidays") // but not on holidays
+            .Build();
+
+        var scheduler = await schedulerFactory.GetScheduler();
+
+        HolidayCalendar cal = new HolidayCalendar();
+        cal.AddExcludedDate(DateTime.Now.AddDays(1));
+
+        await scheduler.AddCalendar("myHolidays", cal, false, false);
 
         await scheduler.ScheduleJob(job, trigger);
         return "";
