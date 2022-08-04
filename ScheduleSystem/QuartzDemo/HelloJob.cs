@@ -70,3 +70,23 @@ public class MisfireJob : IJob
         logger.LogInformation("fireat: {0:r}", DateTime.UtcNow);
     }
 }
+
+
+public class ErrorJob : IJob
+{
+    private readonly ILogger<ErrorJob> logger;
+
+    public ErrorJob(ILogger<ErrorJob> logger)
+    {
+        this.logger = logger;
+    }
+
+    public async Task Execute(IJobExecutionContext context)
+    {
+        var jobkey = context.JobDetail.Key;
+        var triggerkey = context.Trigger.Key;
+        logger.LogInformation($"jobkey: {jobkey}, triggerkey: {triggerkey}.");
+        await Console.Out.WriteLineAsync($"Greetings from HelloJob!{jobkey} job executing, triggered by {triggerkey}");
+        //throw new NotImplementedException();
+    }
+}

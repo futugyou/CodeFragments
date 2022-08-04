@@ -148,4 +148,23 @@ public class DemoController : ControllerBase
         await scheduler.ScheduleJob(job, trigger);
         return "";
     }
+
+
+    [HttpGet("error")]
+    public async Task<string> ErrorJob()
+    {
+        var job = JobBuilder.Create<ErrorJob>().WithIdentity("error", "group1").StoreDurably().Build();
+        var trigger = TriggerBuilder.Create()
+                .WithIdentity("error", "group1")
+                .WithCalendarIntervalSchedule(o=>
+                {
+                    o.WithIntervalInSeconds(10);
+                })
+                .Build();
+
+        var scheduler = await schedulerFactory.GetScheduler();
+
+        await scheduler.ScheduleJob(job, trigger);
+        return "";
+    }
 }
