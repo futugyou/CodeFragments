@@ -21,6 +21,9 @@ public static class HangfireCollectionExtensions
 
     public static IServiceCollection AddSelfHangfire(this IServiceCollection services, IConfiguration config)
     {
+        var hangfireOption = new HangfireCustomOption();
+        config.GetSection(HangfireCustomOption.ConfigSection).Bind(hangfireOption);
+
         var sqlStorageOptions = new SqlServerStorageOptions
         {
             CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
@@ -36,40 +39,34 @@ public static class HangfireCollectionExtensions
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
-            .UseSqlServerStorage(config.GetConnectionString("HangfireConnection"), sqlStorageOptions)
-            // auto delete job,defatul 1 day
-            .WithJobExpirationTimeout(TimeSpan.FromDays(100))
-            .UseConsole(new ConsoleOptions
-            {
-                BackgroundColor = "#CAFFFF"
-            })
-           .UseTagsWithSql(sqlOptions: sqlStorageOptions)
+            .UseSqlServerStorage(hangfireOption.ConnectionString, sqlStorageOptions)
+            .UseConsole()
+            .UseTagsWithSql(sqlOptions: sqlStorageOptions)
             .UseHangfireHttpJob(new()
             {
-
+                EnableDingTalk = false,
+                JobExpirationTimeoutDay = hangfireOption.JobExpirationTimeoutDay,
+                DefaultRecurringQueueName = hangfireOption.DefaultQueueName,
+                DefaultBackGroundJobQueueName = hangfireOption.DefaultQueueName,
             })
             .UseHeartbeatPage();
         });
 
-        // Add the processing server as IHostedService
         services.AddHangfireServer(options =>
         {
-            // all default value
-            options.WorkerCount = Math.Min(Environment.ProcessorCount * 5, 20);
-            // that means priority:  "alpha" > "beta" > "default"
-            // options.Queues = new[] { "alpha", "beta", "default" };
-            options.Queues = new string[1] { "default" };
+            options.ServerName = hangfireOption.ServiceName;
+            options.WorkerCount = Math.Min(Environment.ProcessorCount * 5, hangfireOption.WorkerCount);
+            options.Queues = hangfireOption.AllQueues;
+            options.SchedulePollingInterval = TimeSpan.FromSeconds(5);
+            options.ServerTimeout = TimeSpan.FromMinutes(5.0);
+            options.HeartbeatInterval = TimeSpan.FromSeconds(30.0);
             options.StopTimeout = TimeSpan.FromMilliseconds(500.0);
             options.ShutdownTimeout = TimeSpan.FromSeconds(15.0);
-            options.SchedulePollingInterval = TimeSpan.FromSeconds(15.0);
-            options.HeartbeatInterval = TimeSpan.FromSeconds(30.0);
-            options.ServerTimeout = TimeSpan.FromMinutes(5.0);
             options.ServerCheckInterval = TimeSpan.FromMinutes(5.0);
             options.CancellationCheckInterval = TimeSpan.FromSeconds(5.0);
         });
         return services;
     }
-
 
     public static void ConfigurationHangfire(this IServiceCollection services, IConfiguration Configuration, IGlobalConfiguration globalConfiguration)
     {
@@ -86,6 +83,19 @@ public static class HangfireCollectionExtensions
 
 
 
+    }
+
+    public static IEndpointConventionBuilder AddSelfHangfireDashboard(this IEndpointRouteBuilder endpoints)
+    {
+        var dashbordConfig = new DashboardOptions
+        {
+            AppPath = "/hangfire",
+            IgnoreAntiforgeryToken = true,
+            DisplayStorageConnectionString = true,
+        };
+        var builder = endpoints.MapHangfireDashboard("/hangfire", dashbordConfig);
+
+        return builder;
     }
 
     public static IApplicationBuilder ConfigureSelfHangfire(this IApplicationBuilder app, IConfiguration Configuration)

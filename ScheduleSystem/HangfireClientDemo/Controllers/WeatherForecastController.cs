@@ -18,7 +18,7 @@ public class WeatherForecastController : ControllerBase
     [HttpGet("job")]
     public async Task<AddBackgroundHangfirJobResult> Job()
     {
-        var serverUrl = "https://localhost:7100/hangfire";
+        var serverUrl = "https://localhost:7137/job";
         //下面用的是同步的方式，也可以使用异步： await HangfireJobClient.AddBackgroundJobAsync
         var result = await HangfireJobClient.AddBackgroundJobAsync(serverUrl, new BackgroundJob
         {

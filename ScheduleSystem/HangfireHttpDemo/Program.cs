@@ -27,10 +27,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHangfireDashboard("/hangfire", new DashboardOptions
-    {
-        //Authorization = new[] { new DemoAuthorizationFilter() }
-    });
+    endpoints.AddSelfHangfireDashboard();
 });
 
 app.Run();
