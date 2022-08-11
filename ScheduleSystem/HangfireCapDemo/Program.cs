@@ -1,4 +1,4 @@
-using HangfireCapDemo;
+using Hangfire.Cap;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;

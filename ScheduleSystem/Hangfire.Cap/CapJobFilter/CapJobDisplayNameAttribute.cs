@@ -1,8 +1,4 @@
-﻿using Hangfire;
-using Hangfire.Common;
-using Hangfire.Dashboard;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap.CapJobFilter;
 
 public class CapJobDisplayNameAttribute : JobDisplayNameAttribute
 {

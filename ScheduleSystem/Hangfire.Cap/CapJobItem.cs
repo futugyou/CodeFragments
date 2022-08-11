@@ -1,4 +1,4 @@
-﻿namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap;
 
 public class CapJobItem
 {

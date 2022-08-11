@@ -1,12 +1,4 @@
-﻿using Hangfire.Common;
-using Hangfire.Dashboard;
-using Hangfire.Logging;
-using Hangfire.Server;
-using Hangfire.States;
-using Hangfire.Storage;
-using Hangfire.Tags;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap.CapJobFilter;
 
 public class CapJobHandStateAttribute : JobFilterAttribute, IServerFilter, IElectStateFilter, IApplyStateFilter
 {

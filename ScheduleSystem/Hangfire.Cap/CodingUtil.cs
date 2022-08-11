@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap;
 
 public class CodingUtil
 {

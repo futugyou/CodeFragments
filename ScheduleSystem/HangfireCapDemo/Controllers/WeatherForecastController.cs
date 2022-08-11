@@ -1,6 +1,7 @@
 using Hangfire;
+using Hangfire.Cap;
+using Hangfire.Cap.CapHanfireJob;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace HangfireCapDemo.Controllers;
 

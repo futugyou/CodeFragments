@@ -1,10 +1,4 @@
-﻿using Hangfire;
-using Hangfire.Common;
-using Hangfire.Logging;
-using Hangfire.States;
-using Hangfire.Storage;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap.CapJobFilter;
 
 public class CapJobAutoRetryAttribute : JobFilterAttribute, IElectStateFilter, IApplyStateFilter
 {

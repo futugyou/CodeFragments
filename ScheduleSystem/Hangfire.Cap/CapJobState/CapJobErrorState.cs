@@ -1,8 +1,4 @@
-﻿using Hangfire.Common;
-using Hangfire.States;
-using Newtonsoft.Json;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap.CapJobState;
 
 public class CapJobErrorState : IState
 {

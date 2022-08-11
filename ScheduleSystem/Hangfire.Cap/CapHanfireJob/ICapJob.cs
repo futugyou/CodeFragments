@@ -1,6 +1,4 @@
-﻿using Hangfire.Server;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap.CapHanfireJob;
 
 public interface ICapJob
 {

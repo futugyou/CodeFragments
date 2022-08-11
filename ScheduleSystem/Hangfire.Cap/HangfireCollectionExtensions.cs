@@ -1,12 +1,4 @@
-﻿using DotNetCore.CAP;
-using Hangfire;
-using Hangfire.Console;
-using Hangfire.SqlServer;
-using Hangfire.Tags.SqlServer;
-using System.Text.Encodings.Web;
-using System.Text.Unicode;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap;
 
 public static class HangfireCollectionExtensions
 {

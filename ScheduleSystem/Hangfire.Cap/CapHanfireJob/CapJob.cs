@@ -1,10 +1,4 @@
-﻿using DotNetCore.CAP;
-using Hangfire;
-using Hangfire.Console;
-using Hangfire.Server;
-using Newtonsoft.Json;
-
-namespace HangfireCapDemo;
+﻿namespace Hangfire.Cap.CapHanfireJob;
 
 public class CapJob : ICapJob
 {
