@@ -30,11 +30,12 @@ public class WeatherForecastController : ControllerBase
         var jobItem = new CapJobItem();
         jobItem.JobName = "thisiscapjob";
         jobItem.CapEventName = "make.food";
-        jobItem.RetryTimes = 3;
+        jobItem.RetryTimes = 1;
         jobItem.Cron = "0/15 * * * * *";
         //jobItem.Data = new { Name = "cake", Price = 2.3 };
         jobItem.Data = new { Name = "cake", Price = 2.3 };
         jobItem.RecurringJobIdentifier = "thisiscapjob";
+        jobItem.JobExpirationTimeout = 168;
 
         RecurringJob.AddOrUpdate(jobItem.RecurringJobIdentifier, () => _capJob.Excute(jobItem, null, null, false, null), jobItem.Cron, o);
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast

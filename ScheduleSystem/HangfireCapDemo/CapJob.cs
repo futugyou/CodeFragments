@@ -3,7 +3,6 @@ using Hangfire;
 using Hangfire.Console;
 using Hangfire.Server;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace HangfireCapDemo;
 
@@ -26,10 +25,10 @@ public class CapJob : ICapJob
     /// <param name="queuename">指定queue名称(Note: Hangfire queue names need to be lower case)</param>
     /// <param name="isretry">是否cap调用出错重试</param>
     /// <param name="context">上下文</param>
-    [AutomaticRetrySet(Attempts = 3, DelaysInSeconds = new[] { 20, 30, 60 }, LogEvents = true, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [CapJobAutoRetry(Attempts = 3, DelaysInSeconds = new[] { 20, 30, 60 }, LogEvents = true, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
     [CapJobDisplayName("{0}")]
-    //[CapJobFilter(timeoutInSeconds: 30)]
+    [CapJobHandState]
     public async Task Excute(CapJobItem item, string jobName = null, string queuename = null, bool isretry = false, PerformContext context = null)
     {
         try
@@ -54,6 +53,7 @@ public class CapJob : ICapJob
 
             if (item.RetryTimes <= 0)
             {
+                AddErrToJob(context, ex);
                 throw;
             }
 

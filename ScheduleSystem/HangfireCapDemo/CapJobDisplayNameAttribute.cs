@@ -13,8 +13,11 @@ public class CapJobDisplayNameAttribute : JobDisplayNameAttribute
 
     public override string Format(DashboardContext context, Job job)
     {
-        var data = job.Args.FirstOrDefault() as CapJobItem;
-        if (data == null) return job.Method.Name;
+        if (job.Args.FirstOrDefault() is not CapJobItem data)
+        {
+            return job.Method.Name;
+        }
+
         try
         {
             if (string.IsNullOrEmpty(data.RecurringJobIdentifier))
@@ -22,7 +25,7 @@ public class CapJobDisplayNameAttribute : JobDisplayNameAttribute
                 data.RecurringJobIdentifier = data.JobName;
             }
 
-            return "JobName: " + data.JobName + "| EventName: " + data.CapEventName;
+            return "JobName: " + data.JobName + " | EventName: " + data.CapEventName;
         }
         catch (Exception)
         {

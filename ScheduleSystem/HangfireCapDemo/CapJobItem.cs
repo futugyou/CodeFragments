@@ -10,4 +10,6 @@ public class CapJobItem
     public string QueueName { get; set; } = "default";
     public string CapEventName { get; set; }
     public object Data { get; set; }
+    // hour
+    public int JobExpirationTimeout { get; set; }
 }

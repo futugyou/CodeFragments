@@ -6,7 +6,7 @@ using Hangfire.Storage;
 
 namespace HangfireCapDemo;
 
-public class AutomaticRetrySetAttribute : JobFilterAttribute, IElectStateFilter, IApplyStateFilter
+public class CapJobAutoRetryAttribute : JobFilterAttribute, IElectStateFilter, IApplyStateFilter
 {
     /// <summary>
     /// Represents the default number of retry attempts. This field is read-only.
@@ -23,7 +23,7 @@ public class AutomaticRetrySetAttribute : JobFilterAttribute, IElectStateFilter,
             Math.Pow(attempt - 1, 4) + 15 + random.Next(30) * attempt);
     };
 
-    private readonly ILog _logger = LogProvider.For<AutomaticRetrySetAttribute>();
+    private readonly ILog _logger = LogProvider.For<CapJobAutoRetryAttribute>();
 
     private readonly object _lockObject = new object();
     private int _attempts;
@@ -33,10 +33,10 @@ public class AutomaticRetrySetAttribute : JobFilterAttribute, IElectStateFilter,
     private bool _logEvents;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AutomaticRetrySetAttribute"/>
+    /// Initializes a new instance of the <see cref="CapJobAutoRetryAttribute"/>
     /// class with <see cref="DefaultRetryAttempts"/> number.
     /// </summary>
-    public AutomaticRetrySetAttribute()
+    public CapJobAutoRetryAttribute()
     {
     }
 
@@ -117,12 +117,7 @@ public class AutomaticRetrySetAttribute : JobFilterAttribute, IElectStateFilter,
     public void OnStateElection(ElectStateContext context)
     {
         var jobdta = context.BackgroundJob.Job.Args.FirstOrDefault();
-        if (!(jobdta is CapJobItem capjob))
-        {
-            return;
-        }
-
-        if (capjob.RetryTimes <= 0)
+        if (jobdta is not CapJobItem capjob || capjob.RetryTimes <= 0)
         {
             return;
         }
@@ -180,8 +175,7 @@ public class AutomaticRetrySetAttribute : JobFilterAttribute, IElectStateFilter,
     /// <inheritdoc />
     public void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
     {
-        var capjob = context.BackgroundJob.Job.Args.FirstOrDefault() as CapJobItem;
-        if (capjob == null || capjob.RetryTimes <= 0)
+        if (context.BackgroundJob.Job.Args.FirstOrDefault() is not CapJobItem capjob || capjob.RetryTimes <= 0)
         {
             return;
         }
@@ -210,8 +204,7 @@ public class AutomaticRetrySetAttribute : JobFilterAttribute, IElectStateFilter,
     /// <param name="failedState">Object which contains details about the current failed state.</param>
     private void ScheduleAgainLater(ElectStateContext context, int retryAttempt, int totalLimit, FailedState failedState)
     {
-        var capjob = context.BackgroundJob.Job.Args.FirstOrDefault() as CapJobItem;
-        if (capjob == null || capjob.RetryTimes <= 0)
+        if (context.BackgroundJob.Job.Args.FirstOrDefault() is not CapJobItem capjob || capjob.RetryTimes <= 0)
         {
             return;
         }
