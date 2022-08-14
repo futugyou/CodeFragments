@@ -34,7 +34,7 @@ public class WeatherForecastController : ControllerBase
         jobItem.RetryTimes = 1;
         jobItem.Cron = "0/15 * * * * *";
         //jobItem.Data = new { Name = "cake", Price = 2.3 };
-        jobItem.Data = new { Name = "cake", Price = 2.3 };
+        jobItem.Data = @"{'Name'='cake','Price'=2.3}";
         jobItem.RecurringJobIdentifier = "thisiscapjob";
         jobItem.JobExpirationTimeout = 168;
 

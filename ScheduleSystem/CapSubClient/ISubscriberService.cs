@@ -1,17 +1,19 @@
 ﻿using DotNetCore.CAP;
+using Newtonsoft.Json;
 
 namespace CapSubClient;
 
 public interface ISubscriberService
 {
-    void CheckReceivedMessage(Food food);
+    void CheckReceivedMessage(string foodstring);
 }
 
 public class SubscriberService : ISubscriberService, ICapSubscribe
 {
     [CapSubscribe("make.food")]
-    public void CheckReceivedMessage(Food food)
+    public void CheckReceivedMessage(string foodstring)
     {
+        Food food = JsonConvert.DeserializeObject<Food>(foodstring);
         Console.WriteLine(food?.Name);
         Console.WriteLine(food?.Price);
         Console.WriteLine(food?.Size);
