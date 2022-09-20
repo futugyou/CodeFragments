@@ -3,17 +3,20 @@
 public class Job
 {
     private readonly Action _work;
+    private Job? _continue;
+    public JobStatus Status { get; internal set; }
+
     public Job(Action work)
     {
         _work = work;
     }
-    public JobStatus Status { get; internal set; }
 
     internal protected virtual void Invoke()
     {
         Status = JobStatus.Running;
         _work();
         Status = JobStatus.Completed;
+        _continue?.Start();
     }
 
     public void Start(JobScheduler? jobScheduler = null)
@@ -26,6 +29,20 @@ public class Job
         var job = new Job(work);
         job.Start();
         return job;
+    }
+
+    public Job ContinueWith(Action<Job> continueJob)
+    {
+        if (_continue == null)
+        {
+            var job = new Job(() => continueJob(this));
+            _continue = job;
+        }
+        else
+        {
+            _continue.ContinueWith(continueJob);
+        }
+        return this;
     }
 }
 

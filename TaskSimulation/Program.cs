@@ -3,8 +3,9 @@ using TaskSimulation;
 
 Console.WriteLine("Hello, World!");
 
-ThreadPoolDemo();
-DedicatedThreaDemo();
+//ThreadPoolDemo();
+//DedicatedThreaDemo();
+ContinueJob();
 
 Console.ReadLine();
 
@@ -29,4 +30,35 @@ void DedicatedThreaDemo()
     _ = Job.Run(() => Console.WriteLine($"job14 is excuted in thead {Thread.CurrentThread.ManagedThreadId}"));
     _ = Job.Run(() => Console.WriteLine($"job15 is excuted in thead {Thread.CurrentThread.ManagedThreadId}"));
     _ = Job.Run(() => Console.WriteLine($"job16 is excuted in thead {Thread.CurrentThread.ManagedThreadId}"));
+}
+
+void ContinueJob()
+{
+    Job.Run(() =>
+    {
+        Thread.Sleep(1000);
+        Console.WriteLine("Foo1");
+    }).ContinueWith(_ =>
+    {
+        Thread.Sleep(100);
+        Console.WriteLine("Bar1");
+    }).ContinueWith(_ =>
+    {
+        Thread.Sleep(100);
+        Console.WriteLine("Baz1");
+    });
+
+    Job.Run(() =>
+    {
+        Thread.Sleep(100);
+        Console.WriteLine("Foo2");
+    }).ContinueWith(_ =>
+    {
+        Thread.Sleep(10);
+        Console.WriteLine("Bar2");
+    }).ContinueWith(_ =>
+    {
+        Thread.Sleep(10);
+        Console.WriteLine("Baz2");
+    });
 }
