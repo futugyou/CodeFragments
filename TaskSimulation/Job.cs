@@ -44,6 +44,8 @@ public class Job
         }
         return this;
     }
+
+    public JobAwaiter GetAwaiter() => new(this);
 }
 
 public enum JobStatus

@@ -5,7 +5,11 @@ Console.WriteLine("Hello, World!");
 
 //ThreadPoolDemo();
 //DedicatedThreaDemo();
-ContinueJob();
+//ContinueJob();
+
+await Foo();
+await Bar();
+await Baz();
 
 Console.ReadLine();
 
@@ -62,3 +66,21 @@ void ContinueJob()
         Console.WriteLine("Baz2");
     });
 }
+
+static Job Foo() => new Job(() =>
+{
+    Thread.Sleep(1000);
+    Console.WriteLine("Foo");
+});
+
+static Job Bar() => new Job(() =>
+{
+    Thread.Sleep(100);
+    Console.WriteLine("Bar");
+});
+
+static Job Baz() => new Job(() =>
+{
+    Thread.Sleep(10);
+    Console.WriteLine("Baz");
+});
