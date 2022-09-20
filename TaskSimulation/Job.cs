@@ -15,6 +15,18 @@ public class Job
         _work();
         Status = JobStatus.Completed;
     }
+
+    public void Start(JobScheduler? jobScheduler = null)
+    {
+        (jobScheduler ?? JobScheduler.Current).QueueJob(this);
+    }
+
+    public static Job Run(Action work)
+    {
+        var job = new Job(work);
+        job.Start();
+        return job;
+    }
 }
 
 public enum JobStatus
