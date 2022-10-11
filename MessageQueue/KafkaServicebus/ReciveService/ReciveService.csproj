@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>dotnet-ReciveService-e864465f-036e-416e-95d1-40a1cdb0a709</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0-rc.1.22426.10" />
+		<PackageReference Include="Confluent.Kafka" Version="1.9.4-RC1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\KafkaServiceBus\KafkaServiceBus.csproj" />
+	</ItemGroup>
+</Project>

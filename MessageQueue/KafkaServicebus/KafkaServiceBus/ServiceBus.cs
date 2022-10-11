@@ -15,7 +15,8 @@ public class ServiceBus : IServiceBus
 
     public Task ReceiveMessage(string topic, CancellationToken cancellation, bool forever = true)
     {
-        _consumer.Subscribe(topic);
+        //_consumer.Subscribe(topic);
+        _consumer.Assign(new TopicPartitionOffset(topic, 0, Offset.Beginning));
 
         do
         {
