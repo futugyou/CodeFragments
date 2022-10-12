@@ -54,6 +54,7 @@ public class BaseElasticService
     internal void Insert()
     {
         insertService.InsertData();
+        insertService.UpdateData();
     }
 
     internal void Mapping()

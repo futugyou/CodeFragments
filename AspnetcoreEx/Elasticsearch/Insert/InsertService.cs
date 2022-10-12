@@ -1,4 +1,5 @@
 using System.Runtime.ExceptionServices;
+using IdentityModel;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;
@@ -36,6 +37,28 @@ public class InsertService
         var responseSignal = client.Index(order, i => i.Index("order"));
         // var responseSignal = client.Index(new IndexRequest<OrderInfo>(order, "order"));
         responseSignal = client.IndexDocument(order);// it wil use default index. in this case is "demo"
+    }
+
+    public void UpdateData()
+    {
+        var order = new OrderInfo
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "tom",
+            CreateTime = DateTime.Now,
+            Status = "chart",
+            GoodsName = "phone",
+            Price = 10,
+        };
+
+        var result = client.UpdateAsync<OrderInfo>(order.Id,
+                u =>
+                    u.Index("order")
+                        .Doc(order)
+                        .DocAsUpsert());
+
+        // i do not want to change all method async
+        result.GetAwaiter().GetResult();
     }
 
     public void InsertManyData()
