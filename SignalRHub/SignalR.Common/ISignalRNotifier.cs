@@ -2,7 +2,7 @@
 
 public interface ISignalRNotifier
 {
-    event Action<string, CloudEvent> ReceivedOnPublishToTopic;
+    event Action<string, string> ReceivedOnPublishToTopic;
 
     Task StartAsync();
 
