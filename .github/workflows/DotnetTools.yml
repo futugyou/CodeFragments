@@ -6,6 +6,7 @@ on:
     - master  
     paths: 
     - 'DotnetTools/AwsS3BatchUpload/**'
+    - '.github/workflows/DotnetTools.yml'
 
 jobs:
   tools-nuget:
@@ -21,34 +22,20 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         include-prerelease: true
-
-    - name: Set nuget token
-      uses: allenevans/set-env@v2.2.0
-      with:
-        NUGET_ACCESS_TOKEN: ${{secrets.NUGET_ACCESS_TOKEN}}
-        NUGET_ACCESS_USERNAME: ${{secrets.NUGET_ACCESS_USERNAME}}
-
     - name: Install dependencies      
       run: dotnet restore
       working-directory: ${{env.working-directory}}
     - name: Build     
       run: dotnet build --configuration Release --no-restore
       working-directory: ${{env.working-directory}}
-    - name: Test
-      run: dotnet test --no-restore
-      working-directory: ${{env.working-directory}}
-    
     - name: Pack NuGet package
       run: dotnet pack -c Release
-      working-directory: ${{env.working-directory}}
-
-    - name: Publish NuGet package
-      uses: ./actions/publish-nuget
-      with:
-        PACKAGE_NAME: ${{env.package-name}}
-        VERSION_FILE_PATH: ${{env.working-directory}}/AwsS3BatchUpload.csproj
-        NUGET_PUBLISH_COMMAND: dotnet nuget push **/${{env.package-name}}.*.nupkg -k ${{secrets.NUGET_ACCESS_TOKEN}} -s https://api.nuget.org/v3/index.json
+      working-directory: ${{env.working-directory}}    
+    - name: Publish the package to nuget.org
+      run: dotnet nuget push **/${{env.package-name}}.*.nupkg -k ${{secrets.NUGET_ACCESS_TOKEN}} -s https://api.nuget.org/v3/index.json
+      
+      
