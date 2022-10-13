@@ -50,5 +50,5 @@ jobs:
       uses: ./actions/publish-nuget
       with:
         PACKAGE_NAME: ${{env.package-name}}
-        VERSION_FILE_PATH: ${{env.working-directory}}/${{env.package-name}}.csproj
+        VERSION_FILE_PATH: ${{env.working-directory}}/AwsS3BatchUpload.csproj
         NUGET_PUBLISH_COMMAND: dotnet nuget push **/${{env.package-name}}.*.nupkg -k ${{secrets.NUGET_ACCESS_TOKEN}} -s https://api.nuget.org/v3/index.json
