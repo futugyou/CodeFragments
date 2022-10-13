@@ -1,6 +1,6 @@
 using HotChocolate.AspNetCore;
 using HotChocolate.AspNetCore.Subscriptions;
-using HotChocolate.AspNetCore.Subscriptions.Messages;
+using HotChocolate.AspNetCore.Subscriptions.Protocols;
 using HotChocolate.Execution;
 
 namespace AspnetcoreEx.GraphQL;
@@ -13,21 +13,21 @@ public class SocketSessionInterceptor : DefaultSocketSessionInterceptor
         this.logger = logger;
 
     }
-    public override ValueTask<ConnectionStatus> OnConnectAsync(ISocketConnection connection, InitializeConnectionMessage message, CancellationToken cancellationToken)
+    public override ValueTask<ConnectionStatus> OnConnectAsync(ISocketSession session, IOperationMessagePayload connectionInitMessage, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("this log from SocketSessionInterceptor.OnConnectAsync, message is :" + message.Payload);
-        return base.OnConnectAsync(connection, message, cancellationToken);
+        // logger.LogInformation("this log from SocketSessionInterceptor.OnConnectAsync, message is :" + session.Payload);
+        return base.OnConnectAsync(session, connectionInitMessage, cancellationToken);
     }
 
-    public override ValueTask OnRequestAsync(ISocketConnection connection, IQueryRequestBuilder requestBuilder, CancellationToken cancellationToken)
+    public override ValueTask OnRequestAsync(ISocketSession session, string operationSessionId, IQueryRequestBuilder requestBuilder, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("this log from SocketSessionInterceptor.OnRequestAsync");
-        return base.OnRequestAsync(connection, requestBuilder, cancellationToken);
+        return base.OnRequestAsync(session, operationSessionId, requestBuilder, cancellationToken);
     }
 
-    public override ValueTask OnCloseAsync(ISocketConnection connection, CancellationToken cancellationToken)
+    public override ValueTask OnCloseAsync(ISocketSession session, CancellationToken cancellationToken)
     {
         logger.LogInformation("this log from SocketSessionInterceptor.OnCloseAsync");
-        return base.OnCloseAsync(connection, cancellationToken);
+        return base.OnCloseAsync(session, cancellationToken);
     }
 }

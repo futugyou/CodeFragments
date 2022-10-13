@@ -26,7 +26,7 @@ public static class GraphQLApplicationBuilderExtensions
         //     UseBrowserUrlAsGraphQLEndpoint = true,
         //     GraphQLEndpoint = "/my/graphql/endpoint",
         // });
-        app.UseGraphQLVoyager(new VoyagerOptions { GraphQLEndPoint = "/graphql" }, "/graphql-voyager");
+        app.UseGraphQLVoyager("/graphql-voyager", new VoyagerOptions { GraphQLEndPoint = "/graphql" });
         app.InitializeGraphQLDb();
         return app;
     }

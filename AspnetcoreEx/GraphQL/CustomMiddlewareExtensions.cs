@@ -12,7 +12,7 @@ public static class CustomMiddlewareExtensions
         return descriptor
               .Use(next => async context =>
               {
-                  Console.WriteLine("GraphQLMiddleware Log before: " + context.Document);
+                  //Console.WriteLine("GraphQLMiddleware Log before: " + context.Document);
                   await next(context);
                   Console.WriteLine("GraphQLMiddleware Log after: " + context.Result);
                   // Omitted code for brevity
@@ -37,7 +37,7 @@ public class CustomLogMiddleware
 
         // This invokes the next middleware
         // or if we are at the last middleware the field resolver
-        Console.WriteLine("GraphQLMiddleware Log before: " + context.Document);
+        //Console.WriteLine("GraphQLMiddleware Log before: " + context.Document);
         await _next(context);
 
         // Code down here is executed after all later middleware
