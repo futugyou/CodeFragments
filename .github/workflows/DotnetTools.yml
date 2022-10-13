@@ -1,0 +1,54 @@
+name: DotnetTools
+
+on:
+  push:
+    branches: 
+    - master  
+    paths: 
+    - 'DotnetTools/AwsS3BatchUpload/**'
+
+jobs:
+  tools-nuget:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '7.0.x' ]
+    env:
+      working-directory: ./DotnetTools/AwsS3BatchUpload
+      package-name: Vishel.AWS.S3.Tools
+      
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+        include-prerelease: true
+
+    - name: Set nuget token
+      uses: allenevans/set-env@v2.2.0
+      with:
+        NUGET_ACCESS_TOKEN: ${{secrets.NUGET_ACCESS_TOKEN}}
+        NUGET_ACCESS_USERNAME: ${{secrets.NUGET_ACCESS_USERNAME}}
+
+    - name: Install dependencies      
+      run: dotnet restore
+      working-directory: ${{env.working-directory}}
+    - name: Build     
+      run: dotnet build --configuration Release --no-restore
+      working-directory: ${{env.working-directory}}
+    - name: Test
+      run: dotnet test --no-restore
+      working-directory: ${{env.working-directory}}
+    
+    - name: Pack NuGet package
+      run: dotnet pack -c Release
+      working-directory: ${{env.working-directory}}
+
+    - name: Publish NuGet package
+      uses: ./actions/publish-nuget
+      with:
+        PACKAGE_NAME: ${{env.package-name}}
+        VERSION_FILE_PATH: ${{env.working-directory}}/${{env.package-name}}.csproj
+        NUGET_PUBLISH_COMMAND: dotnet nuget push **/${{env.package-name}}.*.nupkg -k ${{secrets.NUGET_ACCESS_TOKEN}} -s https://api.nuget.org/v3/index.json
