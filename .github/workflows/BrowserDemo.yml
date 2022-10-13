@@ -1,4 +1,4 @@
-name: Identity CI
+name: BrowserDemo
 
 on:
   push:
