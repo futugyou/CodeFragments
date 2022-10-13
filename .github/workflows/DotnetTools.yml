@@ -36,6 +36,6 @@ jobs:
       run: dotnet pack -c Release
       working-directory: ${{env.working-directory}}    
     - name: Publish the package to nuget.org
-      run: dotnet nuget push **/${{env.package-name}}.*.nupkg -k ${{secrets.NUGET_ACCESS_TOKEN}} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push **/${{env.package-name}}.*.nupkg -k ${{secrets.NUGET_ACCESS_TOKEN}} -s https://api.nuget.org/v3/index.json --skip-duplicate 
       
       
