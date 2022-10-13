@@ -30,7 +30,7 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}
         include-prerelease: true
     - name: Install dependencies      
-      run: dotnet publish
+      run: dotnet publish -c Release
       working-directory: ${{env.working-directory}}
       
     - name: Install Vishel tools    
@@ -45,6 +45,6 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
         
     - name: Upload
-      run: dotnet vishel -- awss3upload ${{env.bucketname}} ${{env.keyprefix}} ${{env.localpath}}
+      run: dotnet vishel awss3upload ${{env.bucketname}} ${{env.keyprefix}} ${{env.localpath}}
       working-directory: ${{env.working-directory}}
 
