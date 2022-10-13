@@ -150,21 +150,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaskSimulation", "TaskSimul
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KafkaServicebus", "KafkaServicebus", "{87A115EA-B7BD-4EDF-B3EA-774AF82AD278}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaServiceBus", "MessageQueue\KafkaServicebus\KafkaServiceBus\KafkaServiceBus.csproj", "{B8D7A407-E7D9-4FF4-8D01-7C3581C706A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KafkaServiceBus", "MessageQueue\KafkaServicebus\KafkaServiceBus\KafkaServiceBus.csproj", "{B8D7A407-E7D9-4FF4-8D01-7C3581C706A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReciveService", "MessageQueue\KafkaServicebus\ReciveService\ReciveService.csproj", "{F4CB4CFE-7158-4D19-9310-42FC614C56FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReciveService", "MessageQueue\KafkaServicebus\ReciveService\ReciveService.csproj", "{F4CB4CFE-7158-4D19-9310-42FC614C56FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProducerService", "MessageQueue\KafkaServicebus\ProducerService\ProducerService.csproj", "{9B2EF537-6DBA-48A2-81BD-9483A039A2A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProducerService", "MessageQueue\KafkaServicebus\ProducerService\ProducerService.csproj", "{9B2EF537-6DBA-48A2-81BD-9483A039A2A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRHub", "MessageQueue\KafkaServicebus\SignalRHub\SignalRHub.csproj", "{33ECBEF9-CCAC-4116-996C-7ACB2A2220BE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SignalRHub", "SignalRHub", "{D364EE77-8B59-4A5C-B27A-28649E3F17A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Common", "SignalRHub\SignalR.Common\SignalR.Common.csproj", "{735B41A7-A158-4570-95ED-743BF9A7577E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR.Common", "SignalRHub\SignalR.Common\SignalR.Common.csproj", "{735B41A7-A158-4570-95ED-743BF9A7577E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Server", "SignalRHub\SignalR.Server\SignalR.Server.csproj", "{3568261D-5635-4365-BF1A-345B2CB02FF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR.Server", "SignalRHub\SignalR.Server\SignalR.Server.csproj", "{3568261D-5635-4365-BF1A-345B2CB02FF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalR.Client", "SignalRHub\SignalR.Client\SignalR.Client.csproj", "{A7F38738-2DAD-4DB5-8E74-382ED571AF39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR.Client", "SignalRHub\SignalR.Client\SignalR.Client.csproj", "{A7F38738-2DAD-4DB5-8E74-382ED571AF39}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotnetTools", "DotnetTools", "{612F9E6F-1342-423A-9FC4-DF51F9D75889}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwsS3BatchUpload", "DotnetTools\AwsS3BatchUpload\AwsS3BatchUpload.csproj", "{C2D7AD92-8F6F-4C6E-8DBA-C9BA406DD9AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -412,6 +416,10 @@ Global
 		{A7F38738-2DAD-4DB5-8E74-382ED571AF39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7F38738-2DAD-4DB5-8E74-382ED571AF39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7F38738-2DAD-4DB5-8E74-382ED571AF39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2D7AD92-8F6F-4C6E-8DBA-C9BA406DD9AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2D7AD92-8F6F-4C6E-8DBA-C9BA406DD9AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2D7AD92-8F6F-4C6E-8DBA-C9BA406DD9AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2D7AD92-8F6F-4C6E-8DBA-C9BA406DD9AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -476,6 +484,7 @@ Global
 		{735B41A7-A158-4570-95ED-743BF9A7577E} = {D364EE77-8B59-4A5C-B27A-28649E3F17A1}
 		{3568261D-5635-4365-BF1A-345B2CB02FF0} = {D364EE77-8B59-4A5C-B27A-28649E3F17A1}
 		{A7F38738-2DAD-4DB5-8E74-382ED571AF39} = {D364EE77-8B59-4A5C-B27A-28649E3F17A1}
+		{C2D7AD92-8F6F-4C6E-8DBA-C9BA406DD9AA} = {612F9E6F-1342-423A-9FC4-DF51F9D75889}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
