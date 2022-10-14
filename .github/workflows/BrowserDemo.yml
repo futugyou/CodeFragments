@@ -9,7 +9,7 @@ on:
     - '.github/workflows/BrowserDemo.yml'
 
 jobs:
-  identity-ci:
+  publish-static-file:
   
     runs-on: ubuntu-latest
     strategy:
