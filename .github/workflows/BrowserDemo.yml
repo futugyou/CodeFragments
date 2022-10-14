@@ -5,7 +5,7 @@ on:
     branches: 
     - master  
     paths: 
-    - 'BrowserDemo/**'
+    - 'BrowserDemo/CshtmlDemo/**'
     - '.github/workflows/BrowserDemo.yml'
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       matrix:
         dotnet-version: [ '7.0.x' ]
     env:
-      working-directory: ./BrowserDemo
+      working-directory: ./BrowserDemo/CshtmlDemo
       package-name: Vishel.AWS.S3.Tools
       bucketname: oneapp-assets
       keyprefix: uploaddemo
