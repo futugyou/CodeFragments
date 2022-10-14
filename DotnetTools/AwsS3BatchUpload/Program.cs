@@ -1,4 +1,5 @@
 ﻿global using Amazon.S3;
+global using Amazon.S3.Model;
 global using Amazon.S3.Transfer;
 global using Oakton;
 global using System.Reflection;
