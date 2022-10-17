@@ -18,7 +18,7 @@ jobs:
       working-directory: ./BrowserDemo/CshtmlDemo
       bucketname: osim-onecloud-cdn-devtest
       keyprefix: uploaddemo
-      localpath: bin/Release/net7.0/publish/wwwroot
+      localpath: /home/runner/work/CodeFragments/CodeFragments/BrowserDemo/CshtmlDemo/bin/Release/net7.0/publish/wwwroot
       
     steps:
     - uses: actions/checkout@v3
