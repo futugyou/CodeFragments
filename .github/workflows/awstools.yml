@@ -39,12 +39,12 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
     
     - name: cnd invalidation
-      run: aws cloudfront create-invalidation --distribution-id E3O3PP3U0DYQ9F --paths "/demo/*" 
+      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CDN_ID }} --paths "/demo/*" 
     
     - name: delete
-      run: aws s3 rm s3://osim-onecloud-cdn-devtest/demo/ --recursive
+      run: aws s3 rm ${{ secrets.S3PATH }}demo/ --recursive
     
     - name: publish
-      run: aws s3 sync ${{env.localpath}} s3://osim-onecloud-cdn-devtest/demo/ --acl private
+      run: aws s3 sync ${{env.localpath}} ${{ secrets.S3PATH }}demo/ --acl private
         
       
