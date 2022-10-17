@@ -37,8 +37,12 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
         aws-region: ${{ secrets.AWS_REGION }}
+        
+    
+    - name: delete
+      run: aws s3 rm s3://osim-onecloud-cdn-devtest/demo/ --recursive
     
     - name: publish
-      run: aws s3 sync ${{env.localpath}} s3://osim-onecloud-cdn-devtest/demo/
+      run: aws s3 sync ${{env.localpath}} s3://osim-onecloud-cdn-devtest/demo/ --acl private
         
       
