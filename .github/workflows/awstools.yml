@@ -1,0 +1,44 @@
+name: awstools
+
+on:
+  push:
+    branches: 
+    - master  
+    paths: 
+    - '.github/workflows/awstools.yml'
+
+jobs:
+  tools-nuget:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '7.0.x' ]
+    env:
+      working-directory: ./BrowserDemo/CshtmlDemo
+      bucketname: osim-onecloud-cdn-devtest
+      keyprefix: uploaddemo
+      localpath: bin/Release/net7.0/publish/wwwroot
+      
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+        include-prerelease: true
+    - name: Install dependencies      
+      run: dotnet publish -c Release
+      working-directory: ${{env.working-directory}}
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    
+    - name: publish
+      run: aws s3 sync ${{env.localpath}} s3://osim-onecloud-cdn-devtest/demo/
+        
+      
