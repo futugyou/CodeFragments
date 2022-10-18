@@ -43,6 +43,7 @@ jobs:
     
     - name: publish
       run: aws s3 sync ${{env.localpath}} ${{ secrets.S3PATH }}demo/ --acl private
+      working-directory: ${{env.working-directory}}
     
     - name: cnd invalidation
       run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CDN_ID }} --paths "/demo/*" 
