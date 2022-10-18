@@ -18,7 +18,7 @@ jobs:
       working-directory: ./BrowserDemo/CshtmlDemo
       bucketname: osim-onecloud-cdn-devtest
       keyprefix: uploaddemo
-      localpath: /home/runner/work/CodeFragments/CodeFragments/BrowserDemo/CshtmlDemo/bin/Release/net7.0/publish/wwwroot
+      localpath: ./bin/Release/net7.0/publish/wwwroot
       
     steps:
     - uses: actions/checkout@v3
@@ -38,13 +38,13 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
         aws-region: ${{ secrets.AWS_REGION }}
     
-    - name: cnd invalidation
-      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CDN_ID }} --paths "/demo/*" 
-    
     - name: delete
       run: aws s3 rm ${{ secrets.S3PATH }}demo/ --recursive
     
     - name: publish
       run: aws s3 sync ${{env.localpath}} ${{ secrets.S3PATH }}demo/ --acl private
+    
+    - name: cnd invalidation
+      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CDN_ID }} --paths "/demo/*" 
         
       
