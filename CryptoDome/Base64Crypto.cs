@@ -27,6 +27,11 @@ namespace CryptoDome
             return s;
         }
 
+        public static bool IsBase64String(string base64)
+        {
+            var buffer = new Span<byte>(new byte[base64.Length]);
+            return Convert.TryFromBase64String(base64, buffer, out int bytesParsed);
+        }
         #region Base64位加密解密
         /// <summary>
         /// 将字符串转换成base64格式,使用UTF8字符集
