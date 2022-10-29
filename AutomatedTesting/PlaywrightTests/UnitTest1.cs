@@ -6,11 +6,22 @@ namespace PlaywrightTests;
 [TestClass]
 public class UnitTest1 : PageTest
 {
+    [TestInitialize]
+    public async Task TestInitialize()
+    {
+        await Page.GotoAsync("https://playwright.dev");
+    }
+
+    [TestMethod]
+    public async Task MainNavigation()
+    {
+        // Assertions use the expect API.
+        await Expect(Page).ToHaveURLAsync("https://playwright.dev/");
+    }
+
     [TestMethod]
     public async Task HomepageHasPlaywrightInTitleAndGetStartedLinkLinkingtoTheIntroPage()
     {
-        await Page.GotoAsync("https://playwright.dev");
-
         // Expect a title "to contain" a substring.
         await Expect(Page).ToHaveTitleAsync(new Regex("Playwright"));
 
@@ -25,5 +36,7 @@ public class UnitTest1 : PageTest
 
         // Expects the URL to contain intro.
         await Expect(Page).ToHaveURLAsync(new Regex(".*intro"));
+
+        await Expect(Page.Locator("text=Installation")).ToBeVisibleAsync();
     }
 }
