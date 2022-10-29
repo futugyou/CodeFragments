@@ -6,6 +6,7 @@ namespace PlaywrightTests;
 [TestClass]
 public class UnitTest1 : PageTest
 {
+    // $env:PWDEBUG=1
     [TestInitialize]
     public async Task TestInitialize()
     {
