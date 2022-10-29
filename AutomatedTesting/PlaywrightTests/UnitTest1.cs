@@ -1,5 +1,5 @@
-using System.Text.RegularExpressions;
 using Microsoft.Playwright.MSTest;
+using System.Text.RegularExpressions;
 
 namespace PlaywrightTests;
 
