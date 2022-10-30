@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace PlaywrightTests;
 
 [TestClass]
-public class UnitTest1 : PageTest
+internal class UnitTest1 : PageTest
 {
     // $env:PWDEBUG=1
     [TestInitialize]
