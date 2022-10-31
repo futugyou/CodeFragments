@@ -15,8 +15,12 @@
 		<PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
 		<PackageReference Include="coverlet.collector" Version="3.1.2" />
 	</ItemGroup>
+	
+	<ItemGroup>
+		<AdditionalFiles Include="*.json"/>
+	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\PlaywrightSourceGenerator\PlaywrightSourceGenerator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\PlaywrightTestSourceGenerator\PlaywrightTestSourceGenerator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 </Project>

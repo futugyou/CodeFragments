@@ -1,0 +1,54 @@
+{
+	"ServiceName": "Userprofile",
+	"APIList": [
+		{
+			"AcionName": "Getuserprofile",
+			"Url": "https://devtest.services.osim-cloud.com/user/api/v1.0/userprofile",
+			"Method": "GET",
+			"UserCase": [
+				{
+					"Request": {},
+					"Response": {
+						"resultCode": 1,
+						"httpStatus": 200,
+						"gender": "male"
+					}
+				}
+			]
+		},
+		{
+			"AcionName": "Updateuserprofile",
+			"Url": "https://devtest.services.osim-cloud.com/user/api/v1.0/userprofile",
+			"Method": "POST",
+			"UserCase": [
+				{
+					"Request": {
+						"displayName": "in aliquip",
+						"firstName": "ut nisi nostrud",
+						"middleName": "ipsum in",
+						"lastName": "labore magna",
+						"gender": "male",
+						"birthdate": "0001-01-01",
+						"email": "8blae@j.ebis",
+						"phoneNumber": "1",
+						"phoneCode": "1",
+						"languageCode": "zh-CN",
+						"postalCode": "ullamco",
+						"avatarFileId": "enim adipisicing",
+						"pdpa": false,
+						"receiveSMS": true,
+						"receiveEmail": true,
+						"receiveDirectMail": false,
+						"posCustomerId": "sit ullamco sed",
+						"extraPhoneNumber": "culpa quis in Ut"
+					},
+					"Response": {
+						"resultCode": 1,
+						"httpStatus": 200,
+						"gender": "male"
+					}
+				}
+			]
+		}
+	]
+}

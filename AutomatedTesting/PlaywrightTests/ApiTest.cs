@@ -4,7 +4,7 @@ using Microsoft.Playwright.MSTest;
 namespace PlaywrightTests;
 
 [TestClass]
-public class ApiTest : PlaywrightTest
+internal class ApiTest : PlaywrightTest
 {
     // dotnet test --filter "ApiTest"
     // $env:password=*
