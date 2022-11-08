@@ -131,7 +131,7 @@ namespace CodeFragments
     }
 
     [SimpleJob(RuntimeMoniker.Net60)]
-    [SimpleJob(RuntimeMoniker.CoreRt60)]
+    [SimpleJob(RuntimeMoniker.Net70)]
     [RPlotExporter]
     public class SpanTest
     {

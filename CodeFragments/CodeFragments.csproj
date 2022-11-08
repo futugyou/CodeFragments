@@ -18,11 +18,11 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-		<PackageReference Include="Metalama.Framework" Version="0.5.23-preview" />
-		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.0-preview.6.21355.2" />
-		<PackageReference Include="Sharprompt" Version="2.3.7" />
-		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
-		<PackageReference Include="System.IO.Pipelines" Version="6.0.0-preview.6.21352.12" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+		<!--<PackageReference Include="Metalama.Framework" Version="0.5.55-preview" />-->
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="7.0.0" />
+		<PackageReference Include="Sharprompt" Version="2.4.5" />
+		<PackageReference Include="StackExchange.Redis" Version="2.6.70" />
+		<PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
 	</ItemGroup>
 </Project>

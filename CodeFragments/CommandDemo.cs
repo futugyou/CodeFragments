@@ -40,8 +40,8 @@ public class CommandDemo
         var listValue = Prompt.List<string>("Please add item(s)");
         Console.WriteLine($"You picked {string.Join(", ", listValue)}");
 
-        var result = Prompt.AutoForms<MyFormModel>();
-        Console.WriteLine($"You picked {result.Name}");
+        //var result = Prompt.AutoForms<MyFormModel>();
+        //Console.WriteLine($"You picked {result.Name}");
 
         Prompt.Symbols.Prompt = new Symbol("🤔", "?");
         Prompt.Symbols.Done = new Symbol("😎", "V");
