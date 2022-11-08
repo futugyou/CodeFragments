@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Interoperability", "CA1416:验证平台兼容性", Justification = "<挂起>", Scope = "member", Target = "~M:QuicListenerDemo.Program.Main(System.String[])~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<挂起>")]
