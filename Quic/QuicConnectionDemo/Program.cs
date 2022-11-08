@@ -55,6 +55,33 @@ await writer.CompleteAsync();
 
 Console.ReadKey();
 
+// 用多个线程创建多个 Quic 流，并同时发送消息
+// 默认情况下，一个 Quic 连接的流的限制是 100，
+// 可以设置 QuicConnectionOptions 的 MaxInboundBidirectionalStreams 和 MaxInboundUnidirectionalStreams 参数
+for (int j = 0; j < 5; j++)
+{
+    _ = Task.Run(async () => {
+
+        // 创建一个出站的双向流
+        var stream = await connection.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
+
+        var writer = PipeWriter.Create(stream);
+
+        Console.WriteLine();
+
+        await Task.Delay(2000);
+
+        var message = $"Hello Quic [{stream.Id}] \n";
+
+        Console.Write("Send -> " + message);
+
+        await writer.WriteAsync(Encoding.UTF8.GetBytes(message));
+
+        await writer.CompleteAsync();
+    });
+}
+Console.ReadKey();
+
 // 使用 System.IO.Pipeline 读取流数据
 async Task ProcessLinesAsync(QuicStream stream)
 {

@@ -32,16 +32,21 @@ var listener = await QuicListener.ListenAsync(new QuicListenerOptions
 var connection = await listener.AcceptConnectionAsync();
 Console.WriteLine($"Client [{connection.RemoteEndPoint}]: connected");
 
-// 接收一个入站的 Quic 流, 一个 QuicConnection 可以支持多个流。 可单向，也可双向
-var stream = await connection.AcceptInboundStreamAsync();
-Console.WriteLine($"Stream [{stream.Id}]: created");
+var cts = new CancellationTokenSource();
+while (!cts.IsCancellationRequested)
+{
+    // 支持接收多个 Quic 流
+    // 接收一个入站的 Quic 流, 一个 QuicConnection 可以支持多个流。 可单向，也可双向
+    var stream = await connection.AcceptInboundStreamAsync();
+    Console.WriteLine($"Stream [{stream.Id}]: created");
 
-// 接下来，使用 System.IO.Pipeline 处理流数据，读取行数据，并回复一个 ack 消息。
-Console.WriteLine();
-
-await ProcessLinesAsync(stream);
+    // 使用 System.IO.Pipeline 处理流数据，读取行数据，并回复一个 ack 消息。
+    Console.WriteLine();
+    _ = ProcessLinesAsync(stream);
+}
 
 Console.ReadKey();
+
 
 // 处理流数据
 async Task ProcessLinesAsync(QuicStream stream)
