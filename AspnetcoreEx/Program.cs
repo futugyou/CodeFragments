@@ -9,6 +9,7 @@ using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
 using AspnetcoreEx.Elasticsearch;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -41,7 +42,7 @@ builder.Services.AddGraphQL(configuration, builder.Environment);
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
-
+builder.Services.AddDIExtension();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
