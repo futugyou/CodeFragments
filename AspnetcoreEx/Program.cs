@@ -9,7 +9,6 @@ using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
 using AspnetcoreEx.Elasticsearch;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
