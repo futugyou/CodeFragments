@@ -13,10 +13,7 @@ using AspnetcoreEx.Elasticsearch;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 // Add services to the container.
-builder.Host.ConfigureAppConfiguration(config =>
-{
-    config.AddJsonFileExtensions("appsettings.json", true, true);
-});
+builder.Configuration.AddJsonFileExtensions("appsettings.json", true, true);
 
 builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
