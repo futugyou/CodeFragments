@@ -16,7 +16,7 @@ public class Subscription
     public ValueTask<ISourceStream<User>> UserPublished([Service] ITopicEventReceiver receiver)
     {
         var topic = $"userCreated";
-        return receiver.SubscribeAsync<string, User>(topic);
+        return receiver.SubscribeAsync<User>(topic);
     }
 }
 
@@ -31,7 +31,7 @@ public class SubscriptionType : ObjectType
             .Subscribe(async context =>
             {
                 var receiver = context.Service<ITopicEventReceiver>();
-                var stream = await receiver.SubscribeAsync<string, User>("userCreated");
+                var stream = await receiver.SubscribeAsync<User>("userCreated");
                 return stream;
             });
     }
