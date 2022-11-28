@@ -43,7 +43,8 @@ builder.Services.AddGraphQL(configuration, builder.Environment);
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
 builder.Services.AddDIExtension();
-builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("./"));
+// The path must be absolute
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 
 var app = builder.Build();
