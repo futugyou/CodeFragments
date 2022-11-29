@@ -37,14 +37,15 @@ public class Mutation
         return new AddUserResponse(uselist.FirstOrDefault(o => o.Id == user.id)!);
     }
 
-    public IPet? CreatePet(PetInput input)
-    {
-        if (input.Cat != null)
-        {
-            return input.Cat;
-        }
-        return input.Dog;
-    }
+    //public IPet? CreatePet(PetInput input)
+    //{
+    //    if (input.Cat != null)
+    //    {
+    //        return input.Cat;
+    //    }
+    //    return input.Dog;
+    //}
+
     public async Task<bool> UploadFileAsync(IFile file)
     {
         var fileName = file.Name;

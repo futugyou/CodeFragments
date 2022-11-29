@@ -32,7 +32,7 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
         {
             { "testname", "testvalue" }
         };
-        requestBuilder.SetProperties(properties!);
+        requestBuilder.InitializeGlobalState(properties!);
         logger.LogInformation("this log from HttpRequestInterceptor.OnCreateAsync");
         return base.OnCreateAsync(context, requestExecutor, requestBuilder, cancellationToken);
     }
