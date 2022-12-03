@@ -5,10 +5,13 @@ namespace AspnetcoreEx.Extensions;
 public interface IFileSystem
 {
     void ShowStructure(Action<int, string> print);
+
+    void WatchFile(string path);
 }
 public class FileSystem : IFileSystem
 {
     private readonly IFileProvider fileProvider;
+    private string filePath;
 
     public FileSystem(IFileProvider fileProvider)
     {
@@ -32,5 +35,19 @@ public class FileSystem : IFileSystem
             }
             index--;
         }
+    }
+
+    public void WatchFile(string path)
+    {
+        filePath = path;
+        ChangeToken.OnChange(()=>fileProvider.Watch(path), Callback);
+    }
+    async void Callback()
+    {
+        using var stream = fileProvider.GetFileInfo(filePath).CreateReadStream();
+        var buffer = new byte[stream.Length];
+        await stream.ReadAsync(buffer);
+        var current = Encoding.Default.GetString(buffer);
+        Console.WriteLine(current);
     }
 }
