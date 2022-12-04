@@ -26,10 +26,16 @@ public static class DependencyInjectionExtensions
         {
             throw new ArgumentNullException(nameof(configuration));
         }
-        services.Configure<RedisOptions>(configuration.GetSection("RedisOptions"));
+        services.Configure<RedisOptions>(configuration.GetSection("RedisOptions")).Validate(option => Validate(option),"not pass");
         services.AddSingleton<IRedisClient, RedisClient>();
         services.AddSingleton<RedisProfiler>();
         services.AddHttpContextAccessor();
         return services;
+    }
+
+    static bool Validate(RedisOptions)
+    {
+        // do validate here!
+        return true;
     }
 }

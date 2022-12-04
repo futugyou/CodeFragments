@@ -14,7 +14,7 @@ using Microsoft.Extensions.FileProviders;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 // Add services to the container.
-builder.Configuration.AddJsonFileExtensions("appsettings.json", true, true);
+configuration.AddJsonFileExtensions("appsettings.json", true, true);
 
 builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
