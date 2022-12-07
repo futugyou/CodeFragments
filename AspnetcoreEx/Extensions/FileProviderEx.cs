@@ -1,12 +1,14 @@
 ﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
+using System.Text;
 
 namespace AspnetcoreEx.Extensions;
 
 public interface IFileSystem
 {
     void ShowStructure(Action<int, string> print);
-
     void WatchFile(string path);
+    Task<string> ReadAllTextAsync(string path);
 }
 public class FileSystem : IFileSystem
 {
@@ -16,6 +18,14 @@ public class FileSystem : IFileSystem
     public FileSystem(IFileProvider fileProvider)
     {
         this.fileProvider = fileProvider;
+    }
+
+    public async Task<string> ReadAllTextAsync(string path)
+    {
+        using var stream = fileProvider.GetFileInfo(path).CreateReadStream();
+        var buffer = new byte[stream.Length];
+        await stream.ReadAsync(buffer);
+        return Encoding.Default.GetString(buffer);
     }
 
     public void ShowStructure(Action<int, string> print)
@@ -40,7 +50,7 @@ public class FileSystem : IFileSystem
     public void WatchFile(string path)
     {
         filePath = path;
-        ChangeToken.OnChange(()=>fileProvider.Watch(path), Callback);
+        ChangeToken.OnChange(() => fileProvider.Watch(path), Callback);
     }
     async void Callback()
     {

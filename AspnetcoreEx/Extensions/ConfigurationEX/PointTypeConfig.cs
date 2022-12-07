@@ -1,7 +1,10 @@
+using System.ComponentModel;
+using System.Globalization;
+
 namespace AspnetcoreEx.Extensions;
 
 [TypeConverter(typeof(PointTypeConverter))]
-public readonly record  struct Point(double x,double y);
+public readonly record struct Point(double x, double y);
 
 public class PointTypeConverter : TypeConverter
 {
@@ -15,6 +18,6 @@ public class PointTypeConverter : TypeConverter
         var split = (value.ToString() ?? "0.0,0.0").Split(',');
         double x = double.Parse(split[0].Trim().TrimStart('('));
         double y = double.Parse(split[1].Trim().TrimStart(')'));
-        return new Point(x,y);
+        return new Point(x, y);
     }
 }
