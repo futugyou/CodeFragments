@@ -89,6 +89,26 @@ public class EventSourceEx6
             _ => level >= LogLevel.Information,
         };
     }
+
+    public static void LoggerMessageUsecase()
+    {
+        var template = "this is log {one}, time {two}, message {three}";
+        var log = LoggerMessage.Define<string,DateTime,string>(
+            logLevel: LogLevel.Trace,
+            eventId: 123,
+            formatString: template
+        );
+        var logger =  = new ServiceCollection()
+        .AddLogging(builder => 
+            builder
+            .SetMinimumLevel(LogLevel.Trace)
+            .AddConsole()
+        )
+        .BuildServiceProvider()
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger("Program");
+        log(logger,"thisisone",DateTime.Now(),"thisismessage",null);
+    }
 }
 
 public class ConsoleListener : TraceListener
