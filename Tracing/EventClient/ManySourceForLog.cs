@@ -40,6 +40,43 @@ public class EventSourceEx6
         }
         source.Flush();
     }
+
+    class FoobarEventListener : EventListener{}
+    public static void TraceSourceLog()
+    {
+        var listener = new FoobarEventListener();
+        listener.EventSourceCreated += (sender, args) =>
+        {
+            if (args.EventSource?.Name == "Microsoft-Extensions-Logging")
+            {
+                listener.EnableEvents(args.EventSource, EventLevel.LogAlways);
+            }
+        };
+        listener.EventWritten += (sender, args) =>
+        {
+            var payload = args.Payload;
+            var payloadNames = args.PayloadNames;
+            if (args.EventName == "FotmattedMessage" && payload != null && payloadNames != null)
+            {
+                var level = payloadNames.IndexOf("Level");
+                var category = payloadNames.IndexOf("LoggerName");
+                var eventid = payloadNames.IndexOf("EventId");
+                var message = payloadNames.IndexOf("FormattedMessage");
+                Console.WriteLine($"{level},{category},{eventid},{message}");
+            }
+        };
+        var logger = new ServiceCollection()
+        .AddLogging(builder => 
+            builder.AddTraceSource(new SourceSwitch("default","All"), new DefaultTraceListener{LogFileName = "trace.log"})
+            .AddEventSourceLogger()
+        )
+        .BuildServiceProvider()
+        .GetRequiredService<ILogger<Program>>();
+        var levels = (LogLevel[])Enum.GetValues(typeof(LogLevel));
+        levels = levels.Where(it => it != LogLevel.None).ToArray();
+        var eventid = 1;
+        Array.ForEach(levels, level => logger.Log(level, eventid++, $"this is a {level} message"));
+    }
 }
 
 public class ConsoleListener : TraceListener

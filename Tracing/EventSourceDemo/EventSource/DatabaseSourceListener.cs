@@ -29,6 +29,8 @@ namespace EventSourceDemo
                 Console.BackgroundColor = ConsoleColor.Green;
                 Console.WriteLine(JsonSerializer.Serialize(eventData));
                 Console.BackgroundColor = tmpColor;
+                Console.WriteLine(eventData.RelatedActivityId);
+                Console.WriteLine(eventData.ActivityId);
             }
         }
     }
