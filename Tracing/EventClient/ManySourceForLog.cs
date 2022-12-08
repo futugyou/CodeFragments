@@ -67,7 +67,9 @@ public class EventSourceEx6
         };
         var logger = new ServiceCollection()
         .AddLogging(builder => 
-            builder.AddTraceSource(new SourceSwitch("default","All"), new DefaultTraceListener{LogFileName = "trace.log"})
+            builder
+            .AddFilter(TraceFilter)
+            .AddTraceSource(new SourceSwitch("default","All"), new DefaultTraceListener{LogFileName = "trace.log"})
             .AddEventSourceLogger()
         )
         .BuildServiceProvider()
@@ -76,6 +78,16 @@ public class EventSourceEx6
         levels = levels.Where(it => it != LogLevel.None).ToArray();
         var eventid = 1;
         Array.ForEach(levels, level => logger.Log(level, eventid++, $"this is a {level} message"));
+    }
+
+    static bool TraceFilter(string category, LogLevel level)
+    {
+        return category swtich
+        {
+            // we only have this category
+            "Program" => level >= LogLevel.Debug,
+            _ => level >= LogLevel.Information,
+        };
     }
 }
 
