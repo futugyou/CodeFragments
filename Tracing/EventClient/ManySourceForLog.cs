@@ -132,7 +132,38 @@ public class EventSourceEx6
     ActivitySamplingResult SampleNone(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.None;
     ActivitySamplingResult SamplePropagationData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.SamplePropagationData;
     ActivitySamplingResult SampleAllData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.SampleAllData;
+    ActivitySamplingResult Sample(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData;
+
     bool MatchAll(ActivitySource activitySource) => true;
+
+    public static void ActivityUseCase2()
+    {
+        var logger = new ServiceCollection()
+            .AddLogging(builder => builder
+                .Configure(options => options.ActivityTrackingOptions = 
+                    ActivityCreationOptions.TraceId 
+                    | ActivityCreationOptions.SpanId 
+                    | ActivityCreationOptions.ParentId)
+                .AddConsole()
+                .AddSampleConsole(options => options.IncludeScopes = true))
+            .BuildServiceProvider()
+            .GetRequiredService<ILogger<Program>>();
+        ActivitySource.AddActivityListener(new ActivityListener{ShouldListenTo = _=>true,Sample = Sample});
+        var source = new ActivitySource("App");
+        using (source.StartActivity("foo"))
+        {
+            logger.Log(LogLevel.Information, "this is a log written by scope foo");
+            using(source.StartActivity("bar"))
+            {
+                logger.Log(LogLevel.Information, "this is a log written by scope bar");
+                using(source.StartActivity("baz"))
+                {
+                    logger.Log(LogLevel.Information, "this is a log written by scope baz");
+                }
+            }
+        }
+        Console.Read();
+    }
 }
 
 public class ConsoleListener : TraceListener
