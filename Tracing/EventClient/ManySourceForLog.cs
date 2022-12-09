@@ -109,6 +109,30 @@ public class EventSourceEx6
         .CreateLogger("Program");
         log(logger,"thisisone",DateTime.Now(),"thisismessage",null);
     }
+
+    public static void ActivityUseCase()
+    {
+        var source = new ActivitySource("demo");
+        Debug.Assert(source.CreateActivity("bar", ActivityKind.Internal) == null);
+        var listener1 = new ActivityListener { ShouldListenTo = MatchAll , Sample = SampleNone };
+        ActivitySource.AddActivityListener(listener1);
+        Debug.Assert(source.CreateActivity("bar", ActivityKind.Internal) == null);
+        
+        var listener2 = new ActivityListener { ShouldListenTo = MatchAll , Sample = SamplePropagationData }; 
+        ActivitySource.AddActivityListener(listener2);
+        var activity = source.CreateActivity("bar", ActivityKind.Internal);
+        Debug.Assert(activity?.IsAllDataRequested == false);
+
+        var listener3 = new ActivityListener { ShouldListenTo = MatchAll , Sample = SampleAllData }; 
+        ActivitySource.AddActivityListener(listener3);
+        activity = source.CreateActivity("bar", ActivityKind.Internal);
+        Debug.Assert(activity?.IsAllDataRequested == true);
+    }
+
+    ActivitySamplingResult SampleNone(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.None;
+    ActivitySamplingResult SamplePropagationData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.SamplePropagationData;
+    ActivitySamplingResult SampleAllData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.SampleAllData;
+    bool MatchAll(ActivitySource activitySource) => true;
 }
 
 public class ConsoleListener : TraceListener
