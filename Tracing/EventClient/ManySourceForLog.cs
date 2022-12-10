@@ -190,6 +190,36 @@ public class EventSourceEx6
         var eventid = 1;
         Array.ForEach(levels, level => logger.Log(level, eventid++, $"this is a {level} message"));
     }
+    
+    public static void SystemdConsoleFormatterUsecase(string[] args)
+    {
+        var includeScopes = args.Contains("includeScopes");
+        var logger = LoggerFactory.Create(builder => builder
+            .SetMinimumLevel(LogLevel.Trace)
+            .AddConsole()
+            .AddSystemdConsole(options => 
+            {
+                options.IncludeScopes = includeScopes;
+            }))
+            .CreateLogger<Program>();
+        var levels = (LogLevel[])Enum.GetValues(typeof(LogLevel));
+        levels = levels.Where(it => it != LogLevel.None).ToArray();
+        var eventid = 1;
+        Array.ForEach(levels, ScopedLog);
+        void ScopedLog(LogLevel level)
+        {
+            using (logger.BeginScope("one"))
+            {
+                using (logger.BeginScope("two"))
+                {
+                    using (logger.BeginScope("three"))
+                    {
+                        logger.Log(level, eventid++, new Exception("Error..."), "this is a {0} log message.", level);
+                    }
+                }
+            }
+        }
+    }
 }
 
 public class ConsoleListener : TraceListener

@@ -17,7 +17,8 @@ namespace EventClient
             // EventSourceEx6.LoggerMessageUsecase();
             // EventSourceEx6.ActivityUseCase();
             // EventSourceEx6.ActivityUseCase2();
-            EventSourceEx6.SimpleConsoleFormatterUsecase(args);
+            // EventSourceEx6.SimpleConsoleFormatterUsecase(args);
+            EventSourceEx6.SystemdConsoleFormatterUsecase(args);
         }
     }
 }
