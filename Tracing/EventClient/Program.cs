@@ -19,7 +19,8 @@ namespace EventClient
             // EventSourceEx6.ActivityUseCase2();
             // EventSourceEx6.SimpleConsoleFormatterUsecase(args);
             // EventSourceEx6.SystemdConsoleFormatterUsecase(args);
-            EventSourceEx6.ErrorThresholdUsecase();
+            // EventSourceEx6.ErrorThresholdUsecase();
+            EventSourceEx6.TamplatedConsoleLogUsecase();
         }
     }
 }
