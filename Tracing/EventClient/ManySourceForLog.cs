@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace EventClient;
 
@@ -165,7 +167,28 @@ public class EventSourceEx6
                 }
             }
         }
-        Console.Read();
+        // Console.Read();
+    }
+
+    public static void SimpleConsoleFormatterUsecase(string[] args)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddCommandLine(args)
+            .Build();
+        var singleLine = configuration.GetSection("singleLine").Get<bool>();
+        var color = configuration.GetSection("color").Get<LoggerColorBehavior>();
+        var logger = LoggerFactory.Create(builder => builder
+            .AddConsole()
+            .AddSimpleConsole(options => 
+            {
+                options.SingleLine = singleLine;
+                options.ColorBehavior = color;
+            }))
+            .CreateLogger<Program>();
+        var levels = (LogLevel[])Enum.GetValues(typeof(LogLevel));
+        levels = levels.Where(it => it != LogLevel.None).ToArray();
+        var eventid = 1;
+        Array.ForEach(levels, level => logger.Log(level, eventid++, $"this is a {level} message"));
     }
 }
 

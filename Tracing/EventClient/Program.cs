@@ -7,10 +7,17 @@ namespace EventClient
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!"); 
-            EventSourceEx6.ThisEventSource();
-            var pro = new DiagnosticsTools();
-            pro.Run();
-
+            
+            // var pro = new DiagnosticsTools();
+            // pro.Run();
+            
+            // EventSourceEx6.ThisEventSource();
+            // EventSourceEx6.UseDelimitedListTraceListener();
+            // EventSourceEx6.TraceSourceLog();
+            // EventSourceEx6.LoggerMessageUsecase();
+            // EventSourceEx6.ActivityUseCase();
+            // EventSourceEx6.ActivityUseCase2();
+            EventSourceEx6.SimpleConsoleFormatterUsecase(args);
         }
     }
 }
