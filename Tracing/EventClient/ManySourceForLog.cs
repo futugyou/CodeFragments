@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EventClient;
 
@@ -12,7 +15,7 @@ public class EventSourceEx6
         source.Listeners.Add(new TextWriterTraceListener());
         source.Listeners.Add(new DelimitedListTraceListener("./de.log"));
         source.Listeners.Add(new ConsoleListener());
-        var eventTypes = (TraceEventType[])Enum.GetVlues(typeof(TraceEventType));
+        var eventTypes = (TraceEventType[])Enum.GetValues(typeof(TraceEventType));
         var eventId = 1;
         Array.ForEach(eventTypes, it => source.TraceEvent(it, eventId++, $"this is a {it} message"));
     }
@@ -30,7 +33,7 @@ public class EventSourceEx6
         };
         var source = new TraceSource("foo", SourceLevels.All);
         source.Listeners.Add(listener);
-        var eventTypes = (TraceEventType[])Enum.GetVlues(typeof(TraceEventType));
+        var eventTypes = (TraceEventType[])Enum.GetValues(typeof(TraceEventType));
         for (int i = 0; i < eventTypes.Length; i++)
         {
             var eventType = eventTypes[i];
@@ -82,7 +85,7 @@ public class EventSourceEx6
 
     static bool TraceFilter(string category, LogLevel level)
     {
-        return category swtich
+        return category switch
         {
             // we only have this category
             "Program" => level >= LogLevel.Debug,
@@ -98,7 +101,7 @@ public class EventSourceEx6
             eventId: 123,
             formatString: template
         );
-        var logger =  = new ServiceCollection()
+        var logger = new ServiceCollection()
         .AddLogging(builder => 
             builder
             .SetMinimumLevel(LogLevel.Trace)
@@ -107,7 +110,7 @@ public class EventSourceEx6
         .BuildServiceProvider()
         .GetRequiredService<ILoggerFactory>()
         .CreateLogger("Program");
-        log(logger,"thisisone",DateTime.Now(),"thisismessage",null);
+        log(logger,"thisisone",DateTime.Now,"thisismessage",null);
     }
 
     public static void ActivityUseCase()
@@ -129,23 +132,23 @@ public class EventSourceEx6
         Debug.Assert(activity?.IsAllDataRequested == true);
     }
 
-    ActivitySamplingResult SampleNone(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.None;
-    ActivitySamplingResult SamplePropagationData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.SamplePropagationData;
-    ActivitySamplingResult SampleAllData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.SampleAllData;
-    ActivitySamplingResult Sample(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData;
+    static ActivitySamplingResult SampleNone(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.None;
+    static ActivitySamplingResult SamplePropagationData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.PropagationData;
+    static ActivitySamplingResult SampleAllData(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData;
+    static ActivitySamplingResult Sample(ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData;
 
-    bool MatchAll(ActivitySource activitySource) => true;
+    static bool MatchAll(ActivitySource activitySource) => true;
 
     public static void ActivityUseCase2()
     {
         var logger = new ServiceCollection()
             .AddLogging(builder => builder
                 .Configure(options => options.ActivityTrackingOptions = 
-                    ActivityCreationOptions.TraceId 
-                    | ActivityCreationOptions.SpanId 
-                    | ActivityCreationOptions.ParentId)
+                    ActivityTrackingOptions.TraceId 
+                    | ActivityTrackingOptions.SpanId 
+                    | ActivityTrackingOptions.ParentId)
                 .AddConsole()
-                .AddSampleConsole(options => options.IncludeScopes = true))
+                .AddSimpleConsole(options => options.IncludeScopes = true))
             .BuildServiceProvider()
             .GetRequiredService<ILogger<Program>>();
         ActivitySource.AddActivityListener(new ActivityListener{ShouldListenTo = _=>true,Sample = Sample});
