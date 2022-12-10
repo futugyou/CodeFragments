@@ -197,7 +197,11 @@ public class EventSourceEx6
         var logger = LoggerFactory.Create(builder => builder
             .SetMinimumLevel(LogLevel.Trace)
             .AddConsole()
-            .AddSystemdConsole(options => 
+            // .AddSystemdConsole(options => 
+            // {
+            //     options.IncludeScopes = includeScopes;
+            // })
+            .AddJsonConsole(options => 
             {
                 options.IncludeScopes = includeScopes;
             }))
@@ -218,6 +222,29 @@ public class EventSourceEx6
                     }
                 }
             }
+        }
+    }
+
+    public static void ErrorThresholdUsecase()
+    {
+        using var @out = new StreamWriter("out.log") { AutoFlush = true };
+        using var @error = new StreamWriter("error.log") { AutoFlush = true };
+        Console.SetOut(@out);
+        Console.SetError(@error);
+        var logger = LoggerFactory.Create(builder => builder
+            .SetMinimumLevel(LogLevel.Trace)
+            .AddConsole(options => 
+            {
+                options.LogToStandardErrorThreshold = LogLevel.Error;
+            }))
+            .CreateLogger<Program>();
+        var levels = (LogLevel[])Enum.GetValues(typeof(LogLevel));
+        levels = levels.Where(it => it != LogLevel.None).ToArray();
+        var eventid = 1;
+        Array.ForEach(levels, Log);
+        void Log(LogLevel level)
+        { 
+            logger.Log(level, eventid++, new Exception("Error..."), "this is a {0} log message.", level);                   
         }
     }
 }
