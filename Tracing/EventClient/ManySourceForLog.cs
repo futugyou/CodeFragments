@@ -271,6 +271,19 @@ public class EventSourceEx6
             logger.Log(level, eventid++, new Exception("Error..."), "this is a {0} log message.", level);
         }
     }
+
+    public static void EventSourceFormatLogUsecase()
+    {
+        var listener = new LoggingEventListener();
+        var logger = LoggerFactory.Create(builder => builder.AddEventSourceLogger()).CreateLogger<Program>();
+        var state = new Dictionary<string,object>
+        {
+            ["ErrorCode"] =100,
+            ["Message"] ="exception"
+        };
+
+        logger.Log(LogLevel.Error,1,state,new InvalidOperationException("this is error"),(_,ex)=>ex?.Message??"Error!");
+    }
 }
 
 public class ConsoleListener : TraceListener
