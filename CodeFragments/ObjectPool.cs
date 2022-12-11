@@ -115,7 +115,7 @@ public class ObjectPoolUsecase
         }
     }
 
-    public static async Task ArratPoolUsecase()
+    public static async Task ArrayPoolUsecase()
     {
         using var fs = new FileStream("./CodeFragments.csproj",FileMode.Open);
         var length = (int)fs.Length;
@@ -129,6 +129,15 @@ public class ObjectPoolUsecase
         {
             ArrayPool<byte>.Shared.Return(bytes);
         }
+    }
+
+    public static async Task MemoryPoolUsecase()
+    {
+        using var fs = new FileStream("./CodeFragments.csproj",FileMode.Open);
+        var length = (int)fs.Length;
+        using var bytes = MemoryPool<byte>.Shared.Rent(length);
+        await fs.ReadAsync(bytes.Memory);
+        Console.WriteLine(Encoding.Default.GetString(bytes.Memory.Span.Slice(0,length)));
     }
 }
 
