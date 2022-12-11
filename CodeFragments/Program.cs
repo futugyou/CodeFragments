@@ -13,7 +13,8 @@ class Program
         // ObjectPoolUsecase.StringBuilderUsecase();
         // ObjectPoolUsecase.ObjectPolicyWithParameterConstructorUsecase();
         // ObjectPoolUsecase.ObjectPolicyWithObjectLimitUsecase();
-        await ObjectPoolUsecase.ObjectPolicyWithIDisposableUsecase();
+        // await ObjectPoolUsecase.ObjectPolicyWithIDisposableUsecase();
+        await ObjectPoolUsecase.ArratPoolUsecase();
 
         // CommandDemo.Exection();
 
