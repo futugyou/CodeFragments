@@ -6,117 +6,61 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace CodeFragments
+namespace CodeFragments;
+
+public class ObjectPoolUsecase
 {
-    public class StringBuilderPool
+    public static void StringBuilderUsecase()
     {
-        public static void Exection()
+        var pool = new DefaultObjectPoolProvider();
+        var objectPool = pool.CreateStringBuilderPool(1024, 1024 * 1024);
+        var builder = objectPool.Get();
+        try
         {
-            var pool = new DefaultObjectPoolProvider();
-            var objectPool = pool.CreateStringBuilderPool(1024, 1024 * 1024); 
-            var builder = objectPool.Get();
-            try
+            for (int index = 0; index < 100; index++)
             {
-                for (int index = 0; index < 100; index++)
-                {
-                    builder.Append(index);
-                }
-                Console.WriteLine(builder);
+                builder.Append(index);
             }
-            finally
-            {
-                objectPool.Return(builder);
-            }
+            Console.WriteLine(builder);
+        }
+        finally
+        {
+            objectPool.Return(builder);
         }
     }
 
-    public class ObjectPoolTest2
+    public static void ObjectPolicyWithParameterConstructorUsecase()
     {
-        public static void Exection()
-        {
 
-            //var objectPool = new ServiceCollection()
-            //.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
-            //.BuildServiceProvider()
-            //.GetRequiredService<ObjectPoolProvider>()
-            //.Create(new FoobarListPolicy(1024, 1024 * 1024));
-            var pool = new DefaultObjectPoolProvider();
-            var objectPool = pool.Create(new FoobarListPolicy(1024, 1024 * 1024));
-            string json;
-            var list = objectPool.Get();
-            try
-            {
-                list.AddRange(Enumerable.Range(1, 1000).Select(it => new Foobar(it, it)));
-                json = JsonSerializer.Serialize(list);
-            }
-            finally
-            {
-                objectPool.Return(list);
-            }
-        }
-    }
-    /// <summary>
-    ///  PooledObjectPolicy<T> 比 IPooledObjectPolicy 拥有更好的性能
-    /// </summary>
-    public class FoobarListPolicy : PooledObjectPolicy<List<Foobar>>
-    {
-        private readonly int _initCapacity;
-        private readonly int _maxCapacity;
-
-        public FoobarListPolicy(int initCapacity, int maxCapacity)
+        //var objectPool = new ServiceCollection()
+        //.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
+        //.BuildServiceProvider()
+        //.GetRequiredService<ObjectPoolProvider>()
+        //.Create(new FoobarListPolicy(1024, 1024 * 1024));
+        var pool = new DefaultObjectPoolProvider();
+        var objectPool = pool.Create(new FoobarListPolicy(1024, 1024 * 1024));
+        string json;
+        var list = objectPool.Get();
+        try
         {
-            _initCapacity = initCapacity;
-            _maxCapacity = maxCapacity;
+            list.AddRange(Enumerable.Range(1, 1000).Select(it => new Foobar(it, it)));
+            json = JsonSerializer.Serialize(list);
+            Console.WriteLine(json);
         }
-        public override List<Foobar> Create() => new List<Foobar>(_initCapacity);
-        public override bool Return(List<Foobar> obj)
+        finally
         {
-            if (obj.Capacity <= _maxCapacity)
-            {
-                obj.Clear();
-                return true;
-            }
-            return false;
+            objectPool.Return(list);
         }
     }
 
-    public class Foobar
+    public static void ObjectPolicyWithObjectLimitUsecase()
     {
-        public int Foo { get; }
-        public int Bar { get; }
-        public Foobar(int foo, int bar)
-        {
-            Foo = foo;
-            Bar = bar;
-        }
-    }
+        var policy = new DefaultPooledObjectPolicy<Foo>();
+        DoTest(policy, 1);
+        var policy2 = new FooPooledObjectPolicy();
+        DoTest(policy2, 2);
 
-    public class FooPooledObjectPolicy : IPooledObjectPolicy<Foo>
-    {
-        public Foo Create()
-        {
-            return new Foo();
-        }
-
-        public bool Return(Foo obj)
-        {
-            return true;
-        }
-    }
-    public class Foo
-    {
-        public string Id { get; set; } = Guid.NewGuid().ToString("N");
-    }
-
-    public class ObjectPoolTest
-    {
-        public void DefalultPolicy()
-        {
-            var policy = new DefaultPooledObjectPolicy<Foo>();
-            DoTest(policy, 1);
-        }
-
-        private static void DoTest(IPooledObjectPolicy<Foo> policy, int limit)
+        static void DoTest(IPooledObjectPolicy<Foo> policy, int limit)
         {
             var pool = new DefaultObjectPool<Foo>(policy, limit);
             var item1 = pool.Get();
@@ -147,11 +91,58 @@ namespace CodeFragments
             pool.Return(item6);
             Console.WriteLine("-------------------------------");
         }
-
-        public void CustomPolicy()
-        {
-            var policy = new FooPooledObjectPolicy();
-            DoTest(policy, 2);
-        }
     }
+}
+
+/// <summary>
+///  PooledObjectPolicy<T> 比 IPooledObjectPolicy 拥有更好的性能
+/// </summary>
+class FoobarListPolicy : PooledObjectPolicy<List<Foobar>>
+{
+    private readonly int _initCapacity;
+    private readonly int _maxCapacity;
+
+    public FoobarListPolicy(int initCapacity, int maxCapacity)
+    {
+        _initCapacity = initCapacity;
+        _maxCapacity = maxCapacity;
+    }
+    public override List<Foobar> Create() => new List<Foobar>(_initCapacity);
+    public override bool Return(List<Foobar> obj)
+    {
+        if (obj.Capacity <= _maxCapacity)
+        {
+            obj.Clear();
+            return true;
+        }
+        return false;
+    }
+}
+
+class Foobar
+{
+    public int Foo { get; }
+    public int Bar { get; }
+    public Foobar(int foo, int bar)
+    {
+        Foo = foo;
+        Bar = bar;
+    }
+}
+
+public class FooPooledObjectPolicy : IPooledObjectPolicy<Foo>
+{
+    public Foo Create()
+    {
+        return new Foo();
+    }
+
+    public bool Return(Foo obj)
+    {
+        return true;
+    }
+}
+public class Foo
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
 }

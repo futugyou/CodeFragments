@@ -5,33 +5,33 @@ class Program
     static async System.Threading.Tasks.Task Main(string[] args)
     {
         Console.WriteLine("Hello World!");
-        //await PipelinesTest.Show();
+        // await PipelinesTest.Show();
 
-        //var cardid = "61021118850526301x";
-        //Console.WriteLine(cardid.IsChineseIDCard());
+        // var cardid = "61021118850526301x";
+        // Console.WriteLine(cardid.IsChineseIDCard());
 
-        //var pool = new ObjectPoolTest();
-        //pool.DefalultPolicy();
-        //pool.CustomPolicy();
-        //ObjectPoolTest2.Exection();
-        //CommandDemo.Exection();
+        // ObjectPoolUsecase.StringBuilderUsecase();
+        // ObjectPoolUsecase.ObjectPolicyWithParameterConstructorUsecase();
+        ObjectPoolUsecase.ObjectPolicyWithObjectLimitUsecase();
 
-        //await JsonAsyncEnumerable.Deserialize();
-        //await JsonAsyncEnumerable.Serialize();
+        // CommandDemo.Exection();
 
-        //JsonNodeDemo.Test();
+        // await JsonAsyncEnumerable.Deserialize();
+        // await JsonAsyncEnumerable.Serialize();
 
-        //NewLinqApiDemo.Test();
-        //BufferDemo.Exection();
-        //var summary = BenchmarkRunner.Run<SpanTest>();
-        //await AsyncEnumerableDemo.Exection();
+        // JsonNodeDemo.Test();
 
-        //PriorityQueueDemo.Exection();
-        //var m = new MetalamaTest();
-        //Console.WriteLine(m.Add(1, 2));
+        // NewLinqApiDemo.Test();
+        // BufferDemo.Exection();
+        // var summary = BenchmarkRunner.Run<SpanTest>();
+        // await AsyncEnumerableDemo.Exection();
 
-        //await HttpClientChunked.PostWithChunked();
-        await HttpClientChunked.PostWithoutChunked();
+        // PriorityQueueDemo.Exection();
+        // var m = new MetalamaTest();
+        // Console.WriteLine(m.Add(1, 2));
+
+        // await HttpClientChunked.PostWithChunked();
+        // await HttpClientChunked.PostWithoutChunked();
         
         Console.ReadLine();
     }
