@@ -12,7 +12,8 @@ class Program
 
         // ObjectPoolUsecase.StringBuilderUsecase();
         // ObjectPoolUsecase.ObjectPolicyWithParameterConstructorUsecase();
-        ObjectPoolUsecase.ObjectPolicyWithObjectLimitUsecase();
+        // ObjectPoolUsecase.ObjectPolicyWithObjectLimitUsecase();
+        await ObjectPoolUsecase.ObjectPolicyWithIDisposableUsecase();
 
         // CommandDemo.Exection();
 

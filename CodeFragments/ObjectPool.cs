@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CodeFragments;
 
@@ -31,12 +32,6 @@ public class ObjectPoolUsecase
 
     public static void ObjectPolicyWithParameterConstructorUsecase()
     {
-
-        //var objectPool = new ServiceCollection()
-        //.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
-        //.BuildServiceProvider()
-        //.GetRequiredService<ObjectPoolProvider>()
-        //.Create(new FoobarListPolicy(1024, 1024 * 1024));
         var pool = new DefaultObjectPoolProvider();
         var objectPool = pool.Create(new FoobarListPolicy(1024, 1024 * 1024));
         string json;
@@ -92,6 +87,33 @@ public class ObjectPoolUsecase
             Console.WriteLine("-------------------------------");
         }
     }
+
+    public static async Task ObjectPolicyWithIDisposableUsecase()
+    {
+        var objectPool = new ServiceCollection()
+            .AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>()
+            .BuildServiceProvider()
+            .GetRequiredService<ObjectPoolProvider>()
+            .Create(new FooPooledObjectPolicy());
+        Console.WriteLine(Environment.ProcessorCount * 2);
+        for (int i = 0; i < 1000; i++)
+        {
+            await Task.WhenAll(Enumerable.Range(1, Environment.ProcessorCount * 2 + 3).Select(_ => ExecuteFooAsync()));
+            Console.WriteLine();
+        }
+        async Task ExecuteFooAsync()
+        {
+            var foo = objectPool.Get();
+            try
+            {
+                await Task.Delay(1000);
+            }
+            finally
+            {
+                objectPool.Return(foo);
+            }
+        }
+    }
 }
 
 /// <summary>
@@ -142,7 +164,14 @@ public class FooPooledObjectPolicy : IPooledObjectPolicy<Foo>
         return true;
     }
 }
-public class Foo
+public class Foo : IDisposable
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public Foo()
+    {
+        var t = Interlocked.Increment(ref _id);
+        Id = t.ToString();
+    }
+    static int _id;
+    public string Id { get;}
+    public void Dispose() => Console.Write($"{Id}-");
 }
