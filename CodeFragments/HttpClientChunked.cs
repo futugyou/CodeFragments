@@ -59,6 +59,10 @@ public class HttpClientChunked
         }
     }
 
+    // LifetimeTrackingHttpMessageHandler
+    //   =>LoggingScopeHttpMessageHandler
+    //      =>LoggingHttpMessageHandler
+    //         =>HttpClientHandler
     public static async Task HttpClientHttpMessageHandlerUsecase()
     {
         var httpclient = new ServiceCollection()
@@ -67,6 +71,30 @@ public class HttpClientChunked
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient();
 
+        var handlerField = typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
+        PrintPipeline((HttpMessageHandler?)handlerField?.GetValue(httpclient), 0);
+    }
+
+    // LifetimeTrackingHttpMessageHandler
+    //    =>LoggingScopeHttpMessageHandler
+    //        =>OneHttpMessageHandler
+    //            =>TwoHttpMessageHandler
+    //                =>ThreeHttpMessageHandler
+    //                    =>LoggingHttpMessageHandler
+    //                        =>ExtendedHttpClientHandler
+    public static async Task HttpClientCustomHttpMessageHandlerUsecase()
+    {
+        var services = new ServiceCollection();
+        services.AddHttpClient(string.Empty)
+            .ConfigurePrimaryHttpMessageHandler(_ => new ExtendedHttpClientHandler())
+            .AddHttpMessageHandler(_ => new OneHttpMessageHandler())
+            .AddHttpMessageHandler(_ => new TwoHttpMessageHandler())
+            .AddHttpMessageHandler(_ => new ThreeHttpMessageHandler());
+
+        var httpclient = services.BuildServiceProvider()
+            .GetRequiredService<IHttpClientFactory>()
+            .CreateClient();
+        
         var handlerField = typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
         PrintPipeline((HttpMessageHandler?)handlerField?.GetValue(httpclient), 0);
     }
@@ -87,4 +115,9 @@ public class HttpClientChunked
             PrintPipeline(delegatingHandler.InnerHandler, index + 1);
         }
     }
+
+    class ExtendedHttpClientHandler : HttpClientHandler{}
+    class OneHttpMessageHandler : DelegatingHandler{}
+    class TwoHttpMessageHandler : DelegatingHandler{}
+    class ThreeHttpMessageHandler : DelegatingHandler{}
 }

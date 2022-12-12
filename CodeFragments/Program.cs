@@ -36,7 +36,8 @@ class Program
         // await HttpClientChunked.PostWithChunked();
         // await HttpClientChunked.PostWithoutChunked();
         // await HttpClientChunked.HttpClientExceptionUsecase(args);
-        await HttpClientChunked.HttpClientHttpMessageHandlerUsecase();
+        // await HttpClientChunked.HttpClientHttpMessageHandlerUsecase();
+        await HttpClientChunked.HttpClientCustomHttpMessageHandlerUsecase();
 
         // await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
         // await MemoryCacheDemo.MemeoryCacheWithCompactionUsecase();
