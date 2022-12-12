@@ -36,7 +36,8 @@ class Program
         // await HttpClientChunked.PostWithChunked();
         // await HttpClientChunked.PostWithoutChunked();
         
-        await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
+        // await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
+        await MemoryCacheDemo.MemeoryCacheWithCompactionUsecase();
         Console.ReadLine();
     }
 }
