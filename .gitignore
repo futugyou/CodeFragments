@@ -334,3 +334,4 @@ ASALocalRun/
 
 .vscode
 **/**/appsettings.*.json
+CodeFragments/*.txt

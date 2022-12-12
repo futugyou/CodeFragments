@@ -25,5 +25,7 @@
 		<PackageReference Include="StackExchange.Redis" Version="2.6.70" />
 		<PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" />
 	</ItemGroup>
 </Project>

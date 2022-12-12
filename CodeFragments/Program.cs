@@ -15,7 +15,7 @@ class Program
         // ObjectPoolUsecase.ObjectPolicyWithObjectLimitUsecase();
         // await ObjectPoolUsecase.ObjectPolicyWithIDisposableUsecase();
         // await ObjectPoolUsecase.ArrayPoolUsecase();
-        await ObjectPoolUsecase.MemoryPoolUsecase();
+        // await ObjectPoolUsecase.MemoryPoolUsecase();
 
         // CommandDemo.Exection();
 
@@ -36,6 +36,7 @@ class Program
         // await HttpClientChunked.PostWithChunked();
         // await HttpClientChunked.PostWithoutChunked();
         
+        await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
         Console.ReadLine();
     }
 }
