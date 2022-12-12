@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Engines;
+﻿using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
@@ -84,7 +84,11 @@ public class HttpClientChunked
     //                        =>ExtendedHttpClientHandler
     public static async Task HttpClientCustomHttpMessageHandlerUsecase()
     {
-        var services = new ServiceCollection();
+        var services = new ServiceCollection()
+            .AddLogging(logging => logging
+                .SetMinimumLevel(LogLevel.Trace)
+                .AddConsole()
+                .AddSimpleConsole(options => options.IncludeScopes = true));
         services.AddHttpClient(string.Empty)
             .ConfigurePrimaryHttpMessageHandler(_ => new ExtendedHttpClientHandler())
             .AddHttpMessageHandler(_ => new OneHttpMessageHandler())
@@ -97,6 +101,7 @@ public class HttpClientChunked
         
         var handlerField = typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
         PrintPipeline((HttpMessageHandler?)handlerField?.GetValue(httpclient), 0);
+        await httpclient.GetAsync("http://www.baidu.com");
     }
 
     static void PrintPipeline(HttpMessageHandler? handler, int index)
@@ -119,5 +124,14 @@ public class HttpClientChunked
     class ExtendedHttpClientHandler : HttpClientHandler{}
     class OneHttpMessageHandler : DelegatingHandler{}
     class TwoHttpMessageHandler : DelegatingHandler{}
-    class ThreeHttpMessageHandler : DelegatingHandler{}
+    class ThreeHttpMessageHandler : DelegatingHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+            var response = await base.SendAsync(request, cancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+            return response;
+        }
+    }
 }
