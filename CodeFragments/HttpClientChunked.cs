@@ -2,6 +2,8 @@
 using System.Net.Http.Json;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace CodeFragments;
 
@@ -54,6 +56,35 @@ public class HttpClientChunked
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+    }
+
+    public static async Task HttpClientHttpMessageHandlerUsecase()
+    {
+        var httpclient = new ServiceCollection()
+            .AddHttpClient()
+            .BuildServiceProvider()
+            .GetRequiredService<IHttpClientFactory>()
+            .CreateClient();
+
+        var handlerField = typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
+        PrintPipeline((HttpMessageHandler?)handlerField?.GetValue(httpclient), 0);
+    }
+
+    static void PrintPipeline(HttpMessageHandler? handler, int index)
+    {
+        if (index == 0)
+        {
+            Console.WriteLine(handler?.GetType().Name);
+        }
+        else
+        {
+            Console.WriteLine($"{new string(' ', index * 4)}=>{handler?.GetType().Name}");
+        }
+
+        if (handler is DelegatingHandler delegatingHandler)
+        {
+            PrintPipeline(delegatingHandler.InnerHandler, index + 1);
         }
     }
 }
