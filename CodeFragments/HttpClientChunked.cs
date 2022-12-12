@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Engines;
 using System.Net.Http.Json;
-using System.Reflection.PortableExecutable;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Builder;
 
 namespace CodeFragments;
 
@@ -33,5 +34,26 @@ public class HttpClientChunked
         var response = await client.PostAsync(
             "https://webhook.site/a531b3a2-1ea3-46ec-add2-c37eaff84ab6",
             content);
+    }
+
+    public static async Task HttpClientExceptionUsecase(string[] args)
+    {
+        var app = WebApplication.Create(args);
+        app.MapGet("/", () => "Hello World!");
+        await app.StartAsync();
+
+        while (true)
+        {
+            using var httpclient = new HttpClient();
+            try
+            {
+                var reply = await httpclient.GetStringAsync("http://localhost:5000");
+                Debug.Assert(reply == "Hello World!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
     }
 }
