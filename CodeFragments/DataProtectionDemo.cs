@@ -40,6 +40,13 @@ public class DataProtectionDemo
         return services.BuildServiceProvider().GetDataProtector(purpose).ToTimeLimitedDataProtector();
     }
 
+    static IDataProtectionProvider GetEphemeralDataProtectionProvider()
+    {
+        var services = new ServiceCollection();
+        services.AddDataProtection().UseEphemeralDataProtectionProvider();
+        return services.BuildServiceProvider().GetRequiredService<IDataProtectionProvider>();
+    }
+
     public static async Task DataProtectionWithTimeLimitUsecase()
     {
         var originalPayload = Guid.NewGuid().ToString();
@@ -68,6 +75,21 @@ public class DataProtectionDemo
         // keyManager.RevokeKey(keyRing.DefaultKeyId);
         keyManager.RevokeAllKeys(revocationDate: DateTimeOffset.UtcNow, reason: "no reason");
         // CryptographicException: The key {1d12aa41-xxxx-xxxx-xxxx-xxxxxxxxx} has been revoked
+        protector.Unprotect(protectedPayload);
+    }
+
+    public static void EphemeralDataProtectorUsecase()
+    {
+        var originalPayload = Guid.NewGuid().ToString();
+        var dataProtectionProvider = GetEphemeralDataProtectionProvider();
+        var protector = dataProtectionProvider.CreateProtector("foo");
+        var protectedPayload = protector.Protect(originalPayload);
+
+        protector = dataProtectionProvider.CreateProtector("foo");
+        Debug.Assert(originalPayload == protector.Unprotect(protectedPayload));
+
+        protector = GetEphemeralDataProtectionProvider().CreateProtector("foo");
+        // CryptographicException: The payload was invalid.
         protector.Unprotect(protectedPayload);
     }
 }
