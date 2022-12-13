@@ -37,10 +37,12 @@ class Program
         // await HttpClientChunked.PostWithoutChunked();
         // await HttpClientChunked.HttpClientExceptionUsecase(args);
         // await HttpClientChunked.HttpClientHttpMessageHandlerUsecase();
-        await HttpClientChunked.HttpClientCustomHttpMessageHandlerUsecase();
+        // await HttpClientChunked.HttpClientCustomHttpMessageHandlerUsecase();
 
         // await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
         // await MemoryCacheDemo.MemeoryCacheWithCompactionUsecase();
+
+        DataProtectionDemo.BaseUsecase();
         Console.ReadLine();
     }
 }
