@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 
@@ -48,5 +50,24 @@ public class DataProtectionDemo
         await Task.Delay(5000);
         // it will throw CryptographicException: The payload expired at ****
         Dencrypt("foo", protectedPayload);
+    }
+
+    public static void DataProtectorRevokeUsecase()
+    {
+        var services = new ServiceCollection();
+        services.AddDataProtection();
+        var serviceProvider = services.BuildServiceProvider();
+        var protector = serviceProvider.GetDataProtector("foo");
+        var originalPayload = Guid.NewGuid().ToString();
+        var protectedPayload = protector.Protect(originalPayload);
+        
+        var keyRingProvider = serviceProvider.GetRequiredService<IKeyRingProvider>();
+        var keyRing = keyRingProvider.GetCurrentKeyRing();
+        var keyManager = serviceProvider.GetRequiredService<IKeyManager>();
+        
+        // keyManager.RevokeKey(keyRing.DefaultKeyId);
+        keyManager.RevokeAllKeys(revocationDate: DateTimeOffset.UtcNow, reason: "no reason");
+        // CryptographicException: The key {1d12aa41-xxxx-xxxx-xxxx-xxxxxxxxx} has been revoked
+        protector.Unprotect(protectedPayload);
     }
 }

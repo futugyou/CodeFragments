@@ -42,8 +42,9 @@ class Program
         // await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
         // await MemoryCacheDemo.MemeoryCacheWithCompactionUsecase();
 
-        //DataProtectionDemo.BaseUsecase();
-        await DataProtectionDemo.DataProtectionWithTimeLimitUsecase();
+        // DataProtectionDemo.BaseUsecase();
+        // await DataProtectionDemo.DataProtectionWithTimeLimitUsecase();
+        DataProtectionDemo.DataProtectorRevokeUsecase();
 
         Console.ReadLine();
     }
