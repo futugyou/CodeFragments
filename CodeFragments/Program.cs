@@ -42,7 +42,9 @@ class Program
         // await MemoryCacheDemo.MemeoryCacheWithChangeTokenUsecase();
         // await MemoryCacheDemo.MemeoryCacheWithCompactionUsecase();
 
-        DataProtectionDemo.BaseUsecase();
+        //DataProtectionDemo.BaseUsecase();
+        await DataProtectionDemo.DataProtectionWithTimeLimitUsecase();
+
         Console.ReadLine();
     }
 }
