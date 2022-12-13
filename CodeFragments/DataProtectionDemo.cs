@@ -118,4 +118,23 @@ public class DataProtectionDemo
             return Convert.ToBase64String(hashed);
         }
     }
+
+    public static void FileSystemDataProtectorUsecase()
+    {
+        var dir = "./keyfiles"
+        var services = new ServiceCollection();
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(dir));
+        var keyManager = services.BuildServiceProvider().GetRequiredService<IKeyManager>();
+        var key1 = keyManager.CreateNewKey(DateTimeOffset.Now, DateTimeOffset.Now.AddDays(1));
+        var key2 = keyManager.CreateNewKey(DateTimeOffset.Now, DateTimeOffset.Now.AddDays(2));
+        var key3 = keyManager.CreateNewKey(DateTimeOffset.Now, DateTimeOffset.Now.AddDays(3));
+
+        Console.WriteLine(key1.KeyId);
+        Console.WriteLine(key2.KeyId);
+        Console.WriteLine(key3.KeyId);
+
+        keyManager.RevokeKey(key1.KeyId);
+        keyManager.RevokeAllKeys(DateTimeOffset.Now, "Revike All Keys");
+    }
 }
