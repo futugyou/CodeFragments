@@ -46,7 +46,8 @@ class Program
         // await DataProtectionDemo.DataProtectionWithTimeLimitUsecase();
         // DataProtectionDemo.DataProtectorRevokeUsecase();
         // DataProtectionDemo.EphemeralDataProtectorUsecase();
-        DataProtectionDemo.GeneratorHashUsecase();
+        // DataProtectionDemo.GeneratorHashUsecase();
+        DataProtectionDemo.FileSystemDataProtectorUsecase();
 
         Console.ReadLine();
     }
