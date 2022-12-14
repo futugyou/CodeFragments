@@ -47,6 +47,13 @@ builder.Services.AddDIExtension();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 
+var counter = new MetricsCollector();
+builder.Services.AddHostedService<PerformanceMetricsCollector>();
+builder.Services.AddSingleton<IProcessorMetricsCollector>(counter);
+builder.Services.AddSingleton<IMemoryMetricsCollector>(counter);
+builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
+builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

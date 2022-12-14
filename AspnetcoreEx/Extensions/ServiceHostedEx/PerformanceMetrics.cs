@@ -1,6 +1,6 @@
 namespace AspnetcoreEx.Extensions;
 
-public class PerformanceMetrice
+public class PerformanceMetrics
 {
     private static readonly Random _random = new();
 
@@ -13,7 +13,7 @@ public class PerformanceMetrice
         return @$"CPU: {Processor * 100}%; Memory: {Memory / (1024 * 1024)}M; Network: {Network / (1024 * 1024)}M/s";
     }
 
-    public static PerformanceMetrice Create()
+    public static PerformanceMetrics Create()
     {
         return new()
         {
