@@ -51,7 +51,7 @@ public sealed class PerformanceMetricsCollector : IHostedService
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _scheduler?.Dispose();
-        _tokenSource?.Dispose();
+        // _tokenSource?.Dispose();
         return Task.CompletedTask;
     }
 }

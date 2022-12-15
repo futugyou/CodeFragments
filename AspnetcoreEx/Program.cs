@@ -11,10 +11,24 @@ using HealthChecks.UI.Client;
 using AspnetcoreEx.Elasticsearch;
 using Microsoft.Extensions.FileProviders;
 
-var builder = WebApplication.CreateBuilder(args);
+var options = new WebApplicationOptions
+{
+    Args = args,
+    ApplicationName = "AspnetcoreEx",
+    // System.IO.DirectoryNotFoundException: /workspaces/CodeFragments/AspnetcoreEx/wwwroot/
+    ContentRootPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), ""),
+    EnvironmentName = "Production"
+};
+
+var builder = WebApplication.CreateBuilder(options);
 var configuration = builder.Configuration;
-// Add services to the container.
+
 configuration.AddJsonFileExtensions("appsettings.json", true, true);
+
+Console.WriteLine(builder.Environment.ApplicationName);
+Console.WriteLine(builder.Environment.ContentRootPath);
+Console.WriteLine(builder.Environment.WebRootPath);
+Console.WriteLine(builder.Environment.EnvironmentName);
 
 builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
@@ -55,6 +69,12 @@ builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 var app = builder.Build();
+// app.Urls.Add("http://localhost:5003/");
+// var environment = app.Environment;
+// Console.WriteLine(environment.ApplicationName);
+// Console.WriteLine(environment.ContentRootPath);
+// Console.WriteLine(environment.WebRootPath);
+// Console.WriteLine(environment.EnvironmentName);
 
 // Configure the HTTP request pipeline.
 if (builder.Environment.IsDevelopment())
@@ -64,7 +84,7 @@ if (builder.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ResponseBodyFeature v1"));
 }
 
-//app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseRouting();
 
@@ -81,6 +101,8 @@ app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 });
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
-//app.UseMiddleware<ResponseCustomMiddleware>();
+// app.UseMiddleware<ResponseCustomMiddleware>();
 
+// this will win
+// app.Run("http://localhost:5004/");
 app.Run();
