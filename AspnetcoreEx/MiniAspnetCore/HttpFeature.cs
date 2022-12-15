@@ -59,5 +59,5 @@ public class HttpListenerFeature : IHttpRequestFeature, IHttpResponseFeature
 
     NameValueCollection IHttpResponseFeature.Headers => _context.Response.Headers;
 
-    implStream IHttpResponseFeature.Body => _context.Response.OutputStream;
+    Stream IHttpResponseFeature.Body => _context.Response.OutputStream;
 }
