@@ -10,6 +10,9 @@ using AspnetcoreEx.HealthCheckExtensions;
 using HealthChecks.UI.Client;
 using AspnetcoreEx.Elasticsearch;
 using Microsoft.Extensions.FileProviders;
+using AspnetcoreEx.MiniAspnetCore;
+
+// MiniExtensions.StartMiniAspnetCore();
 
 var options = new WebApplicationOptions
 {
@@ -21,6 +24,7 @@ var options = new WebApplicationOptions
 };
 
 var builder = WebApplication.CreateBuilder(options);
+
 var configuration = builder.Configuration;
 
 configuration.AddJsonFileExtensions("appsettings.json", true, true);

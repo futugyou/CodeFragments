@@ -37,4 +37,37 @@ public static partial class MiniExtensions
         }));
         return builder;
     }
+
+    public static Task WriteAsync(this HttpResponse response ,string contents)
+    {
+        var buffer = System.Text.Encoding.UTF8.GetBytes(contents);
+        return response.Body.WriteAsync(buffer, 0, buffer.Length);
+    }
+
+    public static RequestDelegate OneMiddleware (RequestDelegate next) => async context =>{
+        await context.Response.WriteAsync("One=>");
+        await next(context);
+    };
+
+    public static RequestDelegate TwoMiddleware (RequestDelegate next) => async context =>{
+        await context.Response.WriteAsync("Two=>");
+        await next(context);
+    };
+
+    public static RequestDelegate ThreeMiddleware (RequestDelegate next) => async context =>{
+        await context.Response.WriteAsync("Three=>");
+    };
+
+    public static void StartMiniAspnetCore()
+    {
+        Host.CreateDefaultBuilder()
+        .ConfigureWebHost(builder => builder
+            .UseHttpListenerServer()
+            .Configure(app => app
+                .Use(OneMiddleware)
+                .Use(TwoMiddleware)
+                .Use(ThreeMiddleware)))
+        .Build()
+        .Run();
+    }
 }

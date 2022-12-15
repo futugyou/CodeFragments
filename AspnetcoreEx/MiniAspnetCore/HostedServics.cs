@@ -10,13 +10,21 @@ public class WebHostedService : IHostedService
         _handler = handler;
     }
     
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        return _server.StartAsync(_handler);
+        try
+        {
+            await _server.StartAsync(_handler);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        Console.WriteLine("application stoped");
         return Task.CompletedTask;
     }
 }
