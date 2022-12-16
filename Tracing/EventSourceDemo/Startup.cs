@@ -44,6 +44,7 @@ namespace EventSourceDemo
         {
             app.UseDiagnosticListener(Configuration);
             _ = new DatabaseSourceListener();
+            _ = new HostEventSourceListener();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
