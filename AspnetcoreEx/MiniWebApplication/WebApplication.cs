@@ -60,4 +60,35 @@ public class WebApplication : IApplicationBuilder, IHost
             addresses.Add(url);
         }
     }
+
+    public static WebApplicationBuilder CreateBuilder()
+    {
+        return new WebApplicationBuilder(new WebApplicationOptions());
+    }
+
+    public static WebApplicationBuilder CreateBuilder(string[] args)
+    {
+        var options = new WebApplicationOptions();
+        options.Args = args;
+        return new WebApplicationBuilder(options);
+    }
+
+    public static WebApplicationBuilder CreateBuilder(WebApplicationOptions options)
+    {
+        return WebApplicationBuilder(options);
+    }
+
+    public static WebApplication Create (string[]? args = null)
+    {
+        var options = new WebApplicationOptions();
+        options.Args = args;
+        return new WebApplicationBuilder(options).Build();
+    }
+
+    public static void StartMiniWebApplication()
+    {
+        var app = Create();
+        app.Run(httpContext => httpContext.Response.WriteAsync("Hello Mini"));
+        app.Run();
+    }
 }
