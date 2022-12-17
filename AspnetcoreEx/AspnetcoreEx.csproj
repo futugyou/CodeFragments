@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Hashids.net" Version="1.6.1" />
+		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" />
