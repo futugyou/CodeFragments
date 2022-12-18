@@ -12,6 +12,7 @@ using AspnetcoreEx.Elasticsearch;
 using Microsoft.Extensions.FileProviders;
 using AspnetcoreEx.MiniAspnetCore;
 using AspnetcoreEx.StaticFileEx;
+using AspnetcoreEx.RouteEx;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -107,6 +108,7 @@ app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     Predicate = _ => true,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 });
+app.RoutePatternFactoryExtension();
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
