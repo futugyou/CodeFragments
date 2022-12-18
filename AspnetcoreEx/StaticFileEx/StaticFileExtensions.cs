@@ -25,6 +25,7 @@ public static class StaticFileExtensions
         {
             FileProvider = fileProvifer,
             RequestPath = "/documents",
+            Formatter = new ListDirectoryFormatter(),
         };
 
         var defaultOptions = new DefaultFilesOptions
@@ -37,10 +38,15 @@ public static class StaticFileExtensions
         app
             .UseDefaultFiles()
             .UseDefaultFiles(defaultOptions)
+            
             .UseStaticFiles()
             .UseStaticFiles(fileOptions)
-            .UseDirectoryBrowser().
-            .UseDirectoryBrowser(directoryOptions);
+            
+            .UseMiddleware<DirectoryBrowserMiddleware>()
+            .UseMiddleware<DirectoryBrowserMiddleware>(directoryOptions)
+            // .UseDirectoryBrowser()
+            // .UseDirectoryBrowser(directoryOptions)
+            ;
         return app;
     }
 }
