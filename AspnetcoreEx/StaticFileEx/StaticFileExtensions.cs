@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 
 namespace AspnetcoreEx.StaticFileEx;
 
@@ -36,14 +37,16 @@ public static class StaticFileExtensions
         defaultOptions.DefaultFileNames.Add("readme.md");
 
         app
-            .UseDefaultFiles()
-            .UseDefaultFiles(defaultOptions)
+            .UseMiddleware<DefaultFilesMiddleware>()
+            .UseMiddleware<DefaultFilesMiddleware>(Options.Create(fileOptions))
+            // .UseDefaultFiles()
+            // .UseDefaultFiles(defaultOptions)
             
             .UseStaticFiles()
             .UseStaticFiles(fileOptions)
             
             .UseMiddleware<DirectoryBrowserMiddleware>()
-            .UseMiddleware<DirectoryBrowserMiddleware>(directoryOptions)
+            .UseMiddleware<DirectoryBrowserMiddleware>(Options.Create(directoryOptions))
             // .UseDirectoryBrowser()
             // .UseDirectoryBrowser(directoryOptions)
             ;

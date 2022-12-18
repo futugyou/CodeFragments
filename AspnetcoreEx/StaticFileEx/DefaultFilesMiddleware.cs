@@ -1,26 +1,22 @@
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace AspnetcoreEx.StaticFileEx;
 
-public class DirectoryBrowserMiddleware
-{
+public class DefaultFilesMiddleware
+{    
     private readonly RequestDelegate _next;
-    private readonly DirectoryBrowserOptions _options;
-    public DirectoryBrowserMiddleware(RequestDelegate next, IWebHostEnvironment env, IOptions<DirectoryBrowserOptions> options) : this(next, next, HtmlEncoder.Default, options)
-    {
-        
-    }
+    private readonly DefaultFilesOptions _options;
 
-    public DirectoryBrowserMiddleware(RequestDelegate next, IWebHostEnvironment env, HtmlEncoder encoder, IOptions<DirectoryBrowserOptions> options)
+    public DefaultFilesMiddleware(RequestDelegate next, IWebHostEnvironment env, IOptions<DefaultFilesOptions> options)
     {
         _next = next;
         _options = options.Value;
         _options.FileProvider = _options.FilepRovider ?? env.WebRootFileProvider;
-        _options.Formatter = _options.Formatter ?? new HtmlDirectoryFormatter(encoder);
     }
 
     public async Task InvokeAsync(HttpContext)
@@ -46,13 +42,21 @@ public class DirectoryBrowserMiddleware
             return;
         }
 
-        if (_options.RedirectToAppendTrailingSlash && !context.Request.Path.Value.EndsWith("/"))
+        foreach (var fileName in _options.DefaultFileNames)
         {
-            context.Response.StatusCode = 302;
-            context.Response.GetTypedHeaders().Location = new Uri(path.Value + context.Request.QueryString);
-            return;
+            if (_options.FileProvider.GetFileInfo($"{sunPath}{fileName}").Exists);
+            {
+                if (_options.RedirectToAppendTrailingSlash && !context.Request.Path.Value.EndsWith("/"))
+                {
+                    context.Response.StatusCode = 302;
+                    context.Response.GetTypedHeaders().Location = new Uri(path.Value + context.Request.QueryString);
+                    return;
+                }
+
+                context.Request.Path = new PathString($"{context.Request.Path}{fileName}");
+            }    
         }
 
-        await _options.Formatter.GenerateContentAsync(context, directoryContents);
+        await _next(context);
     }
 }
