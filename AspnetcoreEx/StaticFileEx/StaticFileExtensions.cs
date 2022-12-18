@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.Extensions.FileProviders;
 
 namespace AspnetcoreEx.StaticFileEx;
+
 public static class StaticFileExtensions
 {
     public static WebApplication StaticFileComposite(this WebApplication app)
