@@ -11,6 +11,7 @@ using HealthChecks.UI.Client;
 using AspnetcoreEx.Elasticsearch;
 using Microsoft.Extensions.FileProviders;
 using AspnetcoreEx.MiniAspnetCore;
+using AspnetcoreEx.StaticFileEx;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -79,6 +80,8 @@ var app = builder.Build();
 // Console.WriteLine(environment.ContentRootPath);
 // Console.WriteLine(environment.WebRootPath);
 // Console.WriteLine(environment.EnvironmentName);
+
+app.StaticFileComposite();
 
 // Configure the HTTP request pipeline.
 if (builder.Environment.IsDevelopment())
