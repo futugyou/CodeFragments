@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 
 namespace AspnetcoreEx.MiniWebApplication;
 
@@ -27,7 +28,23 @@ public class WebApplicationBuilder
             .ConfigureDefaults(null)
             .ConfigureWebHostDefaults(webHostBuilder =>
                 webHostBuilder.Configure(app =>
-                    app.Run(_application.BuildRequestDelegate())))
+                {
+                    var routeBuilder = (IEndpointRouteBuilder)_application!;
+                    var hasEndpoints = routeBuilder.DataSources.Any();
+
+                    if (hasEndpoints && !app.Properties.ContainsKey("__EndpointRouteBuilder"))
+                    {
+                        app.UseRouting();
+                        app.Properties["__EndpointRouteBuilder"] = _application;
+                    }
+
+                    app.Run(_application.BuildRequestDelegate());
+
+                    if (hasEndpoints)
+                    {
+                        app.UseEndpoints(_ => {});
+                    }
+                }))
             .ConfigureHostConfiguration(config =>
             {
                 if (args?.Any())

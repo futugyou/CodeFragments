@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Routing;
 
 namespace AspnetcoreEx.MiniWebApplication;
 
-public class WebApplication : IApplicationBuilder, IHost
+public class WebApplication : IApplicationBuilder, IHost, IEndpointRouteBuilder
 {
     private readonly IHost _host;
     private readonly ApplicationBuilder _app;
+    private readonly List<EndpointDataSource> _dataSources = new();
+
     public WebApplication(IHost host)
     {
         _host = host;
@@ -17,6 +20,9 @@ public class WebApplication : IApplicationBuilder, IHost
     IServiceProvider IHost.Services => _host.Services;
     Task IHost.StartAsync(CancellationToken cancellationToken) => _host.StartAsync(cancellationToken);
     Task IHost.StopAsync(CancellationToken cancellationToken) => _host.StopAsync(cancellationToken);
+    ICollection<EndpointDataSource> IEndpointRouteBuilder.DataSources => _dataSources;
+    IServiceProvider IEndpointRouteBuilder.ServiceProvider => _app.ApplicationServices;
+    IApplicationBuilder IEndpointRouteBuilder.CreateApplicationBuilder() => _app.New();
     
     IServiceProvider IApplicationBuilder.ApplicationServices
     {
