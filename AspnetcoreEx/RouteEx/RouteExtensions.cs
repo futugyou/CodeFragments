@@ -34,12 +34,17 @@ public static class RouteExtensions
             parameterPolicies: null,
             requiredValues = new { city = "010", days = 4},
         );
+        
         app.MapGet("/routepattern", () => RoutePatternCase.Format(pattern));
         // http://localhost:5000/routepoint?point=(123,456)
         app.MapGet("/routepoint", (PointForRoute point) => point);
 
         templete = "resources/{land:culture}/{resourceName:required}";
         app.MapGet("/culture", GetResource);
+
+        app.MapGet("/exception404", ExceptionExtensions.BuilderHandler(app, false));
+        app.MapGet("/exception404t", ExceptionExtensions.BuilderHandler(app, true));
+
         return app;
 
         IResult GetResource(string lang, string resourceName)
