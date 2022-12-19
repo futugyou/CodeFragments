@@ -36,6 +36,7 @@ Console.WriteLine(builder.Environment.ContentRootPath);
 Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
 
+builder.Services.AddRouteExtension();
 builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
 builder.Services.AddControllers();
