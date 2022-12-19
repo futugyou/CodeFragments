@@ -15,6 +15,8 @@ public static class RouteExtensions
             requiredValues = new { city = "010", days = 4},
         );
         app.MapGet("/routepattern", () => RoutePatternCase.Format(pattern));
+        // http://localhost:5000/routepoint?point=(123,456)
+        app.MapGet("/routepoint", (PointForRoute point) => point);
         return app;
     }
 }
