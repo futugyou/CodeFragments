@@ -27,7 +27,7 @@ public static class RouteExtensions
 
     public static WebApplication RoutePatternFactoryExtension(this WebApplication app)
     {
-        var templete = @"weather/{city:regex(^\d{{2,3}}$)=010}/{days:int:range(1,4)=4}/{detailed?}"
+        var templete = @"weather/{city:regex(^\d{{2,3}}$)=010}/{days:int:range(1,4)=4}/{detailed?}";
         var pattern = RoutePatternFactory.Parse(
             pattern: templete,
             default: null,

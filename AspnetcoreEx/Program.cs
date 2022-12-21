@@ -13,6 +13,10 @@ using Microsoft.Extensions.FileProviders;
 using AspnetcoreEx.MiniAspnetCore;
 using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.RouteEx;
+using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -26,6 +30,17 @@ var options = new WebApplicationOptions
 };
 
 var builder = WebApplication.CreateBuilder(options);
+builder.WebHost.UseKestrel(kestrel =>
+{
+    kestrel.Listen(IPAddress.Any, 80);
+    kestrel.Listen(IPAdress.Any, 443, listener =>
+    {
+        listener.UseHttps(https =>
+        {
+            https.ServerCertificateSelector = SelectServerCertificate;
+        })
+    })
+});
 
 var configuration = builder.Configuration;
 
@@ -116,3 +131,12 @@ app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // this will win
 // app.Run("http://localhost:5004/");
 app.Run();
+
+static X509Certificates? SelectServerCertificate(ConnectionContext? context,string? domain)
+{
+    return domain?.ToLowerInvariant() swtich
+    {
+        "dome.com" => CertificateLoader.LoadFromStoreCert("dome.com", "my", StoreLocation.CurrentUser, true),
+        _ => null
+    };
+}
