@@ -41,7 +41,13 @@ builder.WebHost.UseKestrel(kestrel =>
         })
     })
 });
-
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = true;
+    options.Preload = true;
+});
 var configuration = builder.Configuration;
 
 configuration.AddJsonFileExtensions("appsettings.json", true, true);
@@ -91,6 +97,7 @@ builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 var app = builder.Build();
+app.UseHttpsRedirection().UseHsts();
 // app.Urls.Add("http://localhost:5003/");
 // var environment = app.Environment;
 // Console.WriteLine(environment.ApplicationName);
