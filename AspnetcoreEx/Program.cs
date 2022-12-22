@@ -49,6 +49,16 @@ builder.Services.AddHsts(options =>
     options.IncludeSubDomains = true;
     options.Preload = true;
 });
+// builder.Services.AddQueuePolicy(options =>
+// {
+//     options.MaxConcurrentRequests = 20;
+//     options.RequestQueueLimit = 20;
+// });
+// builder.Services.AddStackPolicy(options =>
+// {
+//     options.MaxConcurrentRequests = 20;
+//     options.RequestQueueLimit = 20;
+// });
 var configuration = builder.Configuration;
 
 configuration.AddJsonFileExtensions("appsettings.json", true, true);
@@ -98,6 +108,7 @@ builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 var app = builder.Build();
+// app.UseConcurrencyLimiter();
 var rewriteOptions = new RewriteOptions()
     // client redirect
     .AddRedirect("^text/(.*)", "bar/$1")
