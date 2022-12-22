@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Rewrite;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -97,6 +98,10 @@ builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 var app = builder.Build();
+var rewriteOptions = new RewriteOptions()
+    // client redirect
+    .AddRedirect("^text/(.*)", "bar/$1");
+app.UseRewriter(rewriteOptions);
 app.UseHttpsRedirection().UseHsts();
 // app.Urls.Add("http://localhost:5003/");
 // var environment = app.Environment;
