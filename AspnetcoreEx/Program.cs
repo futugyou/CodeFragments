@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.ConcurrencyLimiter;
+using Microsoft.AspNetCore.Http.Extensions;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -48,6 +50,10 @@ builder.Services.AddHsts(options =>
     options.MaxAge = TimeSpan.FromDays(365);
     options.IncludeSubDomains = true;
     options.Preload = true;
+});
+builder.Services.Configure<ConcurrencyLimiterOptions>(options =>
+{
+    options.OnRejected = ConcurrencyRejectAsync;
 });
 // builder.Services.AddQueuePolicy(options =>
 // {
@@ -166,4 +172,19 @@ static X509Certificates? SelectServerCertificate(ConnectionContext? context,stri
         "dome.com" => CertificateLoader.LoadFromStoreCert("dome.com", "my", StoreLocation.CurrentUser, true),
         _ => null
     };
+}
+
+static Task ConcurrencyRejectAsync(HttpContext httpContext)
+{
+    var request = httpContext.Request;
+    if (!request.Query.ContainsKey("reject"))
+    {
+        var response = httpContext.Response;
+        response.StatusCode = 307;
+        var queryString = request.QueryString.Add("reject", "add");
+        var newUrl =UriHelper.BuildAbsolute(request.Scheme, request.Host, request.PathBasse, request.Path, queryString);
+        response.Headers.Location = newUrl;
+    }
+
+    return Task.CompletedTask;
 }
