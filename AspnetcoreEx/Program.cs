@@ -102,7 +102,8 @@ var rewriteOptions = new RewriteOptions()
     // client redirect
     .AddRedirect("^text/(.*)", "bar/$1")
     // server rewrite
-    .AddRewrite(regex: "^text/(.*)", replacement: "bar/$1", skipRemainingRules: true);
+    .AddRewrite(regex: "^text/(.*)", replacement: "bar/$1", skipRemainingRules: true)
+    .AddIISUrlRewrite(fileprovider: app.Environment.ContentRootFileProvider, filePath: "rewrite.xml");
 app.UseRewriter(rewriteOptions);
 app.UseHttpsRedirection().UseHsts();
 // app.Urls.Add("http://localhost:5003/");

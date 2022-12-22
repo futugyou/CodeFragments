@@ -1,0 +1,12 @@
+<rewrite>
+    <rules>
+        <rule>
+            <match url="^test/(.*)" />
+            <action type="Redirect" url="baz/{R:1}" />
+        </rule>
+        <rule>
+            <match url="^test/(.*)" />
+            <action type="Rewrite" url="baz/{R:1}" />
+        </rule>
+    </rules>
+</rewrite>
