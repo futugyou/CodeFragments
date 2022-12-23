@@ -11,6 +11,15 @@ using HealthChecks.UI.Client;
 using AspnetcoreEx.Elasticsearch;
 using Microsoft.Extensions.FileProviders;
 using AspnetcoreEx.MiniAspnetCore;
+using AspnetcoreEx.StaticFileEx;
+using AspnetcoreEx.RouteEx;
+using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.ConcurrencyLimiter;
+using Microsoft.AspNetCore.Http.Extensions;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -24,7 +33,38 @@ var options = new WebApplicationOptions
 };
 
 var builder = WebApplication.CreateBuilder(options);
-
+builder.WebHost.UseKestrel(kestrel =>
+{
+    kestrel.Listen(IPAddress.Any, 80);
+    kestrel.Listen(IPAdress.Any, 443, listener =>
+    {
+        listener.UseHttps(https =>
+        {
+            https.ServerCertificateSelector = SelectServerCertificate;
+        })
+    })
+});
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = true;
+    options.Preload = true;
+});
+builder.Services.Configure<ConcurrencyLimiterOptions>(options =>
+{
+    options.OnRejected = ConcurrencyRejectAsync;
+});
+// builder.Services.AddQueuePolicy(options =>
+// {
+//     options.MaxConcurrentRequests = 20;
+//     options.RequestQueueLimit = 20;
+// });
+// builder.Services.AddStackPolicy(options =>
+// {
+//     options.MaxConcurrentRequests = 20;
+//     options.RequestQueueLimit = 20;
+// });
 var configuration = builder.Configuration;
 
 configuration.AddJsonFileExtensions("appsettings.json", true, true);
@@ -34,6 +74,7 @@ Console.WriteLine(builder.Environment.ContentRootPath);
 Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
 
+builder.Services.AddRouteExtension();
 builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
 builder.Services.AddControllers();
@@ -73,12 +114,24 @@ builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 var app = builder.Build();
+// app.UseConcurrencyLimiter();
+var rewriteOptions = new RewriteOptions()
+    // client redirect
+    .AddRedirect("^text/(.*)", "bar/$1")
+    // server rewrite
+    .AddRewrite(regex: "^text/(.*)", replacement: "bar/$1", skipRemainingRules: true)
+    .AddIISUrlRewrite(fileprovider: app.Environment.ContentRootFileProvider, filePath: "rewrite.xml")
+    .AddApacheModRewrite(fileprovider: app.Environment.ContentRootFileProvider, filePath: "rewrite.config");
+app.UseRewriter(rewriteOptions);
+app.UseHttpsRedirection().UseHsts();
 // app.Urls.Add("http://localhost:5003/");
 // var environment = app.Environment;
 // Console.WriteLine(environment.ApplicationName);
 // Console.WriteLine(environment.ContentRootPath);
 // Console.WriteLine(environment.WebRootPath);
 // Console.WriteLine(environment.EnvironmentName);
+
+app.StaticFileComposite();
 
 // Configure the HTTP request pipeline.
 if (builder.Environment.IsDevelopment())
@@ -104,9 +157,34 @@ app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     Predicate = _ => true,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 });
+app.RoutePatternFactoryExtension();
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
 // this will win
 // app.Run("http://localhost:5004/");
 app.Run();
+
+static X509Certificates? SelectServerCertificate(ConnectionContext? context,string? domain)
+{
+    return domain?.ToLowerInvariant() swtich
+    {
+        "dome.com" => CertificateLoader.LoadFromStoreCert("dome.com", "my", StoreLocation.CurrentUser, true),
+        _ => null
+    };
+}
+
+static Task ConcurrencyRejectAsync(HttpContext httpContext)
+{
+    var request = httpContext.Request;
+    if (!request.Query.ContainsKey("reject"))
+    {
+        var response = httpContext.Response;
+        response.StatusCode = 307;
+        var queryString = request.QueryString.Add("reject", "add");
+        var newUrl =UriHelper.BuildAbsolute(request.Scheme, request.Host, request.PathBasse, request.Path, queryString);
+        response.Headers.Location = newUrl;
+    }
+
+    return Task.CompletedTask;
+}

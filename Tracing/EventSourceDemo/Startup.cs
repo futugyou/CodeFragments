@@ -42,8 +42,12 @@ namespace EventSourceDemo
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // var listener = app.ApplicationServices.GetRequiredService<DiagnosticListener>();
+            // listener.SubscribeWithAdapter(new DiagnosticCollector());
+            // listener.SubscribeWithAdapter(new DiagnosticRequestCollector());
             app.UseDiagnosticListener(Configuration);
             _ = new DatabaseSourceListener();
+            _ = new HostEventSourceListener();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
