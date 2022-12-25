@@ -38,7 +38,47 @@ app.MapPost("Account/Login", SignInAsync);
 app.Map("Account/Logout", SignOutAsync);
 app.Run();
 
-Task WelcomeAsync() => throw new NotImplementedException();
-IResult Login(IPageRenderer radner) => throw new NotImplementedException();
-Task SignInAsync() => throw new NotImplementedException();
-Task SignOutAsync() => throw new NotImplementedException();
+Task WelcomeAsync(HttpContext context, ClaimsPrincipal user, IPageRenderer pageRender)
+{
+    if (user?.Identity?.IsAuthenticated)
+    {
+        return pageRender.RednerHomePage(user.Identity.Name!).ExecuteAsync(context);
+    }
+
+    return context.ChallengeAsync();
+}
+
+IResult Login(IPageRenderer radner)
+{
+    return radner.RenderLoginPage();
+}
+
+Task SignInAsync(HttpContext context, HttpRequest request, IPageRenderer pageRender, IAccountService accountService)
+{
+    var username = request.Form("username");
+    if (string.IsNullOrEmpty(username))
+    {
+        return radner.RenderLoginPage(null,null,"enter name").ExecuteAsync(context);
+    }
+
+    var password = request.Form("password");
+    if (string.IsNullOrEmpty(password))
+    {
+        return radner.RenderLoginPage(null,null,"enter password").ExecuteAsync(context);
+    }
+
+    if (!accountService.Validate(username,password))
+    {
+        return radner.RenderLoginPage(username,null,"invalid name or password").ExecuteAsync(context);
+    }
+
+    var identity = new GenericIdentity(name: username, type:"PASSWORD");
+    var user = new ClaimsPrincipal(identity);
+    return context.SignInAsync(user);
+}
+
+async Task SignOutAsync(HttpContext context)
+{
+    await context.SignOutAsync();
+    context.Response.Redirect("/");
+}
