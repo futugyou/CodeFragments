@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IPageRenderer, PageRenderer>();
 builder.Services.AddSingleton<IAccountService, AccountService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+builder.Services.AddAuthorization();
 
 //builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,16 +37,26 @@ app.Map("/", WelcomeAsync);
 app.MapGet("Account/Login", Login);
 app.MapPost("Account/Login", SignInAsync);
 app.Map("Account/Logout", SignOutAsync);
+app.Map("Account/AccessDenied", DeniedAccess);
 app.Run();
 
-Task WelcomeAsync(HttpContext context, ClaimsPrincipal user, IPageRenderer pageRender)
+Task WelcomeAsync(HttpContext context, ClaimsPrincipal user, IPageRenderer pageRender,IAuthorizationService authService)
 {
     if (user?.Identity?.IsAuthenticated)
     {
-        return pageRender.RednerHomePage(user.Identity.Name!).ExecuteAsync(context);
+        var requirement = new RolesAuthorizationRequirement(new string[]{"admin"});
+        var result = await authService.AuthorizeAsync(user:user,resource:null,requriement:new IAuthorizationRequriement[]{requriement});
+        if(result.Succeeded)
+        {
+            await  pageRender.RednerHomePage(user.Identity.Name!).ExecuteAsync(context);
+        }
+        else
+        {
+            await context.ForbidAsync();   
+        }
     }
 
-    return context.ChallengeAsync();
+    await context.ChallengeAsync();
 }
 
 IResult Login(IPageRenderer radner)
@@ -67,12 +78,16 @@ Task SignInAsync(HttpContext context, HttpRequest request, IPageRenderer pageRen
         return radner.RenderLoginPage(null,null,"enter password").ExecuteAsync(context);
     }
 
-    if (!accountService.Validate(username,password))
+    if (!accountService.Validate(username,password,out var roles))
     {
         return radner.RenderLoginPage(username,null,"invalid name or password").ExecuteAsync(context);
     }
 
     var identity = new GenericIdentity(name: username, type:"PASSWORD");
+    foreach (var role in roles)
+    {
+        identity.AddClaim(new Claim(ClaimTypes.Role,role));
+    }
     var user = new ClaimsPrincipal(identity);
     return context.SignInAsync(user);
 }
@@ -81,4 +96,8 @@ async Task SignOutAsync(HttpContext context)
 {
     await context.SignOutAsync();
     context.Response.Redirect("/");
+}
+IResult DeniedAccess(ClaimsPrincipal user, IPageRenderer render)
+{
+    return render.RenderAccessDeniedPage(user?.Identity?.Name);
 }

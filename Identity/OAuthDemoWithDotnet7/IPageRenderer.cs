@@ -6,10 +6,22 @@ public interface IPageRenderer
 {
     IResult RenderLoginPage(string? username = null, string? password = null, string? errormessage = null);
     IResult RednerHomePage(string username);
+    IResult RenderAccessDeniedPage(string username);
 }
 
 public class PageRenderer : IPageRenderer
 {
+    public IResult RenderAccessDeniedPage(string username)
+    {
+        var html =@$"
+        <html>
+        <body><h3>{username},access denied
+        <a href='/Account/Logout'>change other account</a>
+        </body>
+        </html>";
+        return Results.Content(html, "text/html");
+    }
+
     public IResult RednerHomePage(string username)
     {
         var html = @$"
