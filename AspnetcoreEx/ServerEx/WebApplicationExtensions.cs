@@ -1,6 +1,7 @@
 using HttpMachine;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.DependencyInjection;
 using System.Buffers;
 using System.IO.Pipelines;
 using System.Net;
@@ -8,17 +9,19 @@ using System.Text;
 
 namespace AspnetcoreEx.ServerEx;
 
-public static async Task UseIConnectionListenerFactory()
+public class WebApplicationExtensions
 {
-    var factory = WebApplication.Create().Services.GetRequiredServoce<IConnectionListenerFactory>();
-    var lietener = await factory.BindAsync(new IPEndPoint(IPAddress.Any, 6000));
-    while (true)
+    public static async Task UseIConnectionListenerFactory()
     {
-        var context = await listener.AcceptAsync();
-        _ = HandlerAsync(context);        
-    }
+        var factory = WebApplication.Create().Services.GetRequiredService<IConnectionListenerFactory>();
+        var listener = await factory.BindAsync(new IPEndPoint(IPAddress.Any, 6000));
+        while (true)
+        {
+            var context = await listener.AcceptAsync();
+            _ = HandlerAsync(context);
+        }
 
-    async Task HandlerAsync(ConnectionContext connection)
+        async Task HandlerAsync(ConnectionContext connection)
         {
             var reader = connection!.Transport.Input;
             while (true)
@@ -26,7 +29,7 @@ public static async Task UseIConnectionListenerFactory()
                 var result = await reader.ReadAsync();
                 var request = ParseRequest(result);
                 reader.AdvanceTo(result.Buffer.End);
-                Console.WriteLine("[{0}] Receive request: {1} {2} Connection:{3}",connection.ConnectionId, request.Method, request.Path, request.Headers?["Connection"]??"N/A");
+                Console.WriteLine("[{0}] Receive request: {1} {2} Connection:{3}", connection.ConnectionId, request.Method, request.Path, request.Headers?["Connection"] ?? "N/A");
                 var response = @"HTTP1.1 200 OK
 Content-Type: text/plain; charset=utf-8
 Content-Length: 12
@@ -47,11 +50,12 @@ Hello World";
             }
         }
 
-    HttpRequestFeature ParseRequest(ReadResult result)
-    {
-        var handler = new HttpParseerHandler();
-        var parserHandler = new HttpParser(handler);
-        parserHandler.Execute(new ArraySegment<byte>(result.Buffer.ToArray()));
-        return handler.Request;
+        HttpRequestFeature ParseRequest(ReadResult result)
+        {
+            var handler = new HttpParserHandler();
+            var parserHandler = new HttpParser(handler);
+            parserHandler.Execute(new ArraySegment<byte>(result.Buffer.ToArray()));
+            return handler.Request;
+        }
     }
 }

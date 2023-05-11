@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DiagnosticAdapter;
 using System;
+using System.Diagnostics;
 
 namespace EventSourceDemo.Diagnostic
 {

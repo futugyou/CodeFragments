@@ -121,7 +121,7 @@ public class DataProtectionDemo
 
     public static void FileSystemDataProtectorUsecase()
     {
-        var dir = "./keyfiles"
+        var dir = "./keyfiles";
         var services = new ServiceCollection();
         services.AddDataProtection()
             .PersistKeysToFileSystem(new DirectoryInfo(dir));

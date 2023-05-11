@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="System.IO.Pipelines" Version="7.0.0-rc.2.22472.3" />
+	  <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
 	</ItemGroup>
 
 </Project>

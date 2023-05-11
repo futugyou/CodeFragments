@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 
 namespace AspnetcoreEx.StaticFileEx;
 
@@ -10,7 +12,7 @@ public class DirectoryBrowserMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly DirectoryBrowserOptions _options;
-    public DirectoryBrowserMiddleware(RequestDelegate next, IWebHostEnvironment env, IOptions<DirectoryBrowserOptions> options) : this(next, next, HtmlEncoder.Default, options)
+    public DirectoryBrowserMiddleware(RequestDelegate next, IWebHostEnvironment env, IOptions<DirectoryBrowserOptions> options) : this(next, env, HtmlEncoder.Default, options)
     {
         
     }
@@ -19,11 +21,11 @@ public class DirectoryBrowserMiddleware
     {
         _next = next;
         _options = options.Value;
-        _options.FileProvider = _options.FilepRovider ?? env.WebRootFileProvider;
+        _options.FileProvider = _options.FileProvider ?? env.WebRootFileProvider;
         _options.Formatter = _options.Formatter ?? new HtmlDirectoryFormatter(encoder);
     }
 
-    public async Task InvokeAsync(HttpContext)
+    public async Task InvokeAsync(HttpContext context)
     {
         if (!new string[] { "GET", "HEAD" }.Contains(context.Request.Method, StringComparer.OrdinalIgnoreCase) )
         {

@@ -21,7 +21,7 @@ public class ExceptionExtensions
         var app = endpoints.CreateApplicationBuilder();
         app
             .UseExceptionHandler(options)
-            .Run(httpContext => Task.FromExcption(new InvalidOperationException("Manually thrown exception.")));
+            .Run(httpContext => Task.FromException(new InvalidOperationException("Manually thrown exception.")));
         return app.Build();
     }
 }

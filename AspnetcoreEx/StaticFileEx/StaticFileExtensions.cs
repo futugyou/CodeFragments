@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using Path = System.IO.Path;
 
 namespace AspnetcoreEx.StaticFileEx;
 
@@ -22,7 +23,7 @@ public static class StaticFileExtensions
             ContentTypeProvider = contentTypeProvier,
         };
 
-        var directoryOptions = new DirectoryBrowerOptions
+        var directoryOptions = new DirectoryBrowserOptions
         {
             FileProvider = fileProvifer,
             RequestPath = "/documents",

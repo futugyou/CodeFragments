@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace AspnetcoreEx.MiniWebApplication;
 
@@ -23,7 +25,7 @@ public class WebApplication : IApplicationBuilder, IHost, IEndpointRouteBuilder
     ICollection<EndpointDataSource> IEndpointRouteBuilder.DataSources => _dataSources;
     IServiceProvider IEndpointRouteBuilder.ServiceProvider => _app.ApplicationServices;
     IApplicationBuilder IEndpointRouteBuilder.CreateApplicationBuilder() => _app.New();
-    
+
     IServiceProvider IApplicationBuilder.ApplicationServices
     {
         get => _app.ApplicationServices;
@@ -34,7 +36,7 @@ public class WebApplication : IApplicationBuilder, IHost, IEndpointRouteBuilder
     IDictionary<string, object?> IApplicationBuilder.Properties => _app.Properties;
     RequestDelegate IApplicationBuilder.Build() => _app.Build();
     IApplicationBuilder IApplicationBuilder.New() => _app.New();
-    IApplicationBuilder IApplicationBuilder.Use(Func<RequestDelegate, RequestDelegate> middleware) => app.Use(middleware);
+    IApplicationBuilder IApplicationBuilder.Use(Func<RequestDelegate, RequestDelegate> middleware) => _app.Use(middleware);
 
     void IDisposable.Dispose() => _host.Dispose();
     public IServiceProvider Services => _host.Services;
@@ -53,7 +55,7 @@ public class WebApplication : IApplicationBuilder, IHost, IEndpointRouteBuilder
     public void Run(string url)
     {
         Listen(url);
-        return HostingAbstractionsHostExtensions.Run(this);
+        HostingAbstractionsHostExtensions.Run(this);
     }
 
     private void Listen(string? url)
@@ -74,20 +76,24 @@ public class WebApplication : IApplicationBuilder, IHost, IEndpointRouteBuilder
 
     public static WebApplicationBuilder CreateBuilder(string[] args)
     {
-        var options = new WebApplicationOptions();
-        options.Args = args;
+        var options = new WebApplicationOptions()
+        {
+            Args = args
+        };
         return new WebApplicationBuilder(options);
     }
 
     public static WebApplicationBuilder CreateBuilder(WebApplicationOptions options)
     {
-        return WebApplicationBuilder(options);
+        return new WebApplicationBuilder(options);
     }
 
-    public static WebApplication Create (string[]? args = null)
+    public static WebApplication Create(string[]? args = null)
     {
-        var options = new WebApplicationOptions();
-        options.Args = args;
+        var options = new WebApplicationOptions()
+        {
+            Args = args
+        };
         return new WebApplicationBuilder(options).Build();
     }
 

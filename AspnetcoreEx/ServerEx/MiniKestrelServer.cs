@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Connections;
 using System.IO;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace AspnetcoreEx.ServerEx;
 
@@ -23,7 +27,7 @@ public class MiniKestrelServer : IServer
     public void Dispose() => StopAsync(CancellationToken.None).GetAwaiter().GetResult();
     public Task StopAsync(CancellationToken cancellationToken) => Task.WhenAll(_listeners.Select(it => it.DisposeAsync().AsTask()));
 
-    public Task StartAsync(IHttpApplication<TContext> application, CancellationToken cancellationToken) where TContext: notnull
+    public Task StartAsync<TContext>(IHttpApplication<TContext> application, CancellationToken cancellationToken) where TContext : notnull
     {
         var feature = Features.Get<IServerAddressesFeature>();
         IEnumerable<ListenOptions> listenOptions;
@@ -42,7 +46,7 @@ public class MiniKestrelServer : IServer
 
         foreach (var options in listenOptions)
         {
-            _ = StartAsync(optsion);
+            _ = StartAsync(options);
         }
 
         return Task.CompletedTask;
@@ -69,10 +73,10 @@ public class MiniKestrelServer : IServer
 
             foreach (var address in feature.Addresses)
             {
-                var url = new Url(address);
-                if (string.Compare("localhost",url.Host,true)==0)
+                var url = new Uri(address);
+                if (string.Compare("localhost", url.Host, true) == 0)
                 {
-                    options.ListenLocalhost(url.Host);
+                    options.ListenLocalhost(url.Port);
                 }
                 else
                 {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace AspnetcoreEx.MiniWebApplication;
 
@@ -64,10 +65,10 @@ public class BootstrapHostBuilder : IHostBuilder
         var hostConfiguration = new ConfigurationManager();
         _configureHostConfigurations.ForEach(it => it(hostConfiguration));
 
-        var environment = new HostingEnviroment()
+        var environment = new HostingEnvironment()
         {
             ApplicationName = hostConfiguration[HostDefaults.ApplicationKey],
-            Environment = hostConfiguration[HostDefaults.EnvironmentKey] ?? Environments.Production,
+            EnvironmentName = hostConfiguration[HostDefaults.EnvironmentKey] ?? Environments.Production,
             ContentRootPath = HostingPathResolver.ResolvePath(hostConfiguration[HostDefaults.ContentRootKey])
         };
         environment.ContentRootFileProvider = new PhysicalFileProvider(environment.ContentRootPath);
@@ -79,7 +80,7 @@ public class BootstrapHostBuilder : IHostBuilder
         };
 
         configuration.AddConfiguration(hostConfiguration, true);
-        _configureAppConfigurations.ForEach(it => it(hostcon, configuration));
+        _configureAppConfigurations.ForEach(it => it(hostContext, configuration));
         _configureServices.ForEach(it => it(hostContext, services));
 
         _others.ForEach(it => it(hostBuilder));

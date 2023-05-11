@@ -1,5 +1,11 @@
+using HttpMachine;
 using Microsoft.AspNetCore.Connections;
-using System.IO;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Http.Features;
+using System.Buffers;
+using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
+using System.IO.Pipelines;
+using System.Text;
 
 namespace AspnetcoreEx.ServerEx;
 
@@ -8,12 +14,12 @@ public class HostedApplication<TContext> : ConnectionHandler where TContext : no
     private readonly IHttpApplication<TContext> _application;
     public HostedApplication(IHttpApplication<TContext> application)
     {
-        _application = application
+        _application = application;
     }
 
     public override async Task OnConnectedAsync(ConnectionContext connection)
     {
-        var reader =connection!.Transport.Input;
+        var reader = connection!.Transport.Input;
 
         while (true)
         {
@@ -45,23 +51,23 @@ public class HostedApplication<TContext> : ConnectionHandler where TContext : no
                 await connection.DisposeAsync();
                 return;
             }
-        }
 
-        if (result.IsCompleted)
-        {
-            break;
+            if (result.IsCompleted)
+            {
+                break;
+            }
         }
     }
 
     static (IFeatureCollection, IHttpRequestFeature, IHttpResponseFeature) CreateFeatures(ReadResult result, Stream body)
     {
-        var handler = new HttpParseerHandler();
+        var handler = new HttpParserHandler();
         var parserHandler = new HttpParser(handler);
-        var lenght = (int)result.Buffer.Length;
-        var array = ArrayPool<byte>.Shared.Rent(lenght);
+        var length = (int)result.Buffer.Length;
+        var array = ArrayPool<byte>.Shared.Rent(length);
         try
         {
-            resut.Buffer.CopyTo(array);
+            result.Buffer.CopyTo(array);
             parserHandler.Execute(new ArraySegment<byte>(array, 0, length));
         }
         finally

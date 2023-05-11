@@ -16,10 +16,10 @@ public class DefaultFilesMiddleware
     {
         _next = next;
         _options = options.Value;
-        _options.FileProvider = _options.FilepRovider ?? env.WebRootFileProvider;
+        _options.FileProvider = _options.FileProvider ?? env.WebRootFileProvider;
     }
 
-    public async Task InvokeAsync(HttpContext)
+    public async Task InvokeAsync(HttpContext context)
     {
         if (!new string[] { "GET", "HEAD" }.Contains(context.Request.Method, StringComparer.OrdinalIgnoreCase) )
         {
@@ -44,7 +44,7 @@ public class DefaultFilesMiddleware
 
         foreach (var fileName in _options.DefaultFileNames)
         {
-            if (_options.FileProvider.GetFileInfo($"{sunPath}{fileName}").Exists);
+            if (_options.FileProvider.GetFileInfo($"{subPath}{fileName}").Exists);
             {
                 if (_options.RedirectToAppendTrailingSlash && !context.Request.Path.Value.EndsWith("/"))
                 {

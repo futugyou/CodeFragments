@@ -12,18 +12,20 @@ internal static class HostingPathResolver
         PathWithDirectorySeperatorAtEnd(ResolvePathNonCononical(contentRootPath, basePath));
  
     private static string PathWithDirectorySeperatorAtEnd(string path) =>
-        Path.EndsInDirectorySeparator(path) ? path : path + Path.DirectorySeparatorChar;
+        System.IO.Path.EndsInDirectorySeparator(path) ? path : path + System.IO.Path.DirectorySeparatorChar;
  
     private static string ResolvePathNonCononical(string? contentRootPath, string basePath)
     {
         if (string.IsNullOrEmpty(contentRootPath))
         {
-            return Path.GetFullPath(basePath);
+            return System.IO.Path.GetFullPath(basePath);
         }
-        if (Path.IsPathRooted(contentRootPath))
+
+        if (System.IO.Path.IsPathRooted(contentRootPath))
         {
-            return Path.GetFullPath(contentRootPath);
+            return System.IO.Path.GetFullPath(contentRootPath);
         }
-        return Path.GetFullPath(Path.Combine(Path.GetFullPath(basePath), contentRootPath));
+
+        return System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.GetFullPath(basePath), contentRootPath));
     }
 }

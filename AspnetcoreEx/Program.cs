@@ -20,6 +20,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.ConcurrencyLimiter;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -36,13 +37,13 @@ var builder = WebApplication.CreateBuilder(options);
 builder.WebHost.UseKestrel(kestrel =>
 {
     kestrel.Listen(IPAddress.Any, 80);
-    kestrel.Listen(IPAdress.Any, 443, listener =>
+    kestrel.Listen(IPAddress.Any, 443, listener =>
     {
         listener.UseHttps(https =>
         {
             https.ServerCertificateSelector = SelectServerCertificate;
-        })
-    })
+        });
+    });
 });
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddHsts(options =>
@@ -120,8 +121,8 @@ var rewriteOptions = new RewriteOptions()
     .AddRedirect("^text/(.*)", "bar/$1")
     // server rewrite
     .AddRewrite(regex: "^text/(.*)", replacement: "bar/$1", skipRemainingRules: true)
-    .AddIISUrlRewrite(fileprovider: app.Environment.ContentRootFileProvider, filePath: "rewrite.xml")
-    .AddApacheModRewrite(fileprovider: app.Environment.ContentRootFileProvider, filePath: "rewrite.config");
+    .AddIISUrlRewrite(fileProvider: app.Environment.ContentRootFileProvider, filePath: "rewrite.xml")
+    .AddApacheModRewrite(fileProvider: app.Environment.ContentRootFileProvider, filePath: "rewrite.config");
 app.UseRewriter(rewriteOptions);
 app.UseHttpsRedirection().UseHsts();
 // app.Urls.Add("http://localhost:5003/");
@@ -165,16 +166,16 @@ app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // app.Run("http://localhost:5004/");
 app.Run();
 
-static X509Certificates? SelectServerCertificate(ConnectionContext? context,string? domain)
+static X509Certificate2? SelectServerCertificate(ConnectionContext? context, string? domain)
 {
-    return domain?.ToLowerInvariant() swtich
+    return domain?.ToLowerInvariant() switch
     {
         "dome.com" => CertificateLoader.LoadFromStoreCert("dome.com", "my", StoreLocation.CurrentUser, true),
-        _ => null
+        _ => null,
     };
 }
 
-static Task ConcurrencyRejectAsync(HttpContext httpContext)
+static Task ConcurrencyRejectAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
 {
     var request = httpContext.Request;
     if (!request.Query.ContainsKey("reject"))
@@ -182,7 +183,7 @@ static Task ConcurrencyRejectAsync(HttpContext httpContext)
         var response = httpContext.Response;
         response.StatusCode = 307;
         var queryString = request.QueryString.Add("reject", "add");
-        var newUrl =UriHelper.BuildAbsolute(request.Scheme, request.Host, request.PathBasse, request.Path, queryString);
+        var newUrl = UriHelper.BuildAbsolute(request.Scheme, request.Host, request.PathBase, request.Path, queryString);
         response.Headers.Location = newUrl;
     }
 

@@ -42,16 +42,17 @@ public class WebApplicationBuilder
 
                     if (hasEndpoints)
                     {
-                        app.UseEndpoints(_ => {});
+                        app.UseEndpoints(_ => { });
                     }
                 }))
             .ConfigureHostConfiguration(config =>
             {
-                if (args?.Any())
+                if (args != null && args.Length != 0)
                 {
                     config.AddCommandLine(args);
                 }
-                Dictionary<string,string>? settings = new ();
+
+                Dictionary<string, string>? settings = new();
                 if (options.EnvironmentName is not null)
                 {
                     settings[HostDefaults.EnvironmentKey] = options.EnvironmentName;
@@ -64,23 +65,23 @@ public class WebApplicationBuilder
                 {
                     settings[HostDefaults.ContentRootKey] = options.ContentRootPath;
                 }
-                if (options.WebRootPath is not null)
-                {
-                    settings[HostDefaults.WebRootKey] = options.WebRootPath;
-                }
+                //if (options.WebRootPath is not null)
+                //{
+                //    settings[HostDefaults.WebRootKey] = options.WebRootPath;
+                //}
                 config.AddInMemoryCollection(settings);
             });
 
         bootstrap.Apply(_hostBuilder, Configuration, Services, out var builderContext);
 
-        if (options.Args?.Any())
+        if (options.Args != null && options.Args.Length != 0)
         {
             Configuration.AddCommandLine(options.Args);
         }
 
         var webHostContext = (WebHostBuilderContext)builderContext.Properties[typeof(WebHostBuilderContext)];
         Environment = webHostContext.HostingEnvironment;
-        Host = new ConfigureHostBuilder(webHostContext, Configuration, Services);
+        Host = new ConfigureHostBuilder(builderContext, Configuration, Services);
         WebHost = new ConfigureWebHostBuilder(webHostContext, Configuration, Services);
         Logging = new LoggingBuilder(Services);
     }
@@ -108,4 +109,9 @@ public class WebApplicationBuilder
 
         return _application = new WebApplication(_hostBuilder.Build());
     }
+}
+public class LoggingBuilder : ILoggingBuilder
+{
+    public LoggingBuilder(IServiceCollection services) => Services = services;
+    public IServiceCollection Services { get; }
 }
