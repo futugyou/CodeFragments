@@ -24,19 +24,19 @@ foreach (var item in buff)
 Console.WriteLine(Color.Parse("#FFEA23")); // Color { R = 255, G = 234, B = 35, A = 0 }
 
 Color color = new(255, 128, 42, 137);
-ColorView view = color.CreateView();
+//ColorView view = color.CreateView();
 
-Console.WriteLine(color); // Color { R = 255, G = 128, B = 42, A = 137 }
+//Console.WriteLine(color); // Color { R = 255, G = 128, B = 42, A = 137 }
 
-view.R = 7;
-view[3] = 28;
-Console.WriteLine(color); // Color { R = 7, G = 128, B = 42, A = 28 }
+//view.R = 7;
+//view[3] = 28;
+//Console.WriteLine(color); // Color { R = 7, G = 128, B = 42, A = 28 }
 
-view.Rgba = 3072;
-Console.WriteLine(color); // Color { R = 0, G = 12, B = 0, A = 0 }
+//view.Rgba = 3072;
+//Console.WriteLine(color); // Color { R = 0, G = 12, B = 0, A = 0 }
 
-foreach (ref byte i in view) i++;
-Console.WriteLine(color); // Color { R = 1, G = 13, B = 1, A = 1 }
+//foreach (ref byte i in view) i++;
+//Console.WriteLine(color); // Color { R = 1, G = 13, B = 1, A = 1 }
 
 
 public sealed class NativeBuffer<T> : IDisposable where T : unmanaged
@@ -220,7 +220,7 @@ public struct Color : IParsable<Color>, IEquatable<Color>
             && (s.Length is 9 ? byte.TryParse(s[7..9], NumberStyles.HexNumber, provider, out color.A) : true);
     }
 
-    public ColorView CreateView() => new(ref this);
+    //public ColorView CreateView() => new(ref this);
 }
 
 public ref struct ColorView

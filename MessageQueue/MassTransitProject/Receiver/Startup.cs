@@ -27,6 +27,12 @@ namespace Receiver
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<MassTransitHostOptions>(options =>
+            {
+                options.WaitUntilStarted = true;
+                options.StartTimeout = TimeSpan.FromSeconds(30);
+                options.StopTimeout = TimeSpan.FromMinutes(1);
+            });
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<EventConsumer>();
@@ -46,10 +52,9 @@ namespace Receiver
                     //    e.ConfigureConsumer<EventConsumer>(context);
                     //});
 
-                    cfg.ConfigureEndpoints(context); 
+                    cfg.ConfigureEndpoints(context);
                 });
             });
-            services.AddMassTransitHostedService();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
