@@ -154,7 +154,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReciveService", "MessageQue
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProducerService", "MessageQueue\KafkaServicebus\ProducerService\ProducerService.csproj", "{9B2EF537-6DBA-48A2-81BD-9483A039A2A6}"
 EndProject
-
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SignalRHub", "SignalRHub", "{D364EE77-8B59-4A5C-B27A-28649E3F17A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalR.Common", "SignalRHub\SignalR.Common\SignalR.Common.csproj", "{735B41A7-A158-4570-95ED-743BF9A7577E}"
@@ -182,6 +181,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaywrightTestSourceGenerator", "AutomatedTesting\PlaywrightTestSourceGenerator\PlaywrightTestSourceGenerator.csproj", "{7B48247E-F9A9-429A-A2EF-3B07E1BE8B1F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroCost", "ZeroCost\ZeroCost.csproj", "{247F2DEF-342A-4018-94AE-7575A1AD8835}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SKProject", "SKProject", "{4E894D44-3A76-47BF-80A8-EC045EB0BE2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKStart", "SKProject\SKStart\SKStart.csproj", "{D2AF2FC5-02CF-4ABF-8E8A-B24A8E3923C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -449,6 +452,10 @@ Global
 		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2AF2FC5-02CF-4ABF-8E8A-B24A8E3923C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2AF2FC5-02CF-4ABF-8E8A-B24A8E3923C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2AF2FC5-02CF-4ABF-8E8A-B24A8E3923C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2AF2FC5-02CF-4ABF-8E8A-B24A8E3923C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -519,6 +526,7 @@ Global
 		{7E1605EC-D9D3-44B5-9098-B28D153855CE} = {1D3FD8F8-BB70-47C7-A502-DDA7B1B2DC32}
 		{38F00664-0049-4087-B613-B1115DAE2B00} = {1D3FD8F8-BB70-47C7-A502-DDA7B1B2DC32}
 		{7B48247E-F9A9-429A-A2EF-3B07E1BE8B1F} = {1D3FD8F8-BB70-47C7-A502-DDA7B1B2DC32}
+		{D2AF2FC5-02CF-4ABF-8E8A-B24A8E3923C6} = {4E894D44-3A76-47BF-80A8-EC045EB0BE2B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {76872F29-94B1-4BD1-B723-B3150CFCE975}
