@@ -1,5 +1,5 @@
-using HotChocolate.AspNetCore.Authorization;
 using NetTopologySuite.Geometries;
+using AuthorizeAttribute = HotChocolate.AspNetCore.Authorization.AuthorizeAttribute;
 
 namespace AspnetcoreEx.GraphQL;
 
