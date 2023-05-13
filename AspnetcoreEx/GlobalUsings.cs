@@ -1,0 +1,17 @@
+﻿global using global::HealthChecks.UI.Client;
+global using global::Microsoft.AspNetCore.ConcurrencyLimiter;
+global using global::Microsoft.AspNetCore.Connections;
+global using global::Microsoft.AspNetCore.Http.Extensions;
+global using global::Microsoft.AspNetCore.Mvc;
+global using global::Microsoft.AspNetCore.Rewrite;
+global using global::Microsoft.AspNetCore.Server.Kestrel.Https;
+global using global::Microsoft.EntityFrameworkCore;
+global using global::Microsoft.Extensions.FileProviders;
+global using global::Polly;
+global using global::Polly.Extensions.Http;
+global using global::Polly.Timeout;
+global using global::Refit;
+global using global::System.Net;
+global using global::System.Security.Cryptography.X509Certificates;
+global using global::Microsoft.Extensions.Options;
+global using global::Microsoft.SemanticKernel;

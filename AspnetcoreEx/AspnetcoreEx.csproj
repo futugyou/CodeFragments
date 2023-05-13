@@ -7,6 +7,10 @@
 		<RootNamespace>AspnetcoreEx</RootNamespace>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Hashids.net" Version="1.6.1" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
@@ -23,6 +27,7 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="6.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="7.0.1" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="0.13.442.1-preview" />
 
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="7.2.0" />
 			
@@ -38,6 +43,10 @@
 		<PackageReference Include="HotChocolate.PersistedQueries.Redis" Version="13.0.0-preview.92" />
 		<PackageReference Include="HotChocolate.PersistedQueries.InMemory" Version="13.0.0-preview.92" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.0.0-preview.92" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="doc\documents\" />
 	</ItemGroup>
 
 </Project>
