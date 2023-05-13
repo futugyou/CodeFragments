@@ -1,4 +1,5 @@
 ﻿using AspnetcoreEx.SemanticKernel;
+using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
 
 namespace AspnetcoreEx.Controllers;
@@ -118,4 +119,74 @@ Demo, like Julia Balbilla, writes in the artificial and poetic Aeolic dialect. T
 
         return summary.Result;
     }
+
+    [Route("contextVar")]
+    [HttpPost]
+    public async Task<string> ContextVar()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        const string skPrompt = @"
+ChatBot can have a conversation with you about any topic.
+It can give explicit instructions or say 'I don't know' if it does not have an answer.
+
+{{$history}}
+Human: {{$human_input}}
+ChatBot:";
+
+        var promptConfig = new PromptTemplateConfig
+        {
+            Completion =
+            {
+                MaxTokens = 2000,
+                Temperature = 0.7,
+                TopP = 0.5,
+            }
+        };
+
+        var promptTemplate = new PromptTemplate(skPrompt, promptConfig, kernel);
+        var functionConfig = new SemanticFunctionConfig(promptConfig, promptTemplate);
+        var chatFunction = kernel.RegisterSemanticFunction("ChatBot", "Chat", functionConfig);
+
+        var context = new ContextVariables();
+
+        var history = "";
+        context.Set("history", history);
+
+        var human_input = "Hi, I'm looking for book suggestions";
+        context.Set("human_input", human_input);
+
+        var bot_answer = await kernel.RunAsync(context, chatFunction);
+        history += $"\nHuman: {human_input}\nMelody: {bot_answer}\n";
+        context.Update(history);
+
+        Console.WriteLine(context);
+
+        Func<string, Task> Chat = async (string input) => {
+            // Save new message in the context variables
+            context.Set("human_input", input);
+
+            // Process the user message and get an answer
+            var answer = await kernel.RunAsync(context, chatFunction);
+
+            // Append the new interaction to the chat history
+            history += $"\nHuman: {input}\nMelody: {answer}\n"; 
+            context.Set("history", history);
+            //context.Update(history);
+            // Show the response
+            Console.WriteLine(context);
+        };
+
+        await Chat("I would like a non-fiction book suggestion about Greece history. Please only list one book.");
+        await Chat("that sounds interesting, what are some of the topics I will learn about?");
+        await Chat("Which topic from the ones you listed do you think most people find interesting?");
+        await Chat("could you list some more books I could read about the topic(s) you mentioned?");
+
+        return context.Input;
+    }
+
+
 }
