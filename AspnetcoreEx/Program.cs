@@ -1,26 +1,12 @@
 using AspnetcoreEx;
+using AspnetcoreEx.Elasticsearch;
 using AspnetcoreEx.Extensions;
-using AspnetcoreEx.RedisExtensions;
-using Polly.Timeout;
-using Polly;
-using Polly.Extensions.Http;
-using Refit;
 using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
-using HealthChecks.UI.Client;
-using AspnetcoreEx.Elasticsearch;
-using Microsoft.Extensions.FileProviders;
-using AspnetcoreEx.MiniAspnetCore;
-using AspnetcoreEx.StaticFileEx;
+using AspnetcoreEx.RedisExtensions;
 using AspnetcoreEx.RouteEx;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Rewrite;
-using Microsoft.AspNetCore.ConcurrencyLimiter;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Http;
+using AspnetcoreEx.SemanticKernel;
+using AspnetcoreEx.StaticFileEx;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -30,50 +16,58 @@ var options = new WebApplicationOptions
     ApplicationName = "AspnetcoreEx",
     // System.IO.DirectoryNotFoundException: /workspaces/CodeFragments/AspnetcoreEx/wwwroot/
     ContentRootPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), ""),
-    EnvironmentName = "Production"
+    EnvironmentName = "Development"
 };
 
 var builder = WebApplication.CreateBuilder(options);
-builder.WebHost.UseKestrel(kestrel =>
-{
-    kestrel.Listen(IPAddress.Any, 80);
-    kestrel.Listen(IPAddress.Any, 443, listener =>
-    {
-        listener.UseHttps(https =>
-        {
-            https.ServerCertificateSelector = SelectServerCertificate;
-        });
-    });
-});
-builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+
+//  Overriding address(es) 'https://localhost:58176, http://localhost:58177'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+//builder.WebHost.UseKestrel(kestrel =>
+//{
+//    kestrel.Listen(IPAddress.Any, 58177);
+//    kestrel.Listen(IPAddress.Any, 58176, listener =>
+//    {
+//        listener.UseHttps(https =>
+//        {
+//            https.ServerCertificateSelector = SelectServerCertificate;
+//        });
+//    });
+//});
+
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 58176);
+
 builder.Services.AddHsts(options =>
 {
     options.MaxAge = TimeSpan.FromDays(365);
     options.IncludeSubDomains = true;
     options.Preload = true;
 });
+
 builder.Services.Configure<ConcurrencyLimiterOptions>(options =>
 {
     options.OnRejected = ConcurrencyRejectAsync;
 });
-// builder.Services.AddQueuePolicy(options =>
-// {
-//     options.MaxConcurrentRequests = 20;
-//     options.RequestQueueLimit = 20;
-// });
-// builder.Services.AddStackPolicy(options =>
-// {
-//     options.MaxConcurrentRequests = 20;
-//     options.RequestQueueLimit = 20;
-// });
+
+builder.Services.AddQueuePolicy(options =>
+{
+    options.MaxConcurrentRequests = 20;
+    options.RequestQueueLimit = 20;
+});
+builder.Services.AddStackPolicy(options =>
+{
+    options.MaxConcurrentRequests = 20;
+    options.RequestQueueLimit = 20;
+});
+
 var configuration = builder.Configuration;
 
-configuration.AddJsonFileExtensions("appsettings.json", true, true);
+//configuration.AddJsonFileExtensions("appsettings.json", true, true);
 
 Console.WriteLine(builder.Environment.ApplicationName);
 Console.WriteLine(builder.Environment.ContentRootPath);
 Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
+builder.Services.AddSingleton<ILogger>(sp => sp.GetRequiredService<ILogger<Program>>());
 
 builder.Services.AddRouteExtension();
 builder.Services.AddElasticClientExtension(configuration);
@@ -114,8 +108,10 @@ builder.Services.AddSingleton<IMemoryMetricsCollector>(counter);
 builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
+builder.Services.AddSemanticKernelServices(configuration);
+
 var app = builder.Build();
-// app.UseConcurrencyLimiter();
+app.UseConcurrencyLimiter();
 var rewriteOptions = new RewriteOptions()
     // client redirect
     .AddRedirect("^text/(.*)", "bar/$1")
@@ -126,11 +122,11 @@ var rewriteOptions = new RewriteOptions()
 app.UseRewriter(rewriteOptions);
 app.UseHttpsRedirection().UseHsts();
 // app.Urls.Add("http://localhost:5003/");
-// var environment = app.Environment;
-// Console.WriteLine(environment.ApplicationName);
-// Console.WriteLine(environment.ContentRootPath);
-// Console.WriteLine(environment.WebRootPath);
-// Console.WriteLine(environment.EnvironmentName);
+var environment = app.Environment;
+Console.WriteLine(environment.ApplicationName);
+Console.WriteLine(environment.ContentRootPath);
+Console.WriteLine(environment.WebRootPath);
+Console.WriteLine(environment.EnvironmentName);
 
 app.StaticFileComposite();
 
@@ -141,9 +137,7 @@ if (builder.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ResponseBodyFeature v1"));
 }
-
-// app.UseHttpsRedirection();
-
+ 
 app.UseRouting();
 
 app.UseAuthentication();
@@ -175,7 +169,7 @@ static X509Certificate2? SelectServerCertificate(ConnectionContext? context, str
     };
 }
 
-static Task ConcurrencyRejectAsync(Microsoft.AspNetCore.Http.HttpContext httpContext)
+static Task ConcurrencyRejectAsync(HttpContext httpContext)
 {
     var request = httpContext.Request;
     if (!request.Query.ContainsKey("reject"))
