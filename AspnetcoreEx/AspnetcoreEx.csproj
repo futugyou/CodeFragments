@@ -47,6 +47,7 @@
 
 	<ItemGroup>
 	  <Folder Include="doc\documents\" />
+	  <Folder Include="SemanticKernel\Skills\ToGolang\" />
 	</ItemGroup>
 
 </Project>

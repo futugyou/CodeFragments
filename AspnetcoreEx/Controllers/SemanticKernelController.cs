@@ -165,7 +165,8 @@ ChatBot:";
 
         Console.WriteLine(context);
 
-        Func<string, Task> Chat = async (string input) => {
+        Func<string, Task> Chat = async (string input) =>
+        {
             // Save new message in the context variables
             context.Set("human_input", input);
 
@@ -173,7 +174,7 @@ ChatBot:";
             var answer = await kernel.RunAsync(context, chatFunction);
 
             // Append the new interaction to the chat history
-            history += $"\nHuman: {input}\nMelody: {answer}\n"; 
+            history += $"\nHuman: {input}\nMelody: {answer}\n";
             context.Set("history", history);
             //context.Update(history);
             // Show the response
@@ -188,5 +189,24 @@ ChatBot:";
         return context.Input;
     }
 
+    [Route("skill")]
+    [HttpPost]
+    public async Task<string> Skill()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        var input = """
+Console.WriteLine("OK");
+""";
+        var summary = await kernel.RunAsync(input, mySkill["ToGolang"]);
+
+        Console.WriteLine(summary);
+
+        return summary.Result;
+    }
 
 }
