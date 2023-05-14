@@ -1,4 +1,5 @@
 ﻿using AspnetcoreEx.SemanticKernel;
+using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
 
@@ -209,4 +210,23 @@ Console.WriteLine("OK");
         return summary.Result;
     }
 
+    [Route("native")]
+    [HttpPost]
+    public async Task<string> Native()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var mySkill = kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
+
+        var myContext = new ContextVariables();
+        myContext.Set("INPUT", "This is input.");
+
+        var myOutput = await kernel.RunAsync(myContext, mySkill["DupDup"]);
+        Console.WriteLine(myOutput);
+
+        return myOutput.Result;
+    }
 }
