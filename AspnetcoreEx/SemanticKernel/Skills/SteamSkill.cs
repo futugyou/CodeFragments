@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel.SkillDefinition;
+﻿using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace AspnetcoreEx.SemanticKernel.Skills;
 
@@ -14,5 +15,13 @@ public class SteamSkill
     public string DupDup(string text)
     {
         return text + text;
+    }
+
+    [SKFunction("Joins a first and last name together")]
+    [SKFunctionContextParameter(Name = "firstname", Description = "Informal name you use")]
+    [SKFunctionContextParameter(Name = "lastname", Description = "More formal name you use")]
+    public string FullNamer(SKContext context)
+    {
+        return context["firstname"] + " " + context["lastname"];
     }
 }

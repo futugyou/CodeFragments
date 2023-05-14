@@ -227,6 +227,13 @@ Console.WriteLine("OK");
         var myOutput = await kernel.RunAsync(myContext, mySkill["DupDup"]);
         Console.WriteLine(myOutput);
 
+        myContext = new ContextVariables();
+        myContext.Set("firstname", "Sam");
+        myContext.Set("lastname", "Appdev");
+        myOutput = await kernel.RunAsync(myContext, mySkill["FullNamer"]);
+
+        Console.WriteLine(myOutput);
+
         return myOutput.Result;
     }
 }
