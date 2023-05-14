@@ -254,4 +254,26 @@ Console.WriteLine("OK");
 
         return myOutput.Result;
     }
+
+    [Route("call-semantic")]
+    [HttpPost]
+    public async Task<string> CallSemantic()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var mySkill = kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
+        kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        var myContext = new ContextVariables();
+        myContext.Set("input", """
+Console.WriteLine("OK");
+""");
+
+        var myOutput = await kernel.RunAsync(myContext, mySkill["togolang"]);
+        Console.WriteLine(myOutput);
+
+        return myOutput.Result;
+    }
 }

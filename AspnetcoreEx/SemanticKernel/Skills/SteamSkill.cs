@@ -24,4 +24,16 @@ public class SteamSkill
     {
         return context["firstname"] + " " + context["lastname"];
     }
+
+    [SKFunction("convert code to golang")]
+    [SKFunctionName("togolang")]
+    [SKFunctionContextParameter(Name = "input", Description = "other language code")]
+    public async Task<string> ToGolang(SKContext context)
+    {
+        ISKFunction joker2 = context.Func("Skills", "ToGolang");
+
+        var joke = await joker2.InvokeAsync(context);
+
+        return joke.Result.ReplaceLineEndings(" ");
+    }
 }
