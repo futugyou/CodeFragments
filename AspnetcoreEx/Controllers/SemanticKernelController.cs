@@ -236,4 +236,22 @@ Console.WriteLine("OK");
 
         return myOutput.Result;
     }
+
+    [Route("call-native")]
+    [HttpPost]
+    public async Task<string> CallNative()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var myContext = new ContextVariables("*Twinnify");
+        kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
+        var mySemSkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        var myOutput = await kernel.RunAsync(myContext, mySemSkill["CallNative"]);
+        Console.WriteLine(myOutput);
+
+        return myOutput.Result;
+    }
 }
