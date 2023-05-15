@@ -304,4 +304,25 @@ Is it weekend time (weekend/not weekend)?";
 
         return myOutput.Result;
     }
+
+    [Route("core-text")]
+    [HttpPost]
+    public async Task<string> CoreText()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var myText = kernel.ImportSkill(new TextSkill());
+
+        SKContext myOutput = await kernel.RunAsync(
+    "    i n f i n i t e     s p a c e     ",
+    myText["TrimStart"],
+    myText["TrimEnd"],
+    myText["Uppercase"]);
+        Console.WriteLine(myOutput);
+
+        return myOutput.Result;
+    }
 }
