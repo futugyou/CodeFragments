@@ -344,9 +344,7 @@ Is it weekend time (weekend/not weekend)?";
 
         return new string[] { myOutput.Result, myOutput1.Result, myOutput2.Result };
     }
-
-
-
+    
     [Route("core-file")]
     [HttpPost]
     public async Task<string[]> CoreFile()
@@ -366,5 +364,22 @@ Is it weekend time (weekend/not weekend)?";
         SKContext myOutput1 = await kernel.RunAsync("./fileskilldemo.txt", myText["ReadAsync"]);
 
         return new string[] { myOutput.Result, myOutput1.Result };
+    }
+    
+    [Route("core-http")]
+    [HttpPost]
+    public async Task<string[]> CoreHttp()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var myText = kernel.ImportSkill(new HttpSkill(), "http");
+
+        var input = "https://store.steampowered.com/search/suggest?term=tales&f=games&cc=JP&use_store_query=1&use_search_spellcheck=1&search_creators_and_tags=1";
+        SKContext myOutput = await kernel.RunAsync(input, default(CancellationToken), myText["GetAsync"]);
+
+        return new string[] { myOutput.Result };
     }
 }
