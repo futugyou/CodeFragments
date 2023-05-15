@@ -382,4 +382,27 @@ Is it weekend time (weekend/not weekend)?";
 
         return new string[] { myOutput.Result };
     }
+
+    [Route("core-math")]
+    [HttpPost]
+    public async Task<string[]> CoreMath()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var myText = kernel.ImportSkill(new MathSkill(), "math");
+
+        var myContext = new ContextVariables("90");
+
+        myContext["Amount"] = "10";
+        SKContext myOutput = await kernel.RunAsync(myContext, myText["Add"]);
+        Console.WriteLine(myOutput.Result); // 100
+        myContext["Amount"] = "20";
+        SKContext myOutput1 = await kernel.RunAsync(myContext, myText["Subtract"]);
+        Console.WriteLine(myOutput.Result); // 80 
+
+        return new string[] { myOutput.Result , myOutput1.Result };
+    }
 }
