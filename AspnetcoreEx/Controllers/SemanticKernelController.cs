@@ -325,4 +325,23 @@ Is it weekend time (weekend/not weekend)?";
 
         return myOutput.Result;
     }
+
+    [Route("core-summary")]
+    [HttpPost]
+    public async Task<string[]> CoreSummary()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var myText = kernel.ImportSkill(new ConversationSummarySkill(kernel));
+        const string ThePromptTemplate = @"There are lots of different ways to say this, but fundamentally, the models are stronger when they are being asked to reason about meaning and goals, and weaker when they are being asked to perform specific calculations and processes. For example, it's easy for advanced models to write code to solve a sudoku generally, but hard for them to solve a sudoku themselves. Each kind of code has different strengths and it's important to use the right kind of code for the right kind of problem. The boundaries between syntax and semantics are the hard parts of these programs.";
+
+        SKContext myOutput = await kernel.RunAsync(ThePromptTemplate, myText["SummarizeConversation"]);
+        SKContext myOutput1 = await kernel.RunAsync(ThePromptTemplate, myText["GetConversationActionItems"]);
+        SKContext myOutput2 = await kernel.RunAsync(ThePromptTemplate, myText["GetConversationTopics"]);
+
+        return new string[] { myOutput.Result, myOutput1.Result, myOutput2.Result };
+    }
 }
