@@ -1,5 +1,6 @@
 ﻿using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.SemanticKernel.Skills;
+using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
 
@@ -272,6 +273,33 @@ Console.WriteLine("OK");
 """);
 
         var myOutput = await kernel.RunAsync(myContext, mySkill["togolang"]);
+        Console.WriteLine(myOutput);
+
+        return myOutput.Result;
+    }
+
+    [Route("core-time")]
+    [HttpPost]
+    public async Task<string> CoreTime()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var mySkill = kernel.ImportSkill(new TimeSkill(), "time");
+
+        const string ThePromptTemplate = @"
+Today is: {{time.Date}}
+Current time is: {{time.Time}}
+
+Answer to the following questions using JSON syntax, including the data used.
+Is it morning, afternoon, evening, or night (morning/afternoon/evening/night)?
+Is it weekend time (weekend/not weekend)?";
+
+        var myKindOfDay = kernel.CreateSemanticFunction(ThePromptTemplate, maxTokens: 150);
+
+        var myOutput = await myKindOfDay.InvokeAsync();
         Console.WriteLine(myOutput);
 
         return myOutput.Result;
