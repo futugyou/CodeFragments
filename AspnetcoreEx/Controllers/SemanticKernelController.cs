@@ -344,4 +344,27 @@ Is it weekend time (weekend/not weekend)?";
 
         return new string[] { myOutput.Result, myOutput1.Result, myOutput2.Result };
     }
+
+
+
+    [Route("core-file")]
+    [HttpPost]
+    public async Task<string[]> CoreFile()
+    {
+        kernel.Config.AddOpenAITextCompletionService(
+            "text-davinci-003",
+            options.Key
+        );
+
+        var myText = kernel.ImportSkill(new FileIOSkill(), "file");
+        const string ThePromptTemplate = @"There are lots of different ways to say this, but fundamentally, the models are stronger when they are being asked to reason about meaning and goals, and weaker when they are being asked to perform specific calculations and processes. For example, it's easy for advanced models to write code to solve a sudoku generally, but hard for them to solve a sudoku themselves. Each kind of code has different strengths and it's important to use the right kind of code for the right kind of problem. The boundaries between syntax and semantics are the hard parts of these programs.";
+
+        var myContext = new ContextVariables();
+        myContext["path"] = "./fileskilldemo.txt";
+        myContext["content"] = ThePromptTemplate;
+        SKContext myOutput = await kernel.RunAsync(myContext, myText["WriteAsync"]);
+        SKContext myOutput1 = await kernel.RunAsync("./fileskilldemo.txt", myText["ReadAsync"]);
+
+        return new string[] { myOutput.Result, myOutput1.Result };
+    }
 }
