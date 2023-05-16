@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.Skills.Web.Google;
+using Microsoft.SemanticKernel.TemplateEngine;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -423,5 +424,89 @@ Is it weekend time (weekend/not weekend)?";
         Console.WriteLine(googleResult.Result);
 
         return new string[] { googleResult.Result };
+    }
+
+    [Route("google2")]
+    [HttpPost]
+    public async Task<string[]> Google2()
+    {
+        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+
+        // Load Google skill
+        using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
+        kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
+
+        Console.WriteLine("======== Use Search Skill to answer user questions ========");
+
+        const string SemanticFunction = @"Answer questions only when you know the facts or the information is provided.
+When you don't have sufficient information you reply with a list of commands to find the information needed.
+When answering multiple questions, use a bullet point list.
+Note: make sure single and double quotes are escaped using a backslash char.
+
+[COMMANDS AVAILABLE]
+- google.search
+
+[INFORMATION PROVIDED]
+{{ $externalInformation }}
+
+[EXAMPLE 1]
+Question: what's the biggest lake in Italy?
+Answer: Lake Garda, also known as Lago di Garda.
+
+[EXAMPLE 2]
+Question: what's the biggest lake in Italy? What's the smallest positive number?
+Answer:
+* Lake Garda, also known as Lago di Garda.
+* The smallest positive number is 1.
+
+[EXAMPLE 3]
+Question: what's Ferrari stock price ? Who is the current number one female tennis player in the world?
+Answer:
+{{ '{{' }} google.search ""what\\'s Ferrari stock price?"" {{ '}}' }}.
+{{ '{{' }} google.search ""Who is the current number one female tennis player in the world?"" {{ '}}' }}.
+
+[END OF EXAMPLES]
+
+[TASK]
+Question: {{ $input }}.
+Answer: ";
+
+        var questions = "Who is the most followed person on TikTok right now? What's the exchange rate EUR:USD?";
+        Console.WriteLine(questions);
+
+        var oracle = kernel.CreateSemanticFunction(SemanticFunction, maxTokens: 200, temperature: 0, topP: 1);
+
+        var context = kernel.CreateNewContext();
+        context["externalInformation"] = "";
+        context.Variables.Update(questions);
+        var answer = await oracle.InvokeAsync(context);
+        Console.WriteLine(answer);
+        // If the answer contains commands, execute them using the prompt renderer.
+        if (answer.Result.Contains("google.search", StringComparison.OrdinalIgnoreCase))
+        {
+            var promptRenderer = new PromptTemplateEngine();
+
+            Console.WriteLine("---- Fetching information from google...");
+            var information = await promptRenderer.RenderAsync(answer.Result, context);
+
+            Console.WriteLine("Information found:");
+            Console.WriteLine(information);
+
+            // The rendered prompt contains the information retrieved from search engines
+            context["externalInformation"] = information;
+
+            // Run the semantic function again, now including information from google
+            context.Variables.Update(questions);
+            answer = await oracle.InvokeAsync(context);
+        }
+        else
+        {
+            Console.WriteLine("AI had all the information, no need to query google.");
+        }
+
+        Console.WriteLine("---- ANSWER:");
+        Console.WriteLine(answer);
+
+        return new string[] { answer.Result };
     }
 }
