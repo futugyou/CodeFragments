@@ -1,3 +1,5 @@
+using HotChocolate.Resolvers;
+
 namespace AspnetcoreEx.GraphQL;
 
 public class CustomDirectiveType : DirectiveType
@@ -11,7 +13,7 @@ public class CustomDirectiveType : DirectiveType
             .Argument("name")
             .Type<NonNullType<StringType>>();
 
-        descriptor.Use(next => context =>
+        descriptor.Use((FieldDelegate next, Directive directive) => context =>
         {
 
             var task = next.Invoke(context);

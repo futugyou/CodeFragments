@@ -1,9 +1,8 @@
 using NetTopologySuite.Geometries;
-using AuthorizeAttribute = HotChocolate.AspNetCore.Authorization.AuthorizeAttribute;
 
 namespace AspnetcoreEx.GraphQL;
 
-[Authorize]
+//[Authorize]
 // [Authorize(Roles = new[] { "Guest", "Administrator" })]
 // [Authorize(Policy = "AtLeast21")]
 public class AuthUser
