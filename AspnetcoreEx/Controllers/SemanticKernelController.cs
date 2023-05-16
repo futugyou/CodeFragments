@@ -3,6 +3,8 @@ using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.SemanticFunctions;
+using Microsoft.SemanticKernel.Skills.Web;
+using Microsoft.SemanticKernel.Skills.Web.Google;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -344,7 +346,7 @@ Is it weekend time (weekend/not weekend)?";
 
         return new string[] { myOutput.Result, myOutput1.Result, myOutput2.Result };
     }
-    
+
     [Route("core-file")]
     [HttpPost]
     public async Task<string[]> CoreFile()
@@ -365,7 +367,7 @@ Is it weekend time (weekend/not weekend)?";
 
         return new string[] { myOutput.Result, myOutput1.Result };
     }
-    
+
     [Route("core-http")]
     [HttpPost]
     public async Task<string[]> CoreHttp()
@@ -403,6 +405,23 @@ Is it weekend time (weekend/not weekend)?";
         SKContext myOutput1 = await kernel.RunAsync(myContext, myText["Subtract"]);
         Console.WriteLine(myOutput.Result); // 80 
 
-        return new string[] { myOutput.Result , myOutput1.Result };
+        return new string[] { myOutput.Result, myOutput1.Result };
+    }
+
+    [Route("google")]
+    [HttpPost]
+    public async Task<string[]> Google()
+    {
+        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+
+        // Load Google skill
+        using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
+        kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
+
+        var question = "What's the largest building in the world?";
+        var googleResult = await kernel.Func("google", "search").InvokeAsync(question);
+        Console.WriteLine(googleResult.Result);
+
+        return new string[] { googleResult.Result };
     }
 }
