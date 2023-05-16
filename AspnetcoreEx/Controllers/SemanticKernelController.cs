@@ -509,4 +509,29 @@ Answer: ";
 
         return new string[] { answer.Result };
     }
+
+
+
+    [Route("search-url")]
+    [HttpPost]
+    public async Task<string> SearchUrl()
+    {
+        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+
+        var skill = new SearchUrlSkill();
+        var bing = kernel.ImportSkill(skill, "search");
+
+        // Run
+        var ask = "What's the tallest building in Europe?";
+        var result = await kernel.RunAsync(
+            ask,
+            bing["BingSearchUrl"]
+        );
+
+        Console.WriteLine(ask + "\n");
+        Console.WriteLine(result);
+
+        return result.Result;
+    }
+
 }
