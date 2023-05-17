@@ -7,9 +7,12 @@ using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
+using Microsoft.SemanticKernel.Skills.OpenAPI.Authentication;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.TemplateEngine;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -575,15 +578,51 @@ Answer: ";
 
     [Route("dallE")]
     [HttpPost]
-    public async Task<string > DallE()
+    public async Task<string> DallE()
     {
-        kernel.Config.AddOpenAIImageGenerationService( options.Key);
+        kernel.Config.AddOpenAIImageGenerationService(options.Key);
         IImageGeneration dallE = kernel.GetService<IImageGeneration>();
 
         var imageDescription = "A cute baby sea otter";
         var image = await dallE.GenerateImageAsync(imageDescription, 256, 256);
 
         return image;
+    }
+
+
+    [Route("github")]
+    [HttpPost]
+    public async Task<string> Github()
+    {
+        kernel.Config.AddOpenAIImageGenerationService(options.Key);
+        var authenticationProvider = new BearerAuthenticationProvider(() => { return Task.FromResult(options.GithubToken); });
+
+        var skill = await kernel.ImportOpenApiSkillFromFileAsync(
+            "GitHubSkill",
+            "./SemanticKernel/openapi.json",
+            authenticationProvider.AuthenticateRequestAsync);
+
+        // Add arguments for required parameters, arguments for optional ones can be skipped.
+        var contextVariables = new ContextVariables();
+        contextVariables.Set("owner", "futugyou");
+        contextVariables.Set("repo", "goproject");
+
+        // Run
+        var result = await kernel.RunAsync(contextVariables, skill["PullsList"]);
+
+        Console.WriteLine("Successful GitHub List Pull Requests skill response.");
+        var resultJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(result.Result);
+        var pullRequests = JArray.Parse((string)resultJson!["content"]);
+
+        if (pullRequests != null && pullRequests.First != null)
+        {
+            var number = pullRequests.First["number"];
+            return number?.ToString() ?? string.Empty;
+        }
+        else
+        {
+            return "No pull requests found.";
+        }
     }
 
 }
