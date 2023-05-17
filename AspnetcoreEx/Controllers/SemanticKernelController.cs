@@ -13,6 +13,7 @@ using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.TemplateEngine;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Microsoft.SemanticKernel.Connectors.AI.OpenAI.Tokenizers;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -623,6 +624,20 @@ Answer: ";
         {
             return "No pull requests found.";
         }
+    }
+
+    [Route("tokenizer")]
+    [HttpPost]
+    public Task<Dictionary<string, int>> Tokenizer()
+    {
+        var result = new Dictionary<string, int> {
+            { "Some text on one line",GPT3Tokenizer.Encode( "Some text on one line").Count },
+            { "⭐⭐",GPT3Tokenizer.Encode( "⭐⭐").Count },
+            { "Some text on\ntwo lines",GPT3Tokenizer.Encode( "Some text on\ntwo lines").Count },
+            { "Some text on\r\ntwo lines",GPT3Tokenizer.Encode( "Some text on\r\ntwo lines").Count },
+        };
+
+        return Task.FromResult(result);
     }
 
 }
