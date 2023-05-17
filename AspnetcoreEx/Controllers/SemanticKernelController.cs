@@ -1,6 +1,7 @@
 ﻿using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
+using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
@@ -570,6 +571,19 @@ Answer: ";
         chatHistory.AddAssistantMessage(reply);
         var message2 = chatHistory.Messages.Last();
         return new string[] { message1.Content, message2.Content };
+    }
+
+    [Route("dallE")]
+    [HttpPost]
+    public async Task<string > DallE()
+    {
+        kernel.Config.AddOpenAIImageGenerationService( options.Key);
+        IImageGeneration dallE = kernel.GetService<IImageGeneration>();
+
+        var imageDescription = "A cute baby sea otter";
+        var image = await dallE.GenerateImageAsync(imageDescription, 256, 256);
+
+        return image;
     }
 
 }
