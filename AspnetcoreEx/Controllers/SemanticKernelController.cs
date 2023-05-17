@@ -1,5 +1,7 @@
 ﻿using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.SemanticKernel.Skills;
+using Microsoft.SemanticKernel.AI.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
@@ -549,6 +551,25 @@ Answer: ";
 
         Console.WriteLine("Result:");
         return result.Result;
+    }
+
+    [Route("chat")]
+    [HttpPost]
+    public async Task<string[]> Chat()
+    {
+        kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
+        IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
+
+        var chatHistory = (OpenAIChatHistory)chatGPT.CreateNewChat("You are a librarian, expert about books");
+
+        // First user message
+        chatHistory.AddUserMessage("Hi, I'm looking for book suggestions");
+        var message1 = chatHistory.Messages.Last();
+        // First bot assistant message
+        string reply = await chatGPT.GenerateMessageAsync(chatHistory);
+        chatHistory.AddAssistantMessage(reply);
+        var message2 = chatHistory.Messages.Last();
+        return new string[] { message1.Content, message2.Content };
     }
 
 }
