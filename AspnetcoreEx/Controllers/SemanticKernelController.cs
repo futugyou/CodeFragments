@@ -2,6 +2,7 @@
 using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.Skills.Web.Google;
@@ -510,8 +511,6 @@ Answer: ";
         return new string[] { answer.Result };
     }
 
-
-
     [Route("search-url")]
     [HttpPost]
     public async Task<string> SearchUrl()
@@ -531,6 +530,24 @@ Answer: ";
         Console.WriteLine(ask + "\n");
         Console.WriteLine(result);
 
+        return result.Result;
+    }
+
+    [Route("planner")]
+    [HttpPost]
+    public async Task<string> Planner()
+    {
+        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+
+        var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
+
+        var planner = new SequentialPlanner(kernel);
+
+        var plan = await planner.CreatePlanAsync("Write a slogan about Coca Cola, then write a golang code about who to send http request.");
+        var result = await kernel.RunAsync(plan);
+
+        Console.WriteLine("Result:");
         return result.Result;
     }
 
