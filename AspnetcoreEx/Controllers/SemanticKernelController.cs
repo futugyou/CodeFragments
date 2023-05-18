@@ -1,20 +1,22 @@
-﻿using AspnetcoreEx.SemanticKernel;
+﻿using AspnetcoreEx.Resources;
+using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.AI.OpenAI.Tokenizers;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
+using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.Skills.OpenAPI.Authentication;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.TemplateEngine;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using Microsoft.SemanticKernel.Connectors.AI.OpenAI.Tokenizers;
-using Microsoft.SemanticKernel.SkillDefinition;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -576,6 +578,38 @@ Answer: ";
         chatHistory.AddAssistantMessage(reply);
         var message2 = chatHistory.Messages.Last();
         return new string[] { message1.Content, message2.Content };
+    }
+
+    [Route("chat2")]
+    [HttpPost]
+    public async   IAsyncEnumerable<string> Chat2()
+    {
+        var systemPromptTemplate = EmbeddedResource.Read("30-system-prompt.txt");
+        var selectedText = EmbeddedResource.Read("30-user-context.txt");
+        var userPromptTemplate = EmbeddedResource.Read("30-user-prompt.txt");
+
+        kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
+       
+        kernel.ImportSkill(new TimeSkill(), "time");
+
+        var context = kernel.CreateNewContext();
+        context["selectedText"] = selectedText;
+        context["startTime"] = DateTimeOffset.Now.ToString("hh:mm:ss tt zz", CultureInfo.CurrentCulture);
+        context["userMessage"] = "extract locations as a bullet point list";
+
+        var promptRenderer = new PromptTemplateEngine();
+        string systemMessage = await promptRenderer.RenderAsync(systemPromptTemplate, context);
+        yield return systemMessage;
+
+        string userMessage = await promptRenderer.RenderAsync(userPromptTemplate, context);
+        yield return userMessage;
+
+        IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
+        var chatHistory = chatGPT.CreateNewChat(systemMessage);
+        chatHistory.AddMessage(ChatHistory.AuthorRoles.User, userMessage);
+        string answer = await chatGPT.GenerateMessageAsync(chatHistory);
+        yield return answer;
+
     }
 
     [Route("dallE")]

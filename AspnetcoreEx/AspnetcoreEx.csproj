@@ -50,7 +50,13 @@
 
 	<ItemGroup>
 	  <Folder Include="doc\documents\" />
+	  <Folder Include="Resources\" />
 	  <Folder Include="SemanticKernel\Skills\ToGolang\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\30-user-prompt.txt" />
+		<EmbeddedResource Include="Resources\30-system-prompt.txt" />
+		<EmbeddedResource Include="Resources\30-user-context.txt" />
+	</ItemGroup>
 </Project>
