@@ -561,6 +561,57 @@ Answer: ";
         return result.Result;
     }
 
+    [Route("planner2")]
+    [HttpPost]
+    public async Task<string> Planner2()
+    {
+        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+        kernel.ImportSkill(new TimeSkill(), "time");
+
+        using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
+        kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
+
+        var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+
+        var context = kernel.CreateNewContext();
+        context.Variables.Set("firstname", "Jamal");
+        context.Variables.Set("lastname", "Williams");
+        context.Variables.Set("city", "Tacoma");
+        context.Variables.Set("state", "WA");
+        context.Variables.Set("country", "USA");
+
+        kernel.ImportSkill(new TextMemorySkill("contextQueryMemories", "0.3", "5"));
+
+        List<string> memoriesToSave = new()
+        {
+            "I like pizza and chicken wings.",
+            "I ate pizza 10 times this month.",
+            "I ate chicken wings 3 time this month.",
+            "I ate sushi 1 time this month.",
+            "My partner likes sushi and chicken wings.",
+            "I like to eat dinner with my partner.",
+            "I am a software engineer.",
+            "I live in Tacoma, WA.",
+            "I have a dog named Tully.",
+            "I have a cat named Butters.",
+        };
+
+        foreach (var memoryToSave in memoriesToSave)
+        {
+            await kernel.Memory.SaveInformationAsync("contextQueryMemories", memoryToSave, Guid.NewGuid().ToString());
+        }
+
+        var markup = kernel.ImportSkill(new MarkupSkill(), "markup");
+        var plan = new Plan("Execute ContextQuery and then RunMarkup");
+        plan.AddSteps(mySkill["ContextQuery"], markup["RunMarkup"]);
+
+        // Execute plan
+        context.Variables.Update("Who is my president? Who was president 3 years ago? What should I eat for dinner");
+        var result = await plan.InvokeAsync(context);
+
+        return result.Result;
+    }
+
     [Route("chat")]
     [HttpPost]
     public async Task<string[]> Chat()
@@ -582,14 +633,14 @@ Answer: ";
 
     [Route("chat2")]
     [HttpPost]
-    public async   IAsyncEnumerable<string> Chat2()
+    public async IAsyncEnumerable<string> Chat2()
     {
         var systemPromptTemplate = EmbeddedResource.Read("30-system-prompt.txt");
         var selectedText = EmbeddedResource.Read("30-user-context.txt");
         var userPromptTemplate = EmbeddedResource.Read("30-user-prompt.txt");
 
         kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
-       
+
         kernel.ImportSkill(new TimeSkill(), "time");
 
         var context = kernel.CreateNewContext();

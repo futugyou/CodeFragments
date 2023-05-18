@@ -9,7 +9,7 @@ public static class XmlMarkupPlanParser
 {
     private static readonly Dictionary<string, KeyValuePair<string, string>> s_skillMapping = new()
     {
-        { "lookup", new KeyValuePair<string, string>("bing", "SearchAsync") },
+        { "lookup", new KeyValuePair<string, string>("google", "SearchAsync") },
     };
 
     public static Plan FromMarkup(this string markup, string goal, SKContext context)
