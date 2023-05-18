@@ -14,6 +14,7 @@ using Microsoft.SemanticKernel.TemplateEngine;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.Tokenizers;
+using Microsoft.SemanticKernel.SkillDefinition;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -638,6 +639,58 @@ Answer: ";
         };
 
         return Task.FromResult(result);
+    }
+
+    [Route("jira")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Jira()
+    {
+        var contextVariables = new ContextVariables();
+
+        // Change <your-domain> to a jira instance you have access to with your authentication credentials
+        string serverUrl = options.JiraAddress + "rest/api/latest/";
+        contextVariables.Set("server-url", serverUrl);
+
+        var tokenProvider = new BasicAuthenticationProvider(() =>
+        {
+            string s = options.JiraEmailAddress + ":" + options.JiraApiKey;
+            return Task.FromResult(s);
+        });
+
+        using HttpClient httpClient = new HttpClient();
+
+        var apiSkillRawFileURL = new Uri("https://raw.githubusercontent.com/microsoft/PowerPlatformConnectors/dev/certified-connectors/JIRA/apiDefinition.swagger.json");
+        IDictionary<string, ISKFunction> jiraSkills = await kernel.ImportOpenApiSkillFromUrlAsync("jiraSkills", apiSkillRawFileURL, httpClient, tokenProvider.AuthenticateRequestAsync);
+
+
+        // GetIssue Skill
+        {
+            // Set Properties for the Get Issue operation in the openAPI.swagger.json
+            contextVariables.Set("issueKey", "TEC-42");
+
+            // Run operation via the semantic kernel
+            var result = await kernel.RunAsync(contextVariables, jiraSkills["GetIssue"]);
+
+            yield return "\n\n\n";
+            var formattedContent = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(result.Result), Formatting.Indented);
+            Console.WriteLine(formattedContent);
+            yield return "GetIssue jiraSkills response: \n " + formattedContent;
+        }
+
+        // AddComment Skill
+        {
+            // Set Properties for the AddComment operation in the openAPI.swagger.json
+            contextVariables.Set("issueKey", "TEC-42");
+            contextVariables.Set("body", "Here is a rad comment");
+            contextVariables.Set("payload", "Here is a rad comment");
+
+            // Run operation via the semantic kernel
+            var result = await kernel.RunAsync(contextVariables, jiraSkills["AddComment"]);
+
+            yield return "\n\n\n";
+            var formattedContent = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(result.Result), Formatting.Indented);
+            yield return "AddComment jiraSkills response: \n " + formattedContent;
+        }
     }
 
 }
