@@ -19,6 +19,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0-preview.4.23259.3" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0-preview.4.23259.5" />
 		<PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="0.14.547.1-preview" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Memory.Qdrant" Version="0.14.547.1-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Skills.OpenAPI" Version="0.14.547.1-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Skills.Web" Version="0.14.547.1-preview" />
 		<PackageReference Include="NEST" Version="7.17.5" />
