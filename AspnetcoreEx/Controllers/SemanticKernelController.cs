@@ -3,6 +3,7 @@ using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
+using Microsoft.SemanticKernel.AI.TextCompletion;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.Tokenizers;
 using Microsoft.SemanticKernel.CoreSkills;
@@ -782,7 +783,7 @@ Answer: ";
 
     [Route("streamchat")]
     [HttpPost]
-    public async IAsyncEnumerable<string>  StreamChat()
+    public async IAsyncEnumerable<string> StreamChat()
     {
         kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
         IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
@@ -790,7 +791,7 @@ Answer: ";
         var chatHistory = (OpenAIChatHistory)chatGPT.CreateNewChat("You are a librarian, expert about books");
 
         var message = chatHistory.Messages.Last();
-        yield return  $"{message.AuthorRole}: {message.Content}" ;
+        yield return $"{message.AuthorRole}: {message.Content}";
 
         // First user message
         chatHistory.AddUserMessage("Hi, I'm looking for book suggestions");
@@ -803,7 +804,7 @@ Answer: ";
         {
             fullMessage += assistantMessage;
             yield return assistantMessage;
-        }         
+        }
         chatHistory.AddMessage(ChatHistory.AuthorRoles.Assistant, fullMessage);
 
         // Second user message
@@ -819,5 +820,29 @@ Answer: ";
             yield return assistantMessage;
         }
         chatHistory.AddMessage(ChatHistory.AuthorRoles.Assistant, fullMessage);
+    }
+
+    [Route("streamcompletion")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> StreamCompletion()
+    {
+        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+        ITextCompletion textCompletion = kernel.GetService<ITextCompletion>();
+        var requestSettings = new CompleteRequestSettings()
+        {
+            MaxTokens = 100,
+            FrequencyPenalty = 0,
+            PresencePenalty = 0,
+            Temperature = 1,
+            TopP = 0.5
+        };
+
+        var prompt = "Write one paragraph why AI is awesome";
+
+        yield return "Prompt: " + prompt;
+        await foreach (string message in textCompletion.CompleteStreamAsync(prompt, requestSettings))
+        {
+            yield return message;
+        }
     }
 }
