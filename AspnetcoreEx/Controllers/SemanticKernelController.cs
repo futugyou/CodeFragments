@@ -17,6 +17,7 @@ using Microsoft.SemanticKernel.TemplateEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
+using static Microsoft.SemanticKernel.AI.ChatCompletion.ChatHistory;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -778,4 +779,45 @@ Answer: ";
         }
     }
 
+
+    [Route("streamchat")]
+    [HttpPost]
+    public async IAsyncEnumerable<string>  StreamChat()
+    {
+        kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
+        IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
+
+        var chatHistory = (OpenAIChatHistory)chatGPT.CreateNewChat("You are a librarian, expert about books");
+
+        var message = chatHistory.Messages.Last();
+        yield return  $"{message.AuthorRole}: {message.Content}" ;
+
+        // First user message
+        chatHistory.AddUserMessage("Hi, I'm looking for book suggestions");
+        message = chatHistory.Messages.Last();
+        yield return $"{message.AuthorRole}: {message.Content}";
+
+        // First bot assistant message
+        string fullMessage = string.Empty;
+        await foreach (string assistantMessage in chatGPT.GenerateMessageStreamAsync(chatHistory))
+        {
+            fullMessage += assistantMessage;
+            yield return assistantMessage;
+        }         
+        chatHistory.AddMessage(ChatHistory.AuthorRoles.Assistant, fullMessage);
+
+        // Second user message
+        chatHistory.AddUserMessage("I love history and philosophy, I'd like to learn something new about Greece, any suggestion?");
+        message = chatHistory.Messages.Last();
+        yield return $"{message.AuthorRole}: {message.Content}";
+
+        // Second bot assistant message
+        fullMessage = string.Empty;
+        await foreach (string assistantMessage in chatGPT.GenerateMessageStreamAsync(chatHistory))
+        {
+            fullMessage += assistantMessage;
+            yield return assistantMessage;
+        }
+        chatHistory.AddMessage(ChatHistory.AuthorRoles.Assistant, fullMessage);
+    }
 }

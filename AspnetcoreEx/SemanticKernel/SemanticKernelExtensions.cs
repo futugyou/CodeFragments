@@ -13,24 +13,24 @@ public static class SemanticKernelExtensions
     {
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         services.AddScoped<KernelConfig>(sp => new KernelConfig());
-        //services.AddScoped<ISemanticTextMemory>(sp => NullMemory.Instance);
+        services.AddScoped<ISemanticTextMemory>(sp => NullMemory.Instance);
         services.AddSingleton<IPromptTemplateEngine, PromptTemplateEngine>();
         services.AddSingleton<IMemoryStore, VolatileMemoryStore>();
-        services.AddScoped<ISemanticTextMemory>(sp =>
-        {
-            var store = sp.GetRequiredService<IMemoryStore>();
-            var logger = sp.GetRequiredService<ILogger<Program>>();
-            var op = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+        //services.AddScoped<ISemanticTextMemory>(sp =>
+        //{
+        //    var store = sp.GetRequiredService<IMemoryStore>();
+        //    var logger = sp.GetRequiredService<ILogger<Program>>();
+        //    var op = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
 
-            return new SemanticTextMemory(store,
-                new OpenAITextEmbeddingGeneration(
-                    "text-davinci-003",
-                    op.Key,
-                    httpClient: null,
-                    logger: logger
-                    )
-                );
-        });
+        //    return new SemanticTextMemory(store,
+        //        new OpenAITextEmbeddingGeneration(
+        //            "text-davinci-003",
+        //            op.Key,
+        //            httpClient: null,
+        //            logger: logger
+        //            )
+        //        );
+        //});
 
         services.AddScoped<ISkillCollection, SkillCollection>();
         services.AddScoped<IKernel, Kernel>();
