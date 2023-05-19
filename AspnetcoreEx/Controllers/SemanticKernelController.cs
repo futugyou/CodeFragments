@@ -845,4 +845,29 @@ Answer: ";
             yield return message;
         }
     }
+
+    //[Route("multicompletion")]
+    //[HttpPost]
+    //public async IAsyncEnumerable<string> MultiCompletion()
+    //{
+    //    kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
+    //    ITextCompletion textCompletion = kernel.GetService<ITextCompletion>();
+    //    var requestSettings = new CompleteRequestSettings()
+    //    {
+    //        MaxTokens = 200,
+    //        FrequencyPenalty = 0,
+    //        PresencePenalty = 0,
+    //        Temperature = 1,
+    //        TopP = 0.5,
+    //        ResultsPerPrompt = 2,
+    //    };
+
+    //    var prompt = "Write one paragraph why AI is awesome";
+
+    //    foreach (ITextCompletionResult completionResult in await textCompletion.GetCompletionsAsync(prompt, requestSettings))
+    //    {
+    //        yield return await completionResult.GetCompletionAsync();
+    //        yield return "-------------";
+    //    }
+    //}
 }
