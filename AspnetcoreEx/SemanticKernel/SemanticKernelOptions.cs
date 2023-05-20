@@ -13,4 +13,7 @@ public class SemanticKernelOptions
     public string QdrantKey { get; set; }
     public int? QdrantPort { get; set; }
     public int QdrantVectorSize { get; set; }
+    public string Embedding { get; set; }
+    public string TextCompletion { get; set; }
+    public string ChatGPT { get; set; }
 }

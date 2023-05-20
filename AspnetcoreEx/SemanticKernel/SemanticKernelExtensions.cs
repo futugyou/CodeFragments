@@ -37,9 +37,18 @@ public static class SemanticKernelExtensions
                 logger);
         });
 
-        services.AddScoped<KernelConfig>(sp => new KernelConfig());
-        //services.AddScoped<ISemanticTextMemory>(sp => NullMemory.Instance);
+        services.AddScoped<KernelConfig>(sp =>
+        {
+            var kernelConfig = new KernelConfig();
+            kernelConfig.AddOpenAITextEmbeddingGenerationService(config.Embedding, config.Key);
+            kernelConfig.AddOpenAIChatCompletionService(config.ChatGPT, config.Key);
+            kernelConfig.AddOpenAIImageGenerationService(config.Key);
+            kernelConfig.AddOpenAITextCompletionService(config.TextCompletion, config.Key);
+            return kernelConfig;
+        });
+
         services.AddSingleton<IPromptTemplateEngine, PromptTemplateEngine>();
+
         //services.AddSingleton<IMemoryStore, VolatileMemoryStore>();
         //services.AddSingleton<IMemoryStore>(sp => new QdrantMemoryStore(
         //           config.QdrantHost, config.QdrantPort, config.QdrantVectorSize, sp.GetRequiredService<ILogger<QdrantMemoryStore>>()));
@@ -49,7 +58,7 @@ public static class SemanticKernelExtensions
             return new QdrantMemoryStore(dnClient);
         });
 
-
+        //services.AddScoped<ISemanticTextMemory>(sp => NullMemory.Instance);
         services.AddScoped<ISemanticTextMemory>(sp =>
         {
             var store = sp.GetRequiredService<IMemoryStore>();
