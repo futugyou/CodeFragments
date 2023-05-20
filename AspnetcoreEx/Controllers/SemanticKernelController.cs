@@ -18,7 +18,6 @@ using Microsoft.SemanticKernel.TemplateEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
-using static Microsoft.SemanticKernel.AI.ChatCompletion.ChatHistory;
 
 namespace AspnetcoreEx.Controllers;
 [Route("api/sk")]
@@ -38,11 +37,6 @@ public class SemanticKernelController : ControllerBase
     [HttpPost]
     public async Task<string[]> StartDemo()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var prompt = @"{{$input}}
 
 One line TLDR with the fewest words.";
@@ -90,11 +84,6 @@ Give me a TLDR with the fewest words.";
     [HttpPost]
     public async Task<string> InlineFunction()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         string skPrompt = """
 {{$input}}
 
@@ -142,11 +131,6 @@ Demo, like Julia Balbilla, writes in the artificial and poetic Aeolic dialect. T
     [HttpPost]
     public async Task<string> ContextVar()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         const string skPrompt = @"
 ChatBot can have a conversation with you about any topic.
 It can give explicit instructions or say 'I don't know' if it does not have an answer.
@@ -211,11 +195,6 @@ ChatBot:";
     [HttpPost]
     public async Task<string> Skill()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
         var input = """
 Console.WriteLine("OK");
@@ -231,11 +210,6 @@ Console.WriteLine("OK");
     [HttpPost]
     public async Task<string> Native()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var mySkill = kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
 
         var myContext = new ContextVariables();
@@ -258,11 +232,6 @@ Console.WriteLine("OK");
     [HttpPost]
     public async Task<string> CallNative()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var myContext = new ContextVariables("*Twinnify");
         kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
         var mySemSkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
@@ -276,11 +245,6 @@ Console.WriteLine("OK");
     [HttpPost]
     public async Task<string> CallSemantic()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var mySkill = kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
         kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
         var myContext = new ContextVariables();
@@ -298,11 +262,6 @@ Console.WriteLine("OK");
     [HttpPost]
     public async Task<string> CoreTime()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var mySkill = kernel.ImportSkill(new TimeSkill(), "time");
 
         const string ThePromptTemplate = @"
@@ -325,11 +284,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string> CoreText()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var myText = kernel.ImportSkill(new TextSkill());
 
         SKContext myOutput = await kernel.RunAsync(
@@ -346,11 +300,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string[]> CoreSummary()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var myText = kernel.ImportSkill(new ConversationSummarySkill(kernel));
         const string ThePromptTemplate = @"There are lots of different ways to say this, but fundamentally, the models are stronger when they are being asked to reason about meaning and goals, and weaker when they are being asked to perform specific calculations and processes. For example, it's easy for advanced models to write code to solve a sudoku generally, but hard for them to solve a sudoku themselves. Each kind of code has different strengths and it's important to use the right kind of code for the right kind of problem. The boundaries between syntax and semantics are the hard parts of these programs.";
 
@@ -365,11 +314,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string[]> CoreFile()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var myText = kernel.ImportSkill(new FileIOSkill(), "file");
         const string ThePromptTemplate = @"There are lots of different ways to say this, but fundamentally, the models are stronger when they are being asked to reason about meaning and goals, and weaker when they are being asked to perform specific calculations and processes. For example, it's easy for advanced models to write code to solve a sudoku generally, but hard for them to solve a sudoku themselves. Each kind of code has different strengths and it's important to use the right kind of code for the right kind of problem. The boundaries between syntax and semantics are the hard parts of these programs.";
 
@@ -386,11 +330,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string[]> CoreHttp()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var myText = kernel.ImportSkill(new HttpSkill(), "http");
 
         var input = "https://store.steampowered.com/search/suggest?term=tales&f=games&cc=JP&use_store_query=1&use_search_spellcheck=1&search_creators_and_tags=1";
@@ -403,11 +342,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string[]> CoreMath()
     {
-        kernel.Config.AddOpenAITextCompletionService(
-            "text-davinci-003",
-            options.Key
-        );
-
         var myText = kernel.ImportSkill(new MathSkill(), "math");
 
         var myContext = new ContextVariables("90");
@@ -426,8 +360,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string[]> Google()
     {
-        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
-
         // Load Google skill
         using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
         kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
@@ -443,8 +375,6 @@ Is it weekend time (weekend/not weekend)?";
     [HttpPost]
     public async Task<string[]> Google2()
     {
-        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
-
         // Load Google skill
         using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
         kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
@@ -527,8 +457,6 @@ Answer: ";
     [HttpPost]
     public async Task<string> SearchUrl()
     {
-        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
-
         var skill = new SearchUrlSkill();
         var bing = kernel.ImportSkill(skill, "search");
 
@@ -549,9 +477,7 @@ Answer: ";
     [HttpPost]
     public async Task<string> Planner()
     {
-        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
-
-        var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
         kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
 
         var planner = new SequentialPlanner(kernel);
@@ -567,7 +493,6 @@ Answer: ";
     [HttpPost]
     public async Task<string> Planner2()
     {
-        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
         kernel.ImportSkill(new TimeSkill(), "time");
 
         using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
@@ -618,7 +543,6 @@ Answer: ";
     [HttpPost]
     public async Task<string[]> Chat()
     {
-        kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
         IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
 
         var chatHistory = (OpenAIChatHistory)chatGPT.CreateNewChat("You are a librarian, expert about books");
@@ -640,8 +564,6 @@ Answer: ";
         var systemPromptTemplate = EmbeddedResource.Read("30-system-prompt.txt");
         var selectedText = EmbeddedResource.Read("30-user-context.txt");
         var userPromptTemplate = EmbeddedResource.Read("30-user-prompt.txt");
-
-        kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
 
         kernel.ImportSkill(new TimeSkill(), "time");
 
@@ -669,7 +591,6 @@ Answer: ";
     [HttpPost]
     public async Task<string> DallE()
     {
-        kernel.Config.AddOpenAIImageGenerationService(options.Key);
         IImageGeneration dallE = kernel.GetService<IImageGeneration>();
 
         var imageDescription = "A cute baby sea otter";
@@ -683,7 +604,6 @@ Answer: ";
     [HttpPost]
     public async Task<string> Github()
     {
-        kernel.Config.AddOpenAIImageGenerationService(options.Key);
         var authenticationProvider = new BearerAuthenticationProvider(() => { return Task.FromResult(options.GithubToken); });
 
         var skill = await kernel.ImportOpenApiSkillFromFileAsync(
@@ -785,7 +705,6 @@ Answer: ";
     [HttpPost]
     public async IAsyncEnumerable<string> StreamChat()
     {
-        kernel.Config.AddOpenAIChatCompletionService("gpt-3.5-turbo", options.Key);
         IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
 
         var chatHistory = (OpenAIChatHistory)chatGPT.CreateNewChat("You are a librarian, expert about books");
@@ -826,7 +745,6 @@ Answer: ";
     [HttpPost]
     public async IAsyncEnumerable<string> StreamCompletion()
     {
-        kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
         ITextCompletion textCompletion = kernel.GetService<ITextCompletion>();
         var requestSettings = new CompleteRequestSettings()
         {
@@ -850,7 +768,6 @@ Answer: ";
     //[HttpPost]
     //public async IAsyncEnumerable<string> MultiCompletion()
     //{
-    //    kernel.Config.AddOpenAITextCompletionService("text-davinci-003", options.Key);
     //    ITextCompletion textCompletion = kernel.GetService<ITextCompletion>();
     //    var requestSettings = new CompleteRequestSettings()
     //    {
@@ -915,6 +832,6 @@ Answer: ";
         yield return answer;
 
         // 3
-        
+
     }
 }
