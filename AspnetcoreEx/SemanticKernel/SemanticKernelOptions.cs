@@ -11,6 +11,6 @@ public class SemanticKernelOptions
     public string JiraApiKey { get; set; }
     public string QdrantHost { get; set; }
     public string QdrantKey { get; set; }
-    public int QdrantPort { get; set; }
+    public int? QdrantPort { get; set; }
     public int QdrantVectorSize { get; set; }
 }
