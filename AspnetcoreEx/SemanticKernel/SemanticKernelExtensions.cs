@@ -13,7 +13,9 @@ public static class SemanticKernelExtensions
 {
     internal static IServiceCollection AddSemanticKernelServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         var config = services.BuildServiceProvider().GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+
         services.AddHttpClient("qdrant", c =>
         {
             UriBuilder builder = new(config.QdrantHost);
@@ -22,7 +24,7 @@ public static class SemanticKernelExtensions
             c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
         });
 
-        services.AddScoped<IQdrantVectorDbClient>(sp =>
+        services.AddSingleton<IQdrantVectorDbClient>(sp =>
         {
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient("qdrant");
@@ -35,9 +37,8 @@ public static class SemanticKernelExtensions
                 logger);
         });
 
-        services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         services.AddScoped<KernelConfig>(sp => new KernelConfig());
-        services.AddScoped<ISemanticTextMemory>(sp => NullMemory.Instance);
+        //services.AddScoped<ISemanticTextMemory>(sp => NullMemory.Instance);
         services.AddSingleton<IPromptTemplateEngine, PromptTemplateEngine>();
         //services.AddSingleton<IMemoryStore, VolatileMemoryStore>();
         //services.AddSingleton<IMemoryStore>(sp => new QdrantMemoryStore(
@@ -49,25 +50,19 @@ public static class SemanticKernelExtensions
         });
 
 
-        //services.AddScoped<ISemanticTextMemory>(sp =>
-        //{
-        //    var store = sp.GetRequiredService<IMemoryStore>();
-        //    var logger = sp.GetRequiredService<ILogger<Program>>();
-        //    
+        services.AddScoped<ISemanticTextMemory>(sp =>
+        {
+            var store = sp.GetRequiredService<IMemoryStore>();
+            var logger = sp.GetRequiredService<ILogger<Program>>();
 
-        //    return new SemanticTextMemory(store,
-        //        new OpenAITextEmbeddingGeneration(
-        //            "text-davinci-003",
-        //            op.Key,
-        //            httpClient: null,
-        //            logger: logger
-        //            )
-        //        );
-        //});
+            return new SemanticTextMemory(store, new OpenAITextEmbeddingGeneration(
+                modelId: "text-embedding-ada-002",
+                apiKey: config.Key,
+                logger: logger));
+        });
 
         services.AddScoped<ISkillCollection, SkillCollection>();
         services.AddScoped<IKernel, Kernel>();
-
         return services;
     }
 }
