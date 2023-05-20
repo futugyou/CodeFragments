@@ -870,4 +870,51 @@ Answer: ";
     //        yield return "-------------";
     //    }
     //}
+
+    [Route("memory")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Memory()
+    {
+        string MemoryCollectionName = "aboutMe";
+        // ========= Store memories using the kernel =========
+
+        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info1", text: "My name is Andrea");
+        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info2", text: "I work as a tourist operator");
+        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info3", text: "I've been living in Seattle since 2005");
+        await kernel.Memory.SaveInformationAsync(MemoryCollectionName, id: "info4", text: "I visited France and Italy five times since 2015");
+
+        // ========= Store memories using semantic function =========
+
+        // Add Memory as a skill for other functions
+        var memorySkill = new TextMemorySkill();
+        kernel.ImportSkill(new TextMemorySkill());
+
+        // Build a semantic function that saves info to memory
+        const string SaveFunctionDefinition = @"{{save $info}}";
+        var memorySaver = kernel.CreateSemanticFunction(SaveFunctionDefinition);
+
+        var context = kernel.CreateNewContext();
+        context[TextMemorySkill.CollectionParam] = MemoryCollectionName;
+        context[TextMemorySkill.KeyParam] = "info5";
+        context["info"] = "My family is from New York";
+        await memorySaver.InvokeAsync(context);
+
+        // 1
+        context[TextMemorySkill.KeyParam] = "info1";
+        var answer = await memorySkill.RetrieveAsync(context);
+        yield return "Memory associated with 'info1': " + answer;
+
+        // 2
+        context[TextMemorySkill.LimitParam] = "2";
+        answer = await memorySkill.RecallAsync("where did I grow up?", context);
+        yield return ("Ask: where did I grow up?");
+        yield return (answer);
+
+        answer = await memorySkill.RecallAsync("where do I live?", context);
+        yield return ("Ask: where do I live?");
+        yield return answer;
+
+        // 3
+        
+    }
 }
