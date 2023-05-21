@@ -434,59 +434,42 @@ Answer: ";
 
     [Route("search-url")]
     [HttpPost]
-    public async Task<string> SearchUrl()
+    public async IAsyncEnumerable<string> SearchUrl()
     {
-        var skill = new SearchUrlSkill();
-        var bing = kernel.ImportSkill(skill, "search");
-
-        // Run
         var ask = "What's the tallest building in Europe?";
+        yield return ask;
+
         var result = await kernel.RunAsync(
             ask,
-            bing["BingSearchUrl"]
+            kernel.Func("search", "BingSearchUrl")
         );
 
-        Console.WriteLine(ask + "\n");
-        Console.WriteLine(result);
-
-        return result.Result;
+        yield return (result.Result);
     }
 
     [Route("planner")]
     [HttpPost]
-    public async Task<string> Planner()
+    public async IAsyncEnumerable<string> Planner()
     {
-        kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
-        kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
-
         var planner = new SequentialPlanner(kernel);
+        var goal = "Write a slogan about Coca Cola, then write a golang code about who to send http request.";
+        yield return goal;
 
-        var plan = await planner.CreatePlanAsync("Write a slogan about Coca Cola, then write a golang code about who to send http request.");
+        var plan = await planner.CreatePlanAsync(goal);
         var result = await kernel.RunAsync(plan);
-
-        Console.WriteLine("Result:");
-        return result.Result;
+        yield return result.Result;
     }
 
     [Route("planner2")]
     [HttpPost]
-    public async Task<string> Planner2()
+    public async IAsyncEnumerable<string> Planner2()
     {
-        kernel.ImportSkill(new TimeSkill(), "time");
-
-        using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
-        kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
-
-        var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
-
         var context = kernel.CreateNewContext();
         context.Variables.Set("firstname", "Jamal");
         context.Variables.Set("lastname", "Williams");
         context.Variables.Set("city", "Tacoma");
         context.Variables.Set("state", "WA");
         context.Variables.Set("country", "USA");
-
-        kernel.ImportSkill(new TextMemorySkill("contextQueryMemories", "0.3", "5"));
 
         List<string> memoriesToSave = new()
         {
@@ -507,20 +490,19 @@ Answer: ";
             await kernel.Memory.SaveInformationAsync("contextQueryMemories", memoryToSave, Guid.NewGuid().ToString());
         }
 
-        var markup = kernel.ImportSkill(new MarkupSkill(), "markup");
         var plan = new Plan("Execute ContextQuery and then RunMarkup");
-        plan.AddSteps(mySkill["ContextQuery"], markup["RunMarkup"]);
+        plan.AddSteps(kernel.Func("Skills", "ContextQuery"), kernel.Func("markup", "RunMarkup"));
 
         // Execute plan
         context.Variables.Update("Who is my president? Who was president 3 years ago? What should I eat for dinner");
         var result = await plan.InvokeAsync(context);
 
-        return result.Result;
+        yield return result.Result;
     }
 
     [Route("chat")]
     [HttpPost]
-    public async Task<string[]> Chat()
+    public async IAsyncEnumerable<string> Chat()
     {
         IChatCompletion chatGPT = kernel.GetService<IChatCompletion>();
 
@@ -529,11 +511,13 @@ Answer: ";
         // First user message
         chatHistory.AddUserMessage("Hi, I'm looking for book suggestions");
         var message1 = chatHistory.Messages.Last();
+        yield return message1.Content;
+
         // First bot assistant message
         string reply = await chatGPT.GenerateMessageAsync(chatHistory);
         chatHistory.AddAssistantMessage(reply);
         var message2 = chatHistory.Messages.Last();
-        return new string[] { message1.Content, message2.Content };
+        yield return message2.Content;
     }
 
     [Route("chat2")]
@@ -543,8 +527,6 @@ Answer: ";
         var systemPromptTemplate = EmbeddedResource.Read("30-system-prompt.txt");
         var selectedText = EmbeddedResource.Read("30-user-context.txt");
         var userPromptTemplate = EmbeddedResource.Read("30-user-prompt.txt");
-
-        kernel.ImportSkill(new TimeSkill(), "time");
 
         var context = kernel.CreateNewContext();
         context["selectedText"] = selectedText;
@@ -568,20 +550,20 @@ Answer: ";
 
     [Route("dallE")]
     [HttpPost]
-    public async Task<string> DallE()
+    public async IAsyncEnumerable<string> DallE()
     {
         IImageGeneration dallE = kernel.GetService<IImageGeneration>();
 
         var imageDescription = "A cute baby sea otter";
         var image = await dallE.GenerateImageAsync(imageDescription, 256, 256);
 
-        return image;
+        yield return image;
     }
 
 
     [Route("github")]
     [HttpPost]
-    public async Task<string> Github()
+    public async IAsyncEnumerable<string> Github()
     {
         var authenticationProvider = new BearerAuthenticationProvider(() => { return Task.FromResult(options.GithubToken); });
 
@@ -605,11 +587,11 @@ Answer: ";
         if (pullRequests != null && pullRequests.First != null)
         {
             var number = pullRequests.First["number"];
-            return number?.ToString() ?? string.Empty;
+            yield return number?.ToString() ?? string.Empty;
         }
         else
         {
-            return "No pull requests found.";
+            yield return "No pull requests found.";
         }
     }
 

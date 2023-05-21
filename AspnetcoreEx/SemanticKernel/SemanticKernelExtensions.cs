@@ -11,6 +11,7 @@ using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.TemplateEngine;
 using System.Net.Http;
+using Microsoft.SemanticKernel.Skills.OpenAPI.Authentication;
 
 namespace AspnetcoreEx.SemanticKernel;
 public static class SemanticKernelExtensions
@@ -104,6 +105,11 @@ public static class SemanticKernelExtensions
 
             var googleConnector = new GoogleConnector(config.GoogleApikey, config.GoogleEngine);
             kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
+
+            kernel.ImportSkill(new SearchUrlSkill(), "search");
+            kernel.ImportSkill(new TextMemorySkill("contextQueryMemories", "0.3", "5"));
+            kernel.ImportSkill(new TextMemorySkill(),"baseMemory");
+            kernel.ImportSkill(new MarkupSkill(), "markup");
 
             return kernel;
         });
