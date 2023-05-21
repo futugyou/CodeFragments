@@ -7,6 +7,8 @@ using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
+using Microsoft.SemanticKernel.Skills.Web.Google;
+using Microsoft.SemanticKernel.Skills.Web;
 using Microsoft.SemanticKernel.TemplateEngine;
 using System.Net.Http;
 
@@ -96,6 +98,12 @@ public static class SemanticKernelExtensions
             kernel.ImportSkill(new TimeSkill(), "time");
             kernel.ImportSkill(new TextSkill()); // this will use default skill name: _GLOBAL_FUNCTIONS_
             kernel.ImportSkill(new ConversationSummarySkill(kernel));
+            kernel.ImportSkill(new FileIOSkill(), "file");
+            kernel.ImportSkill(new HttpSkill(), "http");
+            kernel.ImportSkill(new MathSkill(), "math");
+
+            var googleConnector = new GoogleConnector(config.GoogleApikey, config.GoogleEngine);
+            kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
 
             return kernel;
         });

@@ -307,74 +307,60 @@ Is it weekend time (weekend/not weekend)?";
 
     [Route("core-file")]
     [HttpPost]
-    public async Task<string[]> CoreFile()
+    public async IAsyncEnumerable<string> CoreFile()
     {
-        var myText = kernel.ImportSkill(new FileIOSkill(), "file");
+        var myText = kernel.Skills;
         const string ThePromptTemplate = @"There are lots of different ways to say this, but fundamentally, the models are stronger when they are being asked to reason about meaning and goals, and weaker when they are being asked to perform specific calculations and processes. For example, it's easy for advanced models to write code to solve a sudoku generally, but hard for them to solve a sudoku themselves. Each kind of code has different strengths and it's important to use the right kind of code for the right kind of problem. The boundaries between syntax and semantics are the hard parts of these programs.";
 
         var myContext = new ContextVariables();
         myContext["path"] = "./fileskilldemo.txt";
         myContext["content"] = ThePromptTemplate;
-        SKContext myOutput = await kernel.RunAsync(myContext, myText["WriteAsync"]);
-        SKContext myOutput1 = await kernel.RunAsync("./fileskilldemo.txt", myText["ReadAsync"]);
+        SKContext myOutput = await kernel.RunAsync(myContext, myText.GetFunction("file", "WriteAsync"));
+        yield return myOutput.Result;
 
-        return new string[] { myOutput.Result, myOutput1.Result };
+        SKContext myOutput1 = await kernel.RunAsync("./fileskilldemo.txt", myText.GetFunction("file", "ReadAsync"));
+        yield return myOutput1.Result;
     }
 
     [Route("core-http")]
     [HttpPost]
-    public async Task<string[]> CoreHttp()
+    public async IAsyncEnumerable<string> CoreHttp()
     {
-        var myText = kernel.ImportSkill(new HttpSkill(), "http");
-
+        var myText = kernel.Skills;
         var input = "https://store.steampowered.com/search/suggest?term=tales&f=games&cc=JP&use_store_query=1&use_search_spellcheck=1&search_creators_and_tags=1";
-        SKContext myOutput = await kernel.RunAsync(input, default(CancellationToken), myText["GetAsync"]);
-
-        return new string[] { myOutput.Result };
+        SKContext myOutput = await kernel.RunAsync(input, default(CancellationToken), myText.GetFunction("http", "GetAsync"));
+        yield return myOutput.Result;
     }
 
     [Route("core-math")]
     [HttpPost]
-    public async Task<string[]> CoreMath()
+    public async IAsyncEnumerable<string> CoreMath()
     {
-        var myText = kernel.ImportSkill(new MathSkill(), "math");
-
         var myContext = new ContextVariables("90");
 
         myContext["Amount"] = "10";
-        SKContext myOutput = await kernel.RunAsync(myContext, myText["Add"]);
-        Console.WriteLine(myOutput.Result); // 100
-        myContext["Amount"] = "20";
-        SKContext myOutput1 = await kernel.RunAsync(myContext, myText["Subtract"]);
-        Console.WriteLine(myOutput.Result); // 80 
+        SKContext myOutput = await kernel.RunAsync(myContext, kernel.Func("math", "Add"));
+        yield return myOutput.Result; // 100
 
-        return new string[] { myOutput.Result, myOutput1.Result };
+        myContext["Amount"] = "20";
+        SKContext myOutput1 = await kernel.RunAsync(myContext, kernel.Func("math", "Subtract"));
+        yield return myOutput.Result; // 80
     }
 
     [Route("google")]
     [HttpPost]
-    public async Task<string[]> Google()
+    public async IAsyncEnumerable<string> Google()
     {
-        // Load Google skill
-        using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
-        kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
-
         var question = "What's the largest building in the world?";
         var googleResult = await kernel.Func("google", "search").InvokeAsync(question);
-        Console.WriteLine(googleResult.Result);
-
-        return new string[] { googleResult.Result };
+        yield return googleResult.Result;
     }
 
     [Route("google2")]
     [HttpPost]
-    public async Task<string[]> Google2()
+    public async IAsyncEnumerable<string> Google2()
     {
-        // Load Google skill
-        using var googleConnector = new GoogleConnector(options.GoogleApikey, options.GoogleEngine);
-        kernel.ImportSkill(new WebSearchEngineSkill(googleConnector), "google");
-
-        Console.WriteLine("======== Use Search Skill to answer user questions ========");
+        yield return ("======== Use Search Skill to answer user questions ========");
 
         const string SemanticFunction = @"Answer questions only when you know the facts or the information is provided.
 When you don't have sufficient information you reply with a list of commands to find the information needed.
@@ -410,7 +396,7 @@ Question: {{ $input }}.
 Answer: ";
 
         var questions = "Who is the most followed person on TikTok right now? What's the exchange rate EUR:USD?";
-        Console.WriteLine(questions);
+        yield return (questions);
 
         var oracle = kernel.CreateSemanticFunction(SemanticFunction, maxTokens: 200, temperature: 0, topP: 1);
 
@@ -418,17 +404,17 @@ Answer: ";
         context["externalInformation"] = "";
         context.Variables.Update(questions);
         var answer = await oracle.InvokeAsync(context);
-        Console.WriteLine(answer);
+        yield return (answer.Result);
         // If the answer contains commands, execute them using the prompt renderer.
         if (answer.Result.Contains("google.search", StringComparison.OrdinalIgnoreCase))
         {
             var promptRenderer = new PromptTemplateEngine();
 
-            Console.WriteLine("---- Fetching information from google...");
+            yield return ("---- Fetching information from google...");
             var information = await promptRenderer.RenderAsync(answer.Result, context);
 
-            Console.WriteLine("Information found:");
-            Console.WriteLine(information);
+            yield return ("Information found:");
+            yield return (information);
 
             // The rendered prompt contains the information retrieved from search engines
             context["externalInformation"] = information;
@@ -439,13 +425,11 @@ Answer: ";
         }
         else
         {
-            Console.WriteLine("AI had all the information, no need to query google.");
+            yield return ("AI had all the information, no need to query google.");
         }
 
-        Console.WriteLine("---- ANSWER:");
-        Console.WriteLine(answer);
-
-        return new string[] { answer.Result };
+        yield return ("---- ANSWER:");
+        yield return (answer.Result);
     }
 
     [Route("search-url")]
