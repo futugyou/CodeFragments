@@ -17,6 +17,7 @@ using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.TemplateEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace AspnetcoreEx.Controllers;
@@ -208,62 +209,54 @@ Console.WriteLine("OK");
 
     [Route("native")]
     [HttpPost]
-    public async Task<string> Native()
+    public async IAsyncEnumerable<string> Native()
     {
-        var mySkill = kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
+        var mySkill = kernel.Skills;
 
         var myContext = new ContextVariables();
         myContext.Set("INPUT", "This is input.");
 
-        var myOutput = await kernel.RunAsync(myContext, mySkill["DupDup"]);
-        Console.WriteLine(myOutput);
+        var myOutput = await kernel.RunAsync(myContext, mySkill.GetFunction("MyCSharpSkill", "DupDup"));
+        yield return myOutput.Result;
 
         myContext = new ContextVariables();
         myContext.Set("firstname", "Sam");
         myContext.Set("lastname", "Appdev");
-        myOutput = await kernel.RunAsync(myContext, mySkill["FullNamer"]);
+        myOutput = await kernel.RunAsync(myContext, mySkill.GetFunction("MyCSharpSkill", "FullNamer"));
 
-        Console.WriteLine(myOutput);
-
-        return myOutput.Result;
+        yield return myOutput.Result;
     }
 
     [Route("call-native")]
     [HttpPost]
-    public async Task<string> CallNative()
+    public async IAsyncEnumerable<string> CallNative()
     {
         var myContext = new ContextVariables("*Twinnify");
-        kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
-        var mySemSkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
-        var myOutput = await kernel.RunAsync(myContext, mySemSkill["CallNative"]);
-        Console.WriteLine(myOutput);
+        var mySemSkill = kernel.Skills;
+        var myOutput = await kernel.RunAsync(myContext, mySemSkill.GetFunction("Skills", "CallNative"));
 
-        return myOutput.Result;
+        yield return myOutput.Result;
     }
 
     [Route("call-semantic")]
     [HttpPost]
-    public async Task<string> CallSemantic()
+    public async IAsyncEnumerable<string> CallSemantic()
     {
-        var mySkill = kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
-        kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        var mySkill = kernel.Skills;
         var myContext = new ContextVariables();
         myContext.Set("input", """
 Console.WriteLine("OK");
 """);
 
-        var myOutput = await kernel.RunAsync(myContext, mySkill["togolang"]);
-        Console.WriteLine(myOutput);
+        var myOutput = await kernel.RunAsync(myContext, mySkill.GetFunction("MyCSharpSkill", "togolang"));
 
-        return myOutput.Result;
+        yield return myOutput.Result;
     }
 
     [Route("core-time")]
     [HttpPost]
-    public async Task<string> CoreTime()
+    public async IAsyncEnumerable<string> CoreTime()
     {
-        var mySkill = kernel.ImportSkill(new TimeSkill(), "time");
-
         const string ThePromptTemplate = @"
 Today is: {{time.Date}}
 Current time is: {{time.Time}}
@@ -275,39 +268,41 @@ Is it weekend time (weekend/not weekend)?";
         var myKindOfDay = kernel.CreateSemanticFunction(ThePromptTemplate, maxTokens: 150);
 
         var myOutput = await myKindOfDay.InvokeAsync();
-        Console.WriteLine(myOutput);
 
-        return myOutput.Result;
+        yield return myOutput.Result;
     }
 
     [Route("core-text")]
     [HttpPost]
-    public async Task<string> CoreText()
+    public async IAsyncEnumerable<string> CoreText()
     {
-        var myText = kernel.ImportSkill(new TextSkill());
+        var myText = kernel.Skills;
 
         SKContext myOutput = await kernel.RunAsync(
     "    i n f i n i t e     s p a c e     ",
-    myText["TrimStart"],
-    myText["TrimEnd"],
-    myText["Uppercase"]);
+    myText.GetFunction("TrimStart"),
+    myText.GetFunction("TrimEnd"),
+    myText.GetFunction("Uppercase"));
         Console.WriteLine(myOutput);
 
-        return myOutput.Result;
+        yield return myOutput.Result;
     }
 
     [Route("core-summary")]
     [HttpPost]
-    public async Task<string[]> CoreSummary()
+    public async IAsyncEnumerable<string> CoreSummary()
     {
-        var myText = kernel.ImportSkill(new ConversationSummarySkill(kernel));
+        var myText = kernel.Skills;
         const string ThePromptTemplate = @"There are lots of different ways to say this, but fundamentally, the models are stronger when they are being asked to reason about meaning and goals, and weaker when they are being asked to perform specific calculations and processes. For example, it's easy for advanced models to write code to solve a sudoku generally, but hard for them to solve a sudoku themselves. Each kind of code has different strengths and it's important to use the right kind of code for the right kind of problem. The boundaries between syntax and semantics are the hard parts of these programs.";
 
-        SKContext myOutput = await kernel.RunAsync(ThePromptTemplate, myText["SummarizeConversation"]);
-        SKContext myOutput1 = await kernel.RunAsync(ThePromptTemplate, myText["GetConversationActionItems"]);
-        SKContext myOutput2 = await kernel.RunAsync(ThePromptTemplate, myText["GetConversationTopics"]);
+        SKContext myOutput = await kernel.RunAsync(ThePromptTemplate, myText.GetFunction("SummarizeConversation"));
+        yield return myOutput.Result;
 
-        return new string[] { myOutput.Result, myOutput1.Result, myOutput2.Result };
+        SKContext myOutput1 = await kernel.RunAsync(ThePromptTemplate, myText.GetFunction("GetConversationActionItems"));
+        yield return myOutput1.Result;
+
+        SKContext myOutput2 = await kernel.RunAsync(ThePromptTemplate, myText.GetFunction("GetConversationTopics"));
+        yield return myOutput2.Result;
     }
 
     [Route("core-file")]

@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AspnetcoreEx.SemanticKernel.Skills;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding;
 using Microsoft.SemanticKernel.Connectors.Memory.Qdrant;
+using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
@@ -89,6 +91,11 @@ public static class SemanticKernelExtensions
             {
                 kernel.RegisterCustomFunction(skill.Key, skill.Value);
             }
+
+            kernel.ImportSkill(new SteamSkill(), "MyCSharpSkill");
+            kernel.ImportSkill(new TimeSkill(), "time");
+            kernel.ImportSkill(new TextSkill()); // this will use default skill name: _GLOBAL_FUNCTIONS_
+            kernel.ImportSkill(new ConversationSummarySkill(kernel));
 
             return kernel;
         });
