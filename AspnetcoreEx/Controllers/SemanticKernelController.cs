@@ -195,11 +195,11 @@ ChatBot:";
     [HttpPost]
     public async Task<string> Skill()
     {
-        var mySkill = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+        var mySkill = kernel.Skills;
         var input = """
 Console.WriteLine("OK");
 """;
-        var summary = await kernel.RunAsync(input, mySkill["ToGolang"]);
+        var summary = await kernel.RunAsync(input, mySkill.GetFunction("Skills", "ToGolang"));
 
         Console.WriteLine(summary);
 

@@ -14,14 +14,19 @@ public static class SemanticKernelExtensions
     internal static IServiceCollection AddSemanticKernelServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
-        var config = services.BuildServiceProvider().GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+        var sp = services.BuildServiceProvider();
+        var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+        var logger = sp.GetRequiredService<ILogger<IKernel>>();
 
         services.AddHttpClient("qdrant", c =>
         {
             UriBuilder builder = new(config.QdrantHost);
             if (config.QdrantPort.HasValue) { builder.Port = config.QdrantPort.Value; }
             c.BaseAddress = builder.Uri;
-            c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
+            if (!string.IsNullOrEmpty(config.QdrantKey))
+            {
+                c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
+            }
         });
 
         services.AddSingleton<IQdrantVectorDbClient>(sp =>
@@ -62,16 +67,32 @@ public static class SemanticKernelExtensions
         services.AddScoped<ISemanticTextMemory>(sp =>
         {
             var store = sp.GetRequiredService<IMemoryStore>();
-            var logger = sp.GetRequiredService<ILogger<Program>>();
 
             return new SemanticTextMemory(store, new OpenAITextEmbeddingGeneration(
-                modelId: "text-embedding-ada-002",
+                modelId: config.Embedding,
                 apiKey: config.Key,
                 logger: logger));
         });
 
         services.AddScoped<ISkillCollection, SkillCollection>();
-        services.AddScoped<IKernel, Kernel>();
+
+        services.AddScoped<IKernel>(sp =>
+        {
+            IKernel kernel = Kernel.Builder
+                .WithLogger(logger)
+                .WithMemory(sp.GetRequiredService<ISemanticTextMemory>())
+                .WithConfiguration(sp.GetRequiredService<KernelConfig>())
+                .Build();
+
+            var skills = kernel.ImportSemanticSkillFromDirectory("SemanticKernel", "Skills");
+            foreach (var skill in skills)
+            {
+                kernel.RegisterCustomFunction(skill.Key, skill.Value);
+            }
+
+            return kernel;
+        });
+
         return services;
     }
 }
