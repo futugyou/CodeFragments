@@ -1,6 +1,5 @@
 ﻿using AspnetcoreEx.Resources;
 using AspnetcoreEx.SemanticKernel;
-using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.AI.TextCompletion;
@@ -12,15 +11,13 @@ using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.SemanticFunctions;
 using Microsoft.SemanticKernel.SkillDefinition;
 using Microsoft.SemanticKernel.Skills.OpenAPI.Authentication;
-using Microsoft.SemanticKernel.Skills.Web;
-using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.TemplateEngine;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 using System.Globalization;
 
 namespace AspnetcoreEx.Controllers;
+
 [Route("api/sk")]
 [ApiController]
 public class SemanticKernelController : ControllerBase
@@ -763,10 +760,6 @@ Answer: ";
 
         // ========= Store memories using semantic function =========
 
-        // Add Memory as a skill for other functions
-        var memorySkill = new TextMemorySkill();
-        kernel.ImportSkill(new TextMemorySkill());
-
         // Build a semantic function that saves info to memory
         const string SaveFunctionDefinition = @"{{save $info}}";
         var memorySaver = kernel.CreateSemanticFunction(SaveFunctionDefinition);
@@ -779,18 +772,22 @@ Answer: ";
 
         // 1
         context[TextMemorySkill.KeyParam] = "info1";
-        var answer = await memorySkill.RetrieveAsync(context);
+        var answer = await kernel.Func("baseMemory", "Retrieve").InvokeAsync(context);
         yield return "Memory associated with 'info1': " + answer;
+        yield return "";
 
         // 2
+        context.Variables.Update("where did I grow up?");
         context[TextMemorySkill.LimitParam] = "2";
-        answer = await memorySkill.RecallAsync("where did I grow up?", context);
+        answer = await kernel.Func("baseMemory", "Recall").InvokeAsync(context);
         yield return ("Ask: where did I grow up?");
-        yield return (answer);
+        yield return (answer.Result);
+        yield return "";
 
-        answer = await memorySkill.RecallAsync("where do I live?", context);
+        context.Variables.Update("where do I live?");
+        answer = await kernel.Func("baseMemory", "Recall").InvokeAsync(context);
         yield return ("Ask: where do I live?");
-        yield return answer;
+        yield return answer.Result;
 
         // 3
 

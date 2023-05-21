@@ -1,17 +1,12 @@
 ﻿using AspnetcoreEx.SemanticKernel.Skills;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding;
 using Microsoft.SemanticKernel.Connectors.Memory.Qdrant;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.Memory;
-using Microsoft.SemanticKernel.Services;
 using Microsoft.SemanticKernel.SkillDefinition;
-using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.Skills.Web;
+using Microsoft.SemanticKernel.Skills.Web.Google;
 using Microsoft.SemanticKernel.TemplateEngine;
-using System.Net.Http;
-using Microsoft.SemanticKernel.Skills.OpenAPI.Authentication;
 
 namespace AspnetcoreEx.SemanticKernel;
 public static class SemanticKernelExtensions
@@ -57,7 +52,7 @@ public static class SemanticKernelExtensions
             return kernelConfig;
         });
 
-        services.AddSingleton<IPromptTemplateEngine, PromptTemplateEngine>();
+        //services.AddSingleton<IPromptTemplateEngine, PromptTemplateEngine>();
 
         //services.AddSingleton<IMemoryStore, VolatileMemoryStore>();
         //services.AddSingleton<IMemoryStore>(sp => new QdrantMemoryStore(
@@ -79,7 +74,7 @@ public static class SemanticKernelExtensions
                 logger: logger));
         });
 
-        services.AddScoped<ISkillCollection, SkillCollection>();
+        //services.AddScoped<ISkillCollection, SkillCollection>();
 
         services.AddScoped<IKernel>(sp =>
         {
@@ -108,7 +103,7 @@ public static class SemanticKernelExtensions
 
             kernel.ImportSkill(new SearchUrlSkill(), "search");
             kernel.ImportSkill(new TextMemorySkill("contextQueryMemories", "0.3", "5"));
-            kernel.ImportSkill(new TextMemorySkill(),"baseMemory");
+            kernel.ImportSkill(new TextMemorySkill(), "baseMemory");
             kernel.ImportSkill(new MarkupSkill(), "markup");
 
             return kernel;
