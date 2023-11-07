@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.14.0" />
 		<PackageReference Include="CloudNative.CloudEvents" Version="2.6.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
 	</ItemGroup>
 
