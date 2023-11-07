@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Elsa" Version="2.8.2" />
     <PackageReference Include="Elsa.Activities.Http" Version="2.8.2" />
-    <PackageReference Include="Elsa.Activities.Temporal.Quartz" Version="2.8.2" />
+    <PackageReference Include="Elsa.Activities.Temporal.Quartz" Version="2.13.0" />
     <PackageReference Include="Elsa.Activities.Timers" Version="1.5.5.1943" />
     <PackageReference Include="Elsa.Activities.UserTask" Version="2.8.2" />
     <PackageReference Include="Elsa.Designer.Components.Web" Version="2.8.2" />
