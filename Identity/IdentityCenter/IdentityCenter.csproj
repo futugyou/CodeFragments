@@ -19,7 +19,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="5.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.13" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
