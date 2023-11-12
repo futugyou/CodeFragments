@@ -1,30 +1,32 @@
 
-using Amazon.Extensions.NETCore.Setup;
 using Amazon.SimpleSystemsManagement;
+using Amazon.SimpleSystemsManagement.Model;
 
 namespace Aws.Extensions.AspNetCore.Configuration;
 
-public class AwsParameterStoreConfigurationProvider : ConfigurationProvider, IDisposable
+public class AwsParameterStoreConfigurationProvider(IAmazonSimpleSystemsManagement manager, AwsClientConfig config) : ConfigurationProvider, IDisposable
 {
-    private readonly AWSOptions _options;
-    private readonly IAmazonSimpleSystemsManagement _manager;
-    private readonly CancellationTokenSource _cancellationToken;
+    private readonly CancellationTokenSource _cancellationToken = new();
     private bool _disposed;
 
-    // TODO: read ssm
-    public AwsParameterStoreConfigurationProvider(IAmazonSimpleSystemsManagement manager, AWSOptions options)
+    public override void Load() => LoadAsync().GetAwaiter().GetResult();
+    private async Task LoadAsync()
     {
-        _options = options;
-        _cancellationToken = new CancellationTokenSource();
-        _manager = manager;
+        string? nextToken = null;
+        var response = await manager.GetParametersByPathAsync(new GetParametersByPathRequest { Path = "/", Recursive = true, WithDecryption = true, NextToken = nextToken }).ConfigureAwait(false);
+        foreach (var item in response.Parameters)
+        {
+            Console.WriteLine(item.Value);
+        }
     }
-
+    #region Dispose
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
 
     }
+
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
@@ -38,4 +40,5 @@ public class AwsParameterStoreConfigurationProvider : ConfigurationProvider, IDi
             _disposed = true;
         }
     }
+    #endregion
 }
