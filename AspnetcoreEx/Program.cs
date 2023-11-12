@@ -112,6 +112,8 @@ builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 builder.Services.AddSemanticKernelServices(configuration);
 
+configuration.AddAwsParameterStore();
+
 var app = builder.Build();
 
 // 'ConcurrencyLimiterExtensions.UseConcurrencyLimiter(IApplicationBuilder)' is obsolete

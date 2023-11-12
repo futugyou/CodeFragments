@@ -9,7 +9,7 @@ public class DefaultFilesMiddleware
     {
         _next = next;
         _options = options.Value;
-        _options.FileProvider = _options.FileProvider ?? env.WebRootFileProvider;
+        _options.FileProvider ??= env.WebRootFileProvider;
     }
 
     public async Task InvokeAsync(HttpContext context)

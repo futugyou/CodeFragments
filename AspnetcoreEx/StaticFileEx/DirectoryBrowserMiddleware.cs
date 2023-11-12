@@ -16,8 +16,8 @@ public class DirectoryBrowserMiddleware
     {
         _next = next;
         _options = options.Value;
-        _options.FileProvider = _options.FileProvider ?? env.WebRootFileProvider;
-        _options.Formatter = _options.Formatter ?? new HtmlDirectoryFormatter(encoder);
+        _options.FileProvider ??= env.WebRootFileProvider;
+        _options.Formatter ??= new HtmlDirectoryFormatter(encoder);
     }
 
     public async Task InvokeAsync(HttpContext context)
