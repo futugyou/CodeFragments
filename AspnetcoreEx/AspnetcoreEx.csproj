@@ -11,6 +11,10 @@
 		<Optimize>False</Optimize>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<NoWarn>AD0001, NU1701, CS8321, CS0169</NoWarn>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />

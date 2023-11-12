@@ -12,11 +12,21 @@ public class RedisProfiler
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public ProfilingSession? GetSession()
+    public ProfilingSession GetSession()
     {
         var ctx = _httpContextAccessor.HttpContext;
-        if (ctx == null) return null;
-        return ctx.Items[RequestContextKey] as ProfilingSession;
+        var session = new ProfilingSession();
+        if (ctx == null)
+        {
+            return session;
+        }
+
+        if (ctx.Items[RequestContextKey] is ProfilingSession storedSession)
+        {
+            return storedSession;
+        }
+
+        return session;
     }
 
     public void CreateSessionForCurrentRequest()

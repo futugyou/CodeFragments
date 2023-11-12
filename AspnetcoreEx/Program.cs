@@ -43,10 +43,12 @@ builder.Services.AddHsts(options =>
     options.Preload = true;
 });
 
-builder.Services.Configure<ConcurrencyLimiterOptions>(options =>
-{
-    options.OnRejected = ConcurrencyRejectAsync;
-});
+
+// Concurrency Limiter middleware has been deprecated
+// builder.Services.Configure<ConcurrencyLimiterOptions>(options =>
+// {
+//     options.OnRejected = ConcurrencyRejectAsync;
+// });
 
 builder.Services.AddQueuePolicy(options =>
 {
@@ -111,7 +113,10 @@ builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 builder.Services.AddSemanticKernelServices(configuration);
 
 var app = builder.Build();
-app.UseConcurrencyLimiter();
+
+// 'ConcurrencyLimiterExtensions.UseConcurrencyLimiter(IApplicationBuilder)' is obsolete
+// app.UseConcurrencyLimiter();
+
 var rewriteOptions = new RewriteOptions()
     // client redirect
     .AddRedirect("^text/(.*)", "bar/$1")

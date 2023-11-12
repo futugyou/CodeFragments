@@ -103,8 +103,10 @@ public class RedisClient : IRedisClient, IDisposable
         var messageQueue = await _sub.SubscribeAsync(key);
         messageQueue.OnMessage(async channelMessage =>
         {
-            var message = (string)channelMessage.Message;
-            await handle(message);
+            if (channelMessage.Message.HasValue)
+            {
+                await handle(channelMessage.Message.ToString());
+            }
         });
     }
 
@@ -114,15 +116,16 @@ public class RedisClient : IRedisClient, IDisposable
         if (session != null)
         {
             var timings = session.FinishProfiling();
-            _logger.LogInformation(string.Join(",", timings.ToList().Select(p => p.Command)));
+            string? message = string.Join(",", timings.ToList().Select(p => p.Command));
+            _logger.LogInformation(message);
             // do what you will with `timings` here
         }
     }
 
     public async Task<string> WriteStream(string streamKey, string fieldName, string value)
     {
-        var messageId = await _db.StreamAddAsync(streamKey, fieldName, value);
-        return messageId;
+        string? messageId = await _db.StreamAddAsync(streamKey, fieldName, value);
+        return messageId ?? "";
     }
 
     public async Task<string> WriteStream(string streamKey, Dictionary<string, string> streamPairs)
@@ -132,8 +135,8 @@ public class RedisClient : IRedisClient, IDisposable
         {
             values.Append(new NameValueEntry(item.Key, item.Value));
         }
-        var messageId = await _db.StreamAddAsync(streamKey, values);
-        return messageId;
+        string? messageId = await _db.StreamAddAsync(streamKey, values);
+        return messageId ?? "";
     }
 
     public async Task<Dictionary<string, Dictionary<string, string>>> ReadStream(string streamKey, string position, int maxCount = 0)
@@ -143,9 +146,23 @@ public class RedisClient : IRedisClient, IDisposable
         var messages = await _db.StreamReadAsync(streamKey, position, count);
         foreach (var message in messages)
         {
+            string? id = message.Id;
+            if (string.IsNullOrEmpty(id))
+            {
+                continue;
+            }
             var d = new Dictionary<string, string>();
-            message.Values.ToList().ForEach(p => d.Add(p.Name, p.Value));
-            result.Add(message.Id, d);
+            message.Values.ToList().ForEach(p =>
+            {
+                string? name = p.Name;
+                string? value = p.Value;
+                if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(value))
+                {
+                    d.Add(name, value);
+                }
+            });
+
+            result.Add(id, d);
         }
         return result;
     }

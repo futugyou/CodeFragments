@@ -30,6 +30,12 @@ public class MiniKestrelServer : IServer
     public Task StartAsync<TContext>(IHttpApplication<TContext> application, CancellationToken cancellationToken) where TContext : notnull
     {
         var feature = Features.Get<IServerAddressesFeature>();
+
+        if (feature == null)
+        {
+            return Task.CompletedTask;
+        }
+
         IEnumerable<ListenOptions> listenOptions;
         if (feature.PreferHostingUrls)
         {

@@ -6,7 +6,18 @@ public static class KestrelServerOptionsExtensions
 {
     public static IEnumerable<ListenOptions> GetListenOptions(this KestrelServerOptions options)
     {
+        IEnumerable<ListenOptions> list = new List<ListenOptions>();
         var property = typeof(KestrelServerOptions).GetProperty("ListenOptions", BindingFlags.NonPublic | BindingFlags.Instance);
-        return (IEnumerable<ListenOptions>)property!.GetValue(options);
+        if (property == null)
+        {
+            return list;
+        }
+
+        if (property.GetValue(options) is IEnumerable<ListenOptions> oplist)
+        {
+            return oplist;
+        }
+
+        return list;
     }
 }

@@ -18,12 +18,15 @@ public class WebApplicationExtensions
         while (true)
         {
             var context = await listener.AcceptAsync();
-            _ = HandlerAsync(context);
+            if (context != null)
+            {
+                _ = HandlerAsync(context);
+            }
         }
 
         async Task HandlerAsync(ConnectionContext connection)
         {
-            var reader = connection!.Transport.Input;
+            var reader = connection.Transport.Input;
             while (true)
             {
                 var result = await reader.ReadAsync();
@@ -38,7 +41,7 @@ Hello World";
 
                 await connection.Transport.Output.WriteAsync(Encoding.UTF8.GetBytes(response));
 
-                if (request.Headers.TryGetValue("Connection", out var value) && string.Compare(value, "close", true) == 0)
+                if (request.Headers != null && request.Headers.TryGetValue("Connection", out var value) && string.Compare(value, "close", true) == 0)
                 {
                     await connection.DisposeAsync();
                     return;

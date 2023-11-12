@@ -29,20 +29,22 @@ public class WebApplicationBuilder
             .ConfigureWebHostDefaults(webHostBuilder =>
                 webHostBuilder.Configure(app =>
                 {
-                    var routeBuilder = (IEndpointRouteBuilder)_application!;
-                    var hasEndpoints = routeBuilder.DataSources.Any();
-
-                    if (hasEndpoints && !app.Properties.ContainsKey("__EndpointRouteBuilder"))
+                    if (_application != null && _application is IEndpointRouteBuilder routeBuilder)
                     {
-                        app.UseRouting();
-                        app.Properties["__EndpointRouteBuilder"] = _application;
-                    }
+                        var hasEndpoints = routeBuilder.DataSources.Count != 0;
 
-                    app.Run(_application.BuildRequestDelegate());
+                        if (hasEndpoints && !app.Properties.ContainsKey("__EndpointRouteBuilder"))
+                        {
+                            app.UseRouting();
+                            app.Properties["__EndpointRouteBuilder"] = _application;
+                        }
 
-                    if (hasEndpoints)
-                    {
-                        app.UseEndpoints(_ => { });
+                        app.Run(_application.BuildRequestDelegate());
+
+                        if (hasEndpoints)
+                        {
+                            app.UseEndpoints(_ => { });
+                        }
                     }
                 }))
             .ConfigureHostConfiguration(config =>
@@ -52,7 +54,7 @@ public class WebApplicationBuilder
                     config.AddCommandLine(args);
                 }
 
-                Dictionary<string, string>? settings = new();
+                Dictionary<string, string?>? settings = new();
                 if (options.EnvironmentName is not null)
                 {
                     settings[HostDefaults.EnvironmentKey] = options.EnvironmentName;
@@ -110,8 +112,8 @@ public class WebApplicationBuilder
         return _application = new WebApplication(_hostBuilder.Build());
     }
 }
-public class LoggingBuilder : ILoggingBuilder
+
+public class LoggingBuilder(IServiceCollection services) : ILoggingBuilder
 {
-    public LoggingBuilder(IServiceCollection services) => Services = services;
-    public IServiceCollection Services { get; }
+    public IServiceCollection Services { get; } = services;
 }

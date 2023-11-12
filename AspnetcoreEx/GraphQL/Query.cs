@@ -60,7 +60,7 @@ public class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetAllUser([ScopedService] GraphQLDbContext dbContext)
+    public IQueryable<User> GetAllUser([Service(ServiceKind.Pooled)] GraphQLDbContext dbContext)
     {
         return dbContext.Users;
     }
@@ -162,7 +162,7 @@ public class Query
 
     public AuthUser GetAuthUser(ClaimsPrincipal claimsPrincipal)
     {
-        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
         return new AuthUser { UserID = userId, Name = "tom" };
     }
 }

@@ -311,7 +311,7 @@ public class SearchService
             .Scroll("10s")
         );
         // make subsequent requests to the scroll API to keep fetching documents, whilst documents are returned
-        while (searchResponse.Documents.Any())
+        while (searchResponse.Documents.Count != 0)
         {
             searchResponse = client.Scroll<Person>("10s", searchResponse.ScrollId);
         }
