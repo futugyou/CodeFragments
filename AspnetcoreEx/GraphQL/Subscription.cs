@@ -12,7 +12,7 @@ public class Subscription
         return user;
     }
 
-    [Subscribe]
+    [Subscribe(MessageType = typeof(User))]
     public ValueTask<ISourceStream<User>> UserPublished([Service] ITopicEventReceiver receiver)
     {
         var topic = $"userCreated";

@@ -1,5 +1,4 @@
 using System.Runtime.ExceptionServices;
-using IdentityModel;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;

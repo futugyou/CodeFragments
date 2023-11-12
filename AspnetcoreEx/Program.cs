@@ -125,7 +125,9 @@ var rewriteOptions = new RewriteOptions()
     .AddIISUrlRewrite(fileProvider: app.Environment.ContentRootFileProvider, filePath: "rewrite.xml")
     .AddApacheModRewrite(fileProvider: app.Environment.ContentRootFileProvider, filePath: "rewrite.config");
 app.UseRewriter(rewriteOptions);
-app.UseHttpsRedirection().UseHsts();
+
+// app.UseHttpsRedirection().UseHsts();
+
 // app.Urls.Add("http://localhost:5003/");
 var environment = app.Environment;
 Console.WriteLine(environment.ApplicationName);

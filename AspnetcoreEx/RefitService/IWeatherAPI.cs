@@ -1,4 +1,3 @@
-using Refit;
 namespace AspnetcoreEx;
 public interface IWeatherAPI
 {

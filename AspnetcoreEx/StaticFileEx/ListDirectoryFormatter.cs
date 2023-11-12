@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.Extensions.FileProviders;
 
 namespace AspnetcoreEx.StaticFileEx;
 

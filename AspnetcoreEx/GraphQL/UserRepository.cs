@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace AspnetcoreEx.GraphQL;
 
 public interface IUserRepository : IAsyncDisposable

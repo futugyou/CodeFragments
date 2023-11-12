@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace AspnetcoreEx.Controllers;
+﻿namespace AspnetcoreEx.Controllers;
 
 [ApiController]
 [Route("[controller]")]

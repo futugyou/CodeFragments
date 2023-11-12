@@ -1,10 +1,7 @@
 using HttpMachine;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.DependencyInjection;
 using System.Buffers;
 using System.IO.Pipelines;
-using System.Net;
 using System.Text;
 
 namespace AspnetcoreEx.ServerEx;

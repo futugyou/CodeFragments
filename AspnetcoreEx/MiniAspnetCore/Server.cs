@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace AspnetcoreEx.MiniAspnetCore;
 
 public interface IServer

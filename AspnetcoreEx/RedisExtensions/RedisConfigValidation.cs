@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-
-namespace AspnetcoreEx.RedisExtensions;
+﻿namespace AspnetcoreEx.RedisExtensions;
 
 public class RedisConfigValidation : IValidateOptions<RedisOptions>
 {

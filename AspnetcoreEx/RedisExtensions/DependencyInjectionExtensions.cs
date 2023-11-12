@@ -1,7 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-
 namespace AspnetcoreEx.RedisExtensions;
 
 public static class DependencyInjectionExtensions

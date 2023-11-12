@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace AspnetcoreEx.RedisExtensions;

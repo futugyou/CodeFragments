@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting.Internal;
 
 namespace AspnetcoreEx.MiniWebApplication;

@@ -1,5 +1,4 @@
 ﻿global using global::HealthChecks.UI.Client;
-global using global::Microsoft.AspNetCore.ConcurrencyLimiter;
 global using global::Microsoft.AspNetCore.Connections;
 global using global::Microsoft.AspNetCore.Http.Extensions;
 global using global::Microsoft.AspNetCore.Mvc;

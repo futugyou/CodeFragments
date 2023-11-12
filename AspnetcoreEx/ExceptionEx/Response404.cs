@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Builder;
-
 namespace AspnetcoreEx.ExceptionEx;
 
 public class ExceptionExtensions

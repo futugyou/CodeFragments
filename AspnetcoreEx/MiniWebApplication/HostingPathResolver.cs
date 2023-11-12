@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore;
-
 namespace AspnetcoreEx.MiniWebApplication;
 
 

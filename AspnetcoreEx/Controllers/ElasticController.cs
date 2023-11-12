@@ -1,6 +1,3 @@
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using AspnetcoreEx.Extensions;
 using AspnetcoreEx.Elasticsearch;
 
 namespace AspnetcoreEx.Controllers;

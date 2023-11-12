@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using Nest;
 
 namespace AspnetcoreEx.Elasticsearch;

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Reflection;
-using System.Collections.Generic;
 
 public static class KestrelServerOptionsExtensions
 {

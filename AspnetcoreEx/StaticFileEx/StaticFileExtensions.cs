@@ -1,8 +1,4 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
-using System.IO;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
 using Path = System.IO.Path;
 
 namespace AspnetcoreEx.StaticFileEx;

@@ -1,5 +1,4 @@
 using System.Net.NetworkInformation;
-using System.Reflection;
 using Elasticsearch.Net.Diagnostics;
 using Nest;
 

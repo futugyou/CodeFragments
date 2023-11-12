@@ -1,9 +1,7 @@
 using HttpMachine;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
 using System.Buffers;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using System.IO.Pipelines;
 using System.Text;
 

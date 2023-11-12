@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Connections;
-using System.IO;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Options;
-using System.Net;
 
 namespace AspnetcoreEx.ServerEx;
 

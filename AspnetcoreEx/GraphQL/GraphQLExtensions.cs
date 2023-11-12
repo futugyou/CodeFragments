@@ -1,9 +1,4 @@
 using HotChocolate.Types.Pagination;
-using HotChocolate.Subscriptions.Redis;
-using StackExchange.Redis;
-using HotChocolate.Data.Filters;
-using HotChocolate.Data.Sorting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.Features;
 using HotChocolate.Language;
 using Microsoft.IdentityModel.Tokens;

@@ -1,12 +1,5 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing.Patterns;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Routing;
-using System.Globalization;
-using System.Resources;
-using Microsoft.AspNetCore.Http;
 using AspnetcoreEx.ExceptionEx;
-using Nest;
 
 namespace AspnetcoreEx.RouteEx;
 
