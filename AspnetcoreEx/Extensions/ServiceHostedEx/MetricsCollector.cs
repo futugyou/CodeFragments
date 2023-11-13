@@ -31,7 +31,7 @@ public class  MetricsDeliver:IMetricsDeliver
 {
     public Task DeliverAsync(PerformanceMetrics counter)
     {
-        Console.WriteLine($"[{DateTimeOffset.UtcNow}]{counter}");
+        // Console.WriteLine($"[{DateTimeOffset.UtcNow}]{counter}");
         return Task.CompletedTask;
     }
 }

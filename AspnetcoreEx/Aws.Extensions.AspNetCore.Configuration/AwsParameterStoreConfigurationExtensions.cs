@@ -1,5 +1,4 @@
 using Amazon.Extensions.NETCore.Setup;
-using Amazon.SimpleSystemsManagement;
 using Aws.Extensions.AspNetCore.Configuration;
 
 namespace Microsoft.Extensions.Configuration;
