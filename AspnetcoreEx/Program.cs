@@ -112,6 +112,7 @@ builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 builder.Services.AddSemanticKernelServices(configuration);
 
+builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
 
 var app = builder.Build();
@@ -146,7 +147,7 @@ if (builder.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ResponseBodyFeature v1"));
 }
- 
+
 app.UseRouting();
 
 app.UseAuthentication();

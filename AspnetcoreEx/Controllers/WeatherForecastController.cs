@@ -4,20 +4,23 @@
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
+    private static readonly string[] Summaries =
+    [
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+    ];
 
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly IConfiguration _configuration;
     private readonly IGitHubApi _gitHubApi;
+    private readonly TestOption _options;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration, IGitHubApi gitHubApi)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration, IGitHubApi gitHubApi,
+     IOptionsMonitor<TestOption> optionsMonitor)
     {
         _logger = logger;
         _configuration = configuration;
         _gitHubApi = gitHubApi;
+        _options = optionsMonitor.CurrentValue;
     }
 
 
@@ -29,6 +32,13 @@ public class WeatherForecastController : ControllerBase
     [HttpGet]
     public IEnumerable<WeatherForecast> Get()
     {
+        if (_options != null)
+        {
+            foreach (var item in _options.Services)
+            {
+                Console.WriteLine("test option " + item);
+            }
+        }
         Console.WriteLine(_configuration["Client:Password"]);
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
@@ -38,4 +48,9 @@ public class WeatherForecastController : ControllerBase
         })
         .ToArray();
     }
+}
+
+public class TestOption
+{
+    public string[] Services { get; set; }
 }
