@@ -7,15 +7,15 @@ namespace Aws.Extensions.AspNetCore.Configuration;
 
 public partial class AwsParameterStoreManager
 {
-	// TODO: get all...  use  DescribeParametersAsync to getall
 	// TODO: parse path like '/AAA/BBB/CCC/DDDD', but data path starts from BBB or CCC
-	// None of the above is important
+	// Not important
 	public virtual async Task<IEnumerable<Parameter>> ReadParameters(IAmazonSimpleSystemsManagement awsmanager, AwsClientConfig config)
 	{
 		var sections = config.Section;
 		if (sections.Length == 0)
 		{
-			return Enumerable.Empty<Parameter>();
+			var parameters = await GetAllParameters(awsmanager);
+			return parameters;
 		}
 
 		var bypath = sections.Where(p => p.EndsWith('/'));
@@ -27,9 +27,39 @@ public partial class AwsParameterStoreManager
 		return parametersWithPath.Concat(parametersWithOutPath.SelectMany(p => p.Parameters));
 	}
 
+	private async Task<List<Parameter>> GetAllParameters(IAmazonSimpleSystemsManagement awsmanager)
+	{
+		var parameterlist = new List<Parameter>();
+		var nameList = new List<string>();
+		string? nextToken = null;
+		do
+		{
+			DescribeParametersRequest request = new()
+			{
+				MaxResults = 50, // 50 is max
+				NextToken = nextToken,
+			};
+			var response = await awsmanager.DescribeParametersAsync(request).ConfigureAwait(false);
+			if (response.Parameters != null && response.Parameters.Count > 0)
+			{
+				nameList.AddRange(response.Parameters.Select(p => p.Name));
+			}
+
+			nextToken = response.NextToken;
+		} while (!string.IsNullOrEmpty(nextToken));
+
+		if (nameList.Count == 0)
+		{
+			return parameterlist;
+		}
+
+		var parametersWithOutPath = await GetParametersWithOutPath(awsmanager, nameList);
+		return parametersWithOutPath.SelectMany(p => p.Parameters).ToList();
+	}
+
 	private async Task<GetParametersResponse[]> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
 	{
-		var namesList = names.Chunk(size: 10);
+		var namesList = names.Chunk(size: 10); //10 is max
 		using var parameterLoader = new ParallelParameterLoader(awsmanager);
 
 		foreach (var subNames in namesList)
@@ -44,6 +74,7 @@ public partial class AwsParameterStoreManager
 	private async Task<List<Parameter>> GetParametersWithPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> bypath)
 	{
 		var parameterlist = new List<Parameter>();
+
 		foreach (var path in bypath)
 		{
 			string? nextToken = null;
@@ -54,8 +85,11 @@ public partial class AwsParameterStoreManager
 					Path = path,
 					NextToken = nextToken,
 					WithDecryption = true,
+					MaxResults = 10, // 10 is max
+					Recursive = true,
 				};
 				var response = await awsmanager.GetParametersByPathAsync(request).ConfigureAwait(false);
+
 				parameterlist.AddRange(response.Parameters);
 				nextToken = response.NextToken;
 			} while (!string.IsNullOrEmpty(nextToken));
