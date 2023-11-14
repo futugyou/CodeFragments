@@ -24,12 +24,12 @@ public partial class AwsParameterStoreManager
 		var parametersWithPath = await GetParametersWithPath(awsmanager, bypath);
 		var parametersWithOutPath = await GetParametersWithOutPath(awsmanager, notbypath);
 
-		return parametersWithPath.Concat(parametersWithOutPath);
+		return parametersWithPath.Concat(parametersWithOutPath.SelectMany(p => p.Parameters));
 	}
 
-	private async Task<List<Parameter>> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
+	private async Task<GetParametersResponse[]> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
 	{
-		var parameterlist = new List<Parameter>();
+		var parameterlist = new List<Task<GetParametersResponse>>();
 
 		var namesList = names.Chunk(size: 10);
 		foreach (var subNames in namesList)
@@ -39,11 +39,11 @@ public partial class AwsParameterStoreManager
 				Names = [.. subNames],
 				WithDecryption = true,
 			};
-			var response = await awsmanager.GetParametersAsync(request).ConfigureAwait(false);
-			parameterlist.AddRange(response.Parameters);
+			var response = awsmanager.GetParametersAsync(request);
+			parameterlist.Add(response);
 		}
 
-		return parameterlist;
+		return await Task.WhenAll(parameterlist).ConfigureAwait(false);
 	}
 
 	private async Task<List<Parameter>> GetParametersWithPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> bypath)
@@ -64,7 +64,6 @@ public partial class AwsParameterStoreManager
 				parameterlist.AddRange(response.Parameters);
 				nextToken = response.NextToken;
 			} while (!string.IsNullOrEmpty(nextToken));
-
 		}
 
 		return parameterlist;
