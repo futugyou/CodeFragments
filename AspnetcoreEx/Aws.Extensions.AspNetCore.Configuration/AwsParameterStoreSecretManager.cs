@@ -7,7 +7,7 @@ namespace Aws.Extensions.AspNetCore.Configuration;
 
 public partial class AwsParameterStoreManager
 {
-	// TODO: get all/ get paging/ get by path ...  use  DescribeParametersAsync to getall
+	// TODO: get all...  use  DescribeParametersAsync to getall
 	// TODO: parse path like '/AAA/BBB/CCC/DDDD', but data path starts from BBB or CCC
 	// None of the above is important
 	public virtual async Task<IEnumerable<Parameter>> ReadParameters(IAmazonSimpleSystemsManagement awsmanager, AwsClientConfig config)
@@ -18,8 +18,56 @@ public partial class AwsParameterStoreManager
 			return Enumerable.Empty<Parameter>();
 		}
 
-		var response = await awsmanager.GetParametersAsync(new GetParametersRequest { WithDecryption = true, Names = [.. sections] }).ConfigureAwait(false);
-		return response.Parameters;
+		var bypath = sections.Where(p => p.EndsWith('/'));
+		var notbypath = sections.Where(p => !p.EndsWith('/'));
+
+		var parametersWithPath = await GetParametersWithPath(awsmanager, bypath);
+		var parametersWithOutPath = await GetParametersWithOutPath(awsmanager, notbypath);
+
+		return parametersWithPath.Concat(parametersWithOutPath);
+	}
+
+	private async Task<List<Parameter>> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
+	{
+		var parameterlist = new List<Parameter>();
+
+		var namesList = names.Chunk(size: 10);
+		foreach (var subNames in namesList)
+		{
+			GetParametersRequest request = new()
+			{
+				Names = [.. subNames],
+				WithDecryption = true,
+			};
+			var response = await awsmanager.GetParametersAsync(request).ConfigureAwait(false);
+			parameterlist.AddRange(response.Parameters);
+		}
+
+		return parameterlist;
+	}
+
+	private async Task<List<Parameter>> GetParametersWithPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> bypath)
+	{
+		var parameterlist = new List<Parameter>();
+		foreach (var path in bypath)
+		{
+			string? nextToken = null;
+			do
+			{
+				GetParametersByPathRequest request = new()
+				{
+					Path = path,
+					NextToken = nextToken,
+					WithDecryption = true,
+				};
+				var response = await awsmanager.GetParametersByPathAsync(request).ConfigureAwait(false);
+				parameterlist.AddRange(response.Parameters);
+				nextToken = response.NextToken;
+			} while (!string.IsNullOrEmpty(nextToken));
+
+		}
+
+		return parameterlist;
 	}
 
 	public virtual IDictionary<string, string?> GetData(IEnumerable<Parameter> parameters)
