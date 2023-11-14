@@ -29,21 +29,16 @@ public partial class AwsParameterStoreManager
 
 	private async Task<GetParametersResponse[]> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
 	{
-		var parameterlist = new List<Task<GetParametersResponse>>();
-
 		var namesList = names.Chunk(size: 10);
+		using var parameterLoader = new ParallelParameterLoader(awsmanager);
+
 		foreach (var subNames in namesList)
 		{
-			GetParametersRequest request = new()
-			{
-				Names = [.. subNames],
-				WithDecryption = true,
-			};
-			var response = awsmanager.GetParametersAsync(request);
-			parameterlist.Add(response);
+			parameterLoader.Add(subNames);
 		}
 
-		return await Task.WhenAll(parameterlist).ConfigureAwait(false);
+		var loadedParameter = await parameterLoader.WaitForAll().ConfigureAwait(false);
+		return loadedParameter;
 	}
 
 	private async Task<List<Parameter>> GetParametersWithPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> bypath)
