@@ -13,7 +13,7 @@
 	</ItemGroup>-->
 
 	<ItemGroup>
-		<PackageReference Include="Duende.IdentityServer" Version="5.2.2" />
+		<PackageReference Include="Duende.IdentityServer" Version="6.3.6" />
 		<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="5.2.2" />
 		<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="5.2.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.0" />
