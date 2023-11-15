@@ -39,7 +39,7 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Skills.OpenAPI" Version="0.14.547.1-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Skills.Web" Version="0.14.547.1-preview" />
 
-		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="7.4.0" />
+		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="7.6.0" />
 
 		<PackageReference Include="HotChocolate.Execution" Version="14.0.0-preview.11.3" />
 		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="14.0.0-preview.11.3" />
@@ -52,7 +52,7 @@
 		<PackageReference Include="HotChocolate.Stitching.Redis" Version="14.0.0-preview.11.3" />
 		<PackageReference Include="HotChocolate.PersistedQueries.FileSystem" Version="14.0.0-preview.11.3" />
 		<PackageReference Include="HotChocolate.PersistedQueries.Redis" Version="14.0.0-preview.11.3" />
-		<PackageReference Include="HotChocolate.PersistedQueries.InMemory" Version="14.0.0-preview.11.3" />
+		<PackageReference Include="HotChocolate.PersistedQueries.InMemory" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="14.0.0-preview.11.3" />
 	</ItemGroup>
 
