@@ -10,12 +10,12 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.452401" />
 		<PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.TraceSource" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.TraceSource" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
 	</ItemGroup>
 </Project>
