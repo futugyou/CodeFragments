@@ -24,14 +24,14 @@
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
 		<!--<PackageReference Include="Metalama.Framework" Version="0.5.55-preview" />-->
-		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.0" />
 		<PackageReference Include="Sharprompt" Version="2.4.5" />
 		<PackageReference Include="StackExchange.Redis" Version="2.6.70" />
 		<PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.Extensions" Version="7.0.13" />
 		<PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="7.0.13" />
 	</ItemGroup>
