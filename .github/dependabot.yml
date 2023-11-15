@@ -20,6 +20,22 @@ updates:
       openTelemetry:
         patterns:
         - "OpenTelemetry*"
-      configuration:
+      extensions:
         patterns:
-        - "Microsoft.Extensions.Configuration*"
+        - "Microsoft.Extensions*"
+      awssdk:
+        patterns:
+        - "AWSSDK*"
+      sk:
+        patterns:
+        - "Microsoft.SemanticKernel*"
+      graphQL:
+        patterns:
+        - "HotChocolate*"
+        - "GraphQL*"
+      healthChecks:
+        patterns:
+        - "AspNetCore.HealthChecks*"
+      netcore:
+        patterns:
+        - "Microsoft.AspNetCore*" 
