@@ -24,7 +24,7 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.*" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="5.0.*" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.*" />
-		<PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="7.0.2" />
+		<PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.2.0" />
 		<PackageReference Include="OpenTelemetry.Contrib.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta2" />
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
