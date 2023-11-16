@@ -28,7 +28,7 @@
 		<PackageReference Include="StackExchange.Redis" Version="2.6.111" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="7.0.2" />
-		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.0.0-rc2.7" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.1.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="7.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0" />
