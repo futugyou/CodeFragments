@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Duende.BFF" Version="1.0.0-rc.3" />
+		<PackageReference Include="Duende.BFF" Version="2.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
 	</ItemGroup>
 
