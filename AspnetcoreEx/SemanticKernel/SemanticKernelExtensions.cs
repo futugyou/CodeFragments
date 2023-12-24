@@ -27,7 +27,9 @@ public static class SemanticKernelExtensions
             {
                 c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
             }
-        }).AddLogger<SimpleConsoleLogger>();
+        })
+        .AddLogger<SimpleConsoleLogger>()
+        .AddLogger<RequestIdLogger>();
 
         services.AddSingleton<IQdrantVectorDbClient>(sp =>
         {
