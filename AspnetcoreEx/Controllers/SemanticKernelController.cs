@@ -1,4 +1,5 @@
-﻿using AspnetcoreEx.Resources;
+﻿using AspnetcoreEx.HttpDiagnosticsExtensions;
+using AspnetcoreEx.Resources;
 using AspnetcoreEx.SemanticKernel;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
@@ -622,11 +623,13 @@ Answer: ";
             return Task.FromResult(s);
         });
 
+        RequestInfo info = RequestInfo.Current;
+        IPLoggingListener ipLoggingListener = IPLoggingListener.IPLoggingListenerInstance;
         using HttpClient httpClient = new HttpClient();
 
         var apiSkillRawFileURL = new Uri("https://raw.githubusercontent.com/microsoft/PowerPlatformConnectors/dev/certified-connectors/JIRA/apiDefinition.swagger.json");
         IDictionary<string, ISKFunction> jiraSkills = await kernel.ImportOpenApiSkillFromUrlAsync("jiraSkills", apiSkillRawFileURL, httpClient, tokenProvider.AuthenticateRequestAsync);
-
+        Console.WriteLine($"Test EventListener. Connection ID {info.ConnectionId}, Remote IP: {info.RemoteAddress}");
 
         // GetIssue Skill
         {
