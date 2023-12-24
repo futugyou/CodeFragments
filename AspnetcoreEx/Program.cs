@@ -70,9 +70,11 @@ builder.Services.ConfigureHttpClientDefaults(b =>
 {
     b.AddLogger<SimpleConsoleLogger>();
     b.AddLogger<RequestIdLogger>();
-    b.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"))
-    // .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false })
-    .AddHttpMessageHandler<TestAuthHandler>();
+    b.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
+    // b.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
+    b.AddHttpMessageHandler<TestAuthHandler>();
+    // it will remove all log, see read,md in HttpDiagnosticsExtensions
+    // b.RemoveAllLoggers();
 });
 
 var configuration = builder.Configuration;
