@@ -1,5 +1,4 @@
-﻿using AspnetcoreEx.HttpDiagnosticsExtensions;
-using AspnetcoreEx.SemanticKernel.Skills;
+﻿using AspnetcoreEx.SemanticKernel.Skills;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.TextEmbedding;
 using Microsoft.SemanticKernel.Connectors.Memory.Qdrant;
 using Microsoft.SemanticKernel.CoreSkills;
@@ -17,7 +16,6 @@ public static class SemanticKernelExtensions
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
         var logger = sp.GetRequiredService<ILogger<IKernel>>();
 
-        services.AddSingleton<SimpleConsoleLogger>();
         services.AddHttpClient("qdrant", c =>
         {
             UriBuilder builder = new(config.QdrantHost);
@@ -27,9 +25,7 @@ public static class SemanticKernelExtensions
             {
                 c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
             }
-        })
-        .AddLogger<SimpleConsoleLogger>()
-        .AddLogger<RequestIdLogger>();
+        });        
 
         services.AddSingleton<IQdrantVectorDbClient>(sp =>
         {

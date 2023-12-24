@@ -7,6 +7,7 @@ using AspnetcoreEx.RedisExtensions;
 using AspnetcoreEx.RouteEx;
 using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.StaticFileEx;
+using AspnetcoreEx.HttpDiagnosticsExtensions;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -55,10 +56,23 @@ builder.Services.AddQueuePolicy(options =>
     options.MaxConcurrentRequests = 20;
     options.RequestQueueLimit = 20;
 });
+
 builder.Services.AddStackPolicy(options =>
 {
     options.MaxConcurrentRequests = 20;
     options.RequestQueueLimit = 20;
+});
+
+
+builder.Services.AddSingleton<SimpleConsoleLogger>();
+builder.Services.AddSingleton<RequestIdLogger>();
+builder.Services.ConfigureHttpClientDefaults(b =>
+{
+    b.AddLogger<SimpleConsoleLogger>();
+    b.AddLogger<RequestIdLogger>();
+    b.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"))
+    // .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false })
+    .AddHttpMessageHandler<TestAuthHandler>();
 });
 
 var configuration = builder.Configuration;
@@ -69,6 +83,7 @@ Console.WriteLine(builder.Environment.ApplicationName);
 Console.WriteLine(builder.Environment.ContentRootPath);
 Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
+
 builder.Services.AddSingleton<ILogger>(sp => sp.GetRequiredService<ILogger<Program>>());
 
 builder.Services.AddRouteExtension();
