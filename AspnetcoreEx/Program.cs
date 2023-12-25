@@ -8,6 +8,7 @@ using AspnetcoreEx.RouteEx;
 using AspnetcoreEx.SemanticKernel;
 using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.HttpDiagnosticsExtensions;
+// using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
 
@@ -77,6 +78,8 @@ builder.Services.ConfigureHttpClientDefaults(b =>
     // b.RemoveAllLoggers();
 });
 
+// builder.Services.AddMiniMvcControllers();
+
 var configuration = builder.Configuration;
 
 //configuration.AddJsonFileExtensions("appsettings.json", true, true);
@@ -133,6 +136,8 @@ builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
 
 var app = builder.Build();
+
+// app.MapMiniMvcControllerRoute(name: "default", pattern: "{controller}/{action}/{id?}");
 
 // 'ConcurrencyLimiterExtensions.UseConcurrencyLimiter(IApplicationBuilder)' is obsolete
 // app.UseConcurrencyLimiter();
