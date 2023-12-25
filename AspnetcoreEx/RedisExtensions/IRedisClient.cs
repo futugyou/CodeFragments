@@ -94,12 +94,12 @@ public class RedisClient : IRedisClient, IDisposable
 
     public async Task<long> Publish(string key, string value)
     {
-        return await _sub.PublishAsync(key, value);
+        return await _sub.PublishAsync(RedisChannel.Literal(key), value);
     }
 
     public async Task Subscribe(string key, Func<string, Task> handle)
     {
-        var messageQueue = await _sub.SubscribeAsync(key);
+        var messageQueue = await _sub.SubscribeAsync(RedisChannel.Literal(key));
         messageQueue.OnMessage(async channelMessage =>
         {
             if (channelMessage.Message.HasValue)
