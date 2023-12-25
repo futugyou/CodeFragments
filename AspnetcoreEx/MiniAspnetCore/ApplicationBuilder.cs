@@ -8,10 +8,11 @@ public interface IApplicationBuilder
 
 public class ApplicationBuilder : IApplicationBuilder
 {
-    private readonly IList<Func<RequestDelegate,RequestDelegate>> _middlewares = new List<Func<RequestDelegate,RequestDelegate>>();
+    private readonly List<Func<RequestDelegate,RequestDelegate>> _middlewares = new List<Func<RequestDelegate,RequestDelegate>>();
 
     public RequestDelegate Build()
     {
+        _middlewares.Reverse();
         RequestDelegate next = context =>
         {
             context.Response.StatusCode = 404;

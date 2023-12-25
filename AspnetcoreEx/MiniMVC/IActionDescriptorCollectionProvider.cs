@@ -28,8 +28,8 @@ public class ActionDescriptorCollectionProvider : IActionDescriptorCollectionPro
         var methods = types
             .Where(IsValidController)
             .SelectMany(type => type.GetMethods()
-            .Where(method => method.DeclaringType == type 
-                && IsValidAction(method)));
+                .Where(method => method.DeclaringType == type 
+                    && IsValidAction(method)));
 
         foreach (var method in methods)
         {
