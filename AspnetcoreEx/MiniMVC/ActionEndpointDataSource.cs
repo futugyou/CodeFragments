@@ -49,7 +49,7 @@ public class ActionEndpointDataSource : EndpointDataSource
         }
         else
         {
-           yield return  CreateAttributeEndpoint(actionDescriptor, routeValues, attributes));
+           yield return  CreateAttributeEndpoint(actionDescriptor, routeValues, attributes);
         }
     }
 
