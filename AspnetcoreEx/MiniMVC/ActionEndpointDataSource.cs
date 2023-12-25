@@ -16,6 +16,7 @@ public class ActionEndpointDataSource : EndpointDataSource
     private readonly RoutePatternTransformer _transformer;
     private readonly List<Action<EndpointBuilder>> _conventions = new();
     private readonly List<Action<EndpointBuilder>> _finallyConventions = new();
+    private readonly EndpointConventionBuilder DefaultBuilder;
     private int _routeOrder;
 
     private List<Endpoint>? _endpoints;

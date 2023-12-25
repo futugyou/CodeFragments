@@ -17,3 +17,4 @@ global using global::Microsoft.SemanticKernel;
 global using global::System.Collections.Generic;
 global using global::System.Threading.Tasks;
 global using global::Microsoft.Extensions.DependencyInjection;
+global using global::Microsoft.Extensions.DependencyInjection.Extensions;
