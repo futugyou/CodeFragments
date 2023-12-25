@@ -15,3 +15,4 @@ global using global::System.Security.Cryptography.X509Certificates;
 global using global::Microsoft.Extensions.Options;
 global using global::Microsoft.SemanticKernel;
 global using global::System.Collections.Generic;
+global using global::System.Threading.Tasks;
