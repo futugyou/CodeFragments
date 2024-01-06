@@ -1,0 +1,3 @@
+name: "codeQL config"
+paths:
+  - AspnetcoreEx

@@ -1,6 +1,7 @@
 name: DotnetTools
 
 on:
+  workflow_dispatch:
   push:
     branches: 
     - master  
@@ -20,9 +21,9 @@ jobs:
       package-name: Vishel.AWS.S3.Tools
       
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         include-prerelease: true

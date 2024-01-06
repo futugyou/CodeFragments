@@ -1,6 +1,7 @@
 name: BrowserDemo
 
 on:
+  workflow_dispatch:
   push:
     branches: 
     - master  
@@ -23,9 +24,9 @@ jobs:
       localpath: bin/Release/net7.0/publish/wwwroot
       
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
         include-prerelease: true
@@ -38,7 +39,7 @@ jobs:
       working-directory: ${{env.project-directory}}
     
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET }}
