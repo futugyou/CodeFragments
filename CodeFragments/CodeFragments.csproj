@@ -22,7 +22,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.13.11" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
 		<!--<PackageReference Include="Metalama.Framework" Version="0.5.55-preview" />-->
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.0" />
 		<PackageReference Include="Sharprompt" Version="2.4.5" />
