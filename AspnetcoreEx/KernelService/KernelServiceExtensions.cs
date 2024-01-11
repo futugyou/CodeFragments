@@ -1,4 +1,7 @@
 
+using Microsoft.SemanticKernel.Connectors.Qdrant;
+using Microsoft.SemanticKernel.Memory;
+
 namespace AspnetcoreEx.KernelService;
 
 
@@ -25,7 +28,32 @@ public static class KernelServiceExtensions
             kernelBuilder.AddOpenAITextGeneration(config.TextCompletion, config.Key);
             kernelBuilder.AddOpenAITextToImage(config.Key);
         }
-        
+
+        services.AddHttpClient("qdrant", c =>
+        {
+            UriBuilder builder = new(config.QdrantHost);
+            if (config.QdrantPort.HasValue) { builder.Port = config.QdrantPort.Value; }
+            c.BaseAddress = builder.Uri;
+            if (!string.IsNullOrEmpty(config.QdrantKey))
+            {
+                c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
+            }
+        });
+
+        services.AddSingleton<IQdrantVectorDbClient>(sp =>
+        {
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient("qdrant");
+            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            return new QdrantVectorDbClient(httpClient, config.QdrantVectorSize, null, loggerFactory);
+        });
+
+        services.AddSingleton<IMemoryStore>(sp =>
+        {
+            var qdrantVectorDbClient = sp.GetRequiredService<IQdrantVectorDbClient>();
+            return new QdrantMemoryStore(qdrantVectorDbClient);
+        });
+
         return services;
     }
 }
