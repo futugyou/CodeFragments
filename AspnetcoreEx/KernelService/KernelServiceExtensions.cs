@@ -1,4 +1,5 @@
 
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
 
@@ -52,6 +53,23 @@ public static class KernelServiceExtensions
         {
             var qdrantVectorDbClient = sp.GetRequiredService<IQdrantVectorDbClient>();
             return new QdrantMemoryStore(qdrantVectorDbClient);
+        });
+
+        services.AddScoped<ISemanticTextMemory>(sp =>
+        {
+            var store = sp.GetRequiredService<IMemoryStore>();
+            var memoryBuilder = new MemoryBuilder();
+            memoryBuilder.WithMemoryStore(store);
+            if (!string.IsNullOrWhiteSpace(config.Endpoint))
+            {
+                memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(config.Embedding, config.Endpoint, config.Key);
+            }
+            else
+            {
+                memoryBuilder.WithOpenAITextEmbeddingGeneration(config.Embedding, config.Key);
+            }
+
+            return memoryBuilder.Build();
         });
 
         return services;
