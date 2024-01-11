@@ -7,6 +7,7 @@ using AspnetcoreEx.RedisExtensions;
 using AspnetcoreEx.RouteEx;
 using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.HttpDiagnosticsExtensions;
+using AspnetcoreEx.KernelService;
 // using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
@@ -128,6 +129,8 @@ builder.Services.AddSingleton<IProcessorMetricsCollector>(counter);
 builder.Services.AddSingleton<IMemoryMetricsCollector>(counter);
 builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
+
+builder.Services.AddKernelServiceServices(configuration);
 
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
