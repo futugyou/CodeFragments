@@ -1,4 +1,5 @@
 
+using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
@@ -29,6 +30,8 @@ public static class KernelServiceExtensions
             kernelBuilder.AddOpenAITextGeneration(config.TextCompletion, config.Key);
             kernelBuilder.AddOpenAITextToImage(config.Key);
         }
+
+        kernelBuilder.Plugins.AddFromType<LightPlugin>();
 
         services.AddHttpClient("qdrant", c =>
         {
