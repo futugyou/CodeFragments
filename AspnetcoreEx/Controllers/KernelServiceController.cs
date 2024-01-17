@@ -42,7 +42,7 @@ public class KernelServiceController : ControllerBase
         history.AddMessage(result.Role, result.Content ?? "");
         responseList.Add("Assistant > " + result);
 
-        return responseList.ToArray();
+        return [.. responseList];
     }
 
     [Route("prompt/one")]
@@ -74,7 +74,44 @@ Bonus: You'll get $20 if you get this right.</message>
 
         var result = await _kernel.InvokePromptAsync(prompt);
         responseList.Add(result.ToString());
-        return responseList.ToArray();
+        return [.. responseList];
+    }
+
+    [Route("prompt/template")]
+    [HttpPost]
+    public async Task<string[]> PromptTemplate()
+    {
+        var responseList = new List<string>();
+        ChatHistory history = [];
+        string request = "I want to send an email to the marketing team celebrating their recent milestone.";
+        responseList.Add(request);
+        var chat = _kernel.CreateFunctionFromPrompt(
+    @"{{$history}}
+    User: {{$request}}
+    Assistant: "
+);
+        var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
+        chat,
+        new() {
+            { "request", request },
+            { "history", string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) }
+        }
+    );
+        // Stream the response
+        string message = "";
+        await foreach (var chunk in chatResult)
+        {
+            if (chunk.Role.HasValue) Console.Write(chunk.Role + " > ");
+            message += chunk;
+        }
+
+        responseList.Add(message);
+
+        // Append to history
+        history.AddUserMessage(request!);
+        history.AddAssistantMessage(message);
+
+        return [.. responseList];
     }
 
 }
