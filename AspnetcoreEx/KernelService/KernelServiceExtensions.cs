@@ -3,6 +3,7 @@ using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
+using Microsoft.SemanticKernel.Plugins.Core;
 
 namespace AspnetcoreEx.KernelService;
 
@@ -32,6 +33,7 @@ public static class KernelServiceExtensions
         }
 
         kernelBuilder.Plugins.AddFromType<LightPlugin>();
+        kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();
 
         services.AddHttpClient("qdrant", c =>
         {

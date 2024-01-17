@@ -119,7 +119,7 @@ public class KernelServiceController : ControllerBase
 
         return [.. responseList];
     }
-    
+
     [Route("prompt/handlebars")]
     [HttpPost]
     public async Task<string[]> PromptHandlebars()
@@ -145,6 +145,8 @@ public class KernelServiceController : ControllerBase
                     <message role=""{{role}}"">{{content}}</message>
                 {{/each}}
 
+                {{ConversationSummaryPlugin-SummarizeConversation history}}
+                
                 <message role=""user"">{{request}}</message>
                 <message role=""system"">Intent:</message>",
                 TemplateFormat = "handlebars"
@@ -181,6 +183,59 @@ public class KernelServiceController : ControllerBase
         );
 
         responseList.Add(intent.ToString());
+
+        request = "i want go home.";
+        intent = await _kernel.InvokeAsync(
+            getIntent,
+            new() {
+                { "request", request },
+                { "choices", choices },
+                { "history", history },
+                { "fewShotExamples", fewShotExamples }
+            }
+        );
+         responseList.Add(request);
+        responseList.Add(intent.ToString());
+        return [.. responseList];
+    }
+
+
+    [Route("prompt/nested")]
+    [HttpPost]
+    public async Task<string[]> PromptNested()
+    {
+        var responseList = new List<string>();
+        ChatHistory history = [];
+        string request = "I want to send an email to the marketing team celebrating their recent milestone.";
+        responseList.Add(request);
+        var chat = _kernel.CreateFunctionFromPrompt(
+            @"{{ConversationSummaryPlugin.SummarizeConversation $history}}
+            User: {{$request}}
+            Assistant: "
+        );
+
+        var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
+            chat,
+            new() {
+                { "request", request },
+                { "history", string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) }
+            }
+        );
+
+        // Stream the response
+        string message = "";
+        await foreach (var chunk in chatResult)
+        {
+            if (chunk.Role.HasValue) Console.Write(chunk.Role + " > ");
+            message += chunk;
+        }
+
+        responseList.Add(message);
+
+        // Append to history
+        history.AddUserMessage(request!);
+        history.AddAssistantMessage(message);
+
         return [.. responseList];
     }
 
