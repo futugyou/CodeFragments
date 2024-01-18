@@ -1,4 +1,5 @@
 
+using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
@@ -34,6 +35,8 @@ public static class KernelServiceExtensions
 
         kernelBuilder.Plugins.AddFromType<LightPlugin>();
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();
+        kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
+        kernelBuilder.Plugins.AddFromType<EmailPlugin>();
 
         services.AddHttpClient("qdrant", c =>
         {

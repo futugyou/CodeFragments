@@ -357,4 +357,63 @@ public class KernelServiceController : ControllerBase
         responseList.Add(intent.ToString());
         return [.. responseList];
     }
+
+    [Route("prompt/email")]
+    [HttpPost]
+    public async Task<string[]> PromptEmail()
+    {
+        var responseList = new List<string>();
+        ChatHistory chatMessages = new ChatHistory("""
+            You are a friendly assistant who likes to follow the rules. You will complete required steps
+            and request approval before taking any consequential actions. If the user doesn't provide
+            enough information for you to complete a task, you will keep asking questions until you have
+            enough information to complete the task.
+            """);
+
+        var user_inputs = new string[] {
+            "Can you help me write an email for my boss?" ,
+            """
+            I want to give her an update on last months sales. We broke a bunch of records that
+            I want to share with her, but we did have a challenge selling the X4321 model.
+            """,
+            "Sure! It's sarah@contoso.com",
+            "Yes please!",
+            "Please sign it with Stephen and then you can go ahead and send it to Sarah",
+        };
+
+        foreach (var request in user_inputs)
+        {
+            chatMessages.AddUserMessage(request);
+            responseList.Add(request);
+
+            // Get the chat completions
+            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+            {
+                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+            };
+            var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(
+                chatMessages,
+                executionSettings: openAIPromptExecutionSettings,
+                kernel: _kernel);
+
+            // Stream the results
+            string fullMessage = "";
+            await foreach (var content in result)
+            {
+                if (content.Role.HasValue)
+                {
+                    Console.Write("Assistant > ");
+                }
+                Console.Write(content.Content);
+                fullMessage += content.Content;
+            }
+            Console.WriteLine();
+
+            // Add the message from the agent to the chat history
+            chatMessages.AddAssistantMessage(fullMessage);
+            responseList.Add(fullMessage);
+
+        }
+        return [.. responseList];
+    }
 }
