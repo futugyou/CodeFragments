@@ -199,7 +199,6 @@ public class KernelServiceController : ControllerBase
         return [.. responseList];
     }
 
-
     [Route("prompt/nested")]
     [HttpPost]
     public async Task<string[]> PromptNested()
@@ -265,4 +264,38 @@ public class KernelServiceController : ControllerBase
         return [.. responseList];
     }
 
+    [Route("prompt/file")]
+    [HttpPost]
+    public async Task<string[]> PromptFile()
+    {
+        var responseList = new List<string>();
+        ChatHistory history = [];
+        var prompts = _kernel.CreatePluginFromPromptDirectory("KernelService/Skills");
+        string request = "I want to send an email to the marketing team celebrating their recent milestone.";
+        responseList.Add(request);
+
+        var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
+            prompts["chat"],
+            new() {
+                { "request", request },
+                { "history", string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) }
+            }
+        );
+
+        // Stream the response
+        string message = "";
+        await foreach (var chunk in chatResult)
+        {
+            if (chunk.Role.HasValue) Console.Write(chunk.Role + " > ");
+            message += chunk;
+        }
+
+        responseList.Add(message);
+
+        // Append to history
+        history.AddUserMessage(request!);
+        history.AddAssistantMessage(message);
+
+        return [.. responseList];
+    }
 }
