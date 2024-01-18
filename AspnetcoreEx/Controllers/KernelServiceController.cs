@@ -194,7 +194,7 @@ public class KernelServiceController : ControllerBase
                 { "fewShotExamples", fewShotExamples }
             }
         );
-         responseList.Add(request);
+        responseList.Add(request);
         responseList.Add(intent.ToString());
         return [.. responseList];
     }
@@ -209,9 +209,35 @@ public class KernelServiceController : ControllerBase
         string request = "I want to send an email to the marketing team celebrating their recent milestone.";
         responseList.Add(request);
         var chat = _kernel.CreateFunctionFromPrompt(
-            @"{{ConversationSummaryPlugin.SummarizeConversation $history}}
-            User: {{$request}}
-            Assistant: "
+            new PromptTemplateConfig()
+            {
+                Name = "Chat",
+                Description = "Chat with the assistant.",
+                Template = @"{{ConversationSummaryPlugin.SummarizeConversation $history}}
+                User: {{$request}}
+                Assistant: ",
+                TemplateFormat = "semantic-kernel",
+                InputVariables = [
+                    new() { Name = "history", Description = "The history of the conversation.", IsRequired = false, Default = "" },
+                    new() { Name = "request", Description = "The user's request.", IsRequired = true }
+                ],
+                ExecutionSettings = {
+                    { "default", new OpenAIPromptExecutionSettings() {
+                        MaxTokens = 1000,
+                        Temperature = 0
+                    } },
+                    { "gpt-3.5-turbo", new OpenAIPromptExecutionSettings() {
+                        ModelId = "gpt-3.5-turbo-0613",
+                        MaxTokens = 4000,
+                        Temperature = 0.2
+                    } },
+                    { "gpt-4", new OpenAIPromptExecutionSettings() {
+                        ModelId = "gpt-4-1106-preview",
+                        MaxTokens = 8000,
+                        Temperature = 0.3
+                    } }
+                }
+            }
         );
 
         var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
