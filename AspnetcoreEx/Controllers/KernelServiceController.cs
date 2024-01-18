@@ -416,4 +416,48 @@ public class KernelServiceController : ControllerBase
         }
         return [.. responseList];
     }
+
+    [Route("prompt/math")]
+    [HttpPost]
+    public async Task<string> PromptMath()
+    {
+        // double answer = await _kernel.InvokeAsync<double>(
+        // "MathExPlugin", "Sqrt",
+        //     new() {
+        //         { "number1", 12 }
+        //     }
+        // );
+        // return answer.ToString();
+        // Create chat history
+        ChatHistory history = [];
+        history.AddUserMessage("Take the square root of 12");
+
+        // Enable auto function calling
+        OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+        {
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        };
+
+        // Get the response from the AI
+        var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(
+            history,
+            executionSettings: openAIPromptExecutionSettings,
+            kernel: _kernel);
+
+        // Stream the results
+        string fullMessage = "";
+        var first = true;
+        await foreach (var content in result)
+        {
+            if (content.Role.HasValue && first)
+            {
+                Console.Write("Assistant > ");
+                first = false;
+            }
+            Console.Write(content.Content);
+            fullMessage += content.Content;
+        }
+
+        return fullMessage;
+    }
 }
