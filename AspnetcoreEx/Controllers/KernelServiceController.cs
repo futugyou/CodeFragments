@@ -1,4 +1,5 @@
 ﻿
+using System.Reflection;
 using AspnetcoreEx.KernelService;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -296,6 +297,64 @@ public class KernelServiceController : ControllerBase
         history.AddUserMessage(request!);
         history.AddAssistantMessage(message);
 
+        return [.. responseList];
+    }
+
+    [Route("prompt/yaml")]
+    [HttpPost]
+    public async Task<string[]> PromptYAML()
+    {
+        var responseList = new List<string>();
+        ChatHistory history = [];
+        string request = "I want to send an email to the marketing team celebrating their recent milestone.";
+        responseList.Add(request);
+        using StreamReader reader = new(Assembly.GetExecutingAssembly().GetManifestResourceStream("KernelService.Skills.getIntent.prompt.yaml")!);
+        KernelFunction getIntent = _kernel.CreateFunctionFromPromptYaml(
+            reader.ReadToEnd(),
+            promptTemplateFactory: new HandlebarsPromptTemplateFactory()
+        );
+        // Create choices
+        List<string> choices = ["ContinueConversation", "EndConversation"];
+
+        // Create few-shot examples
+        List<ChatHistory> fewShotExamples = [
+            [
+                new ChatMessageContent(AuthorRole.User, "Can you send a very quick approval to the marketing team?"),
+                new ChatMessageContent(AuthorRole.System, "Intent:"),
+                new ChatMessageContent(AuthorRole.Assistant, "ContinueConversation"),
+            ],
+            [
+                new ChatMessageContent(AuthorRole.User, "Thanks, I'm done for now"),
+                new ChatMessageContent(AuthorRole.System, "Intent:"),
+                new ChatMessageContent(AuthorRole.Assistant, "EndConversation")
+            ]
+        ];
+
+        // Invoke prompt
+        var intent = await _kernel.InvokeAsync(
+            getIntent,
+            new() {
+                { "request", request },
+                { "choices", choices },
+                { "history", history },
+                { "fewShotExamples", fewShotExamples }
+            }
+        );
+
+        responseList.Add(intent.ToString());
+
+        request = "i want go home.";
+        intent = await _kernel.InvokeAsync(
+            getIntent,
+            new() {
+                { "request", request },
+                { "choices", choices },
+                { "history", history },
+                { "fewShotExamples", fewShotExamples }
+            }
+        );
+        responseList.Add(request);
+        responseList.Add(intent.ToString());
         return [.. responseList];
     }
 }
