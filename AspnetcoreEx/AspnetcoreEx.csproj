@@ -24,6 +24,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.1.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.0.1-alpha" />
+		<PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.1.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.1.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplate.Handlebars" Version="1.0.0-rc3" />
 		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.1.0" />

@@ -38,6 +38,7 @@ public static class KernelServiceExtensions
         kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
+        kernelBuilder.Plugins.AddFromType<MathSolver>();
 
         services.AddHttpClient("qdrant", c =>
         {
