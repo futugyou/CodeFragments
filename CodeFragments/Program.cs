@@ -47,7 +47,9 @@ class Program
         // DataProtectionDemo.DataProtectorRevokeUsecase();
         // DataProtectionDemo.EphemeralDataProtectorUsecase();
         // DataProtectionDemo.GeneratorHashUsecase();
-        DataProtectionDemo.FileSystemDataProtectorUsecase();
+        // DataProtectionDemo.FileSystemDataProtectorUsecase();
+
+        ScottPlotDemo.ReadFile();
 
         Console.ReadLine();
     }
