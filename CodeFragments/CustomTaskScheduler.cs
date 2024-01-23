@@ -11,7 +11,7 @@ namespace CodeFragments
     public sealed class CustomTaskScheduler : TaskScheduler, IDisposable
     {
         private BlockingCollection<Task> tasksCollection = new BlockingCollection<Task>();
-        private readonly Thread mainThread = null;
+        private readonly Thread mainThread;
         public CustomTaskScheduler()
         {
             mainThread = new Thread(new ThreadStart(Execute));

@@ -25,13 +25,13 @@ namespace CodeFragments
 
     public class CustomJsonStringEnumConverter : JsonConverterFactory
     {
-        private readonly JsonNamingPolicy namingPolicy;
+        private readonly JsonNamingPolicy? namingPolicy;
         private readonly bool allowIntegerValues;
         private readonly JsonStringEnumConverter baseConverter;
 
         public CustomJsonStringEnumConverter() : this(null, true) { }
 
-        public CustomJsonStringEnumConverter(JsonNamingPolicy namingPolicy = null, bool allowIntegerValues = true)
+        public CustomJsonStringEnumConverter(JsonNamingPolicy? namingPolicy = null, bool allowIntegerValues = true)
         {
             this.namingPolicy = namingPolicy;
             this.allowIntegerValues = allowIntegerValues;
@@ -46,8 +46,8 @@ namespace CodeFragments
                         let attr = field.GetCustomAttribute<EnumMemberAttribute>()
                         where attr != null
                         select (field.Name, attr.Value);
-            var dictionary = query.ToDictionary(p => p.Item1, p => p.Item2);
-            if (dictionary.Count > 0)
+            var dictionary = query.ToDictionary(p => p.Item1!, p => p.Item2!);
+            if (dictionary.Count > 0 && namingPolicy != null)
             {
                 return new JsonStringEnumConverter(new DictionaryLookupNamingPolicy(dictionary, namingPolicy), allowIntegerValues).CreateConverter(typeToConvert, options);
             }

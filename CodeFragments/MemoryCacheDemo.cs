@@ -27,7 +27,7 @@ public class MemoryCacheDemo
         {
             Write(DateTime.Now.ToString());
             await Task.Delay(1000);
-            if (cache.TryGetValue("CurrentTime", out string currentTime))
+            if (cache.TryGetValue("CurrentTime", out string? currentTime))
             {
                 Console.WriteLine(currentTime);
             }
@@ -49,7 +49,7 @@ public class MemoryCacheDemo
             }
         }
 
-        void OnEvicted(object key, object value, EvictionReason reason, object state)
+        void OnEvicted(object key, object? value, EvictionReason reason, object? state)
         {
             options.ExpirationTokens.Clear();
             options.AddExpirationToken(fileProvider.Watch(fileName));

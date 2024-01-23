@@ -2,8 +2,9 @@
 
 class Program
 {
-    static async System.Threading.Tasks.Task Main(string[] args)
+    static async Task Main(string[] args)
     {
+        await ValueTask.CompletedTask;
         Console.WriteLine("Hello World!");
         // await PipelinesTest.Show();
 

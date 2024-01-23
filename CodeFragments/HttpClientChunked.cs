@@ -65,6 +65,7 @@ public class HttpClientChunked
     //         =>HttpClientHandler
     public static async Task HttpClientHttpMessageHandlerUsecase()
     {
+        await ValueTask.CompletedTask;
         var httpclient = new ServiceCollection()
             .AddHttpClient()
             .BuildServiceProvider()
@@ -98,7 +99,7 @@ public class HttpClientChunked
         var httpclient = services.BuildServiceProvider()
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient();
-        
+
         var handlerField = typeof(HttpMessageInvoker).GetField("_handler", BindingFlags.NonPublic | BindingFlags.Instance);
         PrintPipeline((HttpMessageHandler?)handlerField?.GetValue(httpclient), 0);
         await httpclient.GetAsync("http://www.baidu.com");
@@ -121,9 +122,9 @@ public class HttpClientChunked
         }
     }
 
-    class ExtendedHttpClientHandler : HttpClientHandler{}
-    class OneHttpMessageHandler : DelegatingHandler{}
-    class TwoHttpMessageHandler : DelegatingHandler{}
+    class ExtendedHttpClientHandler : HttpClientHandler { }
+    class OneHttpMessageHandler : DelegatingHandler { }
+    class TwoHttpMessageHandler : DelegatingHandler { }
     class ThreeHttpMessageHandler : DelegatingHandler
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

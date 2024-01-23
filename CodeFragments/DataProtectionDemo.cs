@@ -25,7 +25,8 @@ public class DataProtectionDemo
 
     static string Encrypt(string purpose, string originalPayload, TimeSpan timeout)
     {
-        return (GetDataProtector(purpose) as ITimeLimitedDataProtector).Protect(originalPayload, DateTimeOffset.UtcNow.Add(timeout));
+        var protector = (GetDataProtector(purpose) as ITimeLimitedDataProtector) ?? throw new Exception("null paraemter");
+        return protector.Protect(originalPayload, DateTimeOffset.UtcNow.Add(timeout));
     }
 
     static string Dencrypt(string purpose, string protectedPayload)
