@@ -28,7 +28,9 @@ class Program
         // JsonUtf8JsonWriter.WriteRawValue();
 
         // JsonUtf8JsonReader.Base();
-        JsonUtf8JsonReader.Filter();
+        // JsonUtf8JsonReader.Filter();
+
+        JsonSourceGeneration.Base();
 
         // NewLinqApiDemo.Test();
         // BufferDemo.Exection();
