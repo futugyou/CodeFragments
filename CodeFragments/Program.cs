@@ -24,6 +24,8 @@ class Program
         // await JsonAsyncEnumerable.Serialize();
 
         // JsonNodeDemo.Test();
+        // JsonUtf8JsonWriter.Base();
+        JsonUtf8JsonWriter.WriteRawValue();
 
         // NewLinqApiDemo.Test();
         // BufferDemo.Exection();
@@ -50,7 +52,7 @@ class Program
         // DataProtectionDemo.GeneratorHashUsecase();
         // DataProtectionDemo.FileSystemDataProtectorUsecase();
 
-        ScottPlotDemo.ReadFile();
+        // ScottPlotDemo.ReadFile();
 
         Console.ReadLine();
     }
