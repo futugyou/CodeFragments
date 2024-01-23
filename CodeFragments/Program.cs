@@ -30,7 +30,11 @@ class Program
         // JsonUtf8JsonReader.Base();
         // JsonUtf8JsonReader.Filter();
 
-        JsonSourceGeneration.Base();
+        // JsonSourceGeneration.Base();
+
+        // JsonCustomContracts.Base();
+        // JsonCustomContracts.PrivateFields();
+        JsonCustomContracts.AllowIntString();
 
         // NewLinqApiDemo.Test();
         // BufferDemo.Exection();
