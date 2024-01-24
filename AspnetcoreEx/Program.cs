@@ -67,15 +67,16 @@ builder.Services.AddStackPolicy(options =>
 
 builder.Services.AddSingleton<SimpleConsoleLogger>();
 builder.Services.AddSingleton<RequestIdLogger>();
-builder.Services.ConfigureHttpClientDefaults(b =>
+builder.Services.ConfigureHttpClientDefaults(static http =>
 {
-    b.AddLogger<SimpleConsoleLogger>();
-    b.AddLogger<RequestIdLogger>();
-    b.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
+    http.AddLogger<SimpleConsoleLogger>();
+    http.AddLogger<RequestIdLogger>();
+    http.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
     // b.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
-    b.AddHttpMessageHandler<TestAuthHandler>();
+    http.AddHttpMessageHandler<TestAuthHandler>();
     // it will remove all log, see read,md in HttpDiagnosticsExtensions
     // b.RemoveAllLoggers();
+    http.UseServiceDiscovery();
 });
 
 // builder.Services.AddMiniMvcControllers();
@@ -134,6 +135,21 @@ builder.Services.AddKernelServiceServices(configuration);
 
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
+
+// builder.Services.AddServiceDiscovery();
+builder.Services.AddServiceDiscoveryCore();
+builder.Services.AddPassThroughServiceEndPointResolver();
+builder.Services.AddConfigurationServiceEndPointResolver(options =>
+{
+    options.SectionName = "Services";
+
+    // Configure the logic for applying host name metadata
+    options.ApplyHostNameMetadata = static endpoint =>
+    {
+        // Your custom logic here. For example:
+        return endpoint.EndPoint is DnsEndPoint dnsEp && dnsEp.Host.StartsWith("internal");
+    };
+});
 
 var app = builder.Build();
 
