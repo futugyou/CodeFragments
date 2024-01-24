@@ -34,7 +34,7 @@ class Program
 
         // JsonCustomContracts.Base();
         // JsonCustomContracts.PrivateFields();
-        JsonCustomContracts.AllowIntString();
+        // JsonCustomContracts.AllowIntString();
 
         // NewLinqApiDemo.Test();
         // BufferDemo.Exection();
@@ -62,6 +62,15 @@ class Program
         // DataProtectionDemo.FileSystemDataProtectorUsecase();
 
         // ScottPlotDemo.ReadFile();
+
+        if (args.Any(p => p.Contains("server")))
+        {
+            NamedPipesServer.Base();
+        }
+        if (args.Any(p => p.Contains("client")))
+        {
+            NamedPipesClient.Base();
+        }
 
         Console.ReadLine();
     }
