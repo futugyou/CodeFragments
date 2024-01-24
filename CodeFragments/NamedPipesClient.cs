@@ -5,8 +5,7 @@ using System.Text;
 
 namespace CodeFragments;
 public class NamedPipesClient
-{
-    private static int numClients = 4;
+{ 
     public static void Base()
     {
         var pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation);

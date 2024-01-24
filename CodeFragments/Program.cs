@@ -72,7 +72,16 @@ class Program
             NamedPipesClient.Base();
         }
 
-        await PipelinesTest.PipeScheduler();
+        // await PipelinesTest.PipeScheduler();
+
+        if (args.Any(p => p.Contains("mmfw")))
+        {
+            Mmf.Write();
+        }
+        if (args.Any(p => p.Contains("mmfr")))
+        {
+            Mmf.Read();
+        }
         Console.ReadLine();
     }
 }
