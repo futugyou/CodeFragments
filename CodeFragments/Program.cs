@@ -72,6 +72,7 @@ class Program
             NamedPipesClient.Base();
         }
 
+        await PipelinesTest.PipeScheduler();
         Console.ReadLine();
     }
 }
