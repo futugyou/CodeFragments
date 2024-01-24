@@ -13,7 +13,7 @@ public static class Mmf
 {
     public static void Write()
     {
-        using var mmf = MemoryMappedFile.CreateOrOpen("ImgA");
+        using var mmf = MemoryMappedFile.OpenExisting("ImgA");
         using var accessor = mmf.CreateViewAccessor(4000000, 2000000);
         int colorSize = Marshal.SizeOf(typeof(MyColor));
         MyColor color;

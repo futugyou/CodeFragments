@@ -82,6 +82,8 @@ class Program
         {
             Mmf.Read();
         }
+
+        await Resilience.BaseAsync();
         Console.ReadLine();
     }
 }
