@@ -7,7 +7,8 @@ using AspnetcoreEx.RedisExtensions;
 using AspnetcoreEx.RouteEx;
 using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.HttpDiagnosticsExtensions;
-using AspnetcoreEx.KernelService; 
+using AspnetcoreEx.KernelService;
+using Microsoft.Extensions.Http.Resilience;
 // using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
@@ -117,6 +118,9 @@ builder.Services.AddRefitClient<IGitHubApi>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"))
     // .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(timeoutPolicy);
+
+var section = builder.Configuration.GetSection("RetryOptions");
+builder.Services.Configure<HttpRetryStrategyOptions>(section);
 
 builder.Services.AddGraphQL(configuration, builder.Environment);
 

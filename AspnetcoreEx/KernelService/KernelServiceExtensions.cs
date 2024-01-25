@@ -52,41 +52,54 @@ public static class KernelServiceExtensions
             }
         });
 
+        // httpClientBuilder.AddResilienceHandler(
+        //     "CustomPipeline",
+        //     static builder =>
+        // {
+        //     // See: https://www.pollydocs.org/strategies/retry.html
+        //     builder.AddRetry(new HttpRetryStrategyOptions
+        //     {
+        //         // Customize and configure the retry logic.
+        //         BackoffType = DelayBackoffType.Exponential,
+        //         MaxRetryAttempts = 5,
+        //         UseJitter = true
+        //     });
+
+        //     // See: https://www.pollydocs.org/strategies/circuit-breaker.html
+        //     builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+        //     {
+        //         // Customize and configure the circuit breaker logic.
+        //         SamplingDuration = TimeSpan.FromSeconds(10),
+        //         FailureRatio = 0.2,
+        //         MinimumThroughput = 3,
+        //         ShouldHandle = static args =>
+        //         {
+        //             return ValueTask.FromResult(args is
+        //             {
+        //                 Outcome.Result.StatusCode:
+        //                     HttpStatusCode.RequestTimeout or
+        //                         HttpStatusCode.TooManyRequests
+        //             });
+        //         }
+        //     });
+
+        //     // See: https://www.pollydocs.org/strategies/timeout.html
+        //     builder.AddTimeout(TimeSpan.FromSeconds(5));
+        // });
         httpClientBuilder.AddResilienceHandler(
-            "CustomPipeline",
-            static builder =>
-        {
-            // See: https://www.pollydocs.org/strategies/retry.html
-            builder.AddRetry(new HttpRetryStrategyOptions
+            "AdvancedPipeline",
+            static (ResiliencePipelineBuilder<HttpResponseMessage> builder, ResilienceHandlerContext context) =>
             {
-                // Customize and configure the retry logic.
-                BackoffType = DelayBackoffType.Exponential,
-                MaxRetryAttempts = 5,
-                UseJitter = true
+                // Enable reloads whenever the named options change
+                context.EnableReloads<HttpRetryStrategyOptions>("RetryOptions");
+
+                // Retrieve the named options
+                var retryOptions = context.GetOptions<HttpRetryStrategyOptions>("RetryOptions");
+
+                // Add retries using the resolved options
+                builder.AddRetry(retryOptions);
             });
 
-            // See: https://www.pollydocs.org/strategies/circuit-breaker.html
-            builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
-            {
-                // Customize and configure the circuit breaker logic.
-                SamplingDuration = TimeSpan.FromSeconds(10),
-                FailureRatio = 0.2,
-                MinimumThroughput = 3,
-                ShouldHandle = static args =>
-                {
-                    return ValueTask.FromResult(args is
-                    {
-                        Outcome.Result.StatusCode:
-                            HttpStatusCode.RequestTimeout or
-                                HttpStatusCode.TooManyRequests
-                    });
-                }
-            });
-
-            // See: https://www.pollydocs.org/strategies/timeout.html
-            builder.AddTimeout(TimeSpan.FromSeconds(5));
-        });
-        
         services.AddSingleton<IQdrantVectorDbClient>(sp =>
         {
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
