@@ -94,6 +94,15 @@ class Program
             await SocketDemo.Server();
         }
 
+        if (args.Any(p => p.Contains("tcp-c")))
+        {
+            await SocketDemo.Client2();
+        }
+        if (args.Any(p => p.Contains("tcp-s")))
+        {
+            await SocketDemo.Listener2();
+        }
+
 
         Console.ReadLine();
     }
