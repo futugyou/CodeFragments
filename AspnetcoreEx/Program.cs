@@ -7,7 +7,7 @@ using AspnetcoreEx.RedisExtensions;
 using AspnetcoreEx.RouteEx;
 using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.HttpDiagnosticsExtensions;
-using AspnetcoreEx.KernelService;
+using AspnetcoreEx.KernelService; 
 // using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
@@ -103,16 +103,19 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "ResponseBodyFeature", Version = "v1" });
 });
 
-var retryPolicy = HttpPolicyExtensions
-    .HandleTransientHttpError()
-    .Or<TimeoutRejectedException>()
-    .WaitAndRetryAsync(10, _ => TimeSpan.FromMilliseconds(5000));
+// 类型“TimeoutRejectedException”同时存在于“Polly.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=c8a3ffc3f8f825cc”和
+// “Polly, Version=7.0.0.0, Culture=neutral, PublicKeyToken=c8a3ffc3f8f825cc”中
+// Polly.Timeout.TimeoutRejectedException fullname does not work.
+// var retryPolicy = HttpPolicyExtensions
+//     .HandleTransientHttpError()
+//     .Or<Polly.Timeout.TimeoutRejectedException>()
+//     .WaitAndRetryAsync(10, _ => TimeSpan.FromMilliseconds(5000));
 
 var timeoutPolicy = Polly.Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(30000));
 
 builder.Services.AddRefitClient<IGitHubApi>()
     .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"))
-    .AddPolicyHandler(retryPolicy)
+    // .AddPolicyHandler(retryPolicy)
     .AddPolicyHandler(timeoutPolicy);
 
 builder.Services.AddGraphQL(configuration, builder.Environment);

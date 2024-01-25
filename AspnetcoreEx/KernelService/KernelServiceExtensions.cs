@@ -1,6 +1,7 @@
 
 using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
@@ -40,7 +41,7 @@ public static class KernelServiceExtensions
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
         kernelBuilder.Plugins.AddFromType<MathSolver>();
 
-        services.AddHttpClient("qdrant", c =>
+        IHttpClientBuilder httpClientBuilder = services.AddHttpClient("qdrant", c =>
         {
             UriBuilder builder = new(config.QdrantHost);
             if (config.QdrantPort.HasValue) { builder.Port = config.QdrantPort.Value; }
@@ -51,6 +52,41 @@ public static class KernelServiceExtensions
             }
         });
 
+        httpClientBuilder.AddResilienceHandler(
+            "CustomPipeline",
+            static builder =>
+        {
+            // See: https://www.pollydocs.org/strategies/retry.html
+            builder.AddRetry(new HttpRetryStrategyOptions
+            {
+                // Customize and configure the retry logic.
+                BackoffType = DelayBackoffType.Exponential,
+                MaxRetryAttempts = 5,
+                UseJitter = true
+            });
+
+            // See: https://www.pollydocs.org/strategies/circuit-breaker.html
+            builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+            {
+                // Customize and configure the circuit breaker logic.
+                SamplingDuration = TimeSpan.FromSeconds(10),
+                FailureRatio = 0.2,
+                MinimumThroughput = 3,
+                ShouldHandle = static args =>
+                {
+                    return ValueTask.FromResult(args is
+                    {
+                        Outcome.Result.StatusCode:
+                            HttpStatusCode.RequestTimeout or
+                                HttpStatusCode.TooManyRequests
+                    });
+                }
+            });
+
+            // See: https://www.pollydocs.org/strategies/timeout.html
+            builder.AddTimeout(TimeSpan.FromSeconds(5));
+        });
+        
         services.AddSingleton<IQdrantVectorDbClient>(sp =>
         {
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
