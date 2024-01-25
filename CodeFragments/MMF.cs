@@ -13,7 +13,9 @@ public static class Mmf
 {
     public static void Write()
     {
+#pragma warning disable CA1416 // 验证平台兼容性
         using var mmf = MemoryMappedFile.OpenExisting("ImgA");
+#pragma warning restore CA1416 // 验证平台兼容性
         using var accessor = mmf.CreateViewAccessor(4000000, 2000000);
         int colorSize = Marshal.SizeOf(typeof(MyColor));
         MyColor color;

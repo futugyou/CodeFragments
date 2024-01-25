@@ -83,7 +83,18 @@ class Program
             Mmf.Read();
         }
 
-        await Resilience.BaseAsync();
+        // await Resilience.BaseAsync();
+
+        if (args.Any(p => p.Contains("socket-c")))
+        {
+            await SocketDemo.Client();
+        }
+        if (args.Any(p => p.Contains("socket-s")))
+        {
+            await SocketDemo.Server();
+        }
+
+
         Console.ReadLine();
     }
 }
