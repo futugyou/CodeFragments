@@ -82,6 +82,9 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
     http.UseServiceDiscovery();
 });
 
+// consume-events-in-process
+builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
+
 // builder.Services.AddMiniMvcControllers();
 
 var configuration = builder.Configuration;
