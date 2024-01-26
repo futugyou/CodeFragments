@@ -103,6 +103,7 @@ class Program
             await SocketDemo.Listener2();
         }
 
+        FileGlobbing.Base();
 
         Console.ReadLine();
     }
