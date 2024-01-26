@@ -1,4 +1,5 @@
-﻿namespace CodeFragments;
+﻿
+namespace CodeFragments;
 
 class Program
 {
@@ -103,8 +104,14 @@ class Program
             await SocketDemo.Listener2();
         }
 
-        FileGlobbing.Base();
+        // FileGlobbing.Base();
+
+        // PrimitivesPackage.Token1();
+        // PrimitivesPackage.Token2();
+        // PrimitivesPackage.Token3();
+        PrimitivesPackage.String1();
 
         Console.ReadLine();
     }
+
 }
