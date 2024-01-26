@@ -75,6 +75,8 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
     http.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
     // b.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
     http.AddHttpMessageHandler<TestAuthHandler>();
+    http.AddHttpMessageHandler<EnrichmentHandler>();
+    // http.AddHttpMessageHandler<ClientSideRateLimitedHandler>();
     // it will remove all log, see read,md in HttpDiagnosticsExtensions
     // b.RemoveAllLoggers();
     http.UseServiceDiscovery();
