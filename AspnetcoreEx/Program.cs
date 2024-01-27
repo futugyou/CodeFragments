@@ -9,6 +9,7 @@ using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.HttpDiagnosticsExtensions;
 using AspnetcoreEx.KernelService;
 using Microsoft.Extensions.Http.Resilience;
+using AspnetcoreEx.HostedService;
 // using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
@@ -161,6 +162,13 @@ builder.Services.AddConfigurationServiceEndPointResolver(options =>
         // Your custom logic here. For example:
         return endpoint.EndPoint is DnsEndPoint dnsEp && dnsEp.Host.StartsWith("internal");
     };
+});
+
+builder.Services.AddHostedService<QueuedHostedService>();
+builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
+{
+    var queueCapacity = 100;
+    return new DefaultBackgroundTaskQueue(queueCapacity);
 });
 
 var app = builder.Build();
