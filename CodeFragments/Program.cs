@@ -109,7 +109,9 @@ class Program
         // PrimitivesPackage.Token1();
         // PrimitivesPackage.Token2();
         // PrimitivesPackage.Token3();
-        PrimitivesPackage.String1();
+        // PrimitivesPackage.String1();
+
+        ExpressionDemo.Base();
 
         Console.ReadLine();
     }
