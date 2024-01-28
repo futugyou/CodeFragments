@@ -26,5 +26,46 @@ public class ExpressionDemo
         int result = compiledExpression();
         Console.WriteLine(result);
     }
+    public static void ClosureError()
+    {
+        var func = CreateBoundResource();
+        try
+        {
+            var r = func(1);
+            Console.WriteLine(r);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
 
+    private static Func<int, int> CreateBoundResource()
+    {
+        using (var constant = new Resource()) // constant is captured by the expression tree
+        {
+            Expression<Func<int, int>> expression = (b) => constant.Argument + b;
+            var rVal = expression.Compile();
+            return rVal;
+        }
+    }
+}
+
+public class Resource : IDisposable
+{
+    private bool _isDisposed = false;
+    public int Argument
+    {
+        get
+        {
+            if (!_isDisposed)
+                return 5;
+            else throw new ObjectDisposedException("Resource");
+        }
+    }
+
+    public void Dispose()
+    {
+        _isDisposed = true;
+    }
 }

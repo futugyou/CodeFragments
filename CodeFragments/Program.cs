@@ -111,7 +111,8 @@ class Program
         // PrimitivesPackage.Token3();
         // PrimitivesPackage.String1();
 
-        ExpressionDemo.Base();
+        // ExpressionDemo.Base();
+        ExpressionDemo.ClosureError();
 
         Console.ReadLine();
     }
