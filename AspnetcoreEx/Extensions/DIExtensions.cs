@@ -17,13 +17,48 @@ public static class DIExtensions
     }
 }
 
-public interface IUsefull { }
+public interface IUsefull
+{
+    private event Action AgeEvent
+    {
+        add
+        {
+            Console.WriteLine("AgeEvent Add");
+        }
+        remove
+        {
+            Console.WriteLine("AgeEvent Remove");
+        }
+    }
+
+    private static readonly int Age = 10;
+    private void Ok()
+    {
+        Console.WriteLine(Age);
+    }
+
+    void Log()
+    {
+        AgeEvent += Ok;
+        Console.WriteLine("log");
+        StaticLog();
+    }
+
+    static void StaticLog()
+    {
+        Console.WriteLine("StaticLog");
+    }
+
+}
 public class UsefullA : IUsefull { }
 public class UsefullB : IUsefull { }
 public class UsefullC : IUsefull { }
 public class UsefullD : IUsefull
 {
-    public UsefullD(string name) { }
+    public UsefullD(string name)
+    {
+        IUsefull.StaticLog();
+    }
 }
 
 public interface IServiceScope : IDisposable
