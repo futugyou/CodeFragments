@@ -102,6 +102,13 @@ public class ExpressionDemo
         var v = Visitor.CreateFromExpression(sum3);
         v.Visit("");
     }
+
+    public static void StandardVisitor()
+    {
+        Expression<Func<int>> sum3 = () => 1;
+        var v = new StandardVisitor();
+        v.Visit(sum3);
+    }
 }
 
 public class Resource : IDisposable

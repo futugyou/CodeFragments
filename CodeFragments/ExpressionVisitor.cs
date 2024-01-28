@@ -13,7 +13,7 @@ public abstract class Visitor
     public abstract void Visit(string prefix);
 
     public ExpressionType NodeType => node.NodeType;
-    
+
     public static Visitor CreateFromExpression(Expression node) =>
     node.NodeType switch
     {
@@ -154,5 +154,16 @@ public class MethodCallVisitor : Visitor
             var argVisitor = Visitor.CreateFromExpression(arg);
             argVisitor.Visit(prefix + "\t");
         }
+    }
+}
+
+public class StandardVisitor : ExpressionVisitor
+{
+    protected override Expression VisitConstant(ConstantExpression node)
+    {
+        Console.WriteLine($"This is an {node.NodeType} expression type");
+        Console.WriteLine($"The type of the constant value is {node.Type}");
+        Console.WriteLine($"The value of the constant value is {node.Value}");
+        return base.VisitConstant(node);
     }
 }
