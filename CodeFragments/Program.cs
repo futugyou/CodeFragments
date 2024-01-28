@@ -113,7 +113,8 @@ class Program
 
         // ExpressionDemo.Base();
         // ExpressionDemo.ClosureError();
-        ExpressionDemo.Interpreting();
+        // ExpressionDemo.Interpreting();
+        ExpressionDemo.CustomVisitor();
 
         Console.ReadLine();
     }

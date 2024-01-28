@@ -72,7 +72,7 @@ public class ExpressionDemo
             Console.WriteLine($"The value of the constant value is {constant.Value}");
             Console.WriteLine();
         }
-        
+
         {
             Expression<Func<int, int, int>> addition = (a, b) => a + b;
             Console.WriteLine($"This expression is a {addition.NodeType} expression type");
@@ -94,6 +94,13 @@ public class ExpressionDemo
             Console.WriteLine($"\tParameter Type: {right.Type.ToString()}, Name: {right.Name}");
             Console.WriteLine();
         }
+    }
+
+    public static void CustomVisitor()
+    {
+        Expression<Func<int, int, int>> sum3 = (a, b) => (1 + a) + (3 + b);
+        var v = Visitor.CreateFromExpression(sum3);
+        v.Visit("");
     }
 }
 
