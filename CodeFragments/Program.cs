@@ -112,7 +112,8 @@ class Program
         // PrimitivesPackage.String1();
 
         // ExpressionDemo.Base();
-        ExpressionDemo.ClosureError();
+        // ExpressionDemo.ClosureError();
+        ExpressionDemo.Interpreting();
 
         Console.ReadLine();
     }
