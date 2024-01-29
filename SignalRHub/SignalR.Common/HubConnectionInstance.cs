@@ -4,22 +4,21 @@ namespace SignalR.Common;
 
 public class HubConnectionInstance : IHubConnectionInstance
 {
-    private readonly SignalROption _options;
+    private readonly IOptionsMonitor<SignalROption> _options;
 
     public HubConnection Connection { get; private set; }
 
-    public HubConnectionInstance(SignalROption options)
+    public HubConnectionInstance(IOptionsMonitor<SignalROption> options)
     {
         _options = options;
     }
 
     public async Task InitAsync()
     {
-        var url = _options.Url;
+        var url = _options.CurrentValue.Url;
         Connection = new HubConnectionBuilder()
             .WithUrl(url)
             .Build();
-
         await Task.CompletedTask;
     }
 
