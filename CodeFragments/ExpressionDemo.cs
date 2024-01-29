@@ -108,6 +108,14 @@ public class ExpressionDemo
         Expression<Func<int>> sum3 = () => 1;
         var v = new StandardVisitor();
         v.Visit(sum3);
+
+        Console.WriteLine();
+
+        Expression<Func<string, bool>> expr = name => name.Length > 10 && name.StartsWith("G");
+        Console.WriteLine(expr);
+        Console.WriteLine();
+        Expression modifiedExpr = v.Modify((Expression)expr);
+        Console.WriteLine(modifiedExpr);
     }
 
     public static void Loop()

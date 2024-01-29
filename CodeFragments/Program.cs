@@ -115,8 +115,8 @@ class Program
         // ExpressionDemo.ClosureError();
         // ExpressionDemo.Interpreting();
         // ExpressionDemo.CustomVisitor();
-        // ExpressionDemo.StandardVisitor();
-        ExpressionDemo.Loop();
+        ExpressionDemo.StandardVisitor();
+        // ExpressionDemo.Loop();
 
         Console.ReadLine();
     }
