@@ -11,6 +11,24 @@ namespace PlaywrightTestSourceGenerator;
 [Generator]
 public class PlaywrightTestTemplate : ISourceGenerator
 {
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        context.RegisterPostInitializationOutput(i =>
+        {
+            i.AddSource("GlobalParameterAttribute.g.cs", @"using System;
+namespace SourceGeneratorAttributes;
+[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+public sealed class GlobalParameterAttribute : Attribute
+{
+    public int OptionalNumber { get; set; } = 10;
+    public string OptionalString { get; set; } = ""test"";
+    public GlobalParameterAttribute(string requiredString, int requiredNumber) {}
+}");
+        });
+
+    }
+
     public void Execute(GeneratorExecutionContext context)
     {
         var options = GetLoadOptions(context);
@@ -73,7 +91,7 @@ public class {name}GeneratorTest: PlaywrightTest
         Assert.IsTrue(httpStatus == 200);
     }}
 ");
-            }            
+            }
 
             sourceBuilder.Append(@$"
 }}

@@ -3,18 +3,22 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<LangVersion>preview</LangVersion>
+		<!-- <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules> -->
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Json.Net" Version="1.0.33" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.0-3.final" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0-beta1.23525.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" GeneratePathProperty="true" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.Playwright.MSTest" Version="1.40.0" GeneratePathProperty="true" PrivateAssets="all" />
-		<PackageReference Include="MSTest.TestAdapter" Version="2.2.10" GeneratePathProperty="true" PrivateAssets="all" />
-		<PackageReference Include="MSTest.TestFramework" Version="2.2.10" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0-release-23619-01" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Playwright.MSTest" Version="1.41.2" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.2.0" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.2.0" GeneratePathProperty="true" PrivateAssets="all" />
 	</ItemGroup>
 </Project>
