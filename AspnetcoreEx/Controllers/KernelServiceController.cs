@@ -4,9 +4,11 @@ using AspnetcoreEx.KernelService;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.PromptTemplate.Handlebars;
+using Microsoft.SemanticKernel.Text;
 
 namespace AspnetcoreEx.Controllers;
 
+[Experimental("SKEXP0011")]
 [Route("api/sk")]
 [ApiController]
 public class KernelServiceController : ControllerBase
@@ -460,4 +462,75 @@ public class KernelServiceController : ControllerBase
 
         return fullMessage;
     }
+
+    [Route("token")]
+    [HttpPost]
+    public List<string> Token()
+    {
+        var text = @"You are a friendly assistant who likes to follow the rules. You will complete required steps
+            and request approval before taking any consequential actions. If the user doesn't provide
+            enough information for you to complete a task, you will keep asking questions until you have
+            enough information to complete the task.";
+
+        // 1. no TokenCounter
+        var lines = TextChunker.SplitPlainTextLines(text, 40);
+        Console.WriteLine(lines);
+        var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 120);
+        Console.WriteLine(paragraphs);
+
+        // 2. SharpToken
+        lines = TextChunker.SplitPlainTextLines(text, 40, SharpTokenTokenCounter);
+        Console.WriteLine(lines);
+        paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 120, tokenCounter: SharpTokenTokenCounter);
+        Console.WriteLine(paragraphs);
+
+        // 3. Microsoft.ML.Tokenizers
+        lines = TextChunker.SplitPlainTextLines(text, 40, MicrosoftMLTokenCounter);
+        Console.WriteLine(lines);
+        paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 120, tokenCounter: MicrosoftMLTokenCounter);
+        Console.WriteLine(paragraphs);
+
+        // 4. Microsoft.ML.Robert
+        lines = TextChunker.SplitPlainTextLines(text, 40, MicrosoftMLRobertaTokenCounter);
+        Console.WriteLine(lines);
+        paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 120, tokenCounter: MicrosoftMLRobertaTokenCounter);
+        Console.WriteLine(paragraphs);
+
+
+        return paragraphs;
+    }
+
+    // SharpToken token counter
+    private static TextChunker.TokenCounter SharpTokenTokenCounter => (string input) =>
+    {
+        var encoding = SharpToken.GptEncoding.GetEncoding("cl100k_base");
+        var tokens = encoding.Encode(input);
+
+        return tokens.Count;
+    };
+
+    // Microsoft.ML.Tokenizers token counter
+    private static TextChunker.TokenCounter MicrosoftMLTokenCounter => (string input) =>
+    {
+        Microsoft.ML.Tokenizers.Tokenizer tokenizer = new(new Microsoft.ML.Tokenizers.Bpe());
+        var tokens = tokenizer.Encode(input).Tokens;
+
+        return tokens.Count;
+    };
+
+    // Microsoft.ML.Robert token counter
+    private static TextChunker.TokenCounter MicrosoftMLRobertaTokenCounter => (string input) =>
+    {
+        Assembly assembly = typeof(KernelServiceController).Assembly;
+
+        Microsoft.ML.Tokenizers.EnglishRoberta model = new(
+                                   assembly.GetManifestResourceStream("encoder.json")!,
+                                   assembly.GetManifestResourceStream("vocab.bpe")!,
+                                   assembly.GetManifestResourceStream("dict.txt")!);
+        model.AddMaskSymbol();
+        Microsoft.ML.Tokenizers.Tokenizer tokenizer = new(model, new Microsoft.ML.Tokenizers.RobertaPreTokenizer());
+        var tokens = tokenizer.Encode(input).Tokens;
+
+        return tokens.Count;
+    };
 }

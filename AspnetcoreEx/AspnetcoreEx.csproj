@@ -24,6 +24,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.2.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.0.0-preview.3.24105.21" />
+		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.21.1" /> 
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.4.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.0.1-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.1.0-preview" />
@@ -32,6 +33,7 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.4.0" />
 		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
+		<PackageReference Include="SharpToken" Version="1.2.16" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.7.17" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
@@ -79,5 +81,16 @@
 		<EmbeddedResource Include="Resources\30-user-context.txt" />
 		<EmbeddedResource Include="KernelService\Skill\**\*.yaml" />
 	</ItemGroup>
- 
+	
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\dict.txt">
+			<LogicalName>dict.txt</LogicalName>
+		</EmbeddedResource>    
+		<EmbeddedResource Include="Resources\encoder.json">
+			<LogicalName>encoder.json</LogicalName>
+		</EmbeddedResource>    
+		<EmbeddedResource Include="Resources\vocab.bpe">
+			<LogicalName>vocab.bpe</LogicalName>
+		</EmbeddedResource>    
+	</ItemGroup>
 </Project>
