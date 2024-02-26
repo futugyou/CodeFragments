@@ -19,6 +19,6 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0-release-23619-01" GeneratePathProperty="true" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.Playwright.MSTest" Version="1.41.2" GeneratePathProperty="true" PrivateAssets="all" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.2.0" GeneratePathProperty="true" PrivateAssets="all" />
-		<PackageReference Include="MSTest.TestFramework" Version="3.2.0" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.2.2" GeneratePathProperty="true" PrivateAssets="all" />
 	</ItemGroup>
 </Project>
