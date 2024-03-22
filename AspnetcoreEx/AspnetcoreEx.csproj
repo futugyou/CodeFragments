@@ -35,7 +35,7 @@
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
 		<PackageReference Include="SharpToken" Version="1.2.17" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="StackExchange.Redis" Version="2.7.27" />
+		<PackageReference Include="StackExchange.Redis" Version="2.7.33" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="8.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.0" />
