@@ -3,6 +3,9 @@ using System.Reflection;
 using AspnetcoreEx.KernelService;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Plugins.Document;
+using Microsoft.SemanticKernel.Plugins.Document.FileSystem;
+using Microsoft.SemanticKernel.Plugins.Document.OpenXml;
 using Microsoft.SemanticKernel.PromptTemplate.Handlebars;
 using Microsoft.SemanticKernel.Text;
 
@@ -278,7 +281,7 @@ public class KernelServiceController : ControllerBase
         responseList.Add(request);
 
         var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
-            prompts["chat"],
+            prompts["chat"], // "Skills","chat",           
             new() {
                 { "request", request },
                 { "history", string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) }
@@ -533,4 +536,14 @@ public class KernelServiceController : ControllerBase
 
         return tokens.Count;
     };
+
+    [Route("doc")]
+    [HttpPost]
+    public async Task<string> Document(string filePath)
+    {
+        DocumentPlugin documentPlugin = new(new WordDocumentConnector(), new LocalFileSystemConnector());
+        string text = await documentPlugin.ReadTextAsync(filePath);
+        return text;
+    }
+
 }

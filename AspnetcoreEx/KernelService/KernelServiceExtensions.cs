@@ -41,6 +41,8 @@ public static class KernelServiceExtensions
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
         kernelBuilder.Plugins.AddFromType<MathSolver>();
 
+        kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
+
         IHttpClientBuilder httpClientBuilder = services.AddHttpClient("qdrant", c =>
         {
             UriBuilder builder = new(config.QdrantHost);
