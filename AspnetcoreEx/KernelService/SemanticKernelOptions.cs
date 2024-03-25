@@ -19,4 +19,6 @@ public class SemanticKernelOptions
     public string ChatModel { get; set; }
     // for azure
     public string Endpoint { get; set; }
+    public string KernelMemoryEndpoint { get; set; }
+    public string KernelMemoryApiKey { get; set; }
 }

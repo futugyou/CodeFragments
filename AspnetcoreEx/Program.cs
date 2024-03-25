@@ -145,6 +145,7 @@ builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
 builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 builder.Services.AddKernelServiceServices(configuration);
+builder.Services.AddKernelMemoryServices(configuration);
 
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();

@@ -1,6 +1,7 @@
 ﻿
 using System.Reflection;
 using AspnetcoreEx.KernelService;
+using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Document;
@@ -17,6 +18,7 @@ namespace AspnetcoreEx.Controllers;
 public class KernelServiceController : ControllerBase
 {
     private readonly Kernel _kernel;
+    private readonly IKernelMemory _kernelMemory;
     private readonly SemanticKernelOptions _options;
     private readonly IChatCompletionService _chatCompletionService;
     private OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
@@ -24,9 +26,10 @@ public class KernelServiceController : ControllerBase
         ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
     };
 
-    public KernelServiceController(Kernel kernel, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
+    public KernelServiceController(Kernel kernel, IKernelMemory kernelMemory, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
     {
         _kernel = kernel;
+        _kernelMemory = kernelMemory;
         _options = optionsMonitor.CurrentValue;
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
     }
@@ -544,6 +547,40 @@ public class KernelServiceController : ControllerBase
         DocumentPlugin documentPlugin = new(new WordDocumentConnector(), new LocalFileSystemConnector());
         string text = await documentPlugin.ReadTextAsync(filePath);
         return text;
+    }
+
+
+    [Route("memclientweb")]
+    [HttpPost]
+    public async Task<string> ClientImportWeb(string url, string documentId, string question)
+    {
+        var memory = new MemoryWebClient(endpoint: _options.KernelMemoryEndpoint, apiKey: _options.KernelMemoryApiKey);
+        await memory.ImportWebPageAsync(url);
+
+        while (!await memory.IsDocumentReadyAsync(documentId))
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(1000));
+        }
+
+        var answer = await memory.AskAsync(question);
+
+        return answer.Result;
+    }
+
+    [Route("memweb")]
+    [HttpPost]
+    public async Task<string> ImportWeb(string url, string documentId, string question)
+    {
+        await _kernelMemory.ImportWebPageAsync(url);
+
+        while (!await _kernelMemory.IsDocumentReadyAsync(documentId))
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(1000));
+        }
+
+        var answer = await _kernelMemory.AskAsync(question);
+
+        return answer.Result;
     }
 
 }

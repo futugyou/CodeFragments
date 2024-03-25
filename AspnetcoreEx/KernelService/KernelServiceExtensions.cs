@@ -6,6 +6,7 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Plugins.Core;
+using Microsoft.KernelMemory;
 
 namespace AspnetcoreEx.KernelService;
 
@@ -132,6 +133,55 @@ public static class KernelServiceExtensions
 
             return memoryBuilder.Build();
         });
+
+        return services;
+    }
+
+    internal static IServiceCollection AddKernelMemoryServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
+        var sp = services.BuildServiceProvider();
+        var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+        var memoryBuilder = new KernelMemoryBuilder().WithSimpleVectorDb();
+
+        if (!string.IsNullOrWhiteSpace(config.Endpoint))
+        {
+            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(new AzureOpenAIConfig
+            {
+                Deployment = config.Embedding,
+                Endpoint = config.Endpoint,
+                Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+                APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
+                APIKey = config.Key
+            });
+            memoryBuilder.WithAzureOpenAITextGeneration(new AzureOpenAIConfig
+            {
+                Deployment = config.TextCompletion,
+                Endpoint = config.Endpoint,
+                Auth = AzureOpenAIConfig.AuthTypes.APIKey,
+                APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
+                APIKey = config.Key
+            });
+        }
+        else
+        {
+            memoryBuilder.WithOpenAITextEmbeddingGeneration(new OpenAIConfig
+            {
+                EmbeddingModel = config.Embedding,
+                APIKey = config.Key,
+            });
+            memoryBuilder.WithOpenAITextGeneration(new OpenAIConfig
+            {
+                TextModel = config.TextCompletion,
+                APIKey = config.Key
+            });
+        }
+
+        services.AddSingleton(sp =>
+        {
+            return memoryBuilder.Build();
+        });
+
 
         return services;
     }
