@@ -80,7 +80,7 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
     // http.AddHttpMessageHandler<ClientSideRateLimitedHandler>();
     // it will remove all log, see read,md in HttpDiagnosticsExtensions
     // b.RemoveAllLoggers();
-    http.UseServiceDiscovery();
+    http.AddServiceDiscovery();
 });
 
 // consume-events-in-process
@@ -150,8 +150,6 @@ builder.Services.AddKernelMemoryServices(configuration);
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
 
-// builder.Services.AddServiceDiscovery();
-builder.Services.AddServiceDiscoveryCore();
 builder.Services.AddPassThroughServiceEndPointResolver();
 builder.Services.AddConfigurationServiceEndPointResolver(options =>
 {

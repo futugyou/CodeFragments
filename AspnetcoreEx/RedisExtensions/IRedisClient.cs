@@ -11,6 +11,7 @@ public interface IRedisClient
     Task<string> WriteStream(string streamKey, string fieldName, string value);
     Task<string> WriteStream(string streamKey, Dictionary<string, string> streamPairs);
     Task<Dictionary<string, Dictionary<string, string>>> ReadStream(string streamKey, string position, int maxCount = 0);
+    Task<(bool, string)> TokenBucket(string key);
 }
 
 public class RedisClient : IRedisClient, IDisposable
@@ -29,6 +30,35 @@ public class RedisClient : IRedisClient, IDisposable
                                             return 1
                                         end
                                         return 0";
+
+    private const string TOKENBUCKET = @"
+                                        local prefix = ARGV[1]
+                                        local cursor = '0'
+                                        local found = false
+                                        local selectedKey = nil
+
+                                        repeat
+                                            local result = redis.call('SCAN', cursor, 'MATCH', prefix .. '*', 'COUNT', '1000')
+                                            cursor = result[1]
+                                            local keys = result[2]
+
+                                            for _, key in ipairs(keys) do
+                                                local value = redis.call('GET', key)
+                                                if value == '1' then
+                                                    selectedKey = key
+                                                    found = true
+                                                    break
+                                                end
+                                            end
+
+                                        until cursor == '0' or found
+
+                                        if found and selectedKey then
+                                            redis.call('SET', selectedKey, '0')
+                                        end
+
+                                        return {found, selectedKey}
+                                    ";
 
     private const string UNLOCKSTRING = @"local getlock = redis.call('GET', @key)
                                             if getlock == @value then
@@ -164,5 +194,19 @@ public class RedisClient : IRedisClient, IDisposable
             result.Add(id, d);
         }
         return result;
+    }
+
+    public async Task<(bool, string)> TokenBucket(string key)
+    {
+        var scriptParams = new RedisKey[] { key };
+        var result = await _db.ScriptEvaluateAsync(TOKENBUCKET, scriptParams);
+
+        // Process Lua script result
+        var resultArray = (RedisResult[])result!;
+
+        bool found = (bool)resultArray[0];
+        string selectedKey = (string)resultArray[1]!;
+
+        return (found, selectedKey);
     }
 }
