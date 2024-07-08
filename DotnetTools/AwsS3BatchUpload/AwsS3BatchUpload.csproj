@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AWSSDK.S3" Version="3.7.310.1" />
+		<PackageReference Include="AWSSDK.S3" Version="3.7.310.2" />
 		<PackageReference Include="Oakton" Version="6.1.0" />
 	</ItemGroup>
 
