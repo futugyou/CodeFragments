@@ -25,8 +25,8 @@
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
 		<PackageReference Include="Microsoft.Data.Analysis" Version="0.21.1" />
 		<!--<PackageReference Include="Metalama.Framework" Version="0.5.55-preview" />-->
-		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Resilience" Version="8.4.0" />
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Resilience" Version="8.6.0" />
 		<PackageReference Include="ScottPlot" Version="5.0.23" />
 		<PackageReference Include="Sharprompt" Version="2.4.5" />
 		<PackageReference Include="StackExchange.Redis" Version="2.7.33" />
