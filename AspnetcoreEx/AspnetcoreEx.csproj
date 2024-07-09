@@ -21,7 +21,7 @@
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.0.0-preview.5.24201.12" />
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.35.240321.1" />
