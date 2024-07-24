@@ -10,6 +10,7 @@ using AspnetcoreEx.HttpDiagnosticsExtensions;
 using AspnetcoreEx.KernelService;
 using Microsoft.Extensions.Http.Resilience;
 using AspnetcoreEx.HostedService;
+using Microsoft.Extensions.ServiceDiscovery;
 // using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
@@ -150,19 +151,33 @@ builder.Services.AddKernelMemoryServices(configuration);
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
 
-builder.Services.AddPassThroughServiceEndPointResolver();
-builder.Services.AddConfigurationServiceEndPointResolver(options =>
-{
-    options.SectionName = "Services";
+// this will use aspire, not base asp.net core
+// builder.Services.AddPassThroughServiceEndPointResolver();
+// builder.Services.AddConfigurationServiceEndPointResolver(options =>
+// {
+//     options.SectionName = "Services";
 
-    // Configure the logic for applying host name metadata
-    options.ApplyHostNameMetadata = static endpoint =>
-    {
-        // Your custom logic here. For example:
-        return endpoint.EndPoint is DnsEndPoint dnsEp && dnsEp.Host.StartsWith("internal");
-    };
-});
+//     // Configure the logic for applying host name metadata
+//     options.ApplyHostNameMetadata = static endpoint =>
+//     {
+//         // Your custom logic here. For example:
+//         return endpoint.EndPoint is DnsEndPoint dnsEp && dnsEp.Host.StartsWith("internal");
+//     };
+// });
+// builder.Services.Configure<ConfigurationServiceEndPointResolverOptions>(
+//     static options =>
+//     {
+//         options.SectionName = "MyServiceEndpoints";
 
+//         // Configure the logic for applying host name metadata
+//         options.ApplyHostNameMetadata = static endpoint =>
+//         {
+//             // Your custom logic here. For example:
+//             return endpoint.EndPoint is DnsEndPoint dnsEp
+//                 && dnsEp.Host.StartsWith("internal");
+//         };
+//     });
+    
 builder.Services.AddHostedService<QueuedHostedService>();
 builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 {
