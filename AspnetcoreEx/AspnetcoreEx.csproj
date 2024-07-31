@@ -27,13 +27,13 @@
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.35.240321.1" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.69.240727.1" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.21.1" /> 
-		<PackageReference Include="Microsoft.SemanticKernel" Version="1.16.1" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="1.16.2" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.0.1-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.1.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.1.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.6.3-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplate.Handlebars" Version="1.0.0-rc3" />
-		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.16.1" />
+		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.16.2" />
 		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
 		<PackageReference Include="SharpToken" Version="2.0.3" />
