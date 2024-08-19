@@ -24,6 +24,7 @@
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
 		<PackageReference Include="Microsoft.Data.Analysis" Version="0.21.1" />
+		<PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.532401" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
 		<!--<PackageReference Include="Metalama.Framework" Version="0.5.55-preview" />-->
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.8" />
