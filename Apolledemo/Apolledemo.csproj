@@ -9,5 +9,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Com.Ctrip.Framework.apollo.Configuration" Version="2.10.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
 	</ItemGroup>
 </Project>
