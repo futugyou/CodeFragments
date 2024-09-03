@@ -32,7 +32,7 @@
 		<PackageReference Include="Microsoft.Extensions.Resilience" Version="8.8.0" />
 		<PackageReference Include="ScottPlot" Version="5.0.37" />
 		<PackageReference Include="Sharprompt" Version="2.4.5" />
-		<PackageReference Include="StackExchange.Redis" Version="2.8.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.12" />
 		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
