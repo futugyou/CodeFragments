@@ -25,7 +25,7 @@
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="5.0.0-preview.3.20215.2" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.9.1" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.0" />
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.74.240919.1" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.74.240919.1" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.22.0-preview.24378.1" /> 
