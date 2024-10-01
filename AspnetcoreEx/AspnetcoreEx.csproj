@@ -27,7 +27,7 @@
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.1" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.0" />
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.75.240924.1" />
-		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.75.240924.1" />
+		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.76.240930.3" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.22.0-preview.24378.1" /> 
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.21.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.0.1-alpha" />
