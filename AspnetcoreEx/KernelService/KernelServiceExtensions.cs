@@ -24,14 +24,12 @@ public static class KernelServiceExtensions
         {
             kernelBuilder.AddAzureOpenAIChatCompletion(config.ChatModel, config.Endpoint, config.Key);
             kernelBuilder.AddAzureOpenAITextEmbeddingGeneration(config.Embedding, config.Endpoint, config.Key);
-            kernelBuilder.AddAzureOpenAITextGeneration(config.TextCompletion, config.Endpoint, config.Key);
             kernelBuilder.AddAzureOpenAITextToImage(config.Image, config.Endpoint, config.Key);
         }
         else
         {
             kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, config.Key);
             kernelBuilder.AddOpenAITextEmbeddingGeneration(config.Embedding, config.Key);
-            kernelBuilder.AddOpenAITextGeneration(config.TextCompletion, config.Key);
             kernelBuilder.AddOpenAITextToImage(config.Key);
         }
 
@@ -124,7 +122,7 @@ public static class KernelServiceExtensions
             memoryBuilder.WithMemoryStore(store);
             if (!string.IsNullOrWhiteSpace(config.Endpoint))
             {
-                memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(config.Embedding, config.Endpoint, config.Key);
+                // memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(config.Embedding, config.Endpoint, config.Key);
             }
             else
             {

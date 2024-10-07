@@ -518,10 +518,9 @@ public class KernelServiceController : ControllerBase
     // Microsoft.ML.Tokenizers token counter
     private static TextChunker.TokenCounter MicrosoftMLTokenCounter => (string input) =>
     {
-        Microsoft.ML.Tokenizers.Tokenizer tokenizer = new(new Microsoft.ML.Tokenizers.Bpe());
-        var tokens = tokenizer.Encode(input).Tokens;
-
-        return tokens.Count;
+        Assembly assembly = typeof(KernelServiceController).Assembly;
+        var tokenizer = Microsoft.ML.Tokenizers.BpeTokenizer.Create(assembly.GetManifestResourceStream("vocab.bpe")!, null);
+        return tokenizer.CountTokens(input);
     };
 
     // Microsoft.ML.Robert token counter
@@ -529,15 +528,13 @@ public class KernelServiceController : ControllerBase
     {
         Assembly assembly = typeof(KernelServiceController).Assembly;
 
-        Microsoft.ML.Tokenizers.EnglishRoberta model = new(
+        var tokenizer = Microsoft.ML.Tokenizers.EnglishRobertaTokenizer.Create(
                                    assembly.GetManifestResourceStream("encoder.json")!,
                                    assembly.GetManifestResourceStream("vocab.bpe")!,
-                                   assembly.GetManifestResourceStream("dict.txt")!);
-        model.AddMaskSymbol();
-        Microsoft.ML.Tokenizers.Tokenizer tokenizer = new(model, new Microsoft.ML.Tokenizers.RobertaPreTokenizer());
-        var tokens = tokenizer.Encode(input).Tokens;
-
-        return tokens.Count;
+                                   assembly.GetManifestResourceStream("dict.txt")!,
+                                   Microsoft.ML.Tokenizers.RobertaPreTokenizer.Instance);
+        tokenizer.AddMaskSymbol();
+        return tokenizer.CountTokens(input);
     };
 
     [Route("doc")]
