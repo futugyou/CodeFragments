@@ -16,7 +16,7 @@ public class Query
     //         userName
     //     }
     // }
-    public async Task<User> GetUserWithDataLoader(int id, UserBatchDataLoader dataLoader)
+    public async Task<User?> GetUserWithDataLoader(int id, UserBatchDataLoader dataLoader)
     {
         return await dataLoader.LoadAsync(id);
     }
@@ -56,11 +56,10 @@ public class Query
     /// }
     ///}
     [UseConsoleLog]
-    [UseGraphQLDb]
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetAllUser([Service(ServiceKind.Pooled)] GraphQLDbContext dbContext)
+    public IQueryable<User> GetAllUser(GraphQLDbContext dbContext)
     {
         return dbContext.Users;
     }
@@ -141,8 +140,7 @@ public class Query
                             .ToList();
         var pageInfo = new ConnectionPageInfo(false, false, null, null);
 
-        var connection = new Connection<User>(edges, pageInfo,
-                            ct => ValueTask.FromResult(0));
+        var connection = new Connection<User>(edges, pageInfo);
 
         return Task.FromResult(connection);
     }

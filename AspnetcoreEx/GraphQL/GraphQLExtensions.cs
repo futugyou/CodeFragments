@@ -63,10 +63,10 @@ public static class GraphQLExtensions
         .AddFiltering()
         .AddProjections() // AddProjections can get include data like ef.
         .AddSorting()
-        .SetPagingOptions(new PagingOptions
+        .ModifyPagingOptions(op =>
         {
-            MaxPageSize = 50,
-            IncludeTotalCount = true
+            op.MaxPageSize = 50;
+            op.IncludeTotalCount = true;
         })
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
@@ -112,7 +112,7 @@ public static class GraphQLExtensions
         // .AddRemoteSchema(WellKnownSchemaNames.Myself2)
         // .AddRemoteSchemasFromRedis("Demo", sp => sp.GetRequiredService<ConnectionMultiplexer>())
         .InitializeOnStartup()
-        .UseAutomaticPersistedQueryPipeline()
+        .UseAutomaticPersistedOperationPipeline()
         .AddInMemoryQueryStorage()
         // .AddRedisQueryStorage(services => ConnectionMultiplexer.Connect("redisstring").GetDatabase())
         // .UsePersistedQueryPipeline()

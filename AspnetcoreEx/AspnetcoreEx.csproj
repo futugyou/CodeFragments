@@ -28,6 +28,7 @@
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.2" />
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.90.241021.1" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.90.241021.1" />
+		<PackageReference Include="Microsoft.KernelMemory.AI.AzureOpenAI" Version="0.90.241021.1" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.22.0-preview.24522.7" /> 
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.24.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.0.1-alpha" />

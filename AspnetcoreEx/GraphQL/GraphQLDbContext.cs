@@ -10,15 +10,6 @@ public class GraphQLDbContext : DbContext
     public DbSet<User> Users { get; set; }
 }
 
-public class UseGraphQLDbAttribute : UseDbContextAttribute
-{
-    public UseGraphQLDbAttribute([CallerLineNumber] int order = 1)
-        : base(typeof(GraphQLDbContext))
-    {
-        Order = order;
-    }
-}
-
 public static class GraphQLDbInitializer
 {
     public static void InitializeGraphQLDb(this WebApplication app)

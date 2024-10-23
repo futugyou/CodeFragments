@@ -12,7 +12,7 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
         this.logger = logger;
 
     }
-    public override ValueTask OnCreateAsync(HttpContext context, IRequestExecutor requestExecutor, IQueryRequestBuilder requestBuilder, CancellationToken cancellationToken)
+    public override ValueTask OnCreateAsync(HttpContext context, IRequestExecutor requestExecutor, OperationRequestBuilder requestBuilder, CancellationToken cancellationToken)
     {
         var identity = new ClaimsIdentity();
         identity.AddClaim(new Claim(ClaimTypes.Country, "us"));
@@ -28,11 +28,11 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
             // to be disallowed
             // requestBuilder.SetIntrospectionNotAllowedMessage("Missing `X-Allow-Introspection` header");
         }
-        var properties = new Dictionary<string, object>
+        var properties = new Dictionary<string, object?>
         {
             { "testname", "testvalue" }
         };
-        requestBuilder.InitializeGlobalState(properties!);
+        requestBuilder.AddVariableValues(properties);
         logger.LogInformation("this log from HttpRequestInterceptor.OnCreateAsync");
         return base.OnCreateAsync(context, requestExecutor, requestBuilder, cancellationToken);
     }

@@ -19,7 +19,7 @@ public class SocketSessionInterceptor : DefaultSocketSessionInterceptor
         return base.OnConnectAsync(session, connectionInitMessage, cancellationToken);
     }
 
-    public override ValueTask OnRequestAsync(ISocketSession session, string operationSessionId, IQueryRequestBuilder requestBuilder, CancellationToken cancellationToken = default)
+    public override ValueTask OnRequestAsync(ISocketSession session, string operationSessionId, OperationRequestBuilder requestBuilder, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("this log from SocketSessionInterceptor.OnRequestAsync");
         return base.OnRequestAsync(session, operationSessionId, requestBuilder, cancellationToken);
