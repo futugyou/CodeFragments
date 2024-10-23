@@ -34,6 +34,8 @@ updates:
       sk:
         patterns:
         - "Microsoft.SemanticKernel*"
+        - "Microsoft.KernelMemory*"
+        - "Microsoft.ML*"
       graphQL:
         patterns:
         - "HotChocolate*"
