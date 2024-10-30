@@ -30,7 +30,7 @@
 		<!--<PackageReference Include="Metalama.Framework" Version="0.5.55-preview" />-->
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="8.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Resilience" Version="8.10.0" />
-		<PackageReference Include="ScottPlot" Version="5.0.41" />
+		<PackageReference Include="ScottPlot" Version="5.0.42" />
 		<PackageReference Include="Sharprompt" Version="2.4.5" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.16" />
 		<PackageReference Include="System.IO.Pipelines" Version="8.0.0" />
