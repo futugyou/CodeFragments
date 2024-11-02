@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CryptoDome
+namespace CodeFragments
 {
     public class DesCrypto
     {

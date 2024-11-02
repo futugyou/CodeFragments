@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CryptoDome
+namespace CodeFragments
 {
     public class AesCrypto
     { /// <summary>

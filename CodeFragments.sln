@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31423.177
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeFragments", "CodeFragments\CodeFragments.csproj", "{AA533818-83B0-4B5E-BAF4-36D2A239916E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoDome", "CryptoDome\CryptoDome.csproj", "{EE466A2F-F670-4662-87E2-8EC2C488A02A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mastercard", "Mastercard", "{2EC22CB7-FE81-4B68-9CE7-FE1DF10B332F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mastercard", "Mastercard\Mastercard\Mastercard.csproj", "{C6744D1D-BC1D-41B9-9B3E-88E828099CCE}"
@@ -156,8 +154,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaywrightSourceGenerator",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaywrightTestSourceGenerator", "AutomatedTesting\PlaywrightTestSourceGenerator\PlaywrightTestSourceGenerator.csproj", "{7B48247E-F9A9-429A-A2EF-3B07E1BE8B1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZeroCost", "ZeroCost\ZeroCost.csproj", "{247F2DEF-342A-4018-94AE-7575A1AD8835}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -168,10 +164,6 @@ Global
 		{AA533818-83B0-4B5E-BAF4-36D2A239916E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA533818-83B0-4B5E-BAF4-36D2A239916E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA533818-83B0-4B5E-BAF4-36D2A239916E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE466A2F-F670-4662-87E2-8EC2C488A02A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C6744D1D-BC1D-41B9-9B3E-88E828099CCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C6744D1D-BC1D-41B9-9B3E-88E828099CCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6744D1D-BC1D-41B9-9B3E-88E828099CCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -384,10 +376,6 @@ Global
 		{7B48247E-F9A9-429A-A2EF-3B07E1BE8B1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B48247E-F9A9-429A-A2EF-3B07E1BE8B1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B48247E-F9A9-429A-A2EF-3B07E1BE8B1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{247F2DEF-342A-4018-94AE-7575A1AD8835}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

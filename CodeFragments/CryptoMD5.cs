@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CryptoDome
+namespace CodeFragments
 {
     public class MD5Crypto
     {
         public static string ToMD5(string param, string salt = "")
         {
             var md5 = MD5.Create();
-            byte[] result = null;
+            byte[] result;
             if (string.IsNullOrEmpty(salt))
             {
                 result = md5.ComputeHash(Encoding.UTF8.GetBytes(param));

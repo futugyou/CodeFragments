@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoDome
+namespace CodeFragments
 {
     public class Base64Crypto
     {
