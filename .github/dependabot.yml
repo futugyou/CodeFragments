@@ -57,4 +57,7 @@ updates:
         - "Duende*" 
       elsa:
         patterns:
-        - "Elsa*" 
+        - "Elsa*"
+      azure:
+        patterns:
+        - "Azure*" 
