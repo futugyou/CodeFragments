@@ -46,13 +46,9 @@ app.UseAuthentication();
 app.UseBff();
 
 app.UseAuthorization();
- 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers().AsBffApiEndpoint();
-    endpoints.MapBffManagementEndpoints();
-    endpoints.MapRemoteBffApiEndpoint("/remote", "https://localhost:5003")
-       .RequireAccessToken(Duende.Bff.TokenType.User);
-});
+app.MapControllers().AsBffApiEndpoint();
+app.MapBffManagementEndpoints();
+app.MapRemoteBffApiEndpoint("/remote", "https://localhost:5003")
+   .RequireAccessToken(Duende.Bff.TokenType.User);
 
 app.Run();

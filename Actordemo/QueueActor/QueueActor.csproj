@@ -2,9 +2,8 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
-		<AssemblyName>QueueActor</AssemblyName>
-		<RootNamespace>QueueActor</RootNamespace>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>

@@ -46,3 +46,15 @@ updates:
       netcore:
         patterns:
         - "Microsoft.AspNetCore*" 
+      cloudNative:
+        patterns:
+        - "CloudNative*" 
+      massTransit:
+        patterns:
+        - "MassTransit*" 
+      duende:
+        patterns:
+        - "Duende*" 
+      elsa:
+        patterns:
+        - "Elsa*" 

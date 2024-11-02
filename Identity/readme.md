@@ -1,4 +1,4 @@
-1. Add IdentityServer4 package, add AddIdentityServer() and add UseIdentityServer()
+cd1. Add IdentityServer4 package, add AddIdentityServer() and add UseIdentityServer()
 2. Add IdentityServer4.EntityFramework and Pomelo.EntityFrameworkCore.MySql package, add AddConfigurationStore and AddOperationalStore.
 3. Add Microsoft.EntityFrameworkCore.Tools/Microsoft.EntityFrameworkCore.Design package, and add migration.
     Add-Migration InitPersistedGrantDb -c PersistedGrantDbContext -o Migrations/PersistedGrantDb
