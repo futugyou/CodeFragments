@@ -21,7 +21,7 @@
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="5.0.0-preview.3.20215.2" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.10.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.2" />
@@ -49,7 +49,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="8.0.10" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
-		<PackageReference Include="System.Text.Json" Version="8.0.5" /> 
+		<PackageReference Include="System.Text.Json" Version="9.0.0" /> 
 
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.1.0" />
 
