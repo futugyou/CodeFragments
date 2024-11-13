@@ -26,10 +26,10 @@
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.10.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.2" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.2.0" />
-		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.91.241101.1" />
-		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.91.241101.1" />
-		<PackageReference Include="Microsoft.KernelMemory.AI.AzureOpenAI" Version="0.91.241101.1" />
-		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.22.0-preview.24526.1" /> 
+		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.92.241112.1" />
+		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.92.241112.1" />
+		<PackageReference Include="Microsoft.KernelMemory.AI.AzureOpenAI" Version="0.92.241112.1" />
+		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.22.0" /> 
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.28.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.0.1-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.1.0-preview" />
