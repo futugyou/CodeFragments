@@ -51,7 +51,7 @@
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.0" />
 		<PackageReference Include="System.Text.Json" Version="9.0.0" /> 
 
-		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.1.0" />
+		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.2.0" />
 
 		<PackageReference Include="HotChocolate.Execution" Version="14.2.0" />
 		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="14.2.0" />
