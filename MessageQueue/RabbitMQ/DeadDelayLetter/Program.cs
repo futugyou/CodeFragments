@@ -6,14 +6,14 @@ using RabbitMQ.Client.Events;
 using System.Text;
 
 Console.WriteLine("Hello, World!");
-NomalDeadLetter.Consumer();
-NomalDeadLetter.SendMessage();
+await NomalDeadLetter.Consumer();
+await NomalDeadLetter.SendMessage();
 Console.WriteLine("-------------------------------------------");
-DelayDeadLetter.Consumer();
-DelayDeadLetter.SendMessage();
+await DelayDeadLetter.Consumer();
+await DelayDeadLetter.SendMessage();
 Console.WriteLine("-------------------------------------------");
-DelayDeadLetter.Consumer();
-DelayDeadLetterForDeffTime.SendMessage();
-DelayDeadLetterForDeffTime.DelayConsumer();
+await DelayDeadLetter.Consumer();
+await DelayDeadLetterForDeffTime.SendMessage();
+await DelayDeadLetterForDeffTime.DelayConsumer();
 Console.ReadLine();
 

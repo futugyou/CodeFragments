@@ -163,16 +163,12 @@ public static class KernelServiceExtensions
         }
         else
         {
-            memoryBuilder.WithOpenAITextEmbeddingGeneration(new OpenAIConfig
-            {
-                EmbeddingModel = config.Embedding,
-                APIKey = config.Key,
-            });
-            memoryBuilder.WithOpenAITextGeneration(new OpenAIConfig
-            {
-                TextModel = config.TextCompletion,
-                APIKey = config.Key
-            });
+            // memoryBuilder.WithOpenAITextEmbeddingGeneration(new OpenAIConfig
+            // {
+            //     EmbeddingModel = config.Embedding,
+            //     APIKey = config.Key,
+            // });
+            // Remove the call to WithOpenAITextGeneration as it does not exist
         }
 
         services.AddSingleton(sp =>

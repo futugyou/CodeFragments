@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '7.0.x' ]
+        dotnet-version: [ '9.0' ]
     env:
       working-directory: ./BrowserDemo/CshtmlDemo
       bucketname: osim-onecloud-cdn-devtest
       keyprefix: uploaddemo
-      localpath: ./bin/Release/net7.0/publish/wwwroot
+      localpath: ./bin/Release/net9.0/publish/wwwroot
       
     steps:
     - uses: actions/checkout@v4

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '7.0.x' ]
+        dotnet-version: [ '9.0' ]
     env:
       working-directory: ./DotnetTools/AwsS3BatchUpload
       package-name: Vishel.AWS.S3.Tools

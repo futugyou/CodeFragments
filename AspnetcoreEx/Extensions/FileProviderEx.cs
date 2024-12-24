@@ -23,7 +23,12 @@ public class FileSystem : IFileSystem
     {
         using var stream = fileProvider.GetFileInfo(path).CreateReadStream();
         var buffer = new byte[stream.Length];
-        await stream.ReadAsync(buffer);
+        int bytesRead;
+        int totalBytesRead = 0;
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, buffer.Length - totalBytesRead))) > 0)
+        {
+            totalBytesRead += bytesRead;
+        }
         return Encoding.Default.GetString(buffer);
     }
 
@@ -55,7 +60,12 @@ public class FileSystem : IFileSystem
     {
         using var stream = fileProvider.GetFileInfo(filePath).CreateReadStream();
         var buffer = new byte[stream.Length];
-        await stream.ReadAsync(buffer);
+        int bytesRead;
+        int totalBytesRead = 0;
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, buffer.Length - totalBytesRead))) > 0)
+        {
+            totalBytesRead += bytesRead;
+        }
         var current = Encoding.Default.GetString(buffer);
         Console.WriteLine(current);
     }
