@@ -9,8 +9,8 @@
 	<ItemGroup>
 		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
 		<PackageReference Include="CloudNative.CloudEvents" Version="2.8.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.1" />
 	</ItemGroup>
 
 
