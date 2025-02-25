@@ -24,7 +24,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.2" />
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="5.0.0-preview.3.20215.2" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.2.0" />
-		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.5.0" />
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.97.250211.1" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.97.250211.1" />
