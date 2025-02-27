@@ -67,7 +67,7 @@
 		<PackageReference Include="HotChocolate.PersistedQueries.InMemory" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.0.3" />
 		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.0.3" />
-		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.2.0" />
+		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
