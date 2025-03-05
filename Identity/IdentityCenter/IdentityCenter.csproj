@@ -13,9 +13,9 @@
 	</ItemGroup>-->
 
 	<ItemGroup>
-		<PackageReference Include="Duende.IdentityServer" Version="7.1.0" />
-		<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.1.0" />
-		<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.1.0" />
+		<PackageReference Include="Duende.IdentityServer" Version="7.1.1" />
+		<PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.1.1" />
+		<PackageReference Include="Duende.IdentityServer.EntityFramework" Version="7.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
