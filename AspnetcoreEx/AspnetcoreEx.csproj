@@ -17,7 +17,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.400" />
-		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.403.51" />
+		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.403.52" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
