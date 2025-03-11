@@ -15,7 +15,7 @@
     <PackageReference Include="Elsa.Activities.UserTask" Version="2.14.1" />
     <PackageReference Include="Elsa.CSharp" Version="3.2.3" />
     <PackageReference Include="Elsa.Designer.Components.Web" Version="2.14.1" />
-    <PackageReference Include="Elsa.EntityFrameworkCore" Version="3.2.3" />
+    <PackageReference Include="Elsa.EntityFrameworkCore" Version="3.3.2" />
     <PackageReference Include="Elsa.EntityFrameworkCore.Sqlite" Version="3.2.3" />
     <PackageReference Include="Elsa.Identity" Version="3.2.3" />
     <PackageReference Include="Elsa.Persistence.EntityFramework.SqlServer" Version="2.14.1" />
