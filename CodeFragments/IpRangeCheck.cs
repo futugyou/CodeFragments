@@ -58,8 +58,14 @@ public class IpRangeCheck
         _ipRanges = _ipRanges.OrderBy(p => p.LeftRange).ToList();
     }
 
-    private uint ConvertIpToUint(string ip) => BitConverter.ToUInt32(ip.Split('.').Reverse().Select(x => byte.Parse(x)).ToArray(), 0);
-    
+    private static uint ConvertIpToUint(string ip)
+    {
+        var ipArray = ip.Split('.');
+        ipArray.Reverse();
+        return BitConverter.ToUInt32([.. ipArray.Select(byte.Parse)], 0);
+    }
+
+
     private class IpRange
     {
         public IpRange(uint left, uint right)
