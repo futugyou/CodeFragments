@@ -2,18 +2,18 @@
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
 
 namespace PlaywrightTestSourceGenerator;
 
 [Generator]
-public class PlaywrightTestTemplate : ISourceGenerator
+public class PlaywrightTestTemplate : IIncrementalGenerator
 {
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // 注册初始化时生成的 attribute
         context.RegisterPostInitializationOutput(i =>
         {
             i.AddSource("GlobalParameterAttribute.g.cs", @"using System;
@@ -27,30 +27,46 @@ public sealed class GlobalParameterAttribute : Attribute
 }");
         });
 
+        // 解析 JSON 配置文件
+        var jsonFiles = context.AdditionalTextsProvider
+            .Where(file => file.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            .Select((file, cancellationToken) =>
+            {
+                var jsonText = file.GetText(cancellationToken)?.ToString();
+                if (jsonText is null) return default;
+
+                var jNode = JsonNode.Parse(jsonText);
+                return (name: (string)jNode["ServiceName"], apiList: jNode["APIList"]);
+            })
+            .Where(data => data.name is not null && data.apiList is not null);
+
+        // 生成测试代码
+        context.RegisterSourceOutput(jsonFiles, (spc, options) =>
+        {
+            var sourceCode = GenerateTestClass(options.name, options.apiList);
+            spc.AddSource($"{options.name}GeneratorTest.g.cs", SourceText.From(sourceCode, Encoding.UTF8));
+        });
     }
 
-    public void Execute(GeneratorExecutionContext context)
+    private static string GenerateTestClass(string name, JsonNode apiList)
     {
-        var options = GetLoadOptions(context);
-        foreach ((string name, JsonNode api) in options)
-        {
-            // begin creating the source we'll inject into the users compilation
-            StringBuilder sourceBuilder = new StringBuilder(@$"
+        StringBuilder sourceBuilder = new StringBuilder(@$"
 using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 
 namespace RecordTraceTest;
 
 [TestClass]
-public class {name}GeneratorTest: PlaywrightTest
+public class {name}GeneratorTest : PlaywrightTest
 {{
 ");
-            foreach (var item in api.AsArray())
-            {
-                var apiname = (string)item["AcionName"];
-                var url = (string)item["Url"];
 
-                sourceBuilder.Append(@$"
+        foreach (var item in apiList.AsArray())
+        {
+            var apiname = (string)item["AcionName"];
+            var url = (string)item["Url"];
+
+            sourceBuilder.Append(@$"
     [TestMethod]
     public async Task {apiname}Test()
     {{
@@ -67,13 +83,10 @@ public class {name}GeneratorTest: PlaywrightTest
         var token = body.Value.GetProperty(""accessToken"").GetString();
 
         headers.Add(""Accept"", ""application/json"");
-        // Add authorization token to all requests.
-        // Assuming personal access token available in the environment.
         headers.Add(""Authorization"", ""Bearer "" + token);
 
         request = await Playwright.APIRequest.NewContextAsync(new()
         {{
-            // All requests we send go to this API endpoint.
             BaseURL = ""https://devtest.services.osim-cloud.com"",
             ExtraHTTPHeaders = headers,
         }});
@@ -83,39 +96,16 @@ public class {name}GeneratorTest: PlaywrightTest
         var resultCode = userbody.Value.GetProperty(""resultCode"").GetInt32();
         var httpStatus = userbody.Value.GetProperty(""httpStatus"").GetInt32();
 
-        // Act
-
-        // Assert
         Assert.IsTrue(userReponse.Ok);
         Assert.IsTrue(resultCode == 1);
         Assert.IsTrue(httpStatus == 200);
     }}
 ");
-            }
+        }
 
-            sourceBuilder.Append(@$"
-}}
-
+        sourceBuilder.Append(@"
+}
 ");
-
-            // inject the created source into the users compilation
-            context.AddSource($"{name}GeneratorTest.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
-        }
-    }
-
-    private static IEnumerable<(string, JsonNode)> GetLoadOptions(GeneratorExecutionContext context)
-    {
-        foreach (AdditionalText file in context.AdditionalFiles)
-        {
-            if (Path.GetExtension(file.Path).Equals(".json", StringComparison.OrdinalIgnoreCase))
-            {
-                JsonNode jNode = JsonNode.Parse(File.ReadAllText(file.Path));
-                yield return ((string)jNode["ServiceName"], jNode["APIList"]);
-            }
-        }
-    }
-
-    public void Initialize(GeneratorInitializationContext context)
-    {
+        return sourceBuilder.ToString();
     }
 }

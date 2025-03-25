@@ -1,74 +1,83 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PlaywrightSourceGenerator
 {
     [Generator]
-    public class PlaywrightTemplate : ISourceGenerator
+    public class PlaywrightTemplate : IIncrementalGenerator
     {
-        public void Execute(GeneratorExecutionContext context)
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            // begin creating the source we'll inject into the users compilation
-            StringBuilder sourceBuilder = new StringBuilder(@"
+            // 注册代码生成
+            var sourceProvider = context.AnalyzerConfigOptionsProvider
+                .Select((options, _) => GenerateUserProfileClass());
+
+            context.RegisterSourceOutput(sourceProvider, (ctx, source) =>
+            {
+                ctx.AddSource("UserProfileGenerator.g.cs", SourceText.From(source, Encoding.UTF8));
+            });
+        }
+
+        /// <summary>
+        /// 生成 Playwright UserProfile 代码
+        /// </summary>
+        private static string GenerateUserProfileClass()
+        {
+            return @"
 using Microsoft.Playwright;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace RecordTraceTest;
-
-public class UserProfileGenerator
+namespace RecordTraceTest
 {
-    public static async Task GetUserProfile()
+    public class UserProfileGenerator
     {
-        using var playwright = await Playwright.CreateAsync();
-        var request = await playwright.APIRequest.NewContextAsync();
-        var data = new Dictionary<string, object>() {
-          { ""password"", ""***""},
-          { ""userName"", ""***"" },
-          { ""phoneCode"", ""***"" }
-        };
-
-        var response = await request.PostAsync(""https://devtest.services.osim-cloud.com/identity/api/v1.0/account/login"", new() { DataObject = data });
-        var headers = new Dictionary<string, string>();
-        var body = await response.JsonAsync();
-        var token = body.Value.GetProperty(""accessToken"").GetString();
-
-        headers.Add(""Accept"", ""application/json"");
-        // Add authorization token to all requests.
-        // Assuming personal access token available in the environment.
-        headers.Add(""Authorization"", ""Bearer "" + token);
-
-        request = await playwright.APIRequest.NewContextAsync(new()
+        public static async Task GetUserProfile()
         {
-            // All requests we send go to this API endpoint.
-            BaseURL = ""https://devtest.services.osim-cloud.com"",
-            ExtraHTTPHeaders = headers,
-        });
+            using var playwright = await Playwright.CreateAsync();
+            var request = await playwright.APIRequest.NewContextAsync();
+            
+            var loginData = new Dictionary<string, object>
+            {
+                { ""password"", ""***"" },
+                { ""userName"", ""***"" },
+                { ""phoneCode"", ""***"" }
+            };
 
-        var userReponse = await request.GetAsync(""/user/api/v1.0/userprofile"");
-        var userbody = await userReponse.JsonAsync();
-        var resultCode = userbody.Value.GetProperty(""resultCode"").GetInt32();
-        var httpStatus = userbody.Value.GetProperty(""httpStatus"").GetInt32();
+            var response = await request.PostAsync(""https://devtest.services.osim-cloud.com/identity/api/v1.0/account/login"", new() { DataObject = loginData });
+            var headers = new Dictionary<string, string>();
+            var body = await response.JsonAsync();
+            var token = body.Value.GetProperty(""accessToken"").GetString();
 
-        // Act
+            headers.Add(""Accept"", ""application/json"");
+            headers.Add(""Authorization"", ""Bearer "" + token);
 
-        // Assert
-        Console.WriteLine(userReponse.Ok);
-        Console.WriteLine(resultCode == 1);
-        Console.WriteLine(httpStatus == 200);
+            request = await playwright.APIRequest.NewContextAsync(new()
+            {
+                BaseURL = ""https://devtest.services.osim-cloud.com"",
+                ExtraHTTPHeaders = headers,
+            });
+
+            var userResponse = await request.GetAsync(""/user/api/v1.0/userprofile"");
+            var userBody = await userResponse.JsonAsync();
+            var resultCode = userBody.Value.GetProperty(""resultCode"").GetInt32();
+            var httpStatus = userBody.Value.GetProperty(""httpStatus"").GetInt32();
+
+            // Act & Assert
+            Console.WriteLine(userResponse.Ok);
+            Console.WriteLine(resultCode == 1);
+            Console.WriteLine(httpStatus == 200);
+        }
     }
 }
-
-");
-
-            // inject the created source into the users compilation
-            context.AddSource("UserProfileGenerator.g.cs", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
-        } 
-
-        public void Initialize(GeneratorInitializationContext context)
-        { 
+";
         }
     }
 }
