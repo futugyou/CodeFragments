@@ -117,13 +117,23 @@ public class ObjectPoolUsecase
 
     public static async Task ArrayPoolUsecase()
     {
-        using var fs = new FileStream("./CodeFragments.csproj",FileMode.Open);
+        using var fs = new FileStream("./CodeFragments.csproj", FileMode.Open);
         var length = (int)fs.Length;
         var bytes = ArrayPool<byte>.Shared.Rent(length);
         try
         {
-            await fs.ReadAsync(bytes,0,length);
-            Console.WriteLine(Encoding.Default.GetString(bytes,0,length));
+            int bytesRead = 0;
+            while (bytesRead < length)
+            {
+                var memory = new Memory<byte>(bytes, bytesRead, length - bytesRead);
+                int read = await fs.ReadAsync(memory); // 使用 Memory<byte> 和取消令牌
+                if (read == 0)
+                {
+                    throw new EndOfStreamException("Stream ended unexpectedly while reading.");
+                }
+                bytesRead += read;
+            }
+            Console.WriteLine(Encoding.Default.GetString(bytes, 0, length));
         }
         finally
         {
@@ -133,12 +143,22 @@ public class ObjectPoolUsecase
 
     public static async Task MemoryPoolUsecase()
     {
-        using var fs = new FileStream("./CodeFragments.csproj",FileMode.Open);
+        using var fs = new FileStream("./CodeFragments.csproj", FileMode.Open);
         var length = (int)fs.Length;
         using var bytes = MemoryPool<byte>.Shared.Rent(length);
-        await fs.ReadAsync(bytes.Memory);
-        Console.WriteLine(Encoding.Default.GetString(bytes.Memory.Span.Slice(0,length)));
+        int bytesRead = 0;
+        while (bytesRead < length)
+        {
+            int read = await fs.ReadAsync(bytes.Memory.Slice(bytesRead, length - bytesRead));
+            if (read == 0)
+            {
+                throw new EndOfStreamException("Stream ended unexpectedly while reading.");
+            }
+            bytesRead += read;
+        }
+        Console.WriteLine(Encoding.Default.GetString(bytes.Memory.Span.Slice(0, length)));
     }
+
 }
 
 /// <summary>
@@ -197,6 +217,6 @@ public class Foo : IDisposable
         Id = t.ToString();
     }
     static int _id;
-    public string Id { get;}
+    public string Id { get; }
     public void Dispose() => Console.Write($"{Id}-");
 }

@@ -36,7 +36,7 @@ public class NamedPipesServer
         }
         Console.WriteLine("\nServer threads exhausted, exiting.");
     }
-    
+
     static void ServerThread(object? data)
     {
         NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.InOut, numThreads);
@@ -93,13 +93,27 @@ public class StreamString
     {
         int len = 0;
 
+        // 读取长度信息
         len = ioStream.ReadByte() * 256;
         len += ioStream.ReadByte();
+
         byte[] inBuffer = new byte[len];
-        ioStream.Read(inBuffer, 0, len);
+
+        // 确保读取完整的字节流
+        int bytesRead = 0;
+        while (bytesRead < len)
+        {
+            int read = ioStream.Read(inBuffer, bytesRead, len - bytesRead);
+            if (read == 0)
+            {
+                throw new EndOfStreamException("Stream ended unexpectedly while reading.");
+            }
+            bytesRead += read;
+        }
 
         return streamEncoding.GetString(inBuffer);
     }
+
 
     public int WriteString(string outString)
     {
