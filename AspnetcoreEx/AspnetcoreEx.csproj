@@ -53,20 +53,20 @@
 
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.2.0" />
 
-		<PackageReference Include="HotChocolate.Execution" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.Types.Scalars" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.Data" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.Data.Spatial" Version="15.1.1" />
+		<PackageReference Include="HotChocolate.Execution" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.Types.Scalars" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.Data" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.Data.Spatial" Version="15.1.2" />
 		<PackageReference Include="HotChocolate.Stitching" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.Stitching.Redis" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.PersistedQueries.FileSystem" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.PersistedQueries.Redis" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.PersistedQueries.InMemory" Version="14.0.0-tags-13-1-0-preview-5.1" />
-		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.1" />
-		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.1.1" />
+		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.2" />
+		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.1.2" />
 		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
 	</ItemGroup>
 
