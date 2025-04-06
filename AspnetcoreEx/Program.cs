@@ -70,6 +70,8 @@ builder.Services.AddStackPolicy(options =>
 
 builder.Services.AddSingleton<SimpleConsoleLogger>();
 builder.Services.AddSingleton<RequestIdLogger>();
+builder.Services.AddTransient<TestAuthHandler>();
+builder.Services.AddTransient<EnrichmentHandler>();
 builder.Services.ConfigureHttpClientDefaults(static http =>
 {
     http.AddLogger<SimpleConsoleLogger>();
@@ -129,7 +131,7 @@ builder.Services.AddRefitClient<IGitHubApi>()
 var section = builder.Configuration.GetSection("RetryOptions");
 builder.Services.Configure<HttpRetryStrategyOptions>(section);
 
-builder.Services.AddGraphQL(configuration, builder.Environment);
+// builder.Services.AddGraphQL(configuration, builder.Environment);
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
@@ -177,7 +179,7 @@ configuration.AddAwsParameterStore();
 //                 && dnsEp.Host.StartsWith("internal");
 //         };
 //     });
-    
+
 builder.Services.AddHostedService<QueuedHostedService>();
 builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 {
@@ -226,7 +228,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseWebSockets();
-app.UseGraphQLCustom();
+// app.UseGraphQLCustom();
 
 app.MapControllers();
 app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
@@ -234,13 +236,16 @@ app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     Predicate = _ => true,
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 });
-app.RoutePatternFactoryExtension();
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // app.UseMiddleware<ResponseCustomMiddleware>();
+
+app.RoutePatternFactoryExtension();
 
 await app.InitAIData();
 // this will win
 // app.Run("http://localhost:5004/");
+app.MapMcp();
+
 app.Run();
 
 static X509Certificate2? SelectServerCertificate(ConnectionContext? context, string? domain)

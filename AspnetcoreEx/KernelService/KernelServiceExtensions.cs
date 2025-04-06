@@ -33,6 +33,9 @@ public static class KernelServiceExtensions
         var sp = services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
 
+        // mcp
+        services.AddMcpServer().WithToolsFromAssembly();
+
         // dotnet new install Microsoft.Extensions.AI.Templates
         var credential = new ApiKeyCredential(config.Key ?? throw new InvalidOperationException("Missing configuration: GitHubModels:Token. See the README for details."));
         var openAIOptions = new OpenAIClientOptions()
