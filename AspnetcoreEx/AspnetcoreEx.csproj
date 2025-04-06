@@ -21,8 +21,6 @@
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
-		<PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.3.0-preview.1.25161.3" />
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="5.0.0-preview.3.20215.2" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.3.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
@@ -31,6 +29,9 @@
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.98.250324.1" />
 		<PackageReference Include="Microsoft.KernelMemory.AI.AzureOpenAI" Version="0.98.250324.1" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.2" /> 
+		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25161.3" /> 
+		<PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
+		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.45.0" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.45.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.32.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.32.0-preview" />
@@ -38,8 +39,11 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.32.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplate.Handlebars" Version="1.0.0-rc3" />
 		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.45.0" />
+		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.2.3" />
 		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
+		<PackageReference Include="OpenAI" Version="2.2.0-beta.4" />
+		<PackageReference Include="PdfPig" Version="0.1.10" />
 		<PackageReference Include="SharpToken" Version="2.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />

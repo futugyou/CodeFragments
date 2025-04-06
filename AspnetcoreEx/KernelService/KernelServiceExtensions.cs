@@ -7,6 +7,13 @@ using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.KernelMemory;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.VectorData;
+using OpenAI;
+using System.ClientModel;
+using Qdrant.Client;
+using AspnetcoreEx.KernelService.Ingestion;
+
 
 namespace AspnetcoreEx.KernelService;
 
@@ -14,11 +21,42 @@ namespace AspnetcoreEx.KernelService;
 [Experimental("SKEXP0011")]
 public static class KernelServiceExtensions
 {
+    internal static async Task InitAIData(this WebApplication app)
+    {
+        // await DataIngestor.IngestDataAsync(app.Services, new PDFDirectorySource("./KernelService/Data"));
+    }
+
     internal static IServiceCollection AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         var sp = services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+
+        // dotnet new install Microsoft.Extensions.AI.Templates
+        var credential = new ApiKeyCredential(config.Key ?? throw new InvalidOperationException("Missing configuration: GitHubModels:Token. See the README for details."));
+        var openAIOptions = new OpenAIClientOptions()
+        {
+            Endpoint = new Uri(config.Endpoint)
+        };
+
+        var ghModelsClient = new OpenAIClient(credential, openAIOptions);
+        var chatClient = ghModelsClient.AsChatClient(config.ChatModel);
+        var embeddingGenerator = ghModelsClient.AsEmbeddingGenerator(config.Embedding);
+
+        services.AddSingleton<IVectorStore>(sp =>
+        {
+            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            return new QdrantVectorStore(new QdrantClient(host: config.QdrantHost, port: config.QdrantPort, apiKey: config.QdrantKey, loggerFactory: loggerFactory));
+        });
+
+        services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
+        services.AddEmbeddingGenerator(embeddingGenerator);
+        services.AddSingleton<SemanticSearch>();
+        services.AddScoped<DataIngestor>();
+        services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, "ingestioncache");
+
+        // Microsoft.SemanticKernel
         var kernelBuilder = services.AddKernel();
         if (!string.IsNullOrWhiteSpace(config.Endpoint))
         {
@@ -45,7 +83,7 @@ public static class KernelServiceExtensions
         IHttpClientBuilder httpClientBuilder = services.AddHttpClient("qdrant", c =>
         {
             UriBuilder builder = new(config.QdrantHost);
-            if (config.QdrantPort.HasValue) { builder.Port = config.QdrantPort.Value; }
+            builder.Port = config.QdrantPort;
             c.BaseAddress = builder.Uri;
             if (!string.IsNullOrEmpty(config.QdrantKey))
             {
@@ -53,40 +91,6 @@ public static class KernelServiceExtensions
             }
         });
 
-        // httpClientBuilder.AddResilienceHandler(
-        //     "CustomPipeline",
-        //     static builder =>
-        // {
-        //     // See: https://www.pollydocs.org/strategies/retry.html
-        //     builder.AddRetry(new HttpRetryStrategyOptions
-        //     {
-        //         // Customize and configure the retry logic.
-        //         BackoffType = DelayBackoffType.Exponential,
-        //         MaxRetryAttempts = 5,
-        //         UseJitter = true
-        //     });
-
-        //     // See: https://www.pollydocs.org/strategies/circuit-breaker.html
-        //     builder.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
-        //     {
-        //         // Customize and configure the circuit breaker logic.
-        //         SamplingDuration = TimeSpan.FromSeconds(10),
-        //         FailureRatio = 0.2,
-        //         MinimumThroughput = 3,
-        //         ShouldHandle = static args =>
-        //         {
-        //             return ValueTask.FromResult(args is
-        //             {
-        //                 Outcome.Result.StatusCode:
-        //                     HttpStatusCode.RequestTimeout or
-        //                         HttpStatusCode.TooManyRequests
-        //             });
-        //         }
-        //     });
-
-        //     // See: https://www.pollydocs.org/strategies/timeout.html
-        //     builder.AddTimeout(TimeSpan.FromSeconds(5));
-        // });
         httpClientBuilder.AddResilienceHandler(
             "AdvancedPipeline",
             static (ResiliencePipelineBuilder<HttpResponseMessage> builder, ResilienceHandlerContext context) =>

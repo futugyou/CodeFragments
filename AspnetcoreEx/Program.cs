@@ -238,6 +238,7 @@ app.RoutePatternFactoryExtension();
 app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
+await app.InitAIData();
 // this will win
 // app.Run("http://localhost:5004/");
 app.Run();
