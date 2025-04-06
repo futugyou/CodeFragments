@@ -22,6 +22,7 @@
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.3.0-preview.1.25161.3" />
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="5.0.0-preview.3.20215.2" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.3.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
@@ -69,18 +70,7 @@
 		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.1.3" />
 		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="doc\documents\" />
-		<Folder Include="Resources\" />
-		<Folder Include="SemanticKernel\Skills\ToGolang\" />
-	</ItemGroup>
 	
-	<ItemGroup>
-		<Compile Remove="SemanticKernel\**" />
-		<Compile Remove="Controllers\SemanticKernelController.cs" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\30-user-prompt.txt" />
 		<EmbeddedResource Include="Resources\30-system-prompt.txt" />

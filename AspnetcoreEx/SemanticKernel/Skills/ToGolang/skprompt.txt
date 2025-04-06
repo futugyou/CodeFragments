@@ -1,5 +1,0 @@
-{{$input}}
-
-==
-Convert the above code into golang code
-==
