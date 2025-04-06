@@ -1,22 +1,25 @@
 
+using AspnetcoreEx.KernelService.Ingestion;
 using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.VectorData;
+using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Plugins.Core;
-using Microsoft.KernelMemory;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.VectorData;
+using ModelContextProtocol;
+using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol.Transport;
 using OpenAI;
-using System.ClientModel;
 using Qdrant.Client;
-using AspnetcoreEx.KernelService.Ingestion;
-
+using System.ClientModel;
+using System.Collections.Concurrent;
 
 namespace AspnetcoreEx.KernelService;
-
 
 [Experimental("SKEXP0011")]
 public static class KernelServiceExtensions
@@ -26,14 +29,14 @@ public static class KernelServiceExtensions
         // await DataIngestor.IngestDataAsync(app.Services, new PDFDirectorySource("./KernelService/Data"));
     }
 
-    internal static IServiceCollection AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
+    internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
         // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         var sp = services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
 
-        // mcp
+        // mcp server
         services.AddMcpServer().WithToolsFromAssembly();
 
         // dotnet new install Microsoft.Extensions.AI.Templates
@@ -61,6 +64,11 @@ public static class KernelServiceExtensions
 
         // Microsoft.SemanticKernel
         var kernelBuilder = services.AddKernel();
+
+        // Add the Model Content Protocol tools as SemanticKernel plugins
+        // The Model Content Protocol tools can add into ChatOptions tools directly, so using Microsoft.Extensions.AI is also a way to integrate
+        await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync("https://localhost:5000/sse", "testing-server");
+
         if (!string.IsNullOrWhiteSpace(config.Endpoint))
         {
             kernelBuilder.AddAzureOpenAIChatCompletion(config.ChatModel, config.Endpoint, config.Key);
@@ -140,6 +148,63 @@ public static class KernelServiceExtensions
         });
 
         return services;
+    }
+
+    private static readonly ConcurrentDictionary<string, IKernelBuilderPlugins> SseMap = new();
+
+    /// <summary>
+    /// Creates a Model Content Protocol plugin from an SSE server that contains the specified MCP functions and adds it into the plugin collection.
+    /// </summary>
+    /// <param name="endpoint"></param>
+    /// <param name="serverName"></param>
+    /// <param name="cancellationToken">The optional <see cref="CancellationToken"/>.</param>
+    /// <param name="plugins"></param>
+    /// <returns>A <see cref="KernelPlugin"/> containing the functions.</returns>
+    public static async Task<IKernelBuilderPlugins> AddMcpFunctionsFromSseServerAsync(this IKernelBuilderPlugins plugins,
+        string endpoint, string serverName, CancellationToken cancellationToken = default)
+    {
+        var key = PluginNameSanitizer.ToSafePluginName(serverName);
+
+        if (SseMap.TryGetValue(key, out var sseKernelPlugin))
+        {
+            return sseKernelPlugin;
+        }
+
+        var mcpClient = await GetClientAsync(serverName, endpoint, null, null, cancellationToken).ConfigureAwait(false);
+        var functions = await mcpClient.MapToFunctionsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        cancellationToken.Register(() => mcpClient.DisposeAsync().ConfigureAwait(false).GetAwaiter().GetResult());
+
+        sseKernelPlugin = plugins.AddFromFunctions(key, functions);
+        return SseMap[key] = sseKernelPlugin;
+    }
+
+    private static async Task<IMcpClient> GetClientAsync(string serverName, string? endpoint,
+        Dictionary<string, string>? transportOptions, ILoggerFactory? loggerFactory,
+        CancellationToken cancellationToken)
+    {
+        var transportType = !string.IsNullOrEmpty(endpoint) ? TransportTypes.Sse : TransportTypes.StdIo;
+
+        McpClientOptions options = new()
+        {
+            ClientInfo = new()
+            {
+                Name = $"{serverName} {transportType}Client",
+                Version = "1.0.0"
+            }
+        };
+
+        var config = new McpServerConfig
+        {
+            Id = serverName.ToLowerInvariant(),
+            Name = serverName,
+            Location = endpoint,
+            TransportType = transportType,
+            TransportOptions = transportOptions
+        };
+
+        return await McpClientFactory.CreateAsync(config, options,
+            loggerFactory: loggerFactory ?? NullLoggerFactory.Instance, cancellationToken: cancellationToken);
     }
 
     internal static IServiceCollection AddKernelMemoryServices(this IServiceCollection services, IConfiguration configuration)

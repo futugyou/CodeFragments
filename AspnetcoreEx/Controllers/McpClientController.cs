@@ -1,4 +1,3 @@
-using AspnetcoreEx.Elasticsearch;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol.Transport;
 
