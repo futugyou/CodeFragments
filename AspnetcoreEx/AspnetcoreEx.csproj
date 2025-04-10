@@ -30,7 +30,7 @@
 		<PackageReference Include="Microsoft.KernelMemory.AI.AzureOpenAI" Version="0.98.250324.1" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.2" /> 
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25161.3" /> 
-		<PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
+		<PackageReference Include="Microsoft.Extensions.AI" Version="9.4.0-preview.1.25207.5" />
 		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.45.0" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.45.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.32.0-preview" />
@@ -39,8 +39,8 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.32.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplate.Handlebars" Version="1.0.0-rc3" />
 		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.45.0" />
-		<PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.6" />
-		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.1.0-preview.6" />
+		<PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.7" />
+		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.1.0-preview.7" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.2.3" />
 		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
