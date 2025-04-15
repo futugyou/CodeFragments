@@ -11,6 +11,7 @@ using AspnetcoreEx.KernelService;
 using Microsoft.Extensions.Http.Resilience;
 using AspnetcoreEx.HostedService;
 using Microsoft.Extensions.ServiceDiscovery;
+using AspnetcoreEx.MQTT;
 // using AspnetcoreEx.MiniMVC;
 
 // MiniExtensions.StartMiniAspnetCore();
@@ -149,6 +150,8 @@ builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 
 await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);
+
+builder.Services.AddMQTTExtension(configuration);
 
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
