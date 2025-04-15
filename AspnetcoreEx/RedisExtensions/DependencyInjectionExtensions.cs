@@ -4,24 +4,15 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddRedisExtension(this IServiceCollection services)
     {
-        if (services is null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
+        ArgumentNullException.ThrowIfNull(services);
         var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
         return services.AddRedisExtension(configuration);
     }
 
     public static IServiceCollection AddRedisExtension(this IServiceCollection services, IConfiguration configuration)
     {
-        if (services is null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
-        if (configuration is null)
-        {
-            throw new ArgumentNullException(nameof(configuration));
-        }
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
         services.Configure<RedisOptions>(configuration.GetSection("RedisOptions"));
         // choose one of them

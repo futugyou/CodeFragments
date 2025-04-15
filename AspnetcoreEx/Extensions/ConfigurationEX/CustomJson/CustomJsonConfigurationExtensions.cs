@@ -4,10 +4,7 @@ public static class CustomJsonConfigurationExtensions
 {
     public static IConfigurationBuilder AddJsonFileExtensions(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
     {
-        if (builder == null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        ArgumentNullException.ThrowIfNull(builder);
         if (string.IsNullOrEmpty(path))
         {
             throw new ArgumentException("File path must be a non-empty string.");

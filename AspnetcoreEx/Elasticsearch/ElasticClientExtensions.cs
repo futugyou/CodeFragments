@@ -9,24 +9,15 @@ public static class ElasticClientExtensions
 {
     public static IServiceCollection AddElasticClientExtension(this IServiceCollection services)
     {
-        if (services is null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
+        ArgumentNullException.ThrowIfNull(services);
         var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
         return services.AddElasticClientExtension(configuration);
     }
 
     public static IServiceCollection AddElasticClientExtension(this IServiceCollection services, IConfiguration configuration)
     {
-        if (services is null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
-        if (configuration is null)
-        {
-            throw new ArgumentNullException(nameof(configuration));
-        }
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
         // services.AddOptions<ElasticOptions>().Bind(configuration.GetSection("ElasticServer"));
         // services.Configure<ElasticOptions>(configuration.GetSection("ElasticServer"));

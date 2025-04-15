@@ -7,10 +7,7 @@ public static class RouteExtensions
 {
     public static IServiceCollection AddRouteExtension(this IServiceCollection services)
     {
-        if (services is null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
+        ArgumentNullException.ThrowIfNull(services);
 
         services.Configure<RouteOptions>(options =>
         {
