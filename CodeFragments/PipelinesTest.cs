@@ -1,15 +1,14 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO.Pipelines;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CodeFragments;
 public static class PipelinesTest
 {
-    public static async Task Show()
+    public static async Task Base()
     {
         Pipe pipe = new Pipe();
         // write something
@@ -19,6 +18,54 @@ public static class PipelinesTest
         // consume it
         await ReadSomeDataAsync(pipe.Reader);
     }
+
+    public static async Task PipeWithTcpClient()
+    {
+        var listener = new TcpListener(IPAddress.Any, 8080);
+        listener.Start();
+        Console.WriteLine("Server started. Listening on port 8080...");
+
+        var client = await listener.AcceptTcpClientAsync();
+        Console.WriteLine("Client connected.");
+
+        var pipe = new Pipe();
+        var readTask = TcpReadDataAsync(client, pipe.Writer);
+        var writeTask = TcpWriteDataAsync(client, pipe.Reader);
+
+        await Task.WhenAll(readTask, writeTask);
+
+        client.Close();
+    }
+
+    public static async Task RunClient()
+    {
+        try
+        {
+            using var client = new TcpClient();
+            Console.WriteLine("Connecting to server...");
+            await client.ConnectAsync("127.0.0.1", 8080);
+            Console.WriteLine("Connected to server.");
+
+            using var stream = client.GetStream();
+            var message = "Hello from client!";
+            var data = Encoding.ASCII.GetBytes(message);
+
+            // Send data to the server
+            await stream.WriteAsync(data, 0, data.Length);
+            Console.WriteLine($"Sent: {message}");
+
+            // Optionally, read response from server
+            var buffer = new byte[1024];
+            var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+            var response = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+            Console.WriteLine($"Received: {response}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
     static async ValueTask WriteSomeDataAsync(PipeWriter writer)
     {
         // use an oversized size guess
@@ -30,6 +77,48 @@ public static class PipelinesTest
         // this is **not** the same as Stream.Flush!
         await writer.FlushAsync();
     }
+
+    static async Task TcpReadDataAsync(TcpClient client, PipeWriter writer)
+    {
+        var stream = client.GetStream();
+        while (true)
+        {
+            var memory = writer.GetMemory(1024);
+            var bytesRead = await stream.ReadAsync(memory, default);
+
+            if (bytesRead == 0)
+            {
+                break;
+            }
+
+            writer.Advance(bytesRead);
+            await writer.FlushAsync();
+        }
+
+        writer.Complete();
+    }
+
+    static async Task TcpWriteDataAsync(TcpClient client, PipeReader reader)
+    {
+        var stream = client.GetStream();
+        while (true)
+        {
+            // await some data being available
+            ReadResult read = await reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = read.Buffer;
+            // check whether we've reached the end and processed everything
+            if (buffer.IsEmpty && read.IsCompleted)
+                break; // exit loop 
+                       // process what we received
+            foreach (var segment in buffer)
+            {
+                await stream.WriteAsync(segment, default);
+            }
+            // tell the pipe that we used everything
+            reader.AdvanceTo(buffer.End);
+        }
+    }
+
     static async ValueTask ReadSomeDataAsync(PipeReader reader)
     {
         while (true)
