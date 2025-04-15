@@ -10,45 +10,46 @@ public class McpClientController : ControllerBase
 {
     [Route("tools")]
     [HttpPost]
-    public async Task<string[]> Tools()
+    public async Task<string[]> Tools([FromQuery] string? type)
     {
-        //  var client = await McpClientFactory.CreateAsync(new()
-        // {
-        //     Id = "everything",
-        //     Name = "Everything",
-        //     TransportType = TransportTypes.Sse,
-        //     Location = "https://localhost:5000/sse"
-        // });
-        var client = await McpClientFactory.CreateAsync(new()
+        IClientTransport clientTransport;
+        if (type == "sse")
         {
-            Id = "everything",
-            Name = "Everything",
-            TransportType = TransportTypes.StdIo,
-            TransportOptions = new()
+            clientTransport = new SseClientTransport(new()
             {
-                ["command"] = "npx",
-                ["arguments"] = "-y @modelcontextprotocol/server-everything",
-            }
-        });
+                Name = "everything",
+                Endpoint = new Uri("https://localhost:5000/sse"),
+                ConnectionTimeout = TimeSpan.FromSeconds(30),
+                MaxReconnectAttempts = 3,
+                ReconnectDelay = TimeSpan.FromSeconds(5),
+            });
+        }
+        else
+        {
+            clientTransport = new StdioClientTransport(new()
+            {
+                Name = "everything",
+                Command = "npx",
+                Arguments = ["-y @modelcontextprotocol/server-everything"],
+            });
+        }
 
-        return (await client.ListToolsAsync()).Select(t => t.Name).ToArray();
+        var client = await McpClientFactory.CreateAsync(clientTransport);
+
+        return [.. (await client.ListToolsAsync()).Select(t => t.Name)];
     }
 
     [Route("add")]
     [HttpPost]
     public async Task<string> Add()
     {
-        var client = await McpClientFactory.CreateAsync(new()
+        var clientTransport = new StdioClientTransport(new()
         {
-            Id = "everything",
-            Name = "Everything",
-            TransportType = TransportTypes.StdIo,
-            TransportOptions = new()
-            {
-                ["command"] = "npx",
-                ["arguments"] = "-y @modelcontextprotocol/server-everything",
-            }
+            Name = "everything",
+            Command = "npx",
+            Arguments = ["-y @modelcontextprotocol/server-everything"],
         });
+        var client = await McpClientFactory.CreateAsync(clientTransport);
         var result = await client.CallToolAsync("add", new Dictionary<string, object?>() { ["a"] = 10, ["b"] = 20 });
         return result.Content.First().Text!;
     }
@@ -57,20 +58,18 @@ public class McpClientController : ControllerBase
     [HttpPost]
     public async Task<string[]> GithubTools()
     {
-        var mcpServerConfig = new McpServerConfig
+        var clientTransport = new StdioClientTransport(new()
         {
-            Id = "github",
-            Name = "github",
-            TransportType = TransportTypes.StdIo,
-            TransportOptions = new()
+            Name = "everything",
+            Command = "npx",
+            Arguments = ["-y mcprouter @modelcontextprotocol/github"],
+            EnvironmentVariables = new Dictionary<string, string>
             {
-                ["command"] = "npx",
-                ["arguments"] = "-y mcprouter @modelcontextprotocol/github",
-                ["env:SERVER_KEY"] = "*",
+                ["SERVER_KEY"] = "*"
             }
-        };
-        var client = await McpClientFactory.CreateAsync(mcpServerConfig);
-        return (await client.ListToolsAsync()).Select(t => t.Name).ToArray();
+        });
+        var client = await McpClientFactory.CreateAsync(clientTransport);
+        return [.. (await client.ListToolsAsync()).Select(t => t.Name)];
     }
 
 
@@ -78,19 +77,17 @@ public class McpClientController : ControllerBase
     [HttpPost]
     public async Task<string> GithubSearchCode()
     {
-        var mcpServerConfig = new McpServerConfig
+        var clientTransport = new StdioClientTransport(new()
         {
-            Id = "github",
-            Name = "github",
-            TransportType = TransportTypes.StdIo,
-            TransportOptions = new()
+            Name = "everything",
+            Command = "npx",
+            Arguments = ["-y mcprouter @modelcontextprotocol/github"],
+            EnvironmentVariables = new Dictionary<string, string>
             {
-                ["command"] = "npx",
-                ["arguments"] = "-y mcprouter @modelcontextprotocol/github",
-                ["env:SERVER_KEY"] = "*",
+                ["SERVER_KEY"] = "*"
             }
-        };
-        var client = await McpClientFactory.CreateAsync(mcpServerConfig);
+        });
+        var client = await McpClientFactory.CreateAsync(clientTransport);
         var result = await client.CallToolAsync("search_code", new Dictionary<string, object?>() { ["q"] = "modelcontextprotocol" });
         return result.Content.First().Text!;
     }

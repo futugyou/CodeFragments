@@ -183,8 +183,32 @@ public static class KernelServiceExtensions
         Dictionary<string, string>? transportOptions, ILoggerFactory? loggerFactory,
         CancellationToken cancellationToken)
     {
-        var transportType = !string.IsNullOrEmpty(endpoint) ? TransportTypes.Sse : TransportTypes.StdIo;
-
+        IClientTransport clientTransport;
+        if (!string.IsNullOrEmpty(endpoint))
+        {
+            clientTransport = new SseClientTransport(new()
+            {
+                Name = serverName.ToLowerInvariant(),
+                Endpoint = new Uri(endpoint),
+                ConnectionTimeout = TimeSpan.FromSeconds(30),
+                MaxReconnectAttempts = 3,
+                ReconnectDelay = TimeSpan.FromSeconds(5),
+                AdditionalHeaders = transportOptions,
+            });
+        }
+        else
+        {
+            clientTransport = new StdioClientTransport(new()
+            {
+                Name = serverName.ToLowerInvariant(),
+                // DOTO: how to build command and arguments?
+                Command = "npx",
+                Arguments = ["-y @modelcontextprotocol/server-everything"],
+                EnvironmentVariables = transportOptions,
+            });
+        }
+        
+        var transportType = clientTransport.GetType().Name;
         McpClientOptions options = new()
         {
             ClientInfo = new()
@@ -194,16 +218,7 @@ public static class KernelServiceExtensions
             }
         };
 
-        var config = new McpServerConfig
-        {
-            Id = serverName.ToLowerInvariant(),
-            Name = serverName,
-            Location = endpoint,
-            TransportType = transportType,
-            TransportOptions = transportOptions
-        };
-
-        return await McpClientFactory.CreateAsync(config, options,
+        return await McpClientFactory.CreateAsync(clientTransport, options,
             loggerFactory: loggerFactory ?? NullLoggerFactory.Instance, cancellationToken: cancellationToken);
     }
 
