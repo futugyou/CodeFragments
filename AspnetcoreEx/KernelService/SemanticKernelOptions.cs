@@ -21,4 +21,14 @@ public class SemanticKernelOptions
     public string Endpoint { get; set; }
     public string KernelMemoryEndpoint { get; set; }
     public string KernelMemoryApiKey { get; set; }
+    // for mcp server
+    public Dictionary<string, McpServer> McpServers { get; set; } = [];
+}
+
+public class McpServer
+{
+    public string Command { get; set; }
+    public string Url { get; set; }
+    public string[] Args { get; set; } = [];
+    public Dictionary<string, string> Env { get; set; } = new();
 }
