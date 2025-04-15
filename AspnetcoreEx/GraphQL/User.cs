@@ -38,7 +38,7 @@ public class User
     {
         var currentUserId = this.Id;
         var all = repository.GetAllUser();
-        return all.Where(p => p.Id != currentUserId).ToList();
+        return [.. all.Where(p => p.Id != currentUserId)];
     }
 }
 

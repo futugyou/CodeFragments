@@ -116,13 +116,13 @@ public static class ModelContextProtocolExtensions
         }
 
         HashSet<string> requiredProperties = [.. inputSchema!.Required ?? []];
-        return properties.Select(kvp =>
+        return [.. properties.Select(kvp =>
             new KernelParameterMetadata(kvp.Key)
             {
                 Description = kvp.Value.Description,
                 ParameterType = ConvertParameterDataType(kvp.Value, requiredProperties.Contains(kvp.Key)),
                 IsRequired = requiredProperties.Contains(kvp.Key)
-            }).ToList();
+            })];
     }
 
     private static KernelReturnParameterMetadata ToReturnParameter()

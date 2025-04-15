@@ -61,7 +61,7 @@ public class SearchService
                 ) && p.Term(o => o.GoodsName, "phone")
             )
         );
-        list = response.Documents.ToList();
+        list = [.. response.Documents];
         log.LogInformation("list count " + list.Count);
         response = client.Search<OrderInfo>(p => p
         //.AllIndices()
@@ -74,7 +74,7 @@ public class SearchService
                 )
            )
         );
-        list = response.Documents.ToList();
+        list = [.. response.Documents];
         log.LogInformation("list count " + list.Count);
     }
 
@@ -298,7 +298,7 @@ public class SearchService
         log.LogInformation("list count " + list.Count);
         var scrollid = response.ScrollId;
         response = client.Scroll<OrderInfo>("10s", scrollid);
-        list = response.Documents.ToList();
+        list = [.. response.Documents];
         log.LogInformation("list count " + list.Count);
 
         // 2

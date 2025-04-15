@@ -15,7 +15,7 @@ public class ActionDescriptorCollectionProvider : IActionDescriptorCollectionPro
     private List<ActionDescriptor>? _actionDescriptors;
     public IReadOnlyList<ActionDescriptor> ActionDescriptors 
         => _actionDescriptors 
-        ??= Resolve(_assembly.GetExportedTypes()).ToList();
+        ??= [.. Resolve(_assembly.GetExportedTypes())];
 
     public ActionDescriptorCollectionProvider(IWebHostEnvironment environment)
     {

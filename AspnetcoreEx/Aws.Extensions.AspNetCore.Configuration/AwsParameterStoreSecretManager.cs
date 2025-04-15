@@ -54,7 +54,7 @@ public partial class AwsParameterStoreManager
 		}
 
 		var parametersWithOutPath = await GetParametersWithOutPath(awsmanager, nameList);
-		return parametersWithOutPath.SelectMany(p => p.Parameters).ToList();
+		return [.. parametersWithOutPath.SelectMany(p => p.Parameters)];
 	}
 
 	private async Task<GetParametersResponse[]> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)

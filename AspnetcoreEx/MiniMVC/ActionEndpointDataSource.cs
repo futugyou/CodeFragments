@@ -29,7 +29,7 @@ public class ActionEndpointDataSource : EndpointDataSource
         DefaultBuilder = new EndpointConventionBuilder(_conventions, _finallyConventions);
     }
 
-    public override IReadOnlyList<Endpoint> Endpoints => _endpoints ??= _actions.ActionDescriptors.SelectMany(CreateEndpoints).ToList();
+    public override IReadOnlyList<Endpoint> Endpoints => _endpoints ??= [.. _actions.ActionDescriptors.SelectMany(CreateEndpoints)];
     public override IChangeToken GetChangeToken() => NullChangeToken.Singleton;
 
     private IEnumerable<Endpoint> CreateEndpoints(ActionDescriptor actionDescriptor)

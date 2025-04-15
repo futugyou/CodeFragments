@@ -22,12 +22,12 @@ public class UserRepository : IUserRepository
     {
         _dbSet.Add(user);
         graphQLDbContext.SaveChanges();
-        return graphQLDbContext.Users.ToList();
+        return [.. graphQLDbContext.Users];
     }
 
     public List<User> GetAllUser()
     {
-        return _dbSet.ToList();
+        return [.. _dbSet];
     }
 
     public User? GetUserById(int id)

@@ -20,8 +20,7 @@ public class ActionDescriptor
         ControllerName = MethodInfo.DeclaringType!.Name;
         ControllerName = ControllerName[..^"Controller".Length];
         ActionName = MethodInfo.Name;
-        Parameters = methodInfo.GetParameters()
-            .Select(it => new ParameterDescriptor(it)).ToArray();
+        Parameters = [.. methodInfo.GetParameters().Select(it => new ParameterDescriptor(it))];
     }
 }
 
