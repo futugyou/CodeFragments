@@ -65,9 +65,10 @@ public static class KernelServiceExtensions
         // Microsoft.SemanticKernel
         var kernelBuilder = services.AddKernel();
 
-        // Add the Model Content Protocol tools as SemanticKernel plugins
-        // The Model Content Protocol tools can add into ChatOptions tools directly, so using Microsoft.Extensions.AI is also a way to integrate
-        await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync("https://localhost:5000/sse", "testing-server");
+        foreach (var item in config.McpServers)
+        {
+            await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(config.Endpoint))
         {
@@ -161,16 +162,16 @@ public static class KernelServiceExtensions
     /// <param name="plugins"></param>
     /// <returns>A <see cref="KernelPlugin"/> containing the functions.</returns>
     public static async Task<IKernelBuilderPlugins> AddMcpFunctionsFromSseServerAsync(this IKernelBuilderPlugins plugins,
-        string endpoint, string serverName, CancellationToken cancellationToken = default)
+        string name, McpServer server, CancellationToken cancellationToken = default)
     {
-        var key = PluginNameSanitizer.ToSafePluginName(serverName);
+        var key = PluginNameSanitizer.ToSafePluginName(name);
 
         if (SseMap.TryGetValue(key, out var sseKernelPlugin))
         {
             return sseKernelPlugin;
         }
 
-        var mcpClient = await GetClientAsync(serverName, endpoint, null, null, cancellationToken).ConfigureAwait(false);
+        var mcpClient = await GetClientAsync(name, server, cancellationToken).ConfigureAwait(false);
         var functions = await mcpClient.MapToFunctionsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
         cancellationToken.Register(() => mcpClient.DisposeAsync().ConfigureAwait(false).GetAwaiter().GetResult());
@@ -179,47 +180,42 @@ public static class KernelServiceExtensions
         return SseMap[key] = sseKernelPlugin;
     }
 
-    private static async Task<IMcpClient> GetClientAsync(string serverName, string? endpoint,
-        Dictionary<string, string>? transportOptions, ILoggerFactory? loggerFactory,
-        CancellationToken cancellationToken)
+    private static async Task<IMcpClient> GetClientAsync(string name, McpServer mcpServer, CancellationToken cancellationToken)
     {
         IClientTransport clientTransport;
-        if (!string.IsNullOrEmpty(endpoint))
+        if (!string.IsNullOrEmpty(mcpServer.Url))
         {
             clientTransport = new SseClientTransport(new()
             {
-                Name = serverName.ToLowerInvariant(),
-                Endpoint = new Uri(endpoint),
+                Name = name,
+                Endpoint = new Uri(mcpServer.Url),
                 ConnectionTimeout = TimeSpan.FromSeconds(30),
                 MaxReconnectAttempts = 3,
                 ReconnectDelay = TimeSpan.FromSeconds(5),
-                AdditionalHeaders = transportOptions,
             });
         }
         else
         {
             clientTransport = new StdioClientTransport(new()
             {
-                Name = serverName.ToLowerInvariant(),
-                // DOTO: how to build command and arguments?
-                Command = "npx",
-                Arguments = ["-y @modelcontextprotocol/server-everything"],
-                EnvironmentVariables = transportOptions,
+                Name = name,
+                Command = mcpServer.Command,
+                Arguments = mcpServer.Args,
+                EnvironmentVariables = mcpServer.Env,
             });
         }
-        
+
         var transportType = clientTransport.GetType().Name;
         McpClientOptions options = new()
         {
             ClientInfo = new()
             {
-                Name = $"{serverName} {transportType}Client",
+                Name = $"{name} {transportType}Client",
                 Version = "1.0.0"
             }
         };
 
-        return await McpClientFactory.CreateAsync(clientTransport, options,
-            loggerFactory: loggerFactory ?? NullLoggerFactory.Instance, cancellationToken: cancellationToken);
+        return await McpClientFactory.CreateAsync(clientTransport, options, NullLoggerFactory.Instance, cancellationToken);
     }
 
     internal static IServiceCollection AddKernelMemoryServices(this IServiceCollection services, IConfiguration configuration)
