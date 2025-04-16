@@ -62,7 +62,7 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.46.0" />
 		<PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.9" />
 		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.1.0-preview.9" />
-		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.2.3" />
+		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.0" />
 		<PackageReference Include="MQTTnet" Version="5.0.1.1416" />
 		<PackageReference Include="MQTTnet.AspNetCore" Version="5.0.1.1416" />
 		<PackageReference Include="NEST" Version="7.17.5" />
