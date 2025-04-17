@@ -37,7 +37,7 @@ public static class KernelServiceExtensions
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
 
         // mcp server
-        services.AddMcpServer().WithToolsFromAssembly();
+        services.AddMcpServer().WithToolsFromAssembly().WithHttpTransport();
 
         // dotnet new install Microsoft.Extensions.AI.Templates
         var credential = new ApiKeyCredential(config.Key ?? throw new InvalidOperationException("Missing configuration: GitHubModels:Token. See the README for details."));
@@ -190,8 +190,6 @@ public static class KernelServiceExtensions
                 Name = name,
                 Endpoint = new Uri(mcpServer.Url),
                 ConnectionTimeout = TimeSpan.FromSeconds(30),
-                MaxReconnectAttempts = 3,
-                ReconnectDelay = TimeSpan.FromSeconds(5),
             });
         }
         else

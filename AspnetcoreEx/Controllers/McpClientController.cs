@@ -30,8 +30,6 @@ public class McpClientController : ControllerBase
                 Name = serverType,
                 Endpoint = new Uri(mcpServer.Url),
                 ConnectionTimeout = TimeSpan.FromSeconds(30),
-                MaxReconnectAttempts = 3,
-                ReconnectDelay = TimeSpan.FromSeconds(5),
             });
         }
         else
