@@ -7,6 +7,7 @@ namespace AspnetcoreEx.KernelService;
 /// </summary>
 public static class ModelContextProtocolExtensions
 {
+    [Experimental("SKEXP0001")]
     /// <summary>
     /// Map the tools exposed on this <see cref="IMcpClient"/> to a collection of <see cref="KernelFunction"/> instances for use with the Semantic Kernel.
     /// <param name="mcpClient">The <see cref="IMcpClient"/>.</param>
@@ -17,12 +18,15 @@ public static class ModelContextProtocolExtensions
         var functions = new List<KernelFunction>();
         foreach (var tool in await mcpClient.ListToolsAsync(null, cancellationToken).ConfigureAwait(false))
         {
-            functions.Add(tool.ToKernelFunction(mcpClient, cancellationToken));
+            // use SemanticKernel AIFunctionExtensions
+            functions.Add(tool.AsKernelFunction());
+            // functions.Add(tool.ToKernelFunction(mcpClient, cancellationToken));
         }
 
         return functions;
     }
 
+    #region unused 
     private static KernelFunction ToKernelFunction(this McpClientTool tool, IMcpClient mcpClient, CancellationToken cancellationToken)
     {
         async Task<string> InvokeToolAsync(Kernel kernel, KernelFunction function, KernelArguments arguments, CancellationToken ct)
@@ -148,4 +152,5 @@ public static class ModelContextProtocolExtensions
 
         return !required && type.IsValueType ? typeof(Nullable<>).MakeGenericType(type) : type;
     }
+    #endregion
 }
