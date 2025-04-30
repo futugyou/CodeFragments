@@ -52,14 +52,14 @@
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250324.1" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.98.250324.1" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.2" />
-		<PackageReference Include="Microsoft.SemanticKernel" Version="1.47.0" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="1.48.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.32.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.47.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.48.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.32.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.32.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.32.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplate.Handlebars" Version="1.0.0-rc3" />
-		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.47.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.48.0" />
 		<PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.11" />
 		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.1.0-preview.11" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.0" />
