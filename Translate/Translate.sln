@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dapr", "Dapr", "{47016E42-A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actors", "Dapr\Actors\Actors.csproj", "{5110A889-8D04-490D-8BDB-B1D3CB167994}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config", "Dapr\Config\Config.csproj", "{32DC079A-029C-4C23-BA87-FDC0F451C67F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,11 +31,24 @@ Global
 		{5110A889-8D04-490D-8BDB-B1D3CB167994}.Release|x64.Build.0 = Release|Any CPU
 		{5110A889-8D04-490D-8BDB-B1D3CB167994}.Release|x86.ActiveCfg = Release|Any CPU
 		{5110A889-8D04-490D-8BDB-B1D3CB167994}.Release|x86.Build.0 = Release|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Debug|x64.Build.0 = Debug|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Debug|x86.Build.0 = Debug|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x64.ActiveCfg = Release|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x64.Build.0 = Release|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x86.ActiveCfg = Release|Any CPU
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5110A889-8D04-490D-8BDB-B1D3CB167994} = {47016E42-A4B3-1F9A-4217-340DC71DAA7C}
+		{32DC079A-029C-4C23-BA87-FDC0F451C67F} = {47016E42-A4B3-1F9A-4217-340DC71DAA7C}
 	EndGlobalSection
 EndGlobal
