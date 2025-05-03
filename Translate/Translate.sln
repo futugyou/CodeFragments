@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actors", "Dapr\Actors\Actor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config", "Dapr\Config\Config.csproj", "{32DC079A-029C-4C23-BA87-FDC0F451C67F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Dapr\Tools\Tools.csproj", "{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,18 @@ Global
 		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x64.Build.0 = Release|Any CPU
 		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x86.ActiveCfg = Release|Any CPU
 		{32DC079A-029C-4C23-BA87-FDC0F451C67F}.Release|x86.Build.0 = Release|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Debug|x86.Build.0 = Debug|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Release|x64.Build.0 = Release|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5110A889-8D04-490D-8BDB-B1D3CB167994} = {47016E42-A4B3-1F9A-4217-340DC71DAA7C}
 		{32DC079A-029C-4C23-BA87-FDC0F451C67F} = {47016E42-A4B3-1F9A-4217-340DC71DAA7C}
+		{1B97D9D7-45C1-4398-87C6-F8141B1D88E4} = {47016E42-A4B3-1F9A-4217-340DC71DAA7C}
 	EndGlobalSection
 EndGlobal
