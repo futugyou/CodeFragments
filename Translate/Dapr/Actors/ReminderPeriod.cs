@@ -39,6 +39,12 @@ public class ReminderPeriod
         return repeats != 0 && (years != 0 || months != 0 || days != 0 || period != TimeSpan.Zero);
     }
 
+    public int Repeats
+    {
+        get => repeats;
+        internal set => repeats = value;
+    }
+    
     public DateTime GetFollowing(DateTime now)
     {
         DateTime next = now.AddYears(years).AddMonths(months).AddDays(days);
