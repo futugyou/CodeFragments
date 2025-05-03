@@ -1,6 +1,7 @@
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
+using Amazon.Runtime.Credentials;
 using Amazon.SimpleSystemsManagement;
 
 namespace Aws.Extensions.AspNetCore.Configuration;
@@ -37,6 +38,6 @@ public class AwsParameterStoreConfigurationSource(AWSOptions options, AwsClientC
             return credentials;
         }
 
-        return FallbackCredentialsFactory.GetCredentials() ?? throw new AmazonClientException("Failed to find AWS Credentials for constructing AWS service client");
+        return DefaultAWSCredentialsIdentityResolver.GetCredentials() ?? throw new AmazonClientException("Failed to find AWS Credentials for constructing AWS service client");
     }
 }

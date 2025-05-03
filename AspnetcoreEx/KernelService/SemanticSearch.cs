@@ -13,14 +13,11 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
         Expression<Func<SemanticSearchRecord, bool>>? filter = filenameFilter is { Length: > 0 }
             ? record => record.FileName == filenameFilter
             : null;
-
-        var nearest = await vectorCollection.VectorizedSearchAsync(queryEmbedding, new VectorSearchOptions<SemanticSearchRecord>
-        {
-            Top = maxResults,
-            Filter = filter,
-        });
         var results = new List<SemanticSearchRecord>();
-        await foreach (var item in nearest.Results)
+        await foreach (var item in vectorCollection.SearchEmbeddingAsync(queryEmbedding, maxResults, new VectorSearchOptions<SemanticSearchRecord>
+        {
+            Filter = filter,
+        }))
         {
             results.Add(item.Record);
         }
@@ -43,6 +40,6 @@ public class SemanticSearchRecord
     [VectorStoreRecordData]
     public required string Text { get; set; }
 
-    [VectorStoreRecordVector(1536, DistanceFunction.CosineSimilarity)] // 1536 is the default vector size for the OpenAI text-embedding-3-small model
+    [VectorStoreRecordVector(Dimensions: 1536, DistanceFunction = DistanceFunction.CosineSimilarity)] // 1536 is the default vector size for the OpenAI text-embedding-3-small model
     public ReadOnlyMemory<float> Vector { get; set; }
 }
