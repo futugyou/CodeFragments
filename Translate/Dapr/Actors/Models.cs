@@ -60,7 +60,7 @@ public class GetBulkStateRequest
     public string ActorKey() => $"{ActorType}{Const.DaprSeparator}{ActorID}";
 }
 
-[JsonConverter(typeof(ReminderResponse.JsonConverter))]
+[JsonConverter(typeof(JsonConverter))]
 public class ReminderResponse
 {
     [JsonPropertyName("data")]
@@ -152,7 +152,7 @@ public class BulkStateResponse
     public Dictionary<string, byte[]> Data { get; set; }
 }
 
-[JsonConverter(typeof(TimerResponse.JsonConverter))]
+[JsonConverter(typeof(JsonConverter))]
 public class TimerResponse
 {
     [JsonPropertyName("data")]

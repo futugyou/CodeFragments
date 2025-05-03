@@ -1,10 +1,13 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tools;
 
 namespace Actors;
 
+[JsonConverter(typeof(JsonConverter))]
 public class ReminderPeriod
 {
-    private readonly string value;
+    private string value;
     private int years;
     private int months;
     private int days;
@@ -53,6 +56,32 @@ public class ReminderPeriod
         if (error != null)
         {
             throw error;
+        }
+    }
+    public sealed class JsonConverter : JsonConverter<ReminderPeriod>
+    {
+        public override ReminderPeriod Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var stringValue = reader.GetString() ?? "";
+            var reminder = new ReminderPeriod { value = stringValue };
+            if (string.IsNullOrEmpty(reminder.value) || reminder.value == "null" || reminder.value == "{}" || reminder.value == "\"\"" || reminder.value == "[]")
+            {
+                reminder.value = "";
+                return reminder;
+            }
+
+            if (reminder.value.Length >= 2 && reminder.value[0] == '"' && reminder.value[^1] == '"')
+            {
+                reminder.value = reminder.value[1..^1];
+            }
+
+            reminder.ParseReminderPeriod();
+            return reminder;
+        }
+
+        public override void Write(Utf8JsonWriter writer, ReminderPeriod value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.value);
         }
     }
 }
