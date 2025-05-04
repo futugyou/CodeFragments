@@ -239,4 +239,20 @@ public static class TimeUtil
 
         return (DateTime.MinValue, new Exception("Unsupported time/duration format: " + from));
     }
+
+    public static DateTime ParseTimeTruncateSeconds(string val, DateTime now)
+    {
+        var (t, err) = ParseTime(val, now);
+        if (err != null)
+        {
+            throw err;
+        }
+
+        return t.AddTicks(-(t.Ticks % TimeSpan.TicksPerSecond));
+    }
+    
+    public static DateTime Truncate(DateTime now)
+    { 
+        return now.AddTicks(-(now.Ticks % TimeSpan.TicksPerSecond));
+    }
 }
