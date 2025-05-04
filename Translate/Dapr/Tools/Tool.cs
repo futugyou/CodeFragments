@@ -250,9 +250,9 @@ public static class TimeUtil
 
         return t.AddTicks(-(t.Ticks % TimeSpan.TicksPerSecond));
     }
-    
+
     public static DateTime Truncate(DateTime now)
-    { 
+    {
         return now.AddTicks(-(now.Ticks % TimeSpan.TicksPerSecond));
     }
 }

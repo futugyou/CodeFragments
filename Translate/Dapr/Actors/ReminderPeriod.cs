@@ -42,7 +42,7 @@ public class ReminderPeriod
         get => repeats;
         internal set => repeats = value;
     }
-    
+
     public DateTime GetFollowing(DateTime now)
     {
         DateTime next = now.AddYears(years).AddMonths(months).AddDays(days);

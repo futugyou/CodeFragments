@@ -183,7 +183,7 @@ public class TimerResponse
                     doc.RootElement.WriteTo(writer);
                 }
             }
-            
+
             writer.WriteEndObject();
         }
     }
