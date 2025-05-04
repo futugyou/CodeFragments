@@ -122,6 +122,17 @@ public class Reminder
        (Data != null && !Data.Equals(newReminder.Data));
     }
 
+    public void UpdateFromTrack(ReminderTrack track)
+    {
+        if (track == null || track.LastFiredTime == DateTime.MinValue)
+        {
+            return;
+        }
+
+        Period.Repeats = track.RepetitionLeft;
+        RegisteredTime = Period.GetFollowing(track.LastFiredTime);
+    }
+
     public class BsonConverter : ClassSerializerBase<Reminder>
     {
         override public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Reminder value)
