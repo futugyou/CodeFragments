@@ -156,7 +156,7 @@ public class Reminder
             {
                 if (DateTime.TryParse(expProp.GetString(), null, System.Globalization.DateTimeStyles.RoundtripKind, out var exp))
                 {
-                    reminder.ExpirationTime = exp.ToUniversalTime().AddTicks(-(exp.Ticks % TimeSpan.TicksPerSecond));
+                    reminder.ExpirationTime = Tools.TimeUtil.Truncate(exp.ToUniversalTime());
                 }
             }
 
@@ -165,7 +165,7 @@ public class Reminder
             {
                 if (DateTime.TryParse(regProp.GetString(), null, System.Globalization.DateTimeStyles.RoundtripKind, out var reg))
                 {
-                    reminder.RegisteredTime = reg.ToUniversalTime().AddTicks(-(reg.Ticks % TimeSpan.TicksPerSecond));
+                    reminder.RegisteredTime = Tools.TimeUtil.Truncate(reg.ToUniversalTime());
                 }
             }
 
