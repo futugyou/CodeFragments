@@ -17,7 +17,10 @@
 				"ms-azuretools.vscode-docker",
 				"GitHub.copilot",
 				"GitHub.copilot-chat"
-			]
+			],
+			"settings": {
+				"editor.formatOnSave": true
+			}
 		}
 	},
 	"remoteUser": "root"
