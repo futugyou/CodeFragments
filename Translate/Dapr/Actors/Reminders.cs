@@ -17,6 +17,7 @@ public class GetReminderRequest
     public string Name { get; set; }
 }
 
+// TODO: update JsonConverter, beacause JsonContext is used
 [JsonConverter(typeof(JsonConverter))]
 public class CreateReminderRequest
 {
@@ -188,7 +189,7 @@ public class CreateReminderRequest
     }
 }
 
-
+// TODO: update JsonConverter, beacause JsonContext is used
 [JsonConverter(typeof(JsonConverter))]
 public class CreateTimerRequest
 {

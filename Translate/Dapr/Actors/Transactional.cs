@@ -43,11 +43,13 @@ public class TransactionalOperation
                 // Fallback to use AutoMapper or System.TexJson for dynamic mapping
                 if (Operation == OperationType.Upsert)
                 {
+                    // TODO: need JsonSerializerOptions
                     var upsert = JsonSerializer.Deserialize<TransactionalUpsert>(JsonSerializer.Serialize(Request)) ?? throw new InvalidOperationException("upsert request is null");
                     return upsert.StateOperation(baseKey, opts);
                 }
                 else if (Operation == OperationType.Delete)
                 {
+                    // TODO: need JsonSerializerOptions
                     var delete = JsonSerializer.Deserialize<TransactionalDelete>(JsonSerializer.Serialize(Request)) ?? throw new InvalidOperationException("delete request is null");
                     return delete.StateOperation(baseKey, opts);
                 }

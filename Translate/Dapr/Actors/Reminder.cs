@@ -7,6 +7,7 @@ using WellKnownTypes = Google.Protobuf.WellKnownTypes;
 
 namespace Actors;
 
+// TODO: update JsonConverter, beacause JsonContext is used
 [JsonConverter(typeof(JsonConverter))]
 [BsonSerializer(typeof(BsonConverter))]
 public class Reminder
@@ -137,6 +138,7 @@ public class Reminder
     {
         override public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, Reminder value)
         {
+            // TODO: need JsonSerializerOptions
             var json = JsonSerializer.Serialize(value);
             var document = BsonDocument.Parse(json);
             BsonDocumentSerializer.Instance.Serialize(context, document);
@@ -146,6 +148,7 @@ public class Reminder
         {
             var document = BsonDocumentSerializer.Instance.Deserialize(context);
             var json = document.ToJson();
+            // TODO: need JsonSerializerOptions
             return JsonSerializer.Deserialize<Reminder>(json) ?? new Reminder();
         }
     }

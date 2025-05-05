@@ -12,7 +12,8 @@ public interface ITransactionalStateOperation : IStateRequest
     OperationType Operation();
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
+// 成员“Dapr.Abstractions.OperationType”已使用本机 AOT 中不支持的 "JsonStringEnumConverter" 进行批注。请改为考虑使用泛型 "JsonStringEnumConverter<TEnum>"。
+// [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OperationType
 {
     [JsonStringEnumMemberName("upsert")]
