@@ -122,6 +122,11 @@ class Program
             await SocketDemo.Listener2();
         }
 
+        // dotnet run -json-1
+        if (args.Any(p => p.Contains("json-1")))
+        {
+            JsonExtensionDataDemo.Exection();
+        }
         // FileGlobbing.Base();
 
         // PrimitivesPackage.Token1();
@@ -136,7 +141,7 @@ class Program
         // ExpressionDemo.StandardVisitor();
         // ExpressionDemo.Loop();
 
-        CryptoDemo();
+        // CryptoDemo();
 
         Console.ReadLine();
     }
