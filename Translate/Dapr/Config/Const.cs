@@ -38,4 +38,14 @@ public static class Const
     public const string OtlpExporterTimeout = "OTEL_EXPORTER_OTLP_TIMEOUT";
     //OpenTelemetry timeout for the traces request
     public const string OtlpExporterTracesTimeout = "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT";
+    public static readonly TimeSpan OperatorCallTimeout = TimeSpan.FromSeconds(5);
+    public const int OperatorMaxRetries = 100;
+    public const string AllowAccess = "allow";
+    public const string DenyAccess = "deny";
+    public const string DefaultTrustDomain = "public";
+    public const string DefaultNamespace = "default";
+    public const string ActionPolicyApp = "app";
+    public const string ActionPolicyGlobal = "global";
+    public const int defaultMaxWorkflowConcurrentInvocations = 1000;
+    public const int defaultMaxActivityConcurrentInvocations = 1000;
 }

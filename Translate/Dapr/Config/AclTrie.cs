@@ -1,7 +1,22 @@
 
-
-
 namespace Config;
+
+public class AccessControlList
+{
+    public string DefaultAction { get; set; }
+    public string TrustDomain { get; set; }
+    public Dictionary<string, AccessControlListPolicySpec> PolicySpec { get; set; }
+}
+
+// AccessControlListPolicySpec is an in-memory access control list config per app for fast lookup.
+public class AccessControlListPolicySpec
+{
+    public string AppName { get; set; }
+    public string DefaultAction { get; set; }
+    public string TrustDomain { get; set; }
+    public string Namespace { get; set; }
+    public Trie? AppOperationActions { get; set; }
+}
 
 public class AccessControlListOperationAction
 {
@@ -79,7 +94,7 @@ public class Trie
             var ch = operationParts[index];
             ch = Separation + ch;
             var subNode = FindNode(ch, node.SubNodes);
-            
+
             if (null == subNode)
             {
                 TrieNode? newNode;
