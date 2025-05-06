@@ -70,6 +70,36 @@ public class ConfigurationSpec
     [JsonPropertyName("metrics")]
     [YamlMember(Alias = "metrics", ApplyNamingConventions = false)]
     public MetricSpec MetricsSpec { get; set; }
+
+    [JsonPropertyName("secrets")]
+    [YamlMember(Alias = "secrets", ApplyNamingConventions = false)]
+    public SecretsSpec Secrets { get; set; }
+}
+
+public class SecretsSpec
+{
+    [JsonPropertyName("scopes")]
+    [YamlMember(Alias = "scopes", ApplyNamingConventions = false)]
+    public List<SecretsScope> Scopes { get; set; }
+}
+
+public class SecretsScope
+{
+    [JsonPropertyName("defaultAccess")]
+    [YamlMember(Alias = "defaultAccess", ApplyNamingConventions = false)]
+    public string DefaultAccess { get; set; }
+
+    [JsonPropertyName("storeName")]
+    [YamlMember(Alias = "storeName", ApplyNamingConventions = false)]
+    public string StoreName { get; set; }
+
+    [JsonPropertyName("allowedSecrets")]
+    [YamlMember(Alias = "allowedSecrets", ApplyNamingConventions = false)]
+    public List<string> AllowedSecrets { get; set; }
+
+    [JsonPropertyName("deniedSecrets")]
+    [YamlMember(Alias = "deniedSecrets", ApplyNamingConventions = false)]
+    public List<string> DeniedSecrets { get; set; }
 }
 
 public class MetricSpec
