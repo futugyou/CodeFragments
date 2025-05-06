@@ -40,83 +40,92 @@ public class Configuration
 
     [JsonPropertyName("spec")]
     [YamlMember(Alias = "spec", ApplyNamingConventions = false)]
-    public ConfigurationSpec Spec { get; set; }
+    public ConfigurationSpec Spec { get; set; } = new();
 
     [JsonIgnore]
     [YamlIgnore]
     public HashSet<Feature> FeaturesEnabled { get; set; }
+
+    public bool IsFeatureEnabled(Feature target)
+    {
+        if (FeaturesEnabled == null || FeaturesEnabled.Count == 0)
+        {
+            return false;
+        }
+        return FeaturesEnabled.Contains(target);
+    }
 }
 
 public class ConfigurationSpec
 {
     [JsonPropertyName("httpPipeline")]
     [YamlMember(Alias = "httpPipeline", ApplyNamingConventions = false)]
-    public PipelineSpec HTTPPipelineSpec { get; set; }
+    public PipelineSpec HTTPPipelineSpec { get; set; } = new();
     [JsonPropertyName("appHttpPipeline")]
     [YamlMember(Alias = "appHttpPipeline", ApplyNamingConventions = false)]
-    public PipelineSpec AppHTTPPipelineSpec { get; set; }
+    public PipelineSpec AppHTTPPipelineSpec { get; set; } = new();
 
     [JsonPropertyName("tracing")]
     [YamlMember(Alias = "tracing", ApplyNamingConventions = false)]
-    public TracingSpec TracingSpec { get; set; }
+    public TracingSpec TracingSpec { get; set; } = new();
 
     [JsonPropertyName("mtls")]
     [YamlMember(Alias = "mtls", ApplyNamingConventions = false)]
-    public MTLSSpec MTLSSpec { get; set; }
+    public MTLSSpec MTLSSpec { get; set; } = new();
 
     [JsonPropertyName("metric")]
     [YamlMember(Alias = "metric", ApplyNamingConventions = false)]
-    public MetricSpec MetricSpec { get; set; }
+    public MetricSpec MetricSpec { get; set; } = new();
 
     [JsonPropertyName("metrics")]
     [YamlMember(Alias = "metrics", ApplyNamingConventions = false)]
-    public MetricSpec MetricsSpec { get; set; }
+    public MetricSpec MetricsSpec { get; set; } = new();
 
     [JsonPropertyName("secrets")]
     [YamlMember(Alias = "secrets", ApplyNamingConventions = false)]
-    public SecretsSpec Secrets { get; set; }
+    public SecretsSpec Secrets { get; set; } = new();
 
     [JsonPropertyName("accessControl")]
     [YamlMember(Alias = "accessControl", ApplyNamingConventions = false)]
-    public AccessControlSpec AccessControlSpec { get; set; }
+    public AccessControlSpec AccessControlSpec { get; set; } = new();
 
     [JsonPropertyName("nameResolution")]
     [YamlMember(Alias = "nameResolution", ApplyNamingConventions = false)]
-    public NameResolutionSpec NameResolutionSpec { get; set; }
+    public NameResolutionSpec NameResolutionSpec { get; set; } = new();
 
     [JsonPropertyName("features")]
     [YamlMember(Alias = "features", ApplyNamingConventions = false)]
-    public List<FeatureSpec> Features { get; set; }
+    public List<FeatureSpec> Features { get; set; } = new();
 
     [JsonPropertyName("api")]
     [YamlMember(Alias = "api", ApplyNamingConventions = false)]
-    public APISpec APISpec { get; set; }
+    public APISpec APISpec { get; set; } = new();
 
     [JsonPropertyName("components")]
     [YamlMember(Alias = "components", ApplyNamingConventions = false)]
-    public ComponentsSpec ComponentsSpec { get; set; }
+    public ComponentsSpec ComponentsSpec { get; set; } = new();
 
     [JsonPropertyName("logging")]
     [YamlMember(Alias = "logging", ApplyNamingConventions = false)]
-    public LoggingSpec LoggingSpec { get; set; }
+    public LoggingSpec LoggingSpec { get; set; } = new();
 
     [JsonPropertyName("wasm")]
     [YamlMember(Alias = "wasm", ApplyNamingConventions = false)]
-    public WasmSpec WasmSpec { get; set; }
+    public WasmSpec WasmSpec { get; set; } = new();
 
     [JsonPropertyName("workflow")]
     [YamlMember(Alias = "workflow", ApplyNamingConventions = false)]
-    public WorkflowSpec WorkflowSpec { get; set; }
+    public WorkflowSpec WorkflowSpec { get; set; } = new();
 }
 
 public class WorkflowSpec
 {
     [JsonPropertyName("maxConcurrentWorkflowInvocations")]
     [YamlMember(Alias = "maxConcurrentWorkflowInvocations", ApplyNamingConventions = false)]
-    public int MaxConcurrentWorkflowInvocations { get; set; }
+    public int MaxConcurrentWorkflowInvocations { get; set; } = Const.DefaultMaxWorkflowConcurrentInvocations;
     [JsonPropertyName("maxConcurrentActivityInvocations")]
     [YamlMember(Alias = "maxConcurrentActivityInvocations", ApplyNamingConventions = false)]
-    public int MaxConcurrentActivityInvocations { get; set; }
+    public int MaxConcurrentActivityInvocations { get; set; } = Const.DefaultMaxActivityConcurrentInvocations;
     public int GetMaxConcurrentWorkflowInvocations()
     {
         if (MaxConcurrentWorkflowInvocations <= 0)
@@ -243,11 +252,11 @@ public class AccessControlSpec
 {
     [JsonPropertyName("defaultAction")]
     [YamlMember(Alias = "defaultAction", ApplyNamingConventions = false)]
-    public string DefaultAction { get; set; }
+    public string DefaultAction { get; set; } = Const.AllowAccess;
 
     [JsonPropertyName("trustDomain")]
     [YamlMember(Alias = "trustDomain", ApplyNamingConventions = false)]
-    public string TrustDomain { get; set; }
+    public string TrustDomain { get; set; } = "public";
 
     [JsonPropertyName("policies")]
     [YamlMember(Alias = "policies", ApplyNamingConventions = false)]
@@ -317,13 +326,34 @@ public class SecretsScope
     [JsonPropertyName("deniedSecrets")]
     [YamlMember(Alias = "deniedSecrets", ApplyNamingConventions = false)]
     public List<string> DeniedSecrets { get; set; }
+
+    public bool IsSecretAllowed(string key)
+    {
+        var access = Const.AllowAccess;
+        if (Const.DenyAccess.Equals(DefaultAccess))
+        {
+            access = Const.DenyAccess;
+        }
+
+        if (AllowedSecrets != null)
+        {
+            return AllowedSecrets.Contains(key);
+        }
+
+        if (DeniedSecrets != null && DeniedSecrets.Contains(key))
+        {
+            return false;
+        }
+
+        return access == Const.AllowAccess;
+    }
 }
 
 public class MetricSpec
 {
     [JsonPropertyName("enabled")]
     [YamlMember(Alias = "enabled", ApplyNamingConventions = false)]
-    public bool Enabled { get; set; }
+    public bool Enabled { get; set; } = true;
     [JsonPropertyName("recordErrorCodes")]
     [YamlMember(Alias = "recordErrorCodes", ApplyNamingConventions = false)]
     public bool RecordErrorCodes { get; set; }
@@ -450,15 +480,24 @@ public class MetricHTTP
 
 public class MTLSSpec
 {
-    [JsonPropertyName("increasedCardinality")]
-    [YamlMember(Alias = "increasedCardinality", ApplyNamingConventions = false)]
-    public bool IncreasedCardinality { get; set; }
-    [JsonPropertyName("pathMatching")]
-    [YamlMember(Alias = "pathMatching", ApplyNamingConventions = false)]
-    public List<string> PathMatching { get; set; }
-    [JsonPropertyName("excludeVerbs")]
-    [YamlMember(Alias = "excludeVerbs", ApplyNamingConventions = false)]
-    public bool ExcludeVerbs { get; set; }
+    [JsonPropertyName("enabled")]
+    [YamlMember(Alias = "enabled", ApplyNamingConventions = false)]
+    public bool Enabled { get; set; }
+    [JsonPropertyName("workloadCertTTL")]
+    [YamlMember(Alias = "workloadCertTTL", ApplyNamingConventions = false)]
+    public string WorkloadCertTTL { get; set; }
+    [JsonPropertyName("allowedClockSkew")]
+    [YamlMember(Alias = "allowedClockSkew", ApplyNamingConventions = false)]
+    public string AllowedClockSkew { get; set; }
+    [JsonPropertyName("sentryAddress")]
+    [YamlMember(Alias = "sentryAddress", ApplyNamingConventions = false)]
+    public string SentryAddress { get; set; }
+    [JsonPropertyName("controlPlaneTrustDomain")]
+    [YamlMember(Alias = "controlPlaneTrustDomain", ApplyNamingConventions = false)]
+    public string ControlPlaneTrustDomain { get; set; }
+    [JsonPropertyName("tokenValidators")]
+    [YamlMember(Alias = "tokenValidators", ApplyNamingConventions = false)]
+    public List<ValidatorSpec> TokenValidators { get; set; }
 }
 
 public class ValidatorSpec
@@ -488,7 +527,6 @@ public class ValidatorSpec
     }
 }
 
-
 public class TracingSpec
 {
 
@@ -500,10 +538,10 @@ public class TracingSpec
     public bool Stdout { get; set; }
     [JsonPropertyName("zipkin")]
     [YamlMember(Alias = "zipkin", ApplyNamingConventions = false)]
-    public ZipkinSpec Zipkin { get; set; }
+    public ZipkinSpec Zipkin { get; set; } = new();
     [JsonPropertyName("otel")]
     [YamlMember(Alias = "otel", ApplyNamingConventions = false)]
-    public OtelSpec Otel { get; set; }
+    public OtelSpec Otel { get; set; } = new();
 }
 
 public class ZipkinSpec
@@ -525,7 +563,7 @@ public class OtelSpec
 
     [JsonPropertyName("isSecure")]
     [YamlMember(Alias = "isSecure", ApplyNamingConventions = false)]
-    public bool IsSecure { get; set; }
+    public bool IsSecure { get; set; } = true;
 
     [JsonPropertyName("headers")]
     [YamlMember(Alias = "headers", ApplyNamingConventions = false)]
