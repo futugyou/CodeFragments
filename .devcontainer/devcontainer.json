@@ -19,7 +19,11 @@
 				"GitHub.copilot-chat"
 			],
 			"settings": {
-				"editor.formatOnSave": true
+				"editor.formatOnSave": true,
+				"[csharp]": {
+				  "editor.defaultFormatter": "ms-dotnettools.csdevkit",
+				  "editor.formatOnSave": true
+				}
 			}
 		}
 	},
