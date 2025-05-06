@@ -71,7 +71,7 @@
 		<PackageReference Include="PdfPig" Version="0.1.10" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 		<PackageReference Include="SharpToken" Version="2.0.3" />
-		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.37" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
 		<PackageReference Include="System.Text.Json" Version="9.0.4" />
 		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
