@@ -74,6 +74,64 @@ public class ConfigurationSpec
     [JsonPropertyName("secrets")]
     [YamlMember(Alias = "secrets", ApplyNamingConventions = false)]
     public SecretsSpec Secrets { get; set; }
+
+    [JsonPropertyName("accessControl")]
+    [YamlMember(Alias = "accessControl", ApplyNamingConventions = false)]
+    public AccessControlSpec AccessControlSpec { get; set; }
+}
+
+public class AccessControlSpec
+{
+    [JsonPropertyName("defaultAction")]
+    [YamlMember(Alias = "defaultAction", ApplyNamingConventions = false)]
+    public string DefaultAction { get; set; }
+
+    [JsonPropertyName("trustDomain")]
+    [YamlMember(Alias = "trustDomain", ApplyNamingConventions = false)]
+    public string TrustDomain { get; set; }
+
+    [JsonPropertyName("policies")]
+    [YamlMember(Alias = "policies", ApplyNamingConventions = false)]
+    public List<AppPolicySpec> AppPolicies { get; set; }
+}
+
+public class AppPolicySpec
+{
+    [JsonPropertyName("appId")]
+    [YamlMember(Alias = "appId", ApplyNamingConventions = false)]
+    public string AppName { get; set; }
+
+    [JsonPropertyName("defaultAction")]
+    [YamlMember(Alias = "defaultAction", ApplyNamingConventions = false)]
+    public string DefaultAction { get; set; }
+
+    [JsonPropertyName("trustDomain")]
+    [YamlMember(Alias = "trustDomain", ApplyNamingConventions = false)]
+    public string TrustDomain { get; set; }
+
+    [JsonPropertyName("namespace")]
+    [YamlMember(Alias = "namespace", ApplyNamingConventions = false)]
+    public string Namespace { get; set; }
+
+    [JsonPropertyName("operations")]
+    [YamlMember(Alias = "operations", ApplyNamingConventions = false)]
+    public List<AppOperation> AppOperationActions { get; set; }
+}
+
+public class AppOperation
+{
+    [JsonPropertyName("name")]
+    [YamlMember(Alias = "name", ApplyNamingConventions = false)]
+    public string Operation { get; set; }
+
+    [JsonPropertyName("httpVerb")]
+    [YamlMember(Alias = "httpVerb", ApplyNamingConventions = false)]
+    public List<string> HTTPVerb { get; set; }
+
+    [JsonPropertyName("action")]
+    [YamlMember(Alias = "action", ApplyNamingConventions = false)]
+    public string Action { get; set; }
+
 }
 
 public class SecretsSpec
