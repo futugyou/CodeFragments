@@ -78,6 +78,25 @@ public class ConfigurationSpec
     [JsonPropertyName("accessControl")]
     [YamlMember(Alias = "accessControl", ApplyNamingConventions = false)]
     public AccessControlSpec AccessControlSpec { get; set; }
+
+    [JsonPropertyName("nameResolution")]
+    [YamlMember(Alias = "nameResolution", ApplyNamingConventions = false)]
+    public NameResolutionSpec NameResolutionSpec { get; set; }
+}
+
+public class NameResolutionSpec
+{
+    [JsonPropertyName("component")]
+    [YamlMember(Alias = "component", ApplyNamingConventions = false)]
+    public string Component { get; set; }
+
+    [JsonPropertyName("version")]
+    [YamlMember(Alias = "version", ApplyNamingConventions = false)]
+    public string Version { get; set; }
+
+    [JsonPropertyName("configuration")]
+    [YamlMember(Alias = "configuration", ApplyNamingConventions = false)]
+    public object Configuration { get; set; }
 }
 
 public class AccessControlSpec
