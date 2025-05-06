@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="KubernetesClient" Version="16.0.7" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
+  </ItemGroup>
+
 </Project>
