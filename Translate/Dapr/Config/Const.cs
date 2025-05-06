@@ -46,6 +46,6 @@ public static class Const
     public const string DefaultNamespace = "default";
     public const string ActionPolicyApp = "app";
     public const string ActionPolicyGlobal = "global";
-    public const int defaultMaxWorkflowConcurrentInvocations = 1000;
-    public const int defaultMaxActivityConcurrentInvocations = 1000;
+    public const int DefaultMaxWorkflowConcurrentInvocations = 1000;
+    public const int DefaultMaxActivityConcurrentInvocations = 1000;
 }

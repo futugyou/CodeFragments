@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using k8s;
+using Microsoft.VisualBasic;
 using YamlDotNet.Serialization;
 
 namespace Config;
@@ -82,6 +83,145 @@ public class ConfigurationSpec
     [JsonPropertyName("nameResolution")]
     [YamlMember(Alias = "nameResolution", ApplyNamingConventions = false)]
     public NameResolutionSpec NameResolutionSpec { get; set; }
+
+    [JsonPropertyName("features")]
+    [YamlMember(Alias = "features", ApplyNamingConventions = false)]
+    public List<FeatureSpec> Features { get; set; }
+
+    [JsonPropertyName("api")]
+    [YamlMember(Alias = "api", ApplyNamingConventions = false)]
+    public APISpec APISpec { get; set; }
+
+    [JsonPropertyName("components")]
+    [YamlMember(Alias = "components", ApplyNamingConventions = false)]
+    public ComponentsSpec ComponentsSpec { get; set; }
+
+    [JsonPropertyName("logging")]
+    [YamlMember(Alias = "logging", ApplyNamingConventions = false)]
+    public LoggingSpec LoggingSpec { get; set; }
+
+    [JsonPropertyName("wasm")]
+    [YamlMember(Alias = "wasm", ApplyNamingConventions = false)]
+    public WasmSpec WasmSpec { get; set; }
+
+    [JsonPropertyName("workflow")]
+    [YamlMember(Alias = "workflow", ApplyNamingConventions = false)]
+    public WorkflowSpec WorkflowSpec { get; set; }
+}
+
+public class WorkflowSpec
+{
+    [JsonPropertyName("maxConcurrentWorkflowInvocations")]
+    [YamlMember(Alias = "maxConcurrentWorkflowInvocations", ApplyNamingConventions = false)]
+    public int MaxConcurrentWorkflowInvocations { get; set; }
+    [JsonPropertyName("maxConcurrentActivityInvocations")]
+    [YamlMember(Alias = "maxConcurrentActivityInvocations", ApplyNamingConventions = false)]
+    public int MaxConcurrentActivityInvocations { get; set; }
+    public int GetMaxConcurrentWorkflowInvocations()
+    {
+        if (MaxConcurrentWorkflowInvocations <= 0)
+        {
+            return Const.DefaultMaxWorkflowConcurrentInvocations;
+        }
+        return MaxConcurrentWorkflowInvocations;
+    }
+
+    public int GetMaxConcurrentActivityInvocations()
+    {
+        if (MaxConcurrentActivityInvocations <= 0)
+        {
+            return Const.DefaultMaxActivityConcurrentInvocations;
+        }
+        return MaxConcurrentActivityInvocations;
+    }
+}
+
+public class WasmSpec
+{
+    [JsonPropertyName("strictSandbox")]
+    [YamlMember(Alias = "strictSandbox", ApplyNamingConventions = false)]
+    public bool StrictSandbox { get; set; }
+
+    public bool GetStrictSandbox()
+    {
+        return StrictSandbox;
+    }
+}
+
+public class LoggingSpec
+{
+    [JsonPropertyName("apiLogging")]
+    [YamlMember(Alias = "apiLogging", ApplyNamingConventions = false)]
+    public APILoggingSpec APILogging { get; set; }
+}
+
+public class APILoggingSpec
+{
+    [JsonPropertyName("enabled")]
+    [YamlMember(Alias = "enabled", ApplyNamingConventions = false)]
+    public bool Enabled { get; set; }
+
+    [JsonPropertyName("obfuscateURLs")]
+    [YamlMember(Alias = "obfuscateURLs", ApplyNamingConventions = false)]
+    public bool ObfuscateURLs { get; set; }
+
+    [JsonPropertyName("omitHealthChecks")]
+    [YamlMember(Alias = "omitHealthChecks", ApplyNamingConventions = false)]
+    public bool OmitHealthChecks { get; set; }
+}
+
+public class ComponentsSpec
+{
+    [JsonPropertyName("deny")]
+    [YamlMember(Alias = "deny", ApplyNamingConventions = false)]
+    public List<string> Deny { get; set; }
+}
+
+public class APISpec
+{
+    [JsonPropertyName("allowed")]
+    [YamlMember(Alias = "allowed", ApplyNamingConventions = false)]
+    public List<APIAccessRule> Allowed { get; set; }
+
+    [JsonPropertyName("denied")]
+    [YamlMember(Alias = "denied", ApplyNamingConventions = false)]
+    public List<APIAccessRule> Denied { get; set; }
+}
+
+public class APIAccessRule
+{
+    [JsonPropertyName("name")]
+    [YamlMember(Alias = "name", ApplyNamingConventions = false)]
+    public string Name { get; set; }
+
+    [JsonPropertyName("version")]
+    [YamlMember(Alias = "version", ApplyNamingConventions = false)]
+    public string Version { get; set; }
+
+    [JsonPropertyName("protocol")]
+    [YamlMember(Alias = "protocol", ApplyNamingConventions = false)]
+    public APIAccessRuleProtocol Protocol { get; set; }
+
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum APIAccessRuleProtocol
+{
+    [JsonStringEnumMemberName("http")]
+    APIAccessRuleProtocolHTTP,
+    [JsonStringEnumMemberName("grpc")]
+    APIAccessRuleProtocolGRPC,
+}
+
+public class FeatureSpec
+{
+    [JsonPropertyName("name")]
+    [YamlMember(Alias = "name", ApplyNamingConventions = false)]
+    public Feature Name { get; set; }
+
+    [JsonPropertyName("enabled")]
+    [YamlMember(Alias = "enabled", ApplyNamingConventions = false)]
+    public bool Enabled { get; set; }
 }
 
 public class NameResolutionSpec
