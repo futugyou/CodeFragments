@@ -8,20 +8,20 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Elsa" Version="3.4.0-rc1" />
+    <PackageReference Include="Elsa" Version="3.4.0-rc2" />
     <PackageReference Include="Elsa.Activities.Http" Version="2.15.1" />
     <PackageReference Include="Elsa.Activities.Temporal.Quartz" Version="2.15.1" />
     <PackageReference Include="Elsa.Activities.Timers" Version="2.0.0-preview7.1545" />
     <PackageReference Include="Elsa.Activities.UserTask" Version="2.15.1" />
-    <PackageReference Include="Elsa.CSharp" Version="3.4.0-rc1" />
+    <PackageReference Include="Elsa.CSharp" Version="3.4.0-rc2" />
     <PackageReference Include="Elsa.Designer.Components.Web" Version="2.15.1" />
-    <PackageReference Include="Elsa.EntityFrameworkCore" Version="3.4.0-rc1" />
-    <PackageReference Include="Elsa.EntityFrameworkCore.Sqlite" Version="3.4.0-rc1" />
-    <PackageReference Include="Elsa.Identity" Version="3.4.0-rc1" />
+    <PackageReference Include="Elsa.EntityFrameworkCore" Version="3.4.0-rc2" />
+    <PackageReference Include="Elsa.EntityFrameworkCore.Sqlite" Version="3.4.0-rc2" />
+    <PackageReference Include="Elsa.Identity" Version="3.4.0-rc2" />
     <PackageReference Include="Elsa.Persistence.EntityFramework.SqlServer" Version="2.15.1" />
-    <PackageReference Include="Elsa.Scheduling" Version="3.4.0-rc1" />
+    <PackageReference Include="Elsa.Scheduling" Version="3.4.0-rc2" />
     <PackageReference Include="Elsa.Server.Api" Version="2.15.1" />
-    <PackageReference Include="Elsa.Workflows.Api" Version="3.4.0-rc1" /> 
+    <PackageReference Include="Elsa.Workflows.Api" Version="3.4.0-rc2" /> 
   </ItemGroup>
 
 </Project>
