@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Dapr.Proto.Components.V1;
 using Dapr.Proto.Internals.V1;
+using Google.Protobuf.WellKnownTypes;
 using Grpcv1 = Dapr.Client.Autogen.Grpc.v1;
 
 namespace Messaging;
@@ -7,7 +9,35 @@ namespace Messaging;
 public class InvokeMethodRequest
 {
     private InternalInvokeRequest r;
-    private object dataObject;
+    private object? dataObject;
+    public object? DataObject
+    {
+        get => dataObject;
+        set
+        {
+            if (value is not null)
+            {
+                try
+                {
+                    var json = JsonSerializer.Serialize(value);
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+                    WithRawDataBytes(bytes);
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            dataObject = value;
+        }
+    }
+
+    public string DataTypeURL
+    {
+        get => dataTypeURL;
+        set => dataTypeURL = value;
+    }
+
     private string dataTypeURL;
 
     public InvokeMethodRequest(string methodName)
@@ -55,4 +85,33 @@ public class InvokeMethodRequest
         return this;
     }
 
+    public void ResetMessageData()
+    {
+        if (!HasMessageData())
+        {
+            return;
+        }
+
+        r.Message.Data = new Any();
+    }
+
+    public bool HasMessageData()
+    {
+        var m = r.Message;
+        return m.Data != null && m.Data.Value != null && m.Data.Value.Length > 0;
+    }
+
+    public InvokeMethodRequest WithRawDataBytes(byte[] data)
+    {
+        var stream =  new MemoryStream(data);
+        return WithRawData(stream);
+    }
+
+    public InvokeMethodRequest WithRawData(Stream stream)
+    {
+        dataObject = null;
+        ResetMessageData();
+        // TODO: use stream
+        return this;
+    }
 }
