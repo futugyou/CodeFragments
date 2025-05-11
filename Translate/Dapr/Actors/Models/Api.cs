@@ -1,7 +1,7 @@
 ﻿using Google.Protobuf;
 using WellKnownTypes = Google.Protobuf.WellKnownTypes;
 
-namespace Actors.Abstractions;
+namespace Actors.Models;
 
 public class Const
 {

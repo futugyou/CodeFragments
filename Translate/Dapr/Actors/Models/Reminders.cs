@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Serializers;
 using WellKnownTypes = Google.Protobuf.WellKnownTypes;
 
-namespace Actors.Abstractions;
+namespace Actors.Models;
 
 public class GetReminderRequest
 {

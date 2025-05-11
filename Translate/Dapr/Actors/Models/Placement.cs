@@ -1,5 +1,5 @@
 
-namespace Actors.Abstractions;
+namespace Actors.Models;
 
 public class LookupActorRequest
 {
