@@ -15,3 +15,10 @@ public interface IActorTargets
     Task InvokeStreamAsync(InternalInvokeRequest request, IAsyncEnumerable<InternalInvokeResponse> stream, CancellationToken token);
     void Deactivate();
 }
+
+public interface IActorIdlable : IActorTargets
+{
+    DateTime ScheduledTime();
+}
+
+public delegate IActorTargets ActorTargetsFactory(string actorID);
