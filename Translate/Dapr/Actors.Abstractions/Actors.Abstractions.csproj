@@ -16,6 +16,7 @@
     <ProjectReference Include="..\Config\Config.csproj" />
     <ProjectReference Include="..\Tools\Tools.csproj" />
     <ProjectReference Include="..\Dapr.Abstractions\Dapr.Abstractions.csproj" />
+    <ProjectReference Include="..\Dapr.Proto\Dapr.Proto.csproj" />
   </ItemGroup>
 
 </Project>
