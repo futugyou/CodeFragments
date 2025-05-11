@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Serializers;
 using WellKnownTypes = Google.Protobuf.WellKnownTypes;
 
-namespace Actors;
+namespace Actors.Abstractions;
 
 // TODO: update JsonConverter, beacause JsonContext is used
 [JsonConverter(typeof(JsonConverter))]

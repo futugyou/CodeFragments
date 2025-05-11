@@ -1,6 +1,6 @@
 using Dapr.Abstractions;
 
-namespace Actors;
+namespace Actors.Abstractions;
 
 public class StateOperationOpts
 {

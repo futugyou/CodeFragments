@@ -1,4 +1,4 @@
-namespace Actors;
+namespace Actors.Abstractions;
 
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web, UseStringEnumConverter = false,
 Converters = new[] { typeof(Tools.Rfc3339DateTimeConverter), typeof(Tools.TypeAnyConverter), typeof(JsonStringEnumConverter<Dapr.Abstractions.OperationType>) })]

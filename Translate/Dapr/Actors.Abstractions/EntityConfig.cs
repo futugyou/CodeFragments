@@ -1,6 +1,6 @@
 using Config;
 
-namespace Actors;
+namespace Actors.Abstractions;
 
 public class EntityConfig
 {

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dapr", "Dapr", "{47016E42-A4B3-1F9A-4217-340DC71DAA7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actors", "Dapr\Actors\Actors.csproj", "{5110A889-8D04-490D-8BDB-B1D3CB167994}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actors.Abstractions", "Dapr\Actors.Abstractions\Actors.Abstractions.csproj", "{5110A889-8D04-490D-8BDB-B1D3CB167994}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config", "Dapr\Config\Config.csproj", "{32DC079A-029C-4C23-BA87-FDC0F451C67F}"
 EndProject

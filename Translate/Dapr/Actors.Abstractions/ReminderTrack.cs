@@ -1,4 +1,4 @@
-namespace Actors;
+namespace Actors.Abstractions;
 
 public class ReminderTrack
 {

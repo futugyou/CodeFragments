@@ -1,6 +1,6 @@
 using Tools;
 
-namespace Actors;
+namespace Actors.Abstractions;
 
 [JsonConverter(typeof(JsonConverter))]
 public class ReminderPeriod
