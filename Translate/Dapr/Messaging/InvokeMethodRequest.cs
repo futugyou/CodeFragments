@@ -103,7 +103,7 @@ public class InvokeMethodRequest
 
     public InvokeMethodRequest WithRawDataBytes(byte[] data)
     {
-        var stream =  new MemoryStream(data);
+        var stream = new MemoryStream(data);
         return WithRawData(stream);
     }
 
