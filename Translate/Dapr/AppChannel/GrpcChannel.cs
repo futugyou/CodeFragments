@@ -14,10 +14,9 @@ using Dapr.Client.Autogen.Grpc.v1;
 
 namespace AppChannel;
 
-public class GrpcChannel(AppCallbackClient appCallbackClient, AppCallbackAlphaClient appCallbackAlphaClient, AppCallbackHealthCheckClient appCallbackHealthCheckClient, IOptionsMonitor<TracingSpec> tracingSpec)
+public class GrpcChannel(AppCallbackClient appCallbackClient, AppCallbackAlphaClient appCallbackAlphaClient, AppCallbackHealthCheckClient appCallbackHealthCheckClient)
  : IAppChannel, IHealthCheck
 {
-    private readonly TracingSpec tracingSpec = tracingSpec.CurrentValue;
     private int maxRequestBodySize;
     private string appMetadataToken;
     private static readonly Google.Protobuf.WellKnownTypes.Empty _empty = new();
@@ -104,8 +103,16 @@ public class GrpcChannel(AppCallbackClient appCallbackClient, AppCallbackAlphaCl
         return rsp;
     }
 
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await appCallbackHealthCheckClient.HealthCheckAsync(_empty, cancellationToken: cancellationToken);
+            return new HealthCheckResult(HealthStatus.Healthy);
+        }
+        catch (System.Exception ex)
+        {
+            return new HealthCheckResult(HealthStatus.Unhealthy, "", ex);
+        }
     }
 }
