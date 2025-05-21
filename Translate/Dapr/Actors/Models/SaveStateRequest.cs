@@ -1,4 +1,3 @@
-using Google.Protobuf;
 using WellKnownTypes = Google.Protobuf.WellKnownTypes;
 
 namespace Actors.Models;

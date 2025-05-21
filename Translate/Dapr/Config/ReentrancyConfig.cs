@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace Config;
+﻿namespace Config;
 
 public class ReentrancyConfig
 {

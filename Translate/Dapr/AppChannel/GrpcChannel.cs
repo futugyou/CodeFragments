@@ -6,7 +6,6 @@ using Messaging;
 using static Dapr.AppCallback.Autogen.Grpc.v1.AppCallbackAlpha;
 using static Dapr.AppCallback.Autogen.Grpc.v1.AppCallback;
 using static Dapr.AppCallback.Autogen.Grpc.v1.AppCallbackHealthCheck;
-using Microsoft.Extensions.Options;
 using Dapr.Proto.Internals.V1;
 using Grpc.Core;
 using Dapr.AppCallback.Autogen.Grpc.v1;

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Dapr.Proto.Components.V1;
 using Dapr.Proto.Internals.V1;
 using Google.Protobuf.WellKnownTypes;
 using Grpcv1 = Dapr.Client.Autogen.Grpc.v1;
