@@ -114,4 +114,38 @@ public class InvokeMethodRequest
         // TODO: use stream
         return this;
     }
+
+    public APIVersion GetAPIVersion()
+    {
+        if (r == null)
+        {
+            throw new InvalidOperationException("InvokeMethodRequest is not initialized");
+        }
+        return r.Ver;
+    }
+
+    public InternalInvokeRequest ProtoWithData()
+    {
+        if (r == null || r.Message == null)
+        {
+            throw new InvalidOperationException("InvokeMethodRequest is not initialized");
+        }
+
+        // If the data is already in-memory in the object, return the object directly.
+        // This doesn't copy the object, and that's fine because receivers are not expected to modify the received object.
+        // Only reason for cloning the object below is to make ProtoWithData concurrency-safe.
+        if (HasMessageData())
+        {
+            return r;
+        }
+
+        // Clone the object
+        var m = r.Clone();
+        m.Message.Data = new Any()
+        {
+            TypeUrl = dataTypeURL,
+            Value = m.Message.Data.Value
+        };
+        return m;
+    }
 }

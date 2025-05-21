@@ -2,6 +2,7 @@
 using Dapr.Proto.Internals.V1;
 using Google.Protobuf.WellKnownTypes;
 
+
 namespace Messaging;
 
 public class InvokeMethodResponse
@@ -62,4 +63,15 @@ public class InvokeMethodResponse
 
         return r.Trailers.ToDictionary(x => x.Key, x => x.Value);
     }
+
+    public InvokeMethodResponse WithHeaders(Grpc.Core.Metadata headers)
+    {
+        foreach (var item in Util.MetadataToInternalMetadata(headers))
+        {
+            r.Headers.Add(item.Key, item.Value);
+        }
+
+        return this;
+    }
+
 }
