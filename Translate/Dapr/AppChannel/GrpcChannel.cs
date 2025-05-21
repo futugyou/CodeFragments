@@ -9,6 +9,8 @@ using static Dapr.AppCallback.Autogen.Grpc.v1.AppCallbackHealthCheck;
 using Microsoft.Extensions.Options;
 using Dapr.Proto.Internals.V1;
 using Grpc.Core;
+using Dapr.AppCallback.Autogen.Grpc.v1;
+using Dapr.Client.Autogen.Grpc.v1;
 
 namespace AppChannel;
 
@@ -39,30 +41,67 @@ public class GrpcChannel(AppCallbackClient appCallbackClient, AppCallbackAlphaCl
         var pd = req.ProtoWithData();
         var md = Util.InternalMetadataToGrpcMetadata(pd.Metadata, true, token);
 
-
         if (!string.IsNullOrEmpty(appMetadataToken))
         {
             md.Add("dapr-api-token", appMetadataToken);
         }
 
         InvokeMethodResponse rsp;
+        Metadata trailers;
+
         try
         {
-            var resp = await appCallbackClient.OnInvokeAsync(pd.Message, headers: md, cancellationToken: token);
-            rsp = new InvokeMethodResponse(200, "", []);
+            var call = appCallbackClient.OnInvokeAsync(pd.Message, headers: md, cancellationToken: token);
+            md = await call.ResponseHeadersAsync;
+            var response = await call.ResponseAsync;
+            trailers = call.GetTrailers();
+            rsp = new InvokeMethodResponse((int)StatusCode.OK, "", []);
         }
         catch (RpcException ex)
         {
-            rsp = new InvokeMethodResponse((int)ex.StatusCode, ex.Message, []);
+            trailers = ex.Trailers;
+            rsp = new InvokeMethodResponse((int)ex.StatusCode, ex.Status.Detail, []);
         }
-        rsp.WithHeaders(md);
+
+        rsp.WithHeaders(md).WithTrailers(trailers);
 
         return rsp;
     }
 
-    public Task<InvokeMethodResponse> TriggerJobAsync(string name, object data)
+    public async Task<InvokeMethodResponse> TriggerJobAsync(string name, Google.Protobuf.WellKnownTypes.Any data, CancellationToken token)
     {
-        throw new NotImplementedException();
+        var request = new JobEventRequest
+        {
+            Name = name,
+            Data = data,
+            Method = "job/" + name,
+            ContentType = data.TypeUrl,
+            HttpExtension = new HTTPExtension { Verb = HTTPExtension.Types.Verb.Post }
+        };
+
+        Metadata? responseHeaders = null;
+        Metadata trailers;
+        InvokeMethodResponse rsp;
+        try
+        {
+            var call = appCallbackAlphaClient.OnJobEventAlpha1Async(request, cancellationToken: token);
+            responseHeaders = await call.ResponseHeadersAsync;
+            var response = await call.ResponseAsync;
+            trailers = call.GetTrailers();
+            rsp = new InvokeMethodResponse((int)StatusCode.OK, "", []);
+        }
+        catch (RpcException ex)
+        {
+            trailers = ex.Trailers;
+            rsp = new InvokeMethodResponse((int)ex.StatusCode, ex.Status.Detail, []);
+        }
+
+        if (responseHeaders != null)
+        {
+            rsp.WithHeaders(responseHeaders).WithTrailers(trailers);
+        }
+
+        return rsp;
     }
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)

@@ -9,5 +9,5 @@ public interface IAppChannel
 {
     Task<ApplicationConfig> GetAppConfigAsync(string appID, CancellationToken token);
     Task<InvokeMethodResponse> InvokeMethodAsync(InvokeMethodRequest req, string appID, CancellationToken token);
-    Task<InvokeMethodResponse> TriggerJobAsync(string name, object data);
+    Task<InvokeMethodResponse> TriggerJobAsync(string name, Google.Protobuf.WellKnownTypes.Any data, CancellationToken token);
 }

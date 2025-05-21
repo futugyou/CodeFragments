@@ -18,7 +18,7 @@ public class HttpChannel : IAppChannel, IHealthCheck
         throw new NotImplementedException();
     }
 
-    public Task<InvokeMethodResponse> TriggerJobAsync(string name, object data)
+    public Task<InvokeMethodResponse> TriggerJobAsync(string name, Google.Protobuf.WellKnownTypes.Any data, CancellationToken token)
     {
         throw new NotImplementedException();
     }
