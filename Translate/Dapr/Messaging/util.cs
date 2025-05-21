@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Text;
 using Dapr.Proto.Internals.V1;
 using Google.Protobuf.Collections;
+using Grpc.Core;
 
 namespace Messaging;
 
@@ -100,5 +101,25 @@ public static class Util
     private static void SetHeader(string v1, string v2)
     {
         throw new NotImplementedException();
+    }
+
+    public static MapField<string, ListStringValue> MetadataToInternalMetadata(Grpc.Core.Metadata headers)
+    {
+        var internalMD = new MapField<string, ListStringValue>();
+        foreach (var item in headers)
+        {
+            var k = item.Key;
+            var values = item.Value;
+            if (k.EndsWith(GRPCBinaryMetadataSuffix))
+            {
+                byte[] decoded = Convert.FromBase64String(values);
+                values = Encoding.UTF8.GetString(decoded);
+            }
+            var listStringValue = new ListStringValue();
+            listStringValue.Values.Add(values);
+            internalMD.Add(k, listStringValue);
+        }
+
+        return internalMD;
     }
 }
