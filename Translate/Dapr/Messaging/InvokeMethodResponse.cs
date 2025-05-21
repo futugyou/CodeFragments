@@ -74,4 +74,14 @@ public class InvokeMethodResponse
         return this;
     }
 
+    public InvokeMethodResponse WithTrailers(Grpc.Core.Metadata trailers)
+    {
+        foreach (var item in Util.MetadataToInternalMetadata(trailers))
+        {
+            r.Trailers.Add(item.Key, item.Value);
+        }
+
+        return this;
+    }
+
 }
