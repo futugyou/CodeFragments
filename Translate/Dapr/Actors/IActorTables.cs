@@ -1,5 +1,7 @@
 
 
+using Dapr.Proto.Placement.V1;
+
 namespace Actors;
 
 public interface IActorTables : IDisposable
@@ -10,11 +12,12 @@ public interface IActorTables : IDisposable
     (IActorTargets, bool) GetOrCreate(string actorType, string actorID);
     void RegisterActorTypes(RegisterActorTypeOptions opts);
     Task UnRegisterActorTypes(params string[] actorTypes);
-    Task HaltAll();
+    Task HaltAllAsync(CancellationToken token);
     Task Drain(Func<IActorTargets, bool> factory);
     Dictionary<string, int> Len();
     Task DeleteFromTableIn(IActorTargets actor, TimeSpan timeSpan);
     Task RemoveIdler(IActorTargets actor);
     (IAsyncEnumerable<List<string>>, List<string>) SubscribeToTypeUpdates(CancellationToken token);
     Task HaltIdlable(IActorIdlable target, CancellationToken token);
+    Task UpdateAsync(PlacementOrder order, CancellationToken cancellationToken);
 }
