@@ -1,11 +1,14 @@
 namespace Actors;
 
-public class ToSchedulerOptions
+public class ToSchedulerOptions(IActorTables actorTables,
+    IActorStateReminder stateReminders,
+    IActorStateReminder schedulerReminders,
+    Func<LookupActorRequest, CancellationToken, Task<bool>> lookupFn)
 {
-    private readonly IActorTables actorTables;
-    private readonly IActorStateReminder stateReminders;
-    private readonly IActorStateReminder schedulerReminders;
-    private readonly Func<LookupActorRequest, CancellationToken, Task<bool>> lookupFn;
+    private readonly IActorTables actorTables = actorTables;
+    private readonly IActorStateReminder stateReminders = stateReminders;
+    private readonly IActorStateReminder schedulerReminders = schedulerReminders;
+    private readonly Func<LookupActorRequest, CancellationToken, Task<bool>> lookupFn = lookupFn;
 
     public static async Task ToScheduler(ToSchedulerOptions opts, CancellationToken token)
     {
