@@ -27,6 +27,7 @@ public static class KernelServiceExtensions
     internal static async Task InitAIData(this WebApplication app)
     {
         // await DataIngestor.IngestDataAsync(app.Services, new PDFDirectorySource("./KernelService/Data"));
+        await Task.CompletedTask;
     }
 
     internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)

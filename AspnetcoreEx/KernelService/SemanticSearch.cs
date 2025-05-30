@@ -8,7 +8,7 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
 {
     public async Task<IReadOnlyList<SemanticSearchRecord>> SearchAsync(string text, string? filenameFilter, int maxResults)
     {
-        var queryEmbedding = await embeddingGenerator.GenerateEmbeddingVectorAsync(text);
+        var queryEmbedding = await embeddingGenerator.GenerateVectorAsync(text);
         var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-test-ingested");
         Expression<Func<SemanticSearchRecord, bool>>? filter = filenameFilter is { Length: > 0 }
             ? record => record.FileName == filenameFilter
