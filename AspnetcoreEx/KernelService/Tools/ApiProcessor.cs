@@ -1,13 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
+
+namespace AspnetcoreEx.KernelService.Tools;
 
 public class StatusTracker
 {
@@ -28,7 +21,7 @@ public class APIRequest
     public int TokenConsumption { get; set; }
     public int AttemptsLeft { get; set; }
     public JsonElement? Metadata { get; set; }
-    public List<object> Result { get; set; } = new();
+    public List<object> Result { get; set; } = [];
 
     public async Task CallApiAsync(
         HttpClient client,
@@ -54,7 +47,7 @@ public class APIRequest
             if (responseJson.TryGetProperty("error", out var error))
             {
                 statusTracker.NumApiErrors++;
-                if (error.GetProperty("message").GetString().ToLower().Contains("rate limit"))
+                if (error.GetProperty("message").GetString()?.ToLower().Contains("rate limit") ?? false)
                 {
                     statusTracker.TimeOfLastRateLimitError = DateTime.Now;
                     statusTracker.NumRateLimitErrors++;
@@ -99,7 +92,7 @@ public class APIRequest
     }
 }
 
-public class ApiProcessor(HttpClient client)
+public class ApiProcessor(HttpClient client, ITokenCounter tokenCounter)
 {
     /// <summary>
     ///  await _apiProcessor.ProcessApiRequestsFromFile("requests.jsonl", "result.jsonl", "https://api.xxx.com/v1/endpoint", "your-api-key", 60, 10000, 3);
@@ -111,6 +104,7 @@ public class ApiProcessor(HttpClient client)
     /// <param name="maxRequestsPerMinute"></param>
     /// <param name="maxTokensPerMinute"></param>
     /// <param name="maxAttempts"></param>
+    /// <param name="tokenEncodingName">cl100k_base</param>
     /// <returns></returns>
     public async Task ProcessApiRequestsFromFile(
         string requestsFilePath,
@@ -119,7 +113,8 @@ public class ApiProcessor(HttpClient client)
         string apiKey,
         double maxRequestsPerMinute,
         double maxTokensPerMinute,
-        int maxAttempts)
+        int maxAttempts,
+        string tokenEncodingName = "cl100k_base")
     {
         var requestHeader = new Dictionary<string, string> { { "Authorization", $"Bearer {apiKey}" } };
         if (requestUrl.Contains("/deployments"))
@@ -131,8 +126,9 @@ public class ApiProcessor(HttpClient client)
         var availableTokenCapacity = maxTokensPerMinute;
         var lastUpdateTime = DateTime.Now;
         var fileNotFinished = true;
-        var nextRequest = (APIRequest)null;
+        APIRequest? nextRequest = null;
         var requests = File.ReadLines(requestsFilePath).GetEnumerator();
+        var endpoint = ApiHelper.ApiEndpointFromUrl(requestUrl);
 
         var tasks = new List<Task>();
 
@@ -153,7 +149,7 @@ public class ApiProcessor(HttpClient client)
                         {
                             TaskId = statusTracker.NumTasksStarted,
                             RequestJson = requestJson,
-                            TokenConsumption = 1, // 这里应实现 token 统计逻辑
+                            TokenConsumption = tokenCounter.NumTokensConsumedFromRequest(requestJson, endpoint, tokenEncodingName),
                             AttemptsLeft = maxAttempts,
                             Metadata = requestJson.TryGetProperty("metadata", out var meta) ? meta : null
                         };
