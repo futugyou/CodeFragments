@@ -67,25 +67,25 @@ public class LLMProcessorManager
             case "number":
                 return (
                     useSchemaPrompt ? Prompts.AnswerWithRAGContextNumberPrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextNumberPrompt.SystemPrompt,
-                    Prompts.AnswerWithRAGContextNumberPrompt.AnswerSchema,
+                    typeof(NumberAnswerSchema),
                     Prompts.AnswerWithRAGContextNumberPrompt.UserPrompt
                 );
             case "boolean":
                 return (
                     useSchemaPrompt ? Prompts.AnswerWithRAGContextBooleanPrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextBooleanPrompt.SystemPrompt,
-                    Prompts.AnswerWithRAGContextBooleanPrompt.AnswerSchema,
+                    typeof(BooleanAnswerSchema),
                     Prompts.AnswerWithRAGContextBooleanPrompt.UserPrompt
                 );
             case "names":
                 return (
                     useSchemaPrompt ? Prompts.AnswerWithRAGContextNamesPrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextNamesPrompt.SystemPrompt,
-                    Prompts.AnswerWithRAGContextNamesPrompt.AnswerSchema,
+                    typeof(NamesAnswerSchema),
                     Prompts.AnswerWithRAGContextNamesPrompt.UserPrompt
                 );
             case "comparative":
                 return (
                     useSchemaPrompt ? Prompts.ComparativeAnswerPrompt.SystemPromptWithSchema : Prompts.ComparativeAnswerPrompt.SystemPrompt,
-                    Prompts.ComparativeAnswerPrompt.AnswerSchema,
+                    typeof(ComparativeAnswerSchema),
                     Prompts.ComparativeAnswerPrompt.UserPrompt
                 );
             default:

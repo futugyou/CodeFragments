@@ -1,5 +1,6 @@
 
 using System.ComponentModel;
+using System.Text.Json.Schema;
 using System.Text.Json.Serialization;
 
 namespace AspnetcoreEx.KernelService.Tools;
@@ -7,6 +8,8 @@ namespace AspnetcoreEx.KernelService.Tools;
 
 public static class Prompts
 {
+    public static readonly JsonSerializerOptions DefaultJsonOptions = JsonSerializerOptions.Default;
+
     public static string BuildSystemPrompt(string instruction = "", string example = "", string pydanticSchema = "")
     {
         string delimiter = "\n\n---\n\n";
@@ -144,42 +147,142 @@ Answer:
 
         public const string UserPrompt = AnswerWithRAGContextSharedPrompt.UserPrompt;
         public static readonly string SystemPrompt = BuildSystemPrompt(instruction, example);
-        public static readonly string SystemPromptWithSchema = BuildSystemPrompt(instruction, example, pydanticSchema);
-
-
+        public static readonly string SystemPromptWithSchema = BuildSystemPrompt(instruction, example, DefaultJsonOptions.GetJsonSchemaAsNode(typeof(NameAnswerSchema)).ToString());
     }
 
     public static class AnswerWithRAGContextNumberPrompt
     {
         private const string instruction = AnswerWithRAGContextSharedPrompt.Instruction;
         public const string UserPrompt = AnswerWithRAGContextSharedPrompt.UserPrompt;
-        public const string SystemPrompt = "TODO";
-        public const string SystemPromptWithSchema = "TODO";
-        public static readonly object AnswerSchema = new { Number = "int" };
+        private const string example = """
+Example 1:
+Question:
+"What was the total assets of 'Waste Connections Inc.' in the fiscal year 2022?"
+
+Answer:
+```
+{
+  "step_by_step_analysis": "1. **Metric Definition:** The question asks for 'total assets' for 'Waste Connections Inc.' in fiscal year 2022.  'Total assets' represents the sum of all resources owned or controlled by the company, expected to provide future economic benefits.\n2. **Context Examination:** The context includes 'Consolidated Balance Sheets' (page 78), a standard financial statement that reports a company's assets, liabilities, and equity.\n3. **Metric Matching:** On page 78, under 'December 31, 2022', a line item labeled 'Total assets' exists.  This directly matches the concept requested in the question.\n4. **Value Extraction and Adjustment:** The value for 'Total assets' is '$18,500,342'. The context indicates this is in thousands of dollars.  Therefore, the full value is 18,500,342,000.\n5. **Confirmation**: No calculation beyond unit adjustment was needed. The reported metric directly matches the question.",
+  "reasoning_summary": "The 'Total assets' value for fiscal year 2022 was directly found on the 'Consolidated Balance Sheets' (page 78). The reported value was in thousands, requiring multiplication by 1000 for the final answer.",
+  "relevant_pages": [78],
+  "final_answer": 18500342000
+}
+```
+
+
+Example 2:
+Question:
+"For Ritter Pharmaceuticals, Inc., what was the value of Research and development equipment, at cost at the end of the period listed in annual report?"
+
+Answer:
+```
+{
+  "step_by_step_analysis": "1. The question asks for 'Research and development equipment, at cost' for Ritter Pharmaceuticals, Inc. This indicates a specific value from the balance sheet, representing the *original purchase price* of equipment specifically used for R&D, *without* any accumulated depreciation.\n2. The context (page 35) shows 'Property and equipment, net' at $12,500.  This is a *net* value (after depreciation), and it's a *broader* category, encompassing all property and equipment, not just R&D equipment.\n3. The context (page 37) also mentions 'Accumulated Depreciation' of $110,000 for 'Machinery and Equipment'. This represents the total *depreciation*, not the original cost, and, importantly, it doesn't specify that this equipment is *exclusively* for R&D.\n4. Neither of these metrics *exactly* matches the requested metric. 'Property and equipment, net' is too broad and represents the depreciated value. 'Accumulated Depreciation' only shows depreciation, not cost, and lacks R&D specificity.\n5. Since the context doesn't provide the *original cost* of *only* R&D equipment, and we cannot make assumptions, perform calculations, or combine information, the answer is 'N/A'.",
+  "reasoning_summary": "The context lacks a specific line item for 'Research and development equipment, at cost.' 'Property and equipment, net' is depreciated and too broad, while 'Accumulated Depreciation' only represents depreciation, not original cost, and is not R&D-specific. Strict matching requires 'N/A'.",
+  "relevant_pages": [ 35, 37 ],
+  "final_answer": "N/A"
+}
+```
+""";
+        public static readonly string SystemPrompt = BuildSystemPrompt(instruction, example);
+        public static readonly string SystemPromptWithSchema = BuildSystemPrompt(instruction, example, DefaultJsonOptions.GetJsonSchemaAsNode(typeof(NumberAnswerSchema)).ToString());
     }
 
     public static class AnswerWithRAGContextBooleanPrompt
     {
-        public const string SystemPrompt = "TODO";
-        public const string SystemPromptWithSchema = "TODO";
-        public const string UserPrompt = "TODO";
-        public static readonly object AnswerSchema = new { IsTrue = "bool" };
+        private const string instruction = AnswerWithRAGContextSharedPrompt.Instruction;
+        public const string UserPrompt = AnswerWithRAGContextSharedPrompt.UserPrompt;
+        private const string example = """
+Question:
+"Did W. P. Carey Inc. announce any changes to its dividend policy in the annual report?"
+
+Answer:
+```
+{
+  "step_by_step_analysis": "1. The question asks whether W. P. Carey Inc. announced changes to its dividend policy.\n2. The phrase 'changes to its dividend policy' requires careful interpretation. It means any adjustment to the framework, rules, or stated intentions that dictate how the company determines and distributes dividends.\n3. The context (page 12, 18) states that the company increased its annualized dividend to $4.27 per share in the fourth quarter of 2023, compared to $4.22 per share in the same period of 2022. Page 45 mentions further details about dividend.\n4. Consistent, incremental increases throughout the year, with explicit mentions of maintaining a 'steady and growing' dividend, indicates no changes to *policy*, though the *amount* increased as planned within the existing policy.",
+  "reasoning_summary": "The context highlights consistent, small increases to the dividend throughout the year, consistent with a stated policy of providing a 'steady and growing' dividend. While the dividend *amount* changed, the *policy* governing those increases remained consistent. The question asks about *policy* changes, not amount changes.",
+  "relevant_pages": [12, 18, 45],
+  "final_answer": False
+}
+```
+""";
+        public static readonly string SystemPrompt = BuildSystemPrompt(instruction, example);
+        public static readonly string SystemPromptWithSchema = BuildSystemPrompt(instruction, example, DefaultJsonOptions.GetJsonSchemaAsNode(typeof(BooleanAnswerSchema)).ToString());
+
     }
 
     public static class AnswerWithRAGContextNamesPrompt
     {
-        public const string SystemPrompt = "TODO";
-        public const string SystemPromptWithSchema = "TODO";
-        public const string UserPrompt = "TODO";
-        public static readonly object AnswerSchema = new { Names = "List<string>" };
+        private const string instruction = AnswerWithRAGContextSharedPrompt.Instruction;
+        public const string UserPrompt = AnswerWithRAGContextSharedPrompt.UserPrompt;
+        private const string example = """
+Example:
+Question:
+"What are the names of all new executives that took on new leadership positions in company?"
+
+Answer:
+```
+{
+    "step_by_step_analysis": "1. The question asks for the names of all new executives who took on new leadership positions in the company.\n2. Exhibit 10.9 and 10.10, as listed in the Exhibit Index on page 89, mentions new Executive Agreements with Carly Kennedy and Brian Appelgate.\n3. Exhibit 10.9, Employment Agreement with Carly Kennedy, states her start date as April 4, 2022, and her position as Executive Vice President and General Counsel.\n4. Exhibit 10.10, Offer Letter with Brian Appelgate shows that his new role within the company is Interim Chief Operations Officer, and he was accepting the offer on November 8, 2022.\n5. Based on the documents, Carly Kennedy and Brian Appelgate are named as the new executives.",
+    "reasoning_summary": "Exhibits 10.9 and 10.10 of the annual report, described as Employment Agreement and Offer Letter, explicitly name Carly Kennedy and Brian Appelgate taking on new leadership roles within the company in 2022.",
+    "relevant_pages": [
+        89
+    ],
+    "final_answer": [
+        "Carly Kennedy",
+        "Brian Appelgate"
+    ]
+}
+```
+""";
+        public static readonly string SystemPrompt = BuildSystemPrompt(instruction, example);
+        public static readonly string SystemPromptWithSchema = BuildSystemPrompt(instruction, example, DefaultJsonOptions.GetJsonSchemaAsNode(typeof(NamesAnswerSchema)).ToString());
+
     }
 
     public static class ComparativeAnswerPrompt
     {
-        public const string SystemPrompt = "TODO";
-        public const string SystemPromptWithSchema = "TODO";
-        public const string UserPrompt = "TODO";
-        public static readonly object AnswerSchema = new { ComparisonResult = "string" };
+        private const string instruction =  """
+You are a question answering system.
+Your task is to analyze individual company answers and provide a comparative response that answers the original question.
+Base your analysis only on the provided individual answers - do not make assumptions or include external knowledge.
+Before giving a final answer, carefully think out loud and step by step.
+
+Important rules for comparison:
+- When the question asks to choose one of the companies (e.g., when comparing metrics), return the company name exactly as it appears in the original question
+- If a company's metric is in a different currency than what is asked in the question, exclude that company from comparison
+- If all companies are excluded (due to currency mismatch or other reasons), return 'N/A' as the final answer
+- If all companies except one are excluded, return the name of the remaining company (even though there is no actual comparison possible)
+""";
+        public const string UserPrompt = """
+Here are the individual company answers:
+\"\"\"
+{0}
+\"\"\"
+
+---
+
+Here is the original comparative question:
+"{1}"
+""";
+        private const string example = """
+Example:
+Question:
+"Which of the companies had the lowest total assets in USD at the end of the period listed in the annual report: "CrossFirst Bank", "Sleep Country Canada Holdings Inc.", "Holley Inc.", "PowerFleet, Inc.", "Petra Diamonds"? If data for the company is not available, exclude it from the comparison."
+
+Answer:
+```
+{
+  "step_by_step_analysis": "1. The question asks for the company with the lowest total assets in USD.\n2. Gather the total assets in USD for each company from the individual answers: CrossFirst Bank: $6,601,086,000; Holley Inc.: $1,249,642,000; PowerFleet, Inc.: $217,435,000; Petra Diamonds: $1,078,600,000.\n3. Sleep Country Canada Holdings Inc. is excluded because its assets are not reported in USD.\n4. Compare the total assets: PowerFleet, Inc. ($217,435,000) < Petra Diamonds ($1,078,600,000) < Holley Inc. ($1,249,642,000)  < CrossFirst Bank ($6,601,086,000).\n5. Therefore, PowerFleet, Inc. has the lowest total assets in USD.",
+  "reasoning_summary": "The individual answers provided the total assets in USD for each company except Sleep Country Canada Holdings Inc. (excluded due to currency mismatch). Direct comparison shows PowerFleet, Inc. has the lowest total assets.",
+  "relevant_pages": [],
+  "final_answer": "PowerFleet, Inc."
+}
+```
+""";
+        public static readonly string SystemPrompt = BuildSystemPrompt(instruction, example);
+        public static readonly string SystemPromptWithSchema = BuildSystemPrompt(instruction, example, DefaultJsonOptions.GetJsonSchemaAsNode(typeof(ComparativeAnswerSchema)).ToString());
+
     }
 }
 
@@ -258,6 +361,166 @@ If it is a person name, it should be their full name.
 If it is a product name, it should be extracted exactly as it appears in the context.
 Without any extra information, words or comments.
 - Return 'N/A' if information is not available in the context
+""")]
+    public string FinalAnswer { get; set; }
+}
+
+public class NumberAnswerSchema
+{
+    [JsonPropertyName("step_by_step_analysis")]
+    [Description("""
+Detailed step-by-step analysis of the answer with at least 5 steps and at least 150 words.
+**Strict Metric Matching Required:**    
+
+1. Determine the precise concept the question's metric represents. What is it actually measuring?
+2. Examine potential metrics in the context. Don't just compare names; consider what the context metric measures.
+3. Accept ONLY if: The context metric's meaning *exactly* matches the target metric. Synonyms are acceptable; conceptual differences are NOT.
+4. Reject (and use 'N/A') if:
+    - The context metric covers more or less than the question's metric.
+    - The context metric is a related concept but not the *exact* equivalent (e.g., a proxy or a broader category).
+    - Answering requires calculation, derivation, or inference.
+    - Aggregation Mismatch: The question needs a single value but the context offers only an aggregated total
+5. No Guesswork: If any doubt exists about the metric's equivalence, default to `N/A`."
+""")]
+    public string StepByStepAnalysis { get; set; }
+
+    [JsonPropertyName("reasoning_summary")]
+    [Description("Concise summary of the step-by-step reasoning process. Around 50 words.")]
+    public string ReasoningSummary { get; set; }
+
+    [JsonPropertyName("relevant_pages")]
+    [Description("""
+List of page numbers containing information directly used to answer the question. Include only:
+- Pages with direct answers or explicit statements
+- Pages with key information that strongly supports the answer
+Do not include pages with only tangentially related information or weak connections to the answer.
+At least one page should be included in the list.
+""")]
+    public List<int> RelevantPages { get; set; }
+
+    [JsonPropertyName("final_answer")]
+    [Description("""
+An exact metric number is expected as the answer.
+- Example for percentages:
+    Value from context: 58,3%
+    Final answer: 58.3
+
+Pay special attention to any mentions in the context about whether metrics are reported in units, thousands, or millions to adjust number in final answer with no changes, three zeroes or six zeroes accordingly.
+Pay attention if value wrapped in parentheses, it means that value is negative.
+
+- Example for negative values:
+    Value from context: (2,124,837) CHF
+    Final answer: -2124837
+
+- Example for numbers in thousands:
+    Value from context: 4970,5 (in thousands $)
+    Final answer: 4970500
+
+- Return 'N/A' if metric provided is in a different currency than mentioned in the question
+    Example of value from context: 780000 USD, but question mentions EUR
+    Final answer: 'N/A'
+
+- Return 'N/A' if metric is not directly stated in context EVEN IF it could be calculated from other metrics in the context
+    Example: Requested metric: Dividend per Share; Only available metrics from context: Total Dividends Paid ($5,000,000), and Number of Outstanding Shares (1,000,000); Calculated DPS = Total Dividends / Outstanding Shares.
+    Final answer: 'N/A'
+
+- Return 'N/A' if information is not available in the context
+""")]
+    public string FinalAnswer { get; set; }
+}
+
+public class BooleanAnswerSchema
+{
+    [JsonPropertyName("step_by_step_analysis")]
+    [Description("""
+Detailed step-by-step analysis of the answer with at least 5 steps and at least 150 words. Pay special attention to the wording of the question to avoid being tricked. Sometimes it seems that there is an answer in the context, but this is might be not the requested value, but only a similar one.
+""")]
+    public string StepByStepAnalysis { get; set; }
+
+    [JsonPropertyName("reasoning_summary")]
+    [Description("Concise summary of the step-by-step reasoning process. Around 50 words.")]
+    public string ReasoningSummary { get; set; }
+
+    [JsonPropertyName("relevant_pages")]
+    [Description("""
+List of page numbers containing information directly used to answer the question. Include only:
+- Pages with direct answers or explicit statements
+- Pages with key information that strongly supports the answer
+Do not include pages with only tangentially related information or weak connections to the answer.
+At least one page should be included in the list.
+""")]
+    public List<int> RelevantPages { get; set; }
+
+    [JsonPropertyName("final_answer")]
+    [Description("""
+A boolean value (True or False) extracted from the context that precisely answers the question.
+If question ask about did something happen, and in context there is information about it, return False.
+""")]
+    public bool FinalAnswer { get; set; }
+}
+
+public class NamesAnswerSchema
+{
+    [JsonPropertyName("step_by_step_analysis")]
+    [Description("Detailed step-by-step analysis of the answer with at least 5 steps and at least 150 words. Pay special attention to the wording of the question to avoid being tricked. Sometimes it seems that there is an answer in the context, but this is might be not the requested value, but only a similar one.")]
+    public string StepByStepAnalysis { get; set; }
+
+    [JsonPropertyName("reasoning_summary")]
+    [Description("Concise summary of the step-by-step reasoning process. Around 50 words.")]
+    public string ReasoningSummary { get; set; }
+
+    [JsonPropertyName("relevant_pages")]
+    [Description("""
+List of page numbers containing information directly used to answer the question. Include only:
+- Pages with direct answers or explicit statements
+- Pages with key information that strongly supports the answer
+Do not include pages with only tangentially related information or weak connections to the answer.
+At least one page should be included in the list.
+""")]
+    public List<int> RelevantPages { get; set; }
+
+    [JsonPropertyName("final_answer")]
+    [Description("""
+Example:
+Question:
+"What are the names of all new executives that took on new leadership positions in company?"
+
+Answer:
+```
+{
+    "step_by_step_analysis": "1. The question asks for the names of all new executives who took on new leadership positions in the company.\n2. Exhibit 10.9 and 10.10, as listed in the Exhibit Index on page 89, mentions new Executive Agreements with Carly Kennedy and Brian Appelgate.\n3. Exhibit 10.9, Employment Agreement with Carly Kennedy, states her start date as April 4, 2022, and her position as Executive Vice President and General Counsel.\n4. Exhibit 10.10, Offer Letter with Brian Appelgate shows that his new role within the company is Interim Chief Operations Officer, and he was accepting the offer on November 8, 2022.\n5. Based on the documents, Carly Kennedy and Brian Appelgate are named as the new executives.",
+    "reasoning_summary": "Exhibits 10.9 and 10.10 of the annual report, described as Employment Agreement and Offer Letter, explicitly name Carly Kennedy and Brian Appelgate taking on new leadership roles within the company in 2022.",
+    "relevant_pages": [
+        89
+    ],
+    "final_answer": [
+        "Carly Kennedy",
+        "Brian Appelgate"
+    ]
+}
+```
+""")]
+    public List<string> FinalAnswer { get; set; }
+}
+
+public class ComparativeAnswerSchema
+{
+    [JsonPropertyName("step_by_step_analysis")]
+    [Description("Detailed step-by-step analysis of the answer with at least 5 steps and at least 150 words.")]
+    public string StepByStepAnalysis { get; set; }
+
+    [JsonPropertyName("reasoning_summary")]
+    [Description("Concise summary of the step-by-step reasoning process. Around 50 words.")]
+    public string ReasoningSummary { get; set; }
+
+    [JsonPropertyName("relevant_pages")]
+    [Description("Just leave empty")]
+    public List<int> RelevantPages { get; set; }
+
+    [JsonPropertyName("final_answer")]
+    [Description("""
+Company name should be extracted exactly as it appears in question.
+Answer should be either a single company name or 'N/A' if no company is applicable.
 """)]
     public string FinalAnswer { get; set; }
 }
