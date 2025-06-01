@@ -1,8 +1,7 @@
 
 using System.Text.Json.Schema;
 
-namespace AspnetcoreEx.KernelService.Tools;
-
+namespace AspnetcoreEx.KernelService.CompanyReports;
 
 public static class Prompts
 {
@@ -29,7 +28,6 @@ public static class Prompts
 
         return instruction.Trim() + schema + example;
     }
-
 }
 
 public static class RephrasedQuestionsPrompt

@@ -1,4 +1,4 @@
-namespace AspnetcoreEx.KernelService.Tools;
+namespace AspnetcoreEx.KernelService.CompanyReports;
 
 using System.Text.RegularExpressions;
 

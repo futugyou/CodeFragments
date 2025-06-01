@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
-namespace AspnetcoreEx.KernelService.Tools;
+namespace AspnetcoreEx.KernelService.CompanyReports;
 
 /// <summary>
 /// Individual question for a company

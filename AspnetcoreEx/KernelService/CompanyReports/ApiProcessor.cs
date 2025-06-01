@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace AspnetcoreEx.KernelService.Tools;
+namespace AspnetcoreEx.KernelService.CompanyReports;
 
 public class StatusTracker
 {
