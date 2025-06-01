@@ -61,7 +61,7 @@ public class LLMProcessorManager
             case "name":
                 return (
                     useSchemaPrompt ? Prompts.AnswerWithRAGContextNamePrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextNamePrompt.SystemPrompt,
-                    Prompts.AnswerWithRAGContextNamePrompt.AnswerSchema,
+                    typeof(NameAnswerSchema),
                     Prompts.AnswerWithRAGContextNamePrompt.UserPrompt
                 );
             case "number":
