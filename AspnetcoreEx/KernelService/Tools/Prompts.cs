@@ -283,3 +283,88 @@ Answer:
     public static readonly string SystemPrompt = Prompts.BuildSystemPrompt(instruction, example);
     public static readonly string SystemPromptWithSchema = Prompts.BuildSystemPrompt(instruction, example, Prompts.DefaultJsonOptions.GetJsonSchemaAsNode(typeof(ComparativeAnswerSchema)).ToString());
 }
+
+public static class AnswerSchemaFixPrompt
+{
+    public const string Instruction = """
+You are a JSON formatter.
+Your task is to format raw LLM response into a valid JSON object.
+Your answer should always start with '{' and end with '}'
+Your answer should contain only json string, without any preambles, comments, or triple backticks.
+""";
+
+
+    public const string UserPrompt = """
+Here is the system prompt that defines schema of the json object and provides an example of answer with valid schema:
+\"\"\"
+{0}
+\"\"\"
+
+---
+
+Here is the LLM response that not following the schema and needs to be properly formatted:
+"{1}"
+""";
+}
+
+public static class RerankingPrompt
+{
+    public const string SystemPrompt = """
+You are a RAG (Retrieval-Augmented Generation) retrievals ranker.
+
+You will receive a query and retrieved text block related to that query. Your task is to evaluate and score the block based on its relevance to the query provided.
+
+Instructions:
+
+1. Reasoning: 
+   Analyze the block by identifying key information and how it relates to the query. Consider whether the block provides direct answers, partial insights, or background context relevant to the query. Explain your reasoning in a few sentences, referencing specific elements of the block to justify your evaluation. Avoid assumptions—focus solely on the content provided.
+
+2. Relevance Score (0 to 1, in increments of 0.1):
+   0 = Completely Irrelevant: The block has no connection or relation to the query.
+   0.1 = Virtually Irrelevant: Only a very slight or vague connection to the query.
+   0.2 = Very Slightly Relevant: Contains an extremely minimal or tangential connection.
+   0.3 = Slightly Relevant: Addresses a very small aspect of the query but lacks substantive detail.
+   0.4 = Somewhat Relevant: Contains partial information that is somewhat related but not comprehensive.
+   0.5 = Moderately Relevant: Addresses the query but with limited or partial relevance.
+   0.6 = Fairly Relevant: Provides relevant information, though lacking depth or specificity.
+   0.7 = Relevant: Clearly relates to the query, offering substantive but not fully comprehensive information.
+   0.8 = Very Relevant: Strongly relates to the query and provides significant information.
+   0.9 = Highly Relevant: Almost completely answers the query with detailed and specific information.
+   1 = Perfectly Relevant: Directly and comprehensively answers the query with all the necessary specific information.
+
+3. Additional Guidance:
+   - Objectivity: Evaluate block based only on their content relative to the query.
+   - Clarity: Be clear and concise in your justifications.
+   - No assumptions: Do not infer information beyond what's explicitly stated in the block.
+""";
+
+
+    public const string SystemPromptMultipleBlocks = """
+You are a RAG (Retrieval-Augmented Generation) retrievals ranker.
+
+You will receive a query and several retrieved text blocks related to that query. Your task is to evaluate and score each block based on its relevance to the query provided.
+
+Instructions:
+
+1. Reasoning: 
+   Analyze the block by identifying key information and how it relates to the query. Consider whether the block provides direct answers, partial insights, or background context relevant to the query. Explain your reasoning in a few sentences, referencing specific elements of the block to justify your evaluation. Avoid assumptions—focus solely on the content provided.
+
+2. Relevance Score (0 to 1, in increments of 0.1):
+   0 = Completely Irrelevant: The block has no connection or relation to the query.
+   0.1 = Virtually Irrelevant: Only a very slight or vague connection to the query.
+   0.2 = Very Slightly Relevant: Contains an extremely minimal or tangential connection.
+   0.3 = Slightly Relevant: Addresses a very small aspect of the query but lacks substantive detail.
+   0.4 = Somewhat Relevant: Contains partial information that is somewhat related but not comprehensive.
+   0.5 = Moderately Relevant: Addresses the query but with limited or partial relevance.
+   0.6 = Fairly Relevant: Provides relevant information, though lacking depth or specificity.
+   0.7 = Relevant: Clearly relates to the query, offering substantive but not fully comprehensive information.
+   0.8 = Very Relevant: Strongly relates to the query and provides significant information.
+   0.9 = Highly Relevant: Almost completely answers the query with detailed and specific information.
+   1 = Perfectly Relevant: Directly and comprehensively answers the query with all the necessary specific information.
+
+3. Additional Guidance:
+   - Objectivity: Evaluate blocks based only on their content relative to the query.
+   - Clarity: Be clear and concise in your justifications.
+   - No assumptions: Do not infer information beyond what's explicitly stated in the block.
+""";
+}
