@@ -60,33 +60,33 @@ public class LLMProcessorManager
         {
             case "name":
                 return (
-                    useSchemaPrompt ? Prompts.AnswerWithRAGContextNamePrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextNamePrompt.SystemPrompt,
+                    useSchemaPrompt ? AnswerWithRAGContextNamePrompt.SystemPromptWithSchema : AnswerWithRAGContextNamePrompt.SystemPrompt,
                     typeof(NameAnswerSchema),
-                    Prompts.AnswerWithRAGContextNamePrompt.UserPrompt
+                    AnswerWithRAGContextNamePrompt.UserPrompt
                 );
             case "number":
                 return (
-                    useSchemaPrompt ? Prompts.AnswerWithRAGContextNumberPrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextNumberPrompt.SystemPrompt,
+                    useSchemaPrompt ? AnswerWithRAGContextNumberPrompt.SystemPromptWithSchema : AnswerWithRAGContextNumberPrompt.SystemPrompt,
                     typeof(NumberAnswerSchema),
-                    Prompts.AnswerWithRAGContextNumberPrompt.UserPrompt
+                    AnswerWithRAGContextNumberPrompt.UserPrompt
                 );
             case "boolean":
                 return (
-                    useSchemaPrompt ? Prompts.AnswerWithRAGContextBooleanPrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextBooleanPrompt.SystemPrompt,
+                    useSchemaPrompt ? AnswerWithRAGContextBooleanPrompt.SystemPromptWithSchema : AnswerWithRAGContextBooleanPrompt.SystemPrompt,
                     typeof(BooleanAnswerSchema),
-                    Prompts.AnswerWithRAGContextBooleanPrompt.UserPrompt
+                    AnswerWithRAGContextBooleanPrompt.UserPrompt
                 );
             case "names":
                 return (
-                    useSchemaPrompt ? Prompts.AnswerWithRAGContextNamesPrompt.SystemPromptWithSchema : Prompts.AnswerWithRAGContextNamesPrompt.SystemPrompt,
+                    useSchemaPrompt ? AnswerWithRAGContextNamesPrompt.SystemPromptWithSchema : AnswerWithRAGContextNamesPrompt.SystemPrompt,
                     typeof(NamesAnswerSchema),
-                    Prompts.AnswerWithRAGContextNamesPrompt.UserPrompt
+                    AnswerWithRAGContextNamesPrompt.UserPrompt
                 );
             case "comparative":
                 return (
-                    useSchemaPrompt ? Prompts.ComparativeAnswerPrompt.SystemPromptWithSchema : Prompts.ComparativeAnswerPrompt.SystemPrompt,
+                    useSchemaPrompt ? ComparativeAnswerPrompt.SystemPromptWithSchema : ComparativeAnswerPrompt.SystemPrompt,
                     typeof(ComparativeAnswerSchema),
-                    Prompts.ComparativeAnswerPrompt.UserPrompt
+                    ComparativeAnswerPrompt.UserPrompt
                 );
             default:
                 throw new ArgumentException($"Unsupported schema: {schema}");
@@ -96,9 +96,9 @@ public class LLMProcessorManager
     public Dictionary<string, string> GetRephrasedQuestions(string originalQuestion, List<string> companies)
     {
         var answerDict = processor.SendMessage(
-            systemContent: Prompts.RephrasedQuestionsPrompt.SystemPrompt,
+            systemContent: RephrasedQuestionsPrompt.SystemPrompt,
             humanContent: string.Format(
-                Prompts.RephrasedQuestionsPrompt.UserPrompt,
+                RephrasedQuestionsPrompt.UserPrompt,
                 originalQuestion,
                 string.Join(", ", companies.ConvertAll(c => $"\"{c}\""))
             ),
