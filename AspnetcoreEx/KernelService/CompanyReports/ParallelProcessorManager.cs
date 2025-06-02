@@ -92,21 +92,15 @@ public class APIRequest
     }
 }
 
-public class ApiProcessor(HttpClient client, ITokenCounter tokenCounter)
+public class ParallelProcessorManager
 {
     /// <summary>
-    ///  await _apiProcessor.ProcessApiRequestsFromFile("requests.jsonl", "result.jsonl", "https://api.xxx.com/v1/endpoint", "your-api-key", 60, 10000, 3);
+    ///  await manager.ProcessApiRequestsFromFile(httpClient, tokenCounter, "requests.jsonl", "result.jsonl", "https://api.xxx.com/v1/endpoint", "your-api-key", 60, 10000, 3);
     /// </summary>
-    /// <param name="requestsFilePath"></param>
-    /// <param name="saveFilePath"></param>
-    /// <param name="requestUrl"></param>
-    /// <param name="apiKey"></param>
-    /// <param name="maxRequestsPerMinute"></param>
-    /// <param name="maxTokensPerMinute"></param>
-    /// <param name="maxAttempts"></param>
-    /// <param name="tokenEncodingName">cl100k_base</param>
     /// <returns></returns>
-    public async Task ProcessApiRequestsFromFile(
+    public static async Task ProcessApiRequestsFromFile(
+        HttpClient client,
+        ITokenCounter tokenCounter,
         string requestsFilePath,
         string saveFilePath,
         string requestUrl,
@@ -188,5 +182,79 @@ public class ApiProcessor(HttpClient client, ITokenCounter tokenCounter)
         }
 
         await Task.WhenAll(tasks);
+    }
+
+    public static int NumTokensConsumedFromRequest(
+        ITokenCounter tokenCounter,
+        Dictionary<string, object> requestJson,
+        string apiEndpoint,
+        string tokenEncodingName)
+    {
+        // completions
+        if (apiEndpoint.EndsWith("completions"))
+        {
+            int maxTokens = requestJson.ContainsKey("max_tokens") ? Convert.ToInt32(requestJson["max_tokens"]) : 15;
+            int n = requestJson.ContainsKey("n") ? Convert.ToInt32(requestJson["n"]) : 1;
+            int completionTokens = n * maxTokens;
+
+            // chat completions
+            if (apiEndpoint.StartsWith("chat/"))
+            {
+                int numTokens = 0;
+                var messages = (List<Dictionary<string, object>>)requestJson["messages"];
+                foreach (var message in messages)
+                {
+                    numTokens += 4;
+                    foreach (var kv in message)
+                    {
+                        numTokens += tokenCounter.Count(kv.Value.ToString()!, tokenEncodingName);
+                        if (kv.Key == "name")
+                            numTokens -= 1;
+                    }
+                }
+                numTokens += 2; // assistant priming
+                return numTokens + completionTokens;
+            }
+            // normal completions
+            else
+            {
+                var prompt = requestJson["prompt"];
+                if (prompt is string promptStr)
+                {
+                    int promptTokens = tokenCounter.Count(promptStr, tokenEncodingName);
+                    return promptTokens + completionTokens;
+                }
+                else if (prompt is List<object> promptList)
+                {
+                    int promptTokens = promptList.Sum(p => tokenCounter.Count(p.ToString()!, tokenEncodingName));
+                    return promptTokens + completionTokens * promptList.Count;
+                }
+                else
+                {
+                    throw new ArgumentException("Expecting either string or list of strings for \"prompt\" field in completion request");
+                }
+            }
+        }
+        // embeddings
+        else if (apiEndpoint == "embeddings")
+        {
+            var input = requestJson["input"];
+            if (input is string inputStr)
+            {
+                return tokenCounter.Count(inputStr, tokenEncodingName);
+            }
+            else if (input is List<object> inputList)
+            {
+                return inputList.Sum(i => tokenCounter.Count(i.ToString(), tokenEncodingName));
+            }
+            else
+            {
+                throw new ArgumentException("Expecting either string or list of strings for \"inputs\" field in embedding request");
+            }
+        }
+        else
+        {
+            throw new NotImplementedException($"API endpoint \"{apiEndpoint}\" not implemented in this script");
+        }
     }
 }

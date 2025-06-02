@@ -1,7 +1,7 @@
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-public interface ILLMProcessor
+public interface IAPIProcessor
 {
     string Provider { get; }
     string DefaultModel { get; }

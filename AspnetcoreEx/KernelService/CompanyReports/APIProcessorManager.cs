@@ -1,12 +1,12 @@
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-public class LLMProcessorManager
+public class APIProcessorManager
 {
-    private readonly ILLMProcessor processor;
+    private readonly IAPIProcessor processor;
     public dynamic ResponseData => processor.ResponseData;
 
-    public LLMProcessorManager(IEnumerable<ILLMProcessor> processors, string provider = "openai")
+    public APIProcessorManager(IEnumerable<IAPIProcessor> processors, string provider = "openai")
     {
         processor = processors.FirstOrDefault(p => p.Provider.Equals(provider, StringComparison.OrdinalIgnoreCase))
             ?? throw new ArgumentException($"Unsupported provider: {provider}");
