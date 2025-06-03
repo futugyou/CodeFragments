@@ -11,11 +11,11 @@ public class RephrasedQuestion
 {
     [JsonPropertyName("company_name")]
     [Description("Company name, exactly as provided in quotes in the original question")]
-    public string CompanyName { get; set; }
+    public string CompanyName { get; set; } = "";
 
     [JsonPropertyName("question")]
     [Description("Rephrased question specific to this company")]
-    public string Question { get; set; }
+    public string Question { get; set; } = "";
 }
 
 /// <summary>
@@ -25,7 +25,7 @@ public class RephrasedQuestions
 {
     [JsonPropertyName("questions")]
     [Description("List of rephrased questions for each company")]
-    public List<RephrasedQuestion> Questions { get; set; }
+    public List<RephrasedQuestion> Questions { get; set; } = [];
 }
 
 /// <summary>

@@ -12,21 +12,10 @@ public class APIProcessorManager
             ?? throw new ArgumentException($"Unsupported provider: {provider}");
     }
 
-    public dynamic SendMessage(
-       string model = null,
-       double temperature = 0.5,
-       int? seed = null,
-       string systemContent = "You are a helpful assistant.",
-       string humanContent = "Hello!",
-       bool isStructured = false,
-       object responseFormat = null,
-       Dictionary<string, object> kwargs = null)
+    public async Task<RephrasedQuestions> SendMessageAsync(string model = "gpt-4o-2024-08-06", float temperature = 0.5f, long? seed = null, string systemContent = "You are a helpful assistant.", string humanContent = "Hello!", bool isStructured = false, object responseFormat = null, Dictionary<string, object> kwargs = null, CancellationToken cancellationToken = default)
     {
-        if (model == null)
-        {
-            model = processor.DefaultModel;
-        }
-        return processor.SendMessage(
+        model ??= processor.DefaultModel;
+        return await processor.SendMessageAsync(
             model: model,
             temperature: temperature,
             seed: seed,
@@ -34,81 +23,76 @@ public class APIProcessorManager
             humanContent: humanContent,
             isStructured: isStructured,
             responseFormat: responseFormat,
-            kwargs: kwargs
+            kwargs: kwargs,
+            cancellationToken: cancellationToken
         );
     }
 
-    public dynamic GetAnswerFromRagContext(string question, string ragContext, string schema, string model)
+    public async Task<RephrasedQuestions> GetAnswerFromRagContextAsync(string question, string ragContext, string schema, string model, CancellationToken cancellationToken = default)
     {
         var (systemPrompt, responseFormat, userPrompt) = BuildRagContextPrompts(schema);
 
-        var answerDict = processor.SendMessage(
+        return await processor.SendMessageAsync(
             model: model,
             systemContent: systemPrompt,
             humanContent: string.Format(userPrompt, ragContext, question),
             isStructured: true,
-            responseFormat: responseFormat
+            responseFormat: responseFormat,
+            cancellationToken: cancellationToken
         );
-
-        return answerDict;
     }
 
     private (string systemPrompt, object responseFormat, string userPrompt) BuildRagContextPrompts(string schema)
     {
         bool useSchemaPrompt = processor.Provider == "ibm" || processor.Provider == "gemini";
-        switch (schema)
+        return schema switch
         {
-            case "name":
-                return (
-                    useSchemaPrompt ? AnswerWithRAGContextNamePrompt.SystemPromptWithSchema : AnswerWithRAGContextNamePrompt.SystemPrompt,
-                    typeof(NameAnswerSchema),
-                    AnswerWithRAGContextNamePrompt.UserPrompt
-                );
-            case "number":
-                return (
-                    useSchemaPrompt ? AnswerWithRAGContextNumberPrompt.SystemPromptWithSchema : AnswerWithRAGContextNumberPrompt.SystemPrompt,
-                    typeof(NumberAnswerSchema),
-                    AnswerWithRAGContextNumberPrompt.UserPrompt
-                );
-            case "boolean":
-                return (
-                    useSchemaPrompt ? AnswerWithRAGContextBooleanPrompt.SystemPromptWithSchema : AnswerWithRAGContextBooleanPrompt.SystemPrompt,
-                    typeof(BooleanAnswerSchema),
-                    AnswerWithRAGContextBooleanPrompt.UserPrompt
-                );
-            case "names":
-                return (
-                    useSchemaPrompt ? AnswerWithRAGContextNamesPrompt.SystemPromptWithSchema : AnswerWithRAGContextNamesPrompt.SystemPrompt,
-                    typeof(NamesAnswerSchema),
-                    AnswerWithRAGContextNamesPrompt.UserPrompt
-                );
-            case "comparative":
-                return (
-                    useSchemaPrompt ? ComparativeAnswerPrompt.SystemPromptWithSchema : ComparativeAnswerPrompt.SystemPrompt,
-                    typeof(ComparativeAnswerSchema),
-                    ComparativeAnswerPrompt.UserPrompt
-                );
-            default:
-                throw new ArgumentException($"Unsupported schema: {schema}");
-        }
+            "name" => ((string systemPrompt, object responseFormat, string userPrompt))(
+                                useSchemaPrompt ? AnswerWithRAGContextNamePrompt.SystemPromptWithSchema : AnswerWithRAGContextNamePrompt.SystemPrompt,
+                                typeof(NameAnswerSchema),
+                                AnswerWithRAGContextNamePrompt.UserPrompt
+                            ),
+            "number" => ((string systemPrompt, object responseFormat, string userPrompt))(
+                                useSchemaPrompt ? AnswerWithRAGContextNumberPrompt.SystemPromptWithSchema : AnswerWithRAGContextNumberPrompt.SystemPrompt,
+                                typeof(NumberAnswerSchema),
+                                AnswerWithRAGContextNumberPrompt.UserPrompt
+                            ),
+            "boolean" => ((string systemPrompt, object responseFormat, string userPrompt))(
+                                useSchemaPrompt ? AnswerWithRAGContextBooleanPrompt.SystemPromptWithSchema : AnswerWithRAGContextBooleanPrompt.SystemPrompt,
+                                typeof(BooleanAnswerSchema),
+                                AnswerWithRAGContextBooleanPrompt.UserPrompt
+                            ),
+            "names" => ((string systemPrompt, object responseFormat, string userPrompt))(
+                                useSchemaPrompt ? AnswerWithRAGContextNamesPrompt.SystemPromptWithSchema : AnswerWithRAGContextNamesPrompt.SystemPrompt,
+                                typeof(NamesAnswerSchema),
+                                AnswerWithRAGContextNamesPrompt.UserPrompt
+                            ),
+            "comparative" => ((string systemPrompt, object responseFormat, string userPrompt))(
+                                useSchemaPrompt ? ComparativeAnswerPrompt.SystemPromptWithSchema : ComparativeAnswerPrompt.SystemPrompt,
+                                typeof(ComparativeAnswerSchema),
+                                ComparativeAnswerPrompt.UserPrompt
+                            ),
+            _ => throw new ArgumentException($"Unsupported schema: {schema}"),
+        };
     }
 
-    public Dictionary<string, string> GetRephrasedQuestions(string originalQuestion, List<string> companies)
+    public async Task<Dictionary<string, string>> GetRephrasedQuestions(string originalQuestion, List<string> companies, CancellationToken cancellationToken = default)
     {
-        var answerDict = processor.SendMessage(
+        var answerDict = await processor.SendMessageAsync(
             systemContent: RephrasedQuestionsPrompt.SystemPrompt,
             humanContent: string.Format(
                 RephrasedQuestionsPrompt.UserPrompt,
                 originalQuestion,
                 string.Join(", ", companies.ConvertAll(c => $"\"{c}\""))
             ),
-            isStructured: true
+            isStructured: true,
+            cancellationToken: cancellationToken
         );
 
         var questionsDict = new Dictionary<string, string>();
-        foreach (var item in answerDict.questions)
+        foreach (var item in answerDict.Questions)
         {
-            questionsDict[item.company_name] = item.question;
+            questionsDict[item.CompanyName] = item.Question;
         }
         return questionsDict;
     }
