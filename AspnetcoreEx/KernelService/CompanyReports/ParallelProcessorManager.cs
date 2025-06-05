@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json.Serialization;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
@@ -12,6 +13,29 @@ public class StatusTracker
     public int NumApiErrors = 0;
     public int NumOtherErrors = 0;
     public DateTime TimeOfLastRateLimitError = DateTime.MinValue;
+}
+
+internal class APIRequestMarshal
+{
+    [JsonPropertyName("request_json")]
+    public JsonElement? RequestJson { get; set; }
+    [JsonPropertyName("response_json")]
+    public JsonElement? ResponseJson { get; set; }
+    [JsonPropertyName("metadata")]
+    public JsonElement? Metadata { get; set; }
+    [JsonPropertyName("result")]
+    public List<object> Result { get; set; } = [];
+
+    public APIRequestMarshal() { }
+
+    [JsonConstructor]
+    public APIRequestMarshal(JsonElement? requestJson, JsonElement? responseJson, JsonElement? metadata, List<object>? result)
+    {
+        RequestJson = requestJson;
+        ResponseJson = responseJson;
+        Metadata = metadata;
+        Result = result ?? [];
+    }
 }
 
 public class APIRequest
@@ -58,14 +82,14 @@ public class APIRequest
                     retryQueue.Enqueue(this);
                 else
                 {
-                    AppendToJsonl(new object[] { RequestJson, Result, Metadata }, saveFilePath);
+                    AppendToJsonl(new APIRequestMarshal(RequestJson, responseJson, Metadata, null), saveFilePath);
                     statusTracker.NumTasksInProgress--;
                     statusTracker.NumTasksFailed++;
                 }
             }
             else
             {
-                AppendToJsonl(new object[] { RequestJson, responseJson, Metadata }, saveFilePath);
+                AppendToJsonl(new APIRequestMarshal(RequestJson, responseJson, Metadata, null), saveFilePath);
                 statusTracker.NumTasksInProgress--;
                 statusTracker.NumTasksSucceeded++;
             }
@@ -78,14 +102,14 @@ public class APIRequest
                 retryQueue.Enqueue(this);
             else
             {
-                AppendToJsonl(new object[] { RequestJson, Result, Metadata }, saveFilePath);
+                AppendToJsonl(new APIRequestMarshal(RequestJson, null, Metadata, Result), saveFilePath);
                 statusTracker.NumTasksInProgress--;
                 statusTracker.NumTasksFailed++;
             }
         }
     }
 
-    private static void AppendToJsonl(object data, string filename)
+    private static void AppendToJsonl(APIRequestMarshal data, string filename)
     {
         var json = JsonSerializer.Serialize(data);
         File.AppendAllText(filename, json + Environment.NewLine);
@@ -245,7 +269,7 @@ public class ParallelProcessorManager
             }
             else if (input is List<object> inputList)
             {
-                return inputList.Sum(i => tokenCounter.Count(i.ToString(), tokenEncodingName));
+                return inputList.Sum(i => tokenCounter.Count(i.ToString()!, tokenEncodingName));
             }
             else
             {
