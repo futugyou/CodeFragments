@@ -21,24 +21,59 @@ using System.Text.Json;
 ///     Clean and correct text content.
 ///     Support batch processing of report files in a directory and output them as new JSON or Markdown files.
 /// </summary>
-public class PageTextPreparation(bool useSerializedTables = false, bool serializedTablesInsteadOfMarkdown = false)
+public partial class PageTextPreparation(bool useSerializedTables = false, bool serializedTablesInsteadOfMarkdown = false)
 {
     public bool UseSerializedTables { get; } = useSerializedTables;
     public bool SerializedTablesInsteadOfMarkdown { get; } = serializedTablesInsteadOfMarkdown;
-
+    private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
     private ReportData _reportData;
+    private static readonly Dictionary<string, string> CommandMapping = new()
+    {
+        ["zero"] = "0",
+        ["one"] = "1",
+        ["two"] = "2",
+        ["three"] = "3",
+        ["four"] = "4",
+        ["five"] = "5",
+        ["six"] = "6",
+        ["seven"] = "7",
+        ["eight"] = "8",
+        ["nine"] = "9",
+        ["period"] = ".",
+        ["comma"] = ",",
+        ["colon"] = ":",
+        ["hyphen"] = "-",
+        ["percent"] = "%",
+        ["dollar"] = "$",
+        ["space"] = " ",
+        ["plus"] = "+",
+        ["minus"] = "-",
+        ["slash"] = "/",
+        ["asterisk"] = "*",
+        ["lparen"] = "(",
+        ["rparen"] = ")",
+        ["parenright"] = ")",
+        ["parenleft"] = "(",
+        ["wedge.1_E"] = ""
+    };
+    private static readonly Regex _glyphRegex = GlyphRegex();
+    private static readonly Regex _atoZRegex = AtoZRegex();
 
     public List<ProcessedReport> ProcessReports(string reportsDir, List<string> reportsPaths, string outputDir = "")
     {
         var allReports = new List<ProcessedReport>();
         if (!string.IsNullOrEmpty(reportsDir))
         {
-            reportsPaths = Directory.GetFiles(reportsDir, "*.json").ToList();
+            reportsPaths = [.. Directory.GetFiles(reportsDir, "*.json")];
         }
 
         foreach (var reportPath in reportsPaths)
         {
             var reportData = JsonSerializer.Deserialize<ReportData>(File.ReadAllText(reportPath));
+            if (reportData == null)
+            {
+                continue;
+            }
             var fullReportText = ProcessReport(reportData);
             var report = new ProcessedReport
             {
@@ -51,7 +86,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
             {
                 Directory.CreateDirectory(outputDir);
                 File.WriteAllText(Path.Combine(outputDir, Path.GetFileName(reportPath)),
-                    JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
+                    JsonSerializer.Serialize(report, DefaultJsonSerializerOptions));
             }
         }
         return allReports;
@@ -86,7 +121,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
 
         return new ProcessedReportContent
         {
-            Chunks = null,
+            Chunks = null!, // Placeholder for future use, if needed
             Pages = processedPages
         };
     }
@@ -103,7 +138,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
         if (finalBlocks.Count > 0)
         {
             finalBlocks[0] = finalBlocks[0].TrimStart();
-            finalBlocks[finalBlocks.Count - 1] = finalBlocks.Last().TrimEnd();
+            finalBlocks[^1] = finalBlocks.Last().TrimEnd();
         }
 
         return string.Join("\n", finalBlocks);
@@ -115,8 +150,12 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
         foreach (var reportPath in Directory.GetFiles(reportsDir, "*.json"))
         {
             var reportData = JsonSerializer.Deserialize<ReportData>(File.ReadAllText(reportPath));
-            var processedReport = ProcessReport(reportData);
+            if (reportData == null)
+            {
+                continue;
+            }
 
+            var processedReport = ProcessReport(reportData);
             var sb = new StringBuilder();
             foreach (var page in processedReport.Pages)
             {
@@ -130,35 +169,59 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
     }
 
     #region Private Methods
-    private PageContent GetPageData(int pageNumber)
+    private PageContent? GetPageData(int pageNumber)
     {
         return _reportData.Content.FirstOrDefault(p => p.Page == pageNumber);
     }
 
     private static List<Block> FilterBlocks(List<Block> blocks)
     {
-        return [.. blocks.Where(b =>
-            b != null &&
-            (!string.IsNullOrWhiteSpace(b.Text) || b.Type == BlockType.Table || b.Type == BlockType.ListItem)
-        )];
+        var ignoredTypes = new HashSet<BlockType> { BlockType.PageFooter, BlockType.Picture };
+        return [.. blocks.Where(b => b != null && !string.IsNullOrWhiteSpace(b.Text) && !ignoredTypes.Contains(b.Type))];
     }
 
     private static (string, int, List<string>) CleanText(string text)
     {
-        // Simple implementation: remove extra blank lines and count the number of corrections
         var corrections = new List<string>();
-        int count = 0;
-        string cleaned = text;
-        // Replace multiple blank lines with a single blank line
-        string pattern = @"(\n\s*){3,}";
-        if (Regex.IsMatch(cleaned, pattern))
+
+        string recognizedCommands = string.Join("|", CommandMapping.Keys);
+        string slashCommandPattern = @$"/({recognizedCommands})(\.pl\.tnum|\.tnum\.pl|\.pl|\.tnum|\.case|\.sups)";
+
+        int occurrencesAmount = 0;
+
+        // Count matches
+        occurrencesAmount += Regex.Matches(text, slashCommandPattern).Count;
+        occurrencesAmount += _glyphRegex.Matches(text).Count;
+        occurrencesAmount += _atoZRegex.Matches(text).Count;
+
+        // Replace slash commands
+        text = Regex.Replace(text, slashCommandPattern, match =>
         {
-            cleaned = Regex.Replace(cleaned, pattern, "\n\n");
-            count++;
-            corrections.Add("Extra blank lines have been corrected");
-        }
-        // Other cleaning rules can be expanded as needed
-        return (cleaned, count, corrections);
+            string baseCommand = match.Groups[1].Value;
+            if (CommandMapping.TryGetValue(baseCommand, out var replacement))
+            {
+                corrections.Add($"{match.Value} -> {replacement}");
+                return replacement;
+            }
+            return match.Value;
+        });
+
+        // Replace glyph<...>
+        text = _glyphRegex.Replace(text, match =>
+        {
+            corrections.Add($"{match.Value} -> ");
+            return "";
+        });
+
+        // Replace /X.cap
+        text = _atoZRegex.Replace(text, match =>
+        {
+            string replacement = match.Groups[1].Value;
+            corrections.Add($"{match.Value} -> {replacement}");
+            return replacement;
+        });
+
+        return (text, occurrencesAmount, corrections);
     }
 
     private static bool BlockEndsWithColon(Block block)
@@ -170,12 +233,11 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
     {
         var finalBlocks = new List<string>();
         bool pageHeaderInFirst3 = false;
-        bool sectionHeaderInFirst3 = false;
         for (int j = 0; j < Math.Min(3, blocks.Count); j++)
         {
             if (blocks[j].Type == BlockType.PageHeader) pageHeaderInFirst3 = true;
-            if (blocks[j].Type == BlockType.SectionHeader) sectionHeaderInFirst3 = true;
         }
+
         int firstSectionHeaderIndex = 0;
         int i = 0;
         int n = blocks.Count;
@@ -221,7 +283,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
                 (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == BlockType.Table))
             {
                 var groupBlocks = new List<Block>();
-                Block headerForTable = null;
+                Block? headerForTable;
                 if (BlockEndsWithColon(block) && i + 1 < n)
                 {
                     headerForTable = block;
@@ -235,7 +297,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
                     groupBlocks.Add(block);
                     i++;
                 }
-                // 处理后续的 text/footnote
+                // Process subsequent text/footnote
                 if (i < n && blocks[i].Type == BlockType.Text)
                 {
                     if ((i + 1 < n) && blocks[i + 1].Type == BlockType.Footnote)
@@ -334,7 +396,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
 
     private static string RenderListGroup(List<Block> groupBlocks)
     {
-        var sb = new System.Text.StringBuilder();
+        var sb = new StringBuilder();
         sb.AppendLine();
         foreach (var blk in groupBlocks)
         {
@@ -362,10 +424,7 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
 
     private string GetTableById(int tableId)
     {
-        var table = _reportData.Tables?.FirstOrDefault(t => t.TableId == tableId);
-        if (table == null)
-            throw new Exception($"Table with ID={tableId} not found in report_data!");
-
+        var table = (_reportData.Tables?.FirstOrDefault(t => t.TableId == tableId)) ?? throw new Exception($"Table with ID={tableId} not found in report_data!");
         if (UseSerializedTables)
             return GetSerializedTableText(table, SerializedTablesInsteadOfMarkdown);
 
@@ -377,13 +436,18 @@ public class PageTextPreparation(bool useSerializedTables = false, bool serializ
         if (table.Serialized == null)
             return table.Markdown ?? string.Empty;
 
-        var infoBlocks = table.Serialized.InformationBlocks ?? new List<InformationBlock>();
+        var infoBlocks = table.Serialized.InformationBlocks ?? [];
         var serializedText = string.Join("\n", infoBlocks.Select(b => b.InformationBlockText));
         if (serializedTablesInsteadOfMarkdown)
             return serializedText;
         else
             return $"{table.Markdown}\nDescription of the table entities:\n{serializedText}";
     }
+
+    [GeneratedRegex(@"glyph<[^>]*>")]
+    private static partial Regex GlyphRegex();
+    [GeneratedRegex(@"/([A-Z])\.cap")]
+    private static partial Regex AtoZRegex();
     #endregion
 
 }
@@ -425,7 +489,9 @@ public enum BlockType
     Footnote,
     CheckboxSelected,
     CheckboxUnselected,
-    Formula
+    Formula,
+    PageFooter,
+    Picture,
 }
 
 public class Table
