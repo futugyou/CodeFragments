@@ -7,13 +7,9 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.VectorData;
 using Microsoft.KernelMemory;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Plugins.Core;
-using ModelContextProtocol;
 using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol.Transport;
 using OpenAI;
 using Qdrant.Client;
 using System.ClientModel;
@@ -48,13 +44,13 @@ public static class KernelServiceExtensions
         };
 
         var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-        var chatClient = ghModelsClient.AsChatClient(config.ChatModel);
-        var embeddingGenerator = ghModelsClient.AsEmbeddingGenerator(config.Embedding);
+        var chatClient = ghModelsClient.GetChatClient(config.ChatModel).AsIChatClient();
+        var embeddingGenerator = ghModelsClient.GetEmbeddingClient(config.Embedding).AsIEmbeddingGenerator();
 
-        services.AddSingleton<IVectorStore>(sp =>
+        services.AddSingleton<VectorStore>(sp =>
         {
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            return new QdrantVectorStore(new QdrantClient(host: config.QdrantHost, port: config.QdrantPort, apiKey: config.QdrantKey, loggerFactory: loggerFactory));
+            return new QdrantVectorStore(new QdrantClient(host: config.QdrantHost, port: config.QdrantPort, apiKey: config.QdrantKey, loggerFactory: loggerFactory), true);
         });
 
         services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
@@ -74,13 +70,13 @@ public static class KernelServiceExtensions
         if (!string.IsNullOrWhiteSpace(config.Endpoint))
         {
             kernelBuilder.AddAzureOpenAIChatCompletion(config.ChatModel, config.Endpoint, config.Key);
-            kernelBuilder.AddAzureOpenAITextEmbeddingGeneration(config.Embedding, config.Endpoint, config.Key);
+            kernelBuilder.AddAzureOpenAIEmbeddingGenerator(config.Embedding, config.Endpoint, config.Key);
             kernelBuilder.AddAzureOpenAITextToImage(config.Image, config.Endpoint, config.Key);
         }
         else
         {
             kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, config.Key);
-            kernelBuilder.AddOpenAITextEmbeddingGeneration(config.Embedding, config.Key);
+            kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key);
             kernelBuilder.AddOpenAITextToImage(config.Key);
         }
 
@@ -89,7 +85,6 @@ public static class KernelServiceExtensions
         kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
-        kernelBuilder.Plugins.AddFromType<MathSolver>();
 
         kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
 
@@ -117,37 +112,6 @@ public static class KernelServiceExtensions
                 // Add retries using the resolved options
                 builder.AddRetry(retryOptions);
             });
-
-        services.AddSingleton<IQdrantVectorDbClient>(sp =>
-        {
-            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var httpClient = httpClientFactory.CreateClient("qdrant");
-            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            return new QdrantVectorDbClient(httpClient, config.QdrantVectorSize, null, loggerFactory);
-        });
-
-        services.AddSingleton<IMemoryStore>(sp =>
-        {
-            var qdrantVectorDbClient = sp.GetRequiredService<IQdrantVectorDbClient>();
-            return new QdrantMemoryStore(qdrantVectorDbClient);
-        });
-
-        services.AddScoped<ISemanticTextMemory>(sp =>
-        {
-            var store = sp.GetRequiredService<IMemoryStore>();
-            var memoryBuilder = new MemoryBuilder();
-            memoryBuilder.WithMemoryStore(store);
-            if (!string.IsNullOrWhiteSpace(config.Endpoint))
-            {
-                // memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(config.Embedding, config.Endpoint, config.Key);
-            }
-            else
-            {
-                memoryBuilder.WithOpenAITextEmbeddingGeneration(config.Embedding, config.Key);
-            }
-
-            return memoryBuilder.Build();
-        });
 
         return services;
     }

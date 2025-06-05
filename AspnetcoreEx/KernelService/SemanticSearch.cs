@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace AspnetcoreEx.KernelService;
 
-public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, IVectorStore vectorStore)
+public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, VectorStore vectorStore)
 {
     public async Task<IReadOnlyList<SemanticSearchRecord>> SearchAsync(string text, string? filenameFilter, int maxResults)
     {
@@ -14,7 +14,7 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
             ? record => record.FileName == filenameFilter
             : null;
         var results = new List<SemanticSearchRecord>();
-        await foreach (var item in vectorCollection.SearchEmbeddingAsync(queryEmbedding, maxResults, new VectorSearchOptions<SemanticSearchRecord>
+        await foreach (var item in vectorCollection.SearchAsync(queryEmbedding, maxResults, new VectorSearchOptions<SemanticSearchRecord>
         {
             Filter = filter,
         }))
@@ -28,18 +28,18 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
 
 public class SemanticSearchRecord
 {
-    [VectorStoreRecordKey]
+    [VectorStoreKey]
     public required string Key { get; set; }
 
-    [VectorStoreRecordData]
+    [VectorStoreData]
     public required string FileName { get; set; }
 
-    [VectorStoreRecordData]
+    [VectorStoreData]
     public int PageNumber { get; set; }
 
-    [VectorStoreRecordData]
+    [VectorStoreData]
     public required string Text { get; set; }
 
-    [VectorStoreRecordVector(Dimensions: 1536, DistanceFunction = DistanceFunction.CosineSimilarity)] // 1536 is the default vector size for the OpenAI text-embedding-3-small model
+    [VectorStoreVector(Dimensions: 1536, DistanceFunction = DistanceFunction.CosineSimilarity)] // 1536 is the default vector size for the OpenAI text-embedding-3-small model
     public ReadOnlyMemory<float> Vector { get; set; }
 }

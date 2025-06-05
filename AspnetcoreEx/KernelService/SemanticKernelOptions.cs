@@ -30,5 +30,5 @@ public class McpServer
     public string Command { get; set; }
     public string Url { get; set; }
     public string[] Args { get; set; } = [];
-    public Dictionary<string, string> Env { get; set; } = new();
+    public Dictionary<string, string?> Env { get; set; } = new();
 }

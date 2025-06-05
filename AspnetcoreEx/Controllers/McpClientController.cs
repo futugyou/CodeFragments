@@ -1,6 +1,4 @@
 using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol.Transport;
-using ModelContextProtocol;
 using AspnetcoreEx.KernelService;
 
 namespace AspnetcoreEx.Controllers;

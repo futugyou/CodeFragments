@@ -7,7 +7,7 @@ namespace AspnetcoreEx.KernelService.Ingestion;
 public class DataIngestor(
     ILogger<DataIngestor> logger,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-    IVectorStore vectorStore,
+    VectorStore vectorStore,
     IngestionCacheDbContext ingestionCacheDb)
 {
     public static async Task IngestDataAsync(IServiceProvider services, IIngestionSource source)
@@ -20,7 +20,7 @@ public class DataIngestor(
     public async Task IngestDataAsync(IIngestionSource source)
     {
         var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-test-ingested");
-        await vectorCollection.CreateCollectionIfNotExistsAsync();
+        await vectorCollection.EnsureCollectionExistsAsync();
 
         var documentsForSource = ingestionCacheDb.Documents
             .Where(d => d.SourceId == source.SourceId)

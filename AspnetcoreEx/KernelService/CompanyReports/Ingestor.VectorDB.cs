@@ -25,8 +25,9 @@ public class VectorDBIngestor : IIngestor
         foreach (var text in texts)
         {
             if (string.IsNullOrWhiteSpace(text)) continue;
-            var client = _client.AsEmbeddingGenerator(model);
-            var response = await client.GenerateAsync(text);
+
+            var embeddingGenerator = _client.GetEmbeddingClient(model).AsIEmbeddingGenerator();
+            var response = await embeddingGenerator.GenerateAsync(text);
             embeddings.AddRange(response.Vector.ToArray());
         }
         return embeddings;
