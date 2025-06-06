@@ -3,6 +3,9 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using Tabula;
+using Tabula.Detectors;
+using Tabula.Extractors;
 using UglyToad.PdfPig;
 using Path = System.IO.Path;
 
@@ -15,6 +18,9 @@ public class PDFParser
     private readonly Dictionary<string, Metadata> _metadataLookup;
     private readonly string? _debugDataPath;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
+    private static readonly SpreadsheetExtractionAlgorithm latticeMode = new();
+    private static readonly BasicExtractionAlgorithm streamMode = new();
+    private static readonly SimpleNurminenDetectionAlgorithm detector = new();
 
     public PDFParser(ILogger<PDFParser> logger, string outputDir, string? csvMetadataPath = null, string? debugDataPath = null)
     {
@@ -142,21 +148,52 @@ public class PDFParser
 
     private static ConversionResult ConvertSingleDocumentInternal(string path)
     {
-        using var pdf = PdfDocument.Open(path);
+        using var pdf = PdfDocument.Open(path, new ParsingOptions() { ClipPaths = true });
         var result = new ConversionResult
         {
             Status = ConversionStatus.Success,
             Input = new ConversionInput { File = new FileInfo(path) },
+            Document = new ParsedDocument(),
         };
         foreach (var page in pdf.GetPages())
         {
-            result.Document.Add(new ParsedDocument
-            {
-                Page = page,
-            });
+            var tables = GetPdfTables(pdf, page);
+            result.Document.Tables.AddRange(tables);
+            result.Document.Pages.Add(page);
         }
         return result;
     }
+
+    private static IEnumerable<Tabula.Table> GetPdfTables(PdfDocument pdf, UglyToad.PdfPig.Content.Page page)
+    {
+        PageArea pageArea = ObjectExtractor.Extract(pdf, page.Number);
+        // Try lattice mode extraction first
+        var tables = latticeMode.Extract(pageArea);
+        if (tables.Count > 0 && tables[0].Rows.Count > 0)
+        {
+            return tables;
+        }
+
+        // fallback: use detector and stream mode
+        var fallbackTables = new List<Tabula.Table>();
+        var regions = detector.Detect(pageArea);
+
+        foreach (var region in regions)
+        {
+            var area = pageArea.GetArea(region.BoundingBox);
+            if (area != null)
+            {
+                var regionTables = streamMode.Extract(area);
+                if (regionTables.Count > 0 && regionTables[0].Rows.Count > 0)
+                {
+                    fallbackTables.AddRange(regionTables);
+                }
+            }
+        }
+
+        return fallbackTables;
+    }
+
 
     public (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
     {
@@ -243,32 +280,30 @@ public class ConversionResult
 {
     public ConversionStatus Status { get; set; }
     public ConversionInput Input { get; set; }
-    public List<ParsedDocument> Document { get; set; } = [];
+    public ParsedDocument Document { get; set; }
     public string ErrorMessage { get; set; } = string.Empty;
 }
 
 public class ParsedDocument
 {
-    public UglyToad.PdfPig.Content.Page Page { get; set; }
-}
+    public List<UglyToad.PdfPig.Content.Page> Pages { get; set; } = [];
+    public List<Tabula.Table> Tables { get; set; } = [];
 
-public static class ParsedDocumentExtensions
-{
-    public static Dictionary<string, object> ExportToDict(this List<ParsedDocument> documents)
+    public Dictionary<string, object> ExportToDict()
     {
         var result = new Dictionary<string, object>();
         var contentList = new List<Dictionary<string, object>>();
 
-        foreach (var doc in documents)
+        foreach (var doc in Pages)
         {
             var pageData = new Dictionary<string, object>
             {
-                ["page"] = doc.Page.Number,
-                ["content"] = doc.Page.Text,
+                ["page"] = doc.Number,
+                ["content"] = doc.Text,
                 ["page_dimensions"] = new Dictionary<string, object>
                 {
-                    ["width"] = doc.Page.Width,
-                    ["height"] = doc.Page.Height
+                    ["width"] = doc.Width,
+                    ["height"] = doc.Height
                 }
             };
             contentList.Add(pageData);
