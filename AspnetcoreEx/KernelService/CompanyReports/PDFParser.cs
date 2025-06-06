@@ -122,14 +122,7 @@ public class PDFParser
             ConversionResult result;
             try
             {
-                using var pdf = PdfDocument.Open(path);
-                var text = string.Join("\n", pdf.GetPages().Select(p => p.Text));
-                result = new ConversionResult
-                {
-                    Status = ConversionStatus.Success,
-                    Input = new ConversionInput { File = new FileInfo(path) },
-                    Document = new ParsedDocument { Content = text }
-                };
+                result = ConvertSingleDocumentInternal(path);
             }
             catch (Exception ex)
             {
@@ -138,11 +131,31 @@ public class PDFParser
                 {
                     Status = ConversionStatus.Failure,
                     Input = new ConversionInput { File = new FileInfo(path) },
-                    Document = null
+                    ErrorMessage = ex.Message,
                 };
             }
+
+
             yield return result;
         }
+    }
+
+    private static ConversionResult ConvertSingleDocumentInternal(string path)
+    {
+        using var pdf = PdfDocument.Open(path);
+        var result = new ConversionResult
+        {
+            Status = ConversionStatus.Success,
+            Input = new ConversionInput { File = new FileInfo(path) },
+        };
+        foreach (var page in pdf.GetPages())
+        {
+            result.Document.Add(new ParsedDocument
+            {
+                Page = page,
+            });
+        }
+        return result;
     }
 
     public (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
@@ -230,27 +243,38 @@ public class ConversionResult
 {
     public ConversionStatus Status { get; set; }
     public ConversionInput Input { get; set; }
-    public ParsedDocument Document { get; set; }
+    public List<ParsedDocument> Document { get; set; } = [];
+    public string ErrorMessage { get; set; } = string.Empty;
 }
 
 public class ParsedDocument
 {
-    public string Content { get; set; }
-    public Dictionary<string, object> ExportToDict()
+    public UglyToad.PdfPig.Content.Page Page { get; set; }
+}
+
+public static class ParsedDocumentExtensions
+{
+    public static Dictionary<string, object> ExportToDict(this List<ParsedDocument> documents)
     {
-        // TODO: document.export_to_dict
-        return new Dictionary<string, object>
+        var result = new Dictionary<string, object>();
+        var contentList = new List<Dictionary<string, object>>();
+
+        foreach (var doc in documents)
         {
-            { "content", new List<Dictionary<string, object>>
+            var pageData = new Dictionary<string, object>
+            {
+                ["page"] = doc.Page.Number,
+                ["content"] = doc.Page.Text,
+                ["page_dimensions"] = new Dictionary<string, object>
                 {
-                    new Dictionary<string, object>
-                    {
-                        { "page", 1 },
-                        { "content", new List<object> { Content } },
-                        { "page_dimensions", new Dictionary<string, object>() }
-                    }
+                    ["width"] = doc.Page.Width,
+                    ["height"] = doc.Page.Height
                 }
-            }
-        };
+            };
+            contentList.Add(pageData);
+        }
+
+        result["content"] = contentList;
+        return result;
     }
 }
