@@ -1,6 +1,8 @@
 
 using System.Globalization;
 using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.Configuration.Attributes;
 using UglyToad.PdfPig;
 using Path = System.IO.Path;
 
@@ -23,12 +25,25 @@ public class PDFParser
     private static Dictionary<string, Metadata> ParseCsvMetadata(string csvPath)
     {
         var lookup = new Dictionary<string, Metadata>();
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+            MissingFieldFound = null,
+            HeaderValidated = null,
+            TrimOptions = TrimOptions.Trim,
+        };
+
         using var reader = new StreamReader(csvPath);
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        using var csv = new CsvReader(reader, config);
+
         foreach (var record in csv.GetRecords<Metadata>())
         {
-            lookup[record.Sha1] = record;
+            if (!string.IsNullOrWhiteSpace(record.Sha1))
+            {
+                lookup[record.Sha1] = record;
+            }
         }
+
         return lookup;
     }
 
@@ -150,11 +165,11 @@ public class PDFParser
                 _logger.LogInformation("Document {FullName} failed to convert.", convRes.Input.File.FullName);
             }
         }
-        _logger.LogInformation($"Processed {successCount + failureCount} docs, of which {failureCount} failed");
+        _logger.LogInformation("Processed {TotalCount} docs, of which {FailureCount} failed", successCount + failureCount, failureCount);
         return (successCount, failureCount);
     }
 
-    public Dictionary<string, object> NormalizePageSequence(Dictionary<string, object> data)
+    private static Dictionary<string, object> NormalizePageSequence(Dictionary<string, object> data)
     {
         // TODO:
         if (!data.TryGetValue("content", out object? value)) return data;
@@ -166,15 +181,12 @@ public class PDFParser
         for (int pageNum = 1; pageNum <= maxPage; pageNum++)
         {
             var page = content.FirstOrDefault(p => Convert.ToInt32(p["page"]) == pageNum);
-            if (page == null)
-            {
-                page = new Dictionary<string, object>
+            page ??= new Dictionary<string, object>
                 {
                     ["page"] = pageNum,
                     ["content"] = new List<object>(),
                     ["page_dimensions"] = new Dictionary<string, object>()
                 };
-            }
             newContent.Add(page);
         }
         data["content"] = newContent;
@@ -190,8 +202,19 @@ public class PDFParser
 
 public class Metadata
 {
+    [Name("sha1")]
     public string Sha1 { get; set; }
+
+    [Name("company_name")]
     public string CompanyName { get; set; }
+
+    [Name("name")]
+    public string Name { get; set; }
+
+    public string GetCompanyName()
+    {
+        return (CompanyName ?? Name ?? string.Empty).Trim('"');
+    }
 }
 
 public enum ConversionStatus
