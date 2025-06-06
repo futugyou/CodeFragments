@@ -13,13 +13,15 @@ public class PDFParser
     private readonly ILogger<PDFParser> _logger;
     private readonly string _outputDir;
     private readonly Dictionary<string, Metadata> _metadataLookup;
+    private readonly string? _debugDataPath;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
 
-    public PDFParser(ILogger<PDFParser> logger, string outputDir, string? csvMetadataPath = null)
+    public PDFParser(ILogger<PDFParser> logger, string outputDir, string? csvMetadataPath = null, string? debugDataPath = null)
     {
         _logger = logger;
         _outputDir = outputDir;
         _metadataLookup = csvMetadataPath != null ? ParseCsvMetadata(csvMetadataPath) : [];
+        _debugDataPath = debugDataPath;
     }
 
     private static Dictionary<string, Metadata> ParseCsvMetadata(string csvPath)
@@ -151,13 +153,16 @@ public class PDFParser
             if (convRes.Status == ConversionStatus.Success)
             {
                 successCount++;
-                // TODO: JsonReportProcessor
+                var processor = new JsonReportProcessor(_debugDataPath, _metadataLookup);
                 var data = convRes.Document.ExportToDict();
                 var normalizedData = NormalizePageSequence(data);
-                var processedReport = AssembleReport(convRes, normalizedData);
+                var processedReport = processor.AssembleReport(convRes, normalizedData);
                 var docFilename = Path.GetFileNameWithoutExtension(convRes.Input.File.Name);
-                var outPath = Path.Combine(_outputDir, $"{docFilename}.json");
-                File.WriteAllText(outPath, JsonSerializer.Serialize(processedReport, DefaultJsonSerializerOptions));
+                if (!string.IsNullOrWhiteSpace(docFilename))
+                {
+                    var outPath = Path.Combine(_outputDir, $"{docFilename}.json");
+                    File.WriteAllText(outPath, JsonSerializer.Serialize(processedReport, DefaultJsonSerializerOptions));
+                }
             }
             else
             {
@@ -171,7 +176,6 @@ public class PDFParser
 
     private static Dictionary<string, object> NormalizePageSequence(Dictionary<string, object> data)
     {
-        // TODO:
         if (!data.TryGetValue("content", out object? value)) return data;
         if (value is not List<Dictionary<string, object>> content) return data;
 
@@ -182,21 +186,15 @@ public class PDFParser
         {
             var page = content.FirstOrDefault(p => Convert.ToInt32(p["page"]) == pageNum);
             page ??= new Dictionary<string, object>
-                {
-                    ["page"] = pageNum,
-                    ["content"] = new List<object>(),
-                    ["page_dimensions"] = new Dictionary<string, object>()
-                };
+            {
+                ["page"] = pageNum,
+                ["content"] = new List<object>(),
+                ["page_dimensions"] = new Dictionary<string, object>()
+            };
             newContent.Add(page);
         }
         data["content"] = newContent;
         return data;
-    }
-
-    public Dictionary<string, object> AssembleReport(ConversionResult convRes, Dictionary<string, object> normalizedData)
-    {
-        // TODO: JsonReportProcessor
-        return normalizedData;
     }
 }
 
