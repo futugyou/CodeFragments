@@ -82,30 +82,31 @@ public class PDFParser
 
         var successCount = 0;
         var failureCount = 0;
-        var lockObj = new object();
 
-        Parallel.ForEach(chunks, new ParallelOptions { MaxDegreeOfParallelism = optimalWorkers }, chunk =>
-        {
-            try
+        Parallel.ForEach(
+            chunks,
+            new ParallelOptions { MaxDegreeOfParallelism = optimalWorkers },
+            () => (succ: 0, fail: 0), // init
+            (chunk, state, localCounts) =>
             {
-                var convResults = ConvertDocuments(chunk);
-                var (succ, fail) = ProcessDocuments(convResults);
-                lock (lockObj)
+                try
                 {
-                    successCount += succ;
-                    failureCount += fail;
+                    var convResults = ConvertDocuments(chunk);
+                    var (succ, fail) = ProcessDocuments(convResults);
+                    _logger.LogInformation("Processed {Count} PDFs in parallel.", chunk.Count);
+                    return (localCounts.succ + succ, localCounts.fail + fail);
                 }
-                _logger.LogInformation("Processed {Count} PDFs in parallel.", chunk.Count);
-            }
-            catch (Exception ex)
+                catch (Exception ex)
+                {
+                    _logger.LogError("Error processing chunk: {Message}", ex.Message);
+                    return (localCounts.succ, localCounts.fail + chunk.Count);
+                }
+            },
+            localCounts =>
             {
-                _logger.LogError("Error processing chunk: {Message}", ex.Message);
-                lock (lockObj)
-                {
-                    failureCount += chunk.Count;
-                }
-            }
-        });
+                Interlocked.Add(ref successCount, localCounts.succ);
+                Interlocked.Add(ref failureCount, localCounts.fail);
+            });
 
         var elapsed = DateTime.Now - startTime;
         if (failureCount > 0)
@@ -162,12 +163,12 @@ public class PDFParser
     private static IEnumerable<Tabula.Table> GetPdfTables(UglyToad.PdfPig.Content.Page page)
     {
         var tables = page.GetTablesLattice();
-        if (tables.Any()  && tables.First().Rows.Count > 0)
+        if (tables.Any() && tables.First().Rows.Count > 0)
         {
             return tables;
         }
 
-        return page.GetTablesStream(); 
+        return page.GetTablesStream();
     }
     public (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
     {
