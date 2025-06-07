@@ -4,8 +4,6 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
 using Tabula;
-using Tabula.Detectors;
-using Tabula.Extractors;
 using UglyToad.PdfPig;
 using Path = System.IO.Path;
 
@@ -18,9 +16,6 @@ public class PDFParser
     private readonly Dictionary<string, Metadata> _metadataLookup;
     private readonly string? _debugDataPath;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
-    private static readonly SpreadsheetExtractionAlgorithm latticeMode = new();
-    private static readonly BasicExtractionAlgorithm streamMode = new();
-    private static readonly SimpleNurminenDetectionAlgorithm detector = new();
 
     public PDFParser(ILogger<PDFParser> logger, string outputDir, string? csvMetadataPath = null, string? debugDataPath = null)
     {
@@ -157,44 +152,23 @@ public class PDFParser
         };
         foreach (var page in pdf.GetPages())
         {
-            var tables = GetPdfTables(pdf, page);
+            var tables = GetPdfTables(page);
             result.Document.Tables.AddRange(tables);
             result.Document.Pages.Add(page);
         }
         return result;
     }
 
-    private static IEnumerable<Tabula.Table> GetPdfTables(PdfDocument pdf, UglyToad.PdfPig.Content.Page page)
+    private static IEnumerable<Tabula.Table> GetPdfTables(UglyToad.PdfPig.Content.Page page)
     {
-        PageArea pageArea = ObjectExtractor.Extract(pdf, page.Number);
-        // Try lattice mode extraction first
-        var tables = latticeMode.Extract(pageArea);
-        if (tables.Count > 0 && tables[0].Rows.Count > 0)
+        var tables = page.GetTablesLattice();
+        if (tables.Any()  && tables.First().Rows.Count > 0)
         {
             return tables;
         }
 
-        // fallback: use detector and stream mode
-        var fallbackTables = new List<Tabula.Table>();
-        var regions = detector.Detect(pageArea);
-
-        foreach (var region in regions)
-        {
-            var area = pageArea.GetArea(region.BoundingBox);
-            if (area != null)
-            {
-                var regionTables = streamMode.Extract(area);
-                if (regionTables.Count > 0 && regionTables[0].Rows.Count > 0)
-                {
-                    fallbackTables.AddRange(regionTables);
-                }
-            }
-        }
-
-        return fallbackTables;
+        return page.GetTablesStream(); 
     }
-
-
     public (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
     {
         int successCount = 0, failureCount = 0;
