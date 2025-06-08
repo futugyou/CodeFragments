@@ -38,4 +38,37 @@ public class QuestionsProcessor
     {
         throw new NotImplementedException();
     }
+
+    #region private methos
+    private static List<Dictionary<string, string>> LoadQuestions(string? questionsFilePath)
+    {
+        if (string.IsNullOrEmpty(questionsFilePath))
+            return [];
+
+        var json = File.ReadAllText(questionsFilePath);
+        return JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json) ?? [];
+    }
+
+    private static string FormatRetrievalResults(List<RetrievalResult> retrievalResults)
+    {
+        if (retrievalResults == null)
+            return string.Empty;
+
+        var contextParts = new List<string>();
+        foreach (var result in retrievalResults)
+        {
+            var pageNumber = result.Page;
+            var text = result.Text;
+            contextParts.Add($"Text retrieved from page {pageNumber}: \n\"\"\"\n{text}\n\"\"\"");
+        }
+
+        return string.Join("\n\n---\n\n", contextParts);
+    }
+    #endregion
+}
+
+public class RetrievalResult
+{
+    public int Page { get; set; }
+    public string Text { get; set; }
 }

@@ -10,6 +10,10 @@ using Path = System.IO.Path;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
+/// <summary>
+/// It is best to let Python handle it. 
+/// PdfPig+Tabula cannot achieve the capabilities of Docling.
+/// </summary>
 public class PDFParser
 {
     private readonly ILogger<PDFParser> _logger;
