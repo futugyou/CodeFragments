@@ -3,6 +3,7 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using Microsoft.Extensions.Logging.Abstractions;
 using Tabula;
 using UglyToad.PdfPig;
 using Path = System.IO.Path;
@@ -17,9 +18,9 @@ public class PDFParser
     private readonly string? _debugDataPath;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
 
-    public PDFParser(ILogger<PDFParser> logger, string outputDir, string? csvMetadataPath = null, string? debugDataPath = null)
+    public PDFParser(ILogger<PDFParser>? logger, string outputDir, string? csvMetadataPath = null, string? debugDataPath = null)
     {
-        _logger = logger;
+        _logger = logger ?? NullLogger<PDFParser>.Instance;
         _outputDir = outputDir;
         _metadataLookup = csvMetadataPath != null ? ParseCsvMetadata(csvMetadataPath) : [];
         _debugDataPath = debugDataPath;
@@ -67,13 +68,17 @@ public class PDFParser
         _logger.LogInformation("Completed in {TotalSeconds} seconds. Successfully converted {successCount}/{Count} documents.", elapsed.TotalSeconds, successCount, inputDocPaths.Count);
     }
 
-    public void ParseAndExportParallel(List<string> inputDocPaths, int optimalWorkers = 10)
+    public void ParseAndExportParallel(List<string> inputDocPaths, int optimalWorkers = 10, int? chunkSize = null)
     {
         var startTime = DateTime.Now;
         Directory.CreateDirectory(_outputDir);
 
         int totalDocs = inputDocPaths.Count;
-        int chunkSize = Math.Max(1, totalDocs / optimalWorkers);
+        if (chunkSize == null || chunkSize <= 0)
+        {
+            chunkSize = Math.Max(1, totalDocs / optimalWorkers);
+        }
+
         var chunks = inputDocPaths
             .Select((path, idx) => new { path, idx })
             .GroupBy(x => x.idx / chunkSize)
