@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text.Json;
 using OpenAI;
 using FaissMask;
-
 public class VectorRetriever
 {
     private readonly string _vectorDbDir;
