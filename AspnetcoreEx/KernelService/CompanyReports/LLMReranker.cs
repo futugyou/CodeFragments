@@ -1,4 +1,5 @@
 
+using System.Text.Json.Schema;
 using Microsoft.Extensions.AI;
 using OpenAI;
 
@@ -19,6 +20,16 @@ public class LLMReranker
         _systemPromptMultipleBlocks = systemPromptMulti;
         _schemaSingleBlock = schemaSingle;
         _schemaMultipleBlocks = schemaMulti;
+    }
+
+    public LLMReranker()
+    {
+        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+        _llmClient = new OpenAIClient(apiKey);
+        _systemPromptSingleBlock = RerankingPrompt.SystemPrompt;
+        _systemPromptMultipleBlocks = RerankingPrompt.SystemPromptMultipleBlocks;
+        _schemaSingleBlock = Prompts.DefaultJsonOptions.GetJsonSchemaAsNode(typeof(RetrievalRankingSingleBlock)).ToString();
+        _schemaMultipleBlocks = Prompts.DefaultJsonOptions.GetJsonSchemaAsNode(typeof(RetrievalRankingMultipleBlocks)).ToString();
     }
 
     public async Task<Dictionary<string, object>> GetRankForSingleBlockAsync(string query, string retrievedDocument, CancellationToken cancellationToken = default)
