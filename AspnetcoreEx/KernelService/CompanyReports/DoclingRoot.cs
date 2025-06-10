@@ -32,6 +32,9 @@ public class DoclingRoot
     [JsonPropertyName("pictures")]
     public List<DoclingPicture> Pictures { get; set; }
 
+    [JsonPropertyName("equations")]
+    public List<object> Equations { get; set; }
+
     [JsonPropertyName("tables")]
     public List<Table> Tables { get; set; }
 

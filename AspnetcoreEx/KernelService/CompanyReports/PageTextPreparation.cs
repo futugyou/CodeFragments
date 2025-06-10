@@ -462,6 +462,13 @@ public class ReportData
 public class Metainfo
 {
     public string Sha1Name { get; set; }
+    public int PagesAmount { get; set; }
+    public int TextBlocksAmount { get; set; }
+    public int TablesAmount { get; set; }
+    public int PicturesAmount { get; set; }
+    public int EquationsAmount { get; set; }
+    public int FootnotesAmount { get; set; }
+    public string CompanyName { get; set; }
 }
 
 public class PageContent
