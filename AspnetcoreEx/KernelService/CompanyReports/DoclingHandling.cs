@@ -4,6 +4,15 @@ using Path = System.IO.Path;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
+/// <summary>
+/// Used to process document structured data and generate JSON reports containing metainfo, content, tables, and pictures. Its main functions include:
+///
+/// Assemble report: Generate a structured report containing metainfo, content, tables, and pictures based on the input document data.
+/// Assemble metainfo: Count the number of pages, text blocks, tables, pictures, etc. of the document, and merge external metadata.
+/// Assemble content: Group the document body content by page, support expanding group references, and process content blocks such as text, tables, and pictures.
+/// Assemble tables: Convert table objects to markdown, html, json, and extract table page numbers, positions, number of rows and columns, and other information.
+/// Assemble pictures: Extract the page number, position, and text blocks contained in the picture.
+/// </summary>
 public class DoclingHandling
 {
 
@@ -35,6 +44,7 @@ public class DoclingHandling
         {
             ["metainfo"] = AssembleMetainfo(doclingData),
             ["content"] = AssembleContent(doclingData),
+            ["tables"] = AssembleTables(doclingData),
         };
 
         return assembledReport;
@@ -215,6 +225,39 @@ public class DoclingHandling
         return contentItem;
     }
 
+    private static List<ReportTable> AssembleTables(DoclingRoot doclingData)
+    {
+        var assembledTables = new List<ReportTable>();
+        foreach (var table in doclingData.Tables)
+        {
+            var tableData = doclingData.Tables.FirstOrDefault(t => t.SelfRef == table.SelfRef);
+            if (tableData == null)
+                continue;
+
+            var tablePageNum = tableData.Prov[0].PageNo;
+            var tableBbox = tableData.Prov[0].Bbox;
+            var nrows = tableData.Data.NumRows;
+            var ncols = tableData.Data.NumCols;
+            var refNum = int.Parse(tableData.SelfRef.Split('/').Last());
+
+            var tableObj = new ReportTable
+            {
+                TableId = refNum,
+                Page = tablePageNum,
+                Bbox = new ReportBbox { L = tableBbox.L, T = tableBbox.T, R = tableBbox.R, B = tableBbox.B },
+                Rows = nrows,
+                Cols = ncols,
+                Markdown = "",
+                Html = "",
+                Json = ""
+            };
+            assembledTables.Add(tableObj);
+        }
+
+        return assembledTables;
+    }
+
+
     #endregion
 }
 
@@ -246,4 +289,24 @@ public class ReportContent
     public int Page { get; set; }
     public List<ReportContentItem> Content { get; internal set; }
     public DoclingBbox PageDimensions { get; internal set; }
+}
+
+public class ReportTable
+{
+    public int TableId { get; set; }
+    public int Page { get; set; }
+    public ReportBbox Bbox { get; set; }
+    public int Rows { get; set; }
+    public int Cols { get; set; }
+    public string Markdown { get; set; }
+    public string Html { get; set; }
+    public string Json { get; set; }
+}
+
+public class ReportBbox
+{
+    public double L { get; set; }  // Left
+    public double T { get; set; }  // Top
+    public double R { get; set; }  // Right
+    public double B { get; set; }  // Bottom
 }
