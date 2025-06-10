@@ -15,7 +15,6 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 /// </summary>
 public class DoclingHandling
 {
-
     private Dictionary<string, Metadata> _metadataLookup;
     public async Task<List<DoclingRoot>> ReadDoclingConvertedData(string doclingDirPath)
     {
@@ -37,18 +36,18 @@ public class DoclingHandling
         return lists;
     }
 
-    public Dictionary<string, object> AssembleReport(DoclingRoot doclingData, Dictionary<string, Metadata> metadataLookup)
+    public PdfReport AssembleReport(DoclingRoot doclingData, Dictionary<string, Metadata> metadataLookup)
     {
         _metadataLookup = metadataLookup;
-        var assembledReport = new Dictionary<string, object>
+        return new PdfReport
         {
-            ["metainfo"] = AssembleMetainfo(doclingData),
-            ["content"] = AssembleContent(doclingData),
-            ["tables"] = AssembleTables(doclingData),
+            Metainfo = AssembleMetainfo(doclingData),
+            Content = AssembleContent(doclingData),
+            Tables = AssembleTables(doclingData),
+            Pictures = AssemblePictures(doclingData),
         };
-
-        return assembledReport;
     }
+
 
     #region private
     private Metainfo AssembleMetainfo(DoclingRoot data)
@@ -257,6 +256,50 @@ public class DoclingHandling
         return assembledTables;
     }
 
+    private static List<ReportPicture> AssemblePictures(DoclingRoot data)
+    {
+        var assembledPictures = new List<ReportPicture>();
+        foreach (var picture in data.Pictures)
+        {
+            var childrenList = ProcessPictureBlock(picture, data);
+            var refNum = int.Parse(picture.SelfRef.Split('/').Last());
+            var picturePageNum = picture.Prov[0].PageNo;
+            var pictureBbox = picture.Prov[0].Bbox;
+            var pictureObj = new ReportPicture
+            {
+                PictureId = refNum,
+                Page = picturePageNum,
+                Bbox = new ReportBbox { L = pictureBbox.L, T = pictureBbox.T, R = pictureBbox.R, B = pictureBbox.B },
+                Children = childrenList
+            };
+            assembledPictures.Add(pictureObj);
+        }
+
+        return assembledPictures;
+    }
+
+    private static List<ReportContentItem> ProcessPictureBlock(DoclingPicture picture, DoclingRoot data)
+    {
+        var childrenList = new List<ReportContentItem>();
+        foreach (var item in picture.Children)
+        {
+            var parts = item.Ref.Split('/');
+            if (parts.Length < 2)
+            {
+                continue;
+            }
+            string ref_type = parts[^2];
+            string ref_num = parts[^1];
+            if (ref_type != "texts" || !int.TryParse(ref_num, out int groupId))
+            {
+                continue;
+            }
+
+            var contentItem = ProcessTextReference(groupId, data);
+            childrenList.Add(contentItem);
+        }
+        return childrenList;
+    }
 
     #endregion
 }
@@ -309,4 +352,20 @@ public class ReportBbox
     public double T { get; set; }  // Top
     public double R { get; set; }  // Right
     public double B { get; set; }  // Bottom
+}
+
+public class ReportPicture
+{
+    public int PictureId { get; set; }
+    public int Page { get; set; }
+    public ReportBbox Bbox { get; set; }
+    public List<ReportContentItem> Children { get; set; }
+}
+
+public class PdfReport
+{
+    public Metainfo Metainfo { get; set; }
+    public List<ReportContent> Content { get; set; }
+    public List<ReportTable> Tables { get; set; }
+    public List<ReportPicture> Pictures { get; set; }
 }

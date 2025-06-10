@@ -186,7 +186,7 @@ public class DoclingPicture
     public DoclingParent Parent { get; set; }
 
     [JsonPropertyName("children")]
-    public List<object> Children { get; set; }
+    public List<DoclingChild> Children { get; set; }
 
     [JsonPropertyName("content_layer")]
     public string ContentLayer { get; set; }
