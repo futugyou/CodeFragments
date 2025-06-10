@@ -36,7 +36,7 @@ public class DoclingRoot
     public List<object> Equations { get; set; }
 
     [JsonPropertyName("tables")]
-    public List<Table> Tables { get; set; }
+    public List<DoclingTable> Tables { get; set; }
 
     [JsonPropertyName("key_value_items")]
     public List<object> KeyValueItems { get; set; }
@@ -333,7 +333,7 @@ public class DoclingText
     public int Level { get; set; }
 
     [JsonPropertyName("enumerated")]
-    public bool? Enumerated { get; set; }
+    public bool Enumerated { get; set; }
 
     [JsonPropertyName("marker")]
     public string Marker { get; set; }
