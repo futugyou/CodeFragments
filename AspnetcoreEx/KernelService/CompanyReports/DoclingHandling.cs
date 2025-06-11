@@ -75,15 +75,13 @@ public class DoclingHandling
 
         foreach (var refItem in expandedBodyChildren)
         {
-            var parts = refItem.Ref.Split('/');
-            if (parts.Length < 2)
+            var (ref_type, ref_num, ok) = GetPageTypeAndNum(refItem.Ref);
+            if (!ok)
             {
                 continue;
             }
 
-            string ref_type = parts[^2];
-            string ref_num_string = parts[^1];
-            if (!int.TryParse(ref_num_string, out int ref_num) || data.Texts.Count <= ref_num)
+            if (data.Texts.Count <= ref_num)
             {
                 continue;
             }
@@ -177,15 +175,14 @@ public class DoclingHandling
         var expandedChildren = new List<ReportGroup>();
         foreach (var item in bodyChildren)
         {
-            var parts = item.Ref.Split('/');
-            if (parts.Length < 2)
+            var (ref_type, groupId, ok) = GetPageTypeAndNum(item.Ref);
+            if (!ok)
             {
                 expandedChildren.Add(new ReportGroup { Ref = item.Ref });
                 continue;
             }
-            string ref_type = parts[^2];
-            string ref_num = parts[^1];
-            if (ref_type == "groups" && int.TryParse(ref_num, out int groupId) && groups.Count > groupId)
+
+            if (ref_type == "groups" && groups.Count > groupId)
             {
                 var group = groups[groupId];
                 foreach (var child in group.Children)
@@ -282,14 +279,8 @@ public class DoclingHandling
         var childrenList = new List<ReportContentItem>();
         foreach (var item in picture.Children)
         {
-            var parts = item.Ref.Split('/');
-            if (parts.Length < 2)
-            {
-                continue;
-            }
-            string ref_type = parts[^2];
-            string ref_num = parts[^1];
-            if (ref_type != "texts" || !int.TryParse(ref_num, out int groupId))
+            var (ref_type, groupId, ok) = GetPageTypeAndNum(item.Ref);
+            if (!ok || ref_type != "texts")
             {
                 continue;
             }
@@ -298,6 +289,22 @@ public class DoclingHandling
             childrenList.Add(contentItem);
         }
         return childrenList;
+    }
+
+    private static (string Sha1Name, int CompanyName, bool ok) GetPageTypeAndNum(string refString)
+    {
+        var parts = refString.Split('/');
+        if (parts.Length < 2)
+        {
+            return (string.Empty, -1, false);
+        }
+        string ref_type = parts[^2];
+        string ref_num = parts[^1];
+        if (!int.TryParse(ref_num, out int groupId))
+        {
+            return (string.Empty, -1, false);
+        }
+        return (ref_type, groupId, true);
     }
 
     #endregion
