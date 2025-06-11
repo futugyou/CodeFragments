@@ -16,8 +16,8 @@ and my local PC does not have enough space to complete this task.
 ## 3. Parse PDF report
 
 - C# does not have a powerful PDF library like `Docling`,
-so it is recommended to use `Docling` to process the `PDF` data,
-and then C# to handle the rest of the process.
+so it is recommended to use `Docling` to process the `PDF` data(`docling_example.py`),
+and then C# to handle (`DoclingPDFParser.cs`) the rest of the process.
 
 - `parse_pdf_reports`: Parse PDF report (optional concurrent/serial).
 

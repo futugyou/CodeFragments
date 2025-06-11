@@ -1,4 +1,8 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
+using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Path = System.IO.Path;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
@@ -12,20 +16,52 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 /// Assemble tables: Convert table objects to markdown, html, json, and extract table page numbers, positions, number of rows and columns, and other information.
 /// Assemble pictures: Extract the page number, position, and text blocks contained in the picture.
 /// </summary>
-public class DoclingHandling
+public class DoclingPDFParser
 {
-    private Dictionary<string, Metadata> _metadataLookup;
-    public async Task<List<DoclingRoot>> ReadDoclingConvertedData(string doclingDirPath)
+    private readonly ILogger<DoclingPDFParser> _logger;
+    private readonly string _outputDir;
+    private readonly Dictionary<string, Metadata> _metadataLookup;
+    private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
+
+    public DoclingPDFParser(ILogger<DoclingPDFParser>? logger, string outputDir, string? csvMetadataPath = null)
+    {
+        _logger = logger ?? NullLogger<DoclingPDFParser>.Instance;
+        if (!outputDir.EndsWith('/'))
+        {
+            outputDir += "/";
+        }
+        _outputDir = outputDir;
+        _metadataLookup = csvMetadataPath != null ? ParseCsvMetadata(csvMetadataPath) : [];
+    }
+
+    public async Task ParseAndExport(string doclingDirPath, CancellationToken cancellationToken = default)
+    {
+        var startTime = DateTime.Now;
+        Directory.CreateDirectory(_outputDir);
+
+        var convResults = await ReadDoclingConvertedData(doclingDirPath, cancellationToken);
+        foreach (var convResult in convResults)
+        {
+            var pdfReport = AssembleReport(convResult);
+            await WritePdfReportDataAsync(pdfReport, cancellationToken);
+            _logger.LogInformation("Processed report for {Filename} with SHA1: {Sha1Name}", convResult.Origin.Filename, pdfReport.Metainfo.Sha1Name);
+        }
+
+        var elapsed = DateTime.Now - startTime;
+        _logger.LogInformation("Parallel processing completed in {TotalSeconds} seconds.", elapsed.TotalSeconds);
+    }
+
+    public async Task<List<DoclingRoot>> ReadDoclingConvertedData(string doclingDirPath, CancellationToken cancellationToken = default)
     {
         var lists = new List<DoclingRoot>();
         foreach (var reportPath in Directory.GetFiles(doclingDirPath, "*.json"))
         {
-            var d = await File.ReadAllTextAsync(reportPath);
+            var d = await File.ReadAllTextAsync(reportPath, cancellationToken);
             if (string.IsNullOrWhiteSpace(d))
             {
                 continue;
             }
-            var reportData = JsonSerializer.Deserialize<DoclingRoot>(d);
+            var reportData = JsonSerializer.Deserialize<DoclingRoot>(d, DefaultJsonSerializerOptions);
             if (reportData == null)
             {
                 continue;
@@ -35,18 +71,23 @@ public class DoclingHandling
         return lists;
     }
 
-    public PdfReport AssembleReport(DoclingRoot doclingData, Dictionary<string, Metadata> metadataLookup)
+    public PdfReport AssembleReport(DoclingRoot doclingData)
     {
-        _metadataLookup = metadataLookup;
         return new PdfReport
         {
             Metainfo = AssembleMetainfo(doclingData),
             Content = AssembleContent(doclingData),
             Tables = AssembleTables(doclingData),
-            Pictures = AssemblePictures(doclingData),
+            Pictures = AssemblePictures(doclingData)
         };
     }
 
+    public async Task WritePdfReportDataAsync(PdfReport data, CancellationToken cancellationToken = default)
+    {
+        var json = JsonSerializer.Serialize(data, DefaultJsonSerializerOptions);
+        var filePath = $"{_outputDir}{data.Metainfo.Sha1Name}.json";
+        await File.WriteAllTextAsync(filePath, json, cancellationToken);
+    }
 
     #region private
     private Metainfo AssembleMetainfo(DoclingRoot data)
@@ -305,6 +346,31 @@ public class DoclingHandling
             return (string.Empty, -1, false);
         }
         return (ref_type, groupId, true);
+    }
+
+    private static Dictionary<string, Metadata> ParseCsvMetadata(string csvPath)
+    {
+        var lookup = new Dictionary<string, Metadata>();
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true,
+            MissingFieldFound = null,
+            HeaderValidated = null,
+            TrimOptions = TrimOptions.Trim,
+        };
+
+        using var reader = new StreamReader(csvPath);
+        using var csv = new CsvReader(reader, config);
+
+        foreach (var record in csv.GetRecords<Metadata>())
+        {
+            if (!string.IsNullOrWhiteSpace(record.Sha1))
+            {
+                lookup[record.Sha1] = record;
+            }
+        }
+
+        return lookup;
     }
 
     #endregion
