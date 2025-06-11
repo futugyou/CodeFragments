@@ -179,7 +179,8 @@ public class PDFParser
 
         return page.GetTablesStream();
     }
-    public (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
+    
+    private (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
     {
         int successCount = 0, failureCount = 0;
         foreach (var convRes in convResults)

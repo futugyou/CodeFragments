@@ -118,6 +118,24 @@ public class DoclingData
 
     [JsonPropertyName("grid")]
     public List<List<DoclingTableCell>> Grids { get; set; }
+
+    public List<List<string>> TableGrid
+    {
+        get
+        {
+            var grid = new List<List<string>>();
+            foreach (var row in Grids)
+            {
+                var rowData = new List<string>();
+                foreach (var cell in row)
+                {
+                    rowData.Add(cell.Text);
+                }
+                grid.Add(rowData);
+            }
+            return grid;
+        }
+    }
 }
 
 public class DoclingFurniture

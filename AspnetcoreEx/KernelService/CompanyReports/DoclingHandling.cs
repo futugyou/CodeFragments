@@ -245,9 +245,9 @@ public class DoclingHandling
                 Bbox = new ReportBbox { L = tableBbox.L, T = tableBbox.T, R = tableBbox.R, B = tableBbox.B },
                 Rows = nrows,
                 Cols = ncols,
-                Markdown = "",
-                Html = "",
-                Json = ""
+                Markdown = MarkdownBuilder.ToTable(tableData.Data.TableGrid),
+                Html = HtmlTagsExporter.ExportGridToHtml(tableData.Data.TableGrid),
+                Json = JsonSerializer.Serialize(tableData),
             };
             assembledTables.Add(tableObj);
         }
