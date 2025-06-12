@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text.Json;
 using OpenAI;
 using FaissMask;
+using System.Numerics.Tensors;
+
 public class VectorRetriever
 {
     private readonly string _vectorDbDir;
@@ -72,12 +74,7 @@ public class VectorRetriever
     {
         var llm = SetUpLlm();
         var embeddings = await llm.GetEmbeddingClient("text-embedding-3-large").GenerateEmbeddingsAsync([str1, str2], cancellationToken: cancellationToken);
-        var v1 = embeddings.Value[0].ToFloats().ToArray();
-        var v2 = embeddings.Value[1].ToFloats().ToArray();
-        double dot = v1.Zip(v2, (a, b) => a * b).Sum();
-        double mag1 = Math.Sqrt(v1.Sum(x => x * x));
-        double mag2 = Math.Sqrt(v2.Sum(x => x * x));
-        return dot / (mag1 * mag2);
+        return CosineSimilarity(embeddings.Value[0].ToFloats().Span, embeddings.Value[1].ToFloats().Span);
     }
 
     public async Task<List<Dictionary<string, object>>> RetrieveByCompanyName(
@@ -142,23 +139,52 @@ public class VectorRetriever
             return metainfo != null && metainfo.ContainsKey("company_name") && (string)metainfo["company_name"] == companyName;
         }) ?? throw new Exception($"No report found with '{companyName}' company name.");
         var document = targetReport.Document;
-        var content = ((JsonElement)document["content"]).Deserialize<Dictionary<string, object>>()?? throw new Exception("Document content is missing or malformed.");
-        var pages = ((JsonElement)content["pages"]).Deserialize<List<Dictionary<string, object>>>()?? throw new Exception("Document pages are missing or malformed.");
+        var content = ((JsonElement)document["content"]).Deserialize<Dictionary<string, object>>() ?? throw new Exception("Document content is missing or malformed.");
+        var pages = ((JsonElement)content["pages"]).Deserialize<List<Dictionary<string, object>>>() ?? throw new Exception("Document pages are missing or malformed.");
 
-        return pages.OrderBy(p => Convert.ToInt32(p["page"]))
+        return [.. pages.OrderBy(p => Convert.ToInt32(p["page"]))
             .Select(p => new Dictionary<string, object>
             {
                 { "distance", 0.5 },
                 { "page", p["page"] },
                 { "text", p["text"] }
-            }).ToList();
+            })];
     }
 
-    // 内部类型
+    // internal class
     private class ReportDb
     {
         public string Name { get; set; }
         public IndexFlat VectorDb { get; set; }
         public Dictionary<string, object> Document { get; set; }
     }
+
+    #region private methods
+    public static float CosineSimilarity(ReadOnlySpan<float> x, ReadOnlySpan<float> y)
+    {
+        if (x.Length != y.Length)
+            throw new ArgumentException("Input vectors must have the same length.");
+
+#if NET9_0_OR_GREATER
+        return TensorPrimitives.CosineSimilarity(x, y);
+#else
+                
+        float dot = 0f;
+        float normX = 0f;
+        float normY = 0f;
+
+        for (int i = 0; i < x.Length; i++)
+        {
+            float xi = x[i];
+            float yi = y[i];
+            dot += xi * yi;
+            normX += xi * xi;
+            normY += yi * yi;
+        }
+
+        return dot / MathF.Sqrt(normX * normY);
+#endif
+    }
+
+    #endregion
 }
