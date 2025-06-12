@@ -1,37 +1,17 @@
 
 using System.Globalization;
+using System.Text.Json.Serialization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
-using Microsoft.Extensions.Logging.Abstractions;
-using Tabula;
-using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
-using Path = System.IO.Path;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-/// <summary>
-/// It is best to let Python handle it. 
-/// PdfPig+Tabula cannot achieve the capabilities of Docling.
-/// </summary>
-public class PDFParser
+public interface IPDFParser
 {
-    private readonly ILogger<PDFParser> _logger;
-    private readonly string _outputDir;
-    private readonly Dictionary<string, Metadata> _metadataLookup;
-    private readonly string? _debugDataPath;
-    private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
-
-    public PDFParser(ILogger<PDFParser>? logger, string outputDir, string? csvMetadataPath = null, string? debugDataPath = null)
-    {
-        _logger = logger ?? NullLogger<PDFParser>.Instance;
-        _outputDir = outputDir;
-        _metadataLookup = csvMetadataPath != null ? ParseCsvMetadata(csvMetadataPath) : [];
-        _debugDataPath = debugDataPath;
-    }
-
-    private static Dictionary<string, Metadata> ParseCsvMetadata(string csvPath)
+    Task ParseAndExportAsync(string doclingDirPath, CancellationToken cancellationToken = default);
+    Task ParseAndExportParallelAsync(string doclingDirPath, int optimalWorkers = 10, int? chunkSize = null, CancellationToken cancellationToken = default);
+    static Dictionary<string, Metadata> ParseCsvMetadata(string csvPath)
     {
         var lookup = new Dictionary<string, Metadata>();
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -55,175 +35,121 @@ public class PDFParser
 
         return lookup;
     }
+}
 
-    public Task ParseAndExportAsync(string doclingDirPath, CancellationToken cancellationToken = default)
+public class ReportGroup
+{
+    [JsonPropertyName("group_id")]
+    public int GroupId { get; set; }
+    [JsonPropertyName("group_name")]
+    public string GroupName { get; set; }
+    [JsonPropertyName("group_label")]
+    public string GroupLabel { get; set; }
+    [JsonPropertyName("ref")]
+    public string Ref { get; set; }
+}
+
+public class ReportContentItem
+{
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+    [JsonPropertyName("text_id")]
+    public int TextId { get; set; }
+    [JsonPropertyName("orig")]
+    public string Orig { get; set; }
+    [JsonPropertyName("enumerated")]
+    public bool Enumerated { get; set; }
+    [JsonPropertyName("marker")]
+    public string Marker { get; set; }
+    [JsonPropertyName("group_id")]
+    public int GroupId { get; set; }
+    [JsonPropertyName("group_name")]
+    public string GroupName { get; set; }
+    [JsonPropertyName("group_label")]
+    public string GroupLabel { get; set; }
+    [JsonPropertyName("table_id")]
+    public int TableId { get; set; }
+    [JsonPropertyName("picture_id")]
+    public int PictureId { get; set; }
+}
+
+public class ReportContent
+{
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+    [JsonPropertyName("content")]
+    public List<ReportContentItem> Content { get; internal set; }
+    [JsonPropertyName("page_dimensions")]
+    public ReportBbox PageDimensions { get; internal set; }
+}
+
+public class ReportTable
+{
+    [JsonPropertyName("table_id")]
+    public int TableId { get; set; }
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+    [JsonPropertyName("bbox")]
+    public ReportBbox Bbox { get; set; }
+    [JsonPropertyName("rows")]
+    public int Rows { get; set; }
+    [JsonPropertyName("cols")]
+    public int Cols { get; set; }
+    [JsonPropertyName("markdown")]
+    public string Markdown { get; set; }
+    [JsonPropertyName("html")]
+    public string Html { get; set; }
+    [JsonPropertyName("json")]
+    public string Json { get; set; }
+}
+
+public class ReportBbox
+{
+    [JsonPropertyName("l")]
+    public double L { get; set; }  // Left
+    [JsonPropertyName("t")]
+    public double T { get; set; }  // Top
+    [JsonPropertyName("r")]
+    public double R { get; set; }  // Right
+    [JsonPropertyName("b")]
+    public double B { get; set; }  // Bottom
+
+    public static implicit operator ReportBbox(DoclingBbox bbox)
     {
-        var startTime = DateTime.Now;
-        Directory.CreateDirectory(_outputDir);
-        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json")?.ToList() ?? [];
-
-        var convResults = ConvertDocuments(inputDocPaths);
-        var (successCount, failureCount) = ProcessDocuments(convResults);
-
-        var elapsed = DateTime.Now - startTime;
-        if (failureCount > 0)
+        return new ReportBbox
         {
-            _logger.LogError("Failed converting {failureCount} out of {Count} documents.", failureCount, inputDocPaths.Count);
-            throw new Exception($"Failed converting {failureCount} out of {inputDocPaths.Count} documents.");
-        }
-        _logger.LogInformation("Completed in {TotalSeconds} seconds. Successfully converted {successCount}/{Count} documents.", elapsed.TotalSeconds, successCount, inputDocPaths.Count);
-        return Task.CompletedTask;
-    }
-
-    public Task ParseAndExportParallelAsync(string doclingDirPath, int optimalWorkers = 10, int? chunkSize = null, CancellationToken cancellationToken = default)
-    {
-        var startTime = DateTime.Now;
-        Directory.CreateDirectory(_outputDir);
-        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json")?.ToList() ?? [];
-        int totalDocs = inputDocPaths.Count;
-        if (chunkSize == null || chunkSize <= 0)
-        {
-            chunkSize = Math.Max(1, totalDocs / optimalWorkers);
-        }
-
-        var chunks = inputDocPaths
-            .Select((path, idx) => new { path, idx })
-            .GroupBy(x => x.idx / chunkSize)
-            .Select(g => g.Select(x => x.path).ToList())
-            .ToList();
-
-        var successCount = 0;
-        var failureCount = 0;
-
-        Parallel.ForEach(
-            chunks,
-            new ParallelOptions { MaxDegreeOfParallelism = optimalWorkers },
-            () => (succ: 0, fail: 0), // init
-            (chunk, state, localCounts) =>
-            {
-                try
-                {
-                    var convResults = ConvertDocuments(chunk);
-                    var (succ, fail) = ProcessDocuments(convResults);
-                    _logger.LogInformation("Processed {Count} PDFs in parallel.", chunk.Count);
-                    return (localCounts.succ + succ, localCounts.fail + fail);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Error processing chunk: {Message}", ex.Message);
-                    return (localCounts.succ, localCounts.fail + chunk.Count);
-                }
-            },
-            localCounts =>
-            {
-                Interlocked.Add(ref successCount, localCounts.succ);
-                Interlocked.Add(ref failureCount, localCounts.fail);
-            });
-
-        var elapsed = DateTime.Now - startTime;
-        if (failureCount > 0)
-        {
-            _logger.LogError("Failed converting {FailureCount} out of {TotalDocs} documents.", failureCount, totalDocs);
-            throw new Exception($"Failed converting {failureCount} out of {totalDocs} documents.");
-        }
-        _logger.LogInformation("Parallel processing completed in {TotalSeconds} seconds. Successfully converted {successCount}/{totalDocs} documents.", elapsed.TotalSeconds, successCount, totalDocs);
-        return Task.CompletedTask;
-    }
-
-    public IEnumerable<ConversionResult> ConvertDocuments(List<string> inputDocPaths)
-    {
-        foreach (var path in inputDocPaths)
-        {
-            ConversionResult result;
-            try
-            {
-                result = ConvertSingleDocumentInternal(path);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to convert {path}: {Message}", path, ex.Message);
-                result = new ConversionResult
-                {
-                    Status = ConversionStatus.Failure,
-                    Input = new ConversionInput { File = new FileInfo(path) },
-                    ErrorMessage = ex.Message,
-                };
-            }
-
-
-            yield return result;
-        }
-    }
-
-    private static ConversionResult ConvertSingleDocumentInternal(string path)
-    {
-        using var pdf = PdfDocument.Open(path, new ParsingOptions() { ClipPaths = true });
-        var result = new ConversionResult
-        {
-            Status = ConversionStatus.Success,
-            Input = new ConversionInput { File = new FileInfo(path) },
-            Document = new ParsedDocument(),
+            L = bbox.L,
+            T = bbox.T,
+            R = bbox.R,
+            B = bbox.B
         };
-        foreach (var page in pdf.GetPages())
-        {
-            var tables = GetPdfTables(page);
-            var images = GetPdfPictures(page);
-            var words = GetPdfWords(page);
-            result.Document.Tables.AddRange(tables);
-            result.Document.Words.AddRange(words);
-            result.Document.Pictures.AddRange(images);
-            result.Document.Pages.Add(page);
-        }
-        return result;
     }
+}
 
-    private static IEnumerable<(Page, IPdfImage)> GetPdfPictures(Page page)
-    {
-        return (page.GetImages() ?? []).Select(img => (page, img));
-    }
+public class ReportPicture
+{
+    [JsonPropertyName("picture_id")]
+    public int PictureId { get; set; }
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+    [JsonPropertyName("bbox")]
+    public ReportBbox Bbox { get; set; }
+    [JsonPropertyName("children")]
+    public List<ReportContentItem> Children { get; set; }
+}
 
-    private static IEnumerable<(Page, Word)> GetPdfWords(Page page)
-    {
-        return (page.GetWords() ?? []).Select(word => (page, word));
-    }
-
-    private static IEnumerable<(Page, Tabula.Table)> GetPdfTables(Page page)
-    {
-        var tables = page.GetTablesLattice();
-        if (tables.Any() && tables.First().Rows.Count > 0)
-        {
-            tables = page.GetTablesStream();
-        }
-
-        return (tables ?? []).Select(t => (page, t));
-    }
-
-    private (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
-    {
-        int successCount = 0, failureCount = 0;
-        foreach (var convRes in convResults)
-        {
-            if (convRes.Status == ConversionStatus.Success)
-            {
-                successCount++;
-                var processor = new JsonReportProcessor(_debugDataPath, _metadataLookup);
-                var processedReport = processor.AssembleReport(convRes);
-                var docFilename = Path.GetFileNameWithoutExtension(convRes.Input.File.Name);
-                if (!string.IsNullOrWhiteSpace(docFilename))
-                {
-                    var outPath = Path.Combine(_outputDir, $"{docFilename}.json");
-                    File.WriteAllText(outPath, JsonSerializer.Serialize(processedReport, DefaultJsonSerializerOptions));
-                }
-            }
-            else
-            {
-                failureCount++;
-                _logger.LogInformation("Document {FullName} failed to convert.", convRes.Input.File.FullName);
-            }
-        }
-        _logger.LogInformation("Processed {TotalCount} docs, of which {FailureCount} failed", successCount + failureCount, failureCount);
-        return (successCount, failureCount);
-    }
+public class PdfReport
+{
+    [JsonPropertyName("metainfo")]
+    public Metainfo Metainfo { get; set; }
+    [JsonPropertyName("content")]
+    public List<ReportContent> Content { get; set; }
+    [JsonPropertyName("tables")]
+    public List<ReportTable> Tables { get; set; }
+    [JsonPropertyName("pictures")]
+    public List<ReportPicture> Pictures { get; set; }
 }
 
 public class Metadata
@@ -241,31 +167,4 @@ public class Metadata
     {
         return (CompanyName ?? Name ?? string.Empty).Trim('"');
     }
-}
-
-public enum ConversionStatus
-{
-    Success,
-    Failure
-}
-
-public class ConversionInput
-{
-    public FileInfo File { get; set; }
-}
-
-public class ConversionResult
-{
-    public ConversionStatus Status { get; set; }
-    public ConversionInput Input { get; set; }
-    public ParsedDocument Document { get; set; }
-    public string ErrorMessage { get; set; } = string.Empty;
-}
-
-public class ParsedDocument
-{
-    public List<Page> Pages { get; set; } = [];
-    public List<(Page, Tabula.Table)> Tables { get; set; } = [];
-    public List<(Page, IPdfImage)> Pictures { get; set; } = [];
-    public List<(Page, Word)> Words { get; set; } = [];
 }

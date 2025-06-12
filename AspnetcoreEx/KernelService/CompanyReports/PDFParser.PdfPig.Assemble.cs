@@ -41,7 +41,7 @@ public class JsonReportProcessor
 
         if (_metadataLookup?.TryGetValue(sha1Name, out var csvMeta) == true)
         {
-            metainfo.CompanyName = csvMeta.CompanyName;
+            metainfo.CompanyName = csvMeta.GetCompanyName();
         }
         return metainfo;
     }

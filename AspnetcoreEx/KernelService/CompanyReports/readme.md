@@ -17,7 +17,9 @@ and my local PC does not have enough space to complete this task.
 
 - C# does not have a powerful PDF library like `Docling`,
 so it is recommended to use `Docling` to process the `PDF` data(`docling_example.py`),
-and then C# to handle (`DoclingPDFParser.cs`) the rest of the process.
+and then C# to handle (`PDFParser.Docling.cs`) the rest of the process.
+
+- C# alse can use `UglyToad.PdfPig` to handle PDF.
 
 - `parse_pdf_reports`: Parse PDF report (optional concurrent/serial).
 
