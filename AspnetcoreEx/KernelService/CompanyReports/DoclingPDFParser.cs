@@ -34,12 +34,12 @@ public class DoclingPDFParser
         _metadataLookup = csvMetadataPath != null ? ParseCsvMetadata(csvMetadataPath) : [];
     }
 
-    public async Task ParseAndExport(string doclingDirPath, CancellationToken cancellationToken = default)
+    public async Task ParseAndExportAsync(string doclingDirPath, CancellationToken cancellationToken = default)
     {
         var startTime = DateTime.Now;
         Directory.CreateDirectory(_outputDir);
-
-        var convResults = await ReadDoclingConvertedData(doclingDirPath, cancellationToken);
+        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json");
+        var convResults = await ReadDoclingConvertedDataAsync(inputDocPaths, cancellationToken);
         foreach (var convResult in convResults)
         {
             var pdfReport = AssembleReport(convResult);
@@ -51,10 +51,103 @@ public class DoclingPDFParser
         _logger.LogInformation("Parallel processing completed in {TotalSeconds} seconds.", elapsed.TotalSeconds);
     }
 
-    public async Task<List<DoclingRoot>> ReadDoclingConvertedData(string doclingDirPath, CancellationToken cancellationToken = default)
+    public async Task ParseAndExportParallelAsync(string doclingDirPath, int optimalWorkers = 10, int? chunkSize = null, CancellationToken cancellationToken = default)
+    {
+        var startTime = DateTime.Now;
+        Directory.CreateDirectory(_outputDir);
+        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json");
+        int totalDocs = inputDocPaths.Length;
+        if (chunkSize == null || chunkSize <= 0)
+        {
+            chunkSize = Math.Max(1, totalDocs / optimalWorkers);
+        }
+
+        var chunks = inputDocPaths
+            .Select((path, idx) => new { path, idx })
+            .GroupBy(x => x.idx / chunkSize.Value)
+            .Select(g => g.Select(x => x.path).ToList())
+            .ToList();
+
+        var successCount = 0;
+        var failureCount = 0;
+
+        // Parallel.ForEachAsync started in NET6.0. The purpose of this is to keep two ways of writing.
+#if NET9_0_OR_GREATER
+        await Parallel.ForEachAsync(chunks, new ParallelOptions
+        {
+            MaxDegreeOfParallelism = optimalWorkers,
+            CancellationToken = cancellationToken
+        }, async (chunk, ct) =>
+        {
+            try
+            {
+                var convResults = await ReadDoclingConvertedDataAsync(chunk, ct);
+                foreach (var convResult in convResults)
+                {
+                    var pdfReport = AssembleReport(convResult);
+                    await WritePdfReportDataAsync(pdfReport, ct);
+                }
+
+                Interlocked.Add(ref successCount, convResults.Count);
+            }
+            catch (Exception ex)
+            {
+                Interlocked.Add(ref failureCount, chunk.Count);
+                _logger.LogError(ex, "Error processing chunk");
+            }
+        });
+#else
+        var tasks = chunks.Select(async chunk =>
+        {
+            try
+            {
+                var convResults = await ReadDoclingConvertedData(chunk, cancellationToken);
+                foreach (var convResult in convResults)
+                {
+                    var pdfReport = AssembleReport(convResult);
+                    await WritePdfReportDataAsync(pdfReport, cancellationToken);
+                }
+
+                Interlocked.Add(ref successCount, convResults.Count);
+            }
+            catch (Exception ex)
+            {
+                Interlocked.Add(ref failureCount, chunk.Count);
+                _logger.LogError(ex, "Error processing chunk");
+            }
+        });
+
+        var throttler = new SemaphoreSlim(optimalWorkers);
+        var throttledTasks = tasks.Select(async task =>
+        {
+            await throttler.WaitAsync(cancellationToken);
+            try
+            {
+                await task;
+            }
+            finally
+            {
+                throttler.Release();
+            }
+        });
+
+        await Task.WhenAll(throttledTasks);
+#endif
+
+        var elapsed = DateTime.Now - startTime;
+        if (failureCount > 0)
+        {
+            _logger.LogError("Failed converting {FailureCount} out of {TotalDocs} documents.", failureCount, totalDocs);
+            throw new Exception($"Failed converting {failureCount} out of {totalDocs} documents.");
+        }
+
+        _logger.LogInformation("Parallel processing completed in {TotalSeconds} seconds. Successfully converted {SuccessCount}/{TotalDocs} documents.", elapsed.TotalSeconds, successCount, totalDocs);
+    }
+
+    public async Task<List<DoclingRoot>> ReadDoclingConvertedDataAsync(IEnumerable<string> inputDocPaths, CancellationToken cancellationToken = default)
     {
         var lists = new List<DoclingRoot>();
-        foreach (var reportPath in Directory.GetFiles(doclingDirPath, "*.json"))
+        foreach (var reportPath in inputDocPaths)
         {
             var d = await File.ReadAllTextAsync(reportPath, cancellationToken);
             if (string.IsNullOrWhiteSpace(d))

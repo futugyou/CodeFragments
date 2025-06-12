@@ -165,6 +165,7 @@ public class VectorRetriever
         if (x.Length != y.Length)
             throw new ArgumentException("Input vectors must have the same length.");
 
+        // TensorPrimitives.CosineSimilarity started in NET8.0. The purpose of this is to keep two ways of writing.
 #if NET9_0_OR_GREATER
         return TensorPrimitives.CosineSimilarity(x, y);
 #else
