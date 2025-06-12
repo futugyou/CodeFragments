@@ -49,7 +49,7 @@ public class PdfPigParser : IPDFParser
     {
         var startTime = DateTime.Now;
         Directory.CreateDirectory(_outputDir);
-        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json")?.ToList() ?? [];
+        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.pdf")?.ToList() ?? [];
         int totalDocs = inputDocPaths.Count;
         if (chunkSize == null || chunkSize <= 0)
         {

@@ -56,6 +56,8 @@ public class PipelineConfig
         AnswersFilePath = Path.Combine(rootPath, $"answers{configSuffix}.json");
     }
 }
+
+// TODO: need DI Extensions
 public class Pipeline
 {
     private readonly RunConfig runConfig;
@@ -124,24 +126,23 @@ public class Pipeline
         }
     }
 
-    public static void DownloadDoclingModels()
+    public static async Task DownloadDoclingModels()
     {
-        var parser = new PDFParser(null, "./output");
-        parser.ParseAndExport(["src/dummy_report.pdf"]);
+        var parser = new DoclingPDFParser(null, "./output");
+        await parser.ParseAndExportAsync("src/dummy_report.pdf");
     }
 
-    public void ParsePdfReportsSequential()
+    public async Task ParsePdfReportsSequential()
     {
-        var pdfParser = new PDFParser(null, paths.ParsedReportsPath, paths.SubsetPath, paths.ParsedReportsDebugPath);
-        pdfParser.ParseAndExport([paths.PdfReportsDir]);
+        var pdfParser = new DoclingPDFParser(null, paths.ParsedReportsPath, paths.SubsetPath);
+        await pdfParser.ParseAndExportAsync(paths.PdfReportsDir);
         Console.WriteLine($"PDF reports parsed and saved to {paths.ParsedReportsPath}");
     }
 
-    public void ParsePdfReportsParallel(int chunkSize = 2, int maxWorkers = 10)
+    public async Task ParsePdfReportsParallel(int chunkSize = 2, int maxWorkers = 10)
     {
-        var pdfParser = new PDFParser(null, paths.ParsedReportsPath, paths.SubsetPath, paths.ParsedReportsDebugPath);
-        var inputDocPaths = Directory.GetFiles(paths.PdfReportsDir, "*.pdf").ToList();
-        pdfParser.ParseAndExportParallel(inputDocPaths, maxWorkers, chunkSize);
+        var pdfParser = new DoclingPDFParser(null, paths.ParsedReportsPath, paths.SubsetPath);
+        await pdfParser.ParseAndExportParallelAsync(paths.PdfReportsDir, maxWorkers, chunkSize);
         Console.WriteLine($"PDF reports parsed and saved to {paths.ParsedReportsPath}");
     }
 
@@ -187,12 +188,12 @@ public class Pipeline
         Console.WriteLine($"BM25 database created at {paths.Bm25DbPath}");
     }
 
-    public void ParsePdfReports(bool parallel = true, int chunkSize = 2, int maxWorkers = 10)
+    public async Task ParsePdfReports(bool parallel = true, int chunkSize = 2, int maxWorkers = 10)
     {
         if (parallel)
-            ParsePdfReportsParallel(chunkSize, maxWorkers);
+            await ParsePdfReportsParallel(chunkSize, maxWorkers);
         else
-            ParsePdfReportsSequential();
+            await ParsePdfReportsSequential();
     }
 
     public async Task ProcessParsedReports()
