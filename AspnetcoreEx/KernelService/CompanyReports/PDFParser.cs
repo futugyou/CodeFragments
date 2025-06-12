@@ -6,6 +6,7 @@ using CsvHelper.Configuration.Attributes;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tabula;
 using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 using Path = System.IO.Path;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
@@ -55,10 +56,11 @@ public class PDFParser
         return lookup;
     }
 
-    public void ParseAndExport(List<string> inputDocPaths)
+    public Task ParseAndExportAsync(string doclingDirPath, CancellationToken cancellationToken = default)
     {
         var startTime = DateTime.Now;
         Directory.CreateDirectory(_outputDir);
+        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json")?.ToList() ?? [];
 
         var convResults = ConvertDocuments(inputDocPaths);
         var (successCount, failureCount) = ProcessDocuments(convResults);
@@ -70,13 +72,14 @@ public class PDFParser
             throw new Exception($"Failed converting {failureCount} out of {inputDocPaths.Count} documents.");
         }
         _logger.LogInformation("Completed in {TotalSeconds} seconds. Successfully converted {successCount}/{Count} documents.", elapsed.TotalSeconds, successCount, inputDocPaths.Count);
+        return Task.CompletedTask;
     }
 
-    public void ParseAndExportParallel(List<string> inputDocPaths, int optimalWorkers = 10, int? chunkSize = null)
+    public Task ParseAndExportParallelAsync(string doclingDirPath, int optimalWorkers = 10, int? chunkSize = null, CancellationToken cancellationToken = default)
     {
         var startTime = DateTime.Now;
         Directory.CreateDirectory(_outputDir);
-
+        var inputDocPaths = Directory.GetFiles(doclingDirPath, "*.json")?.ToList() ?? [];
         int totalDocs = inputDocPaths.Count;
         if (chunkSize == null || chunkSize <= 0)
         {
@@ -124,6 +127,7 @@ public class PDFParser
             throw new Exception($"Failed converting {failureCount} out of {totalDocs} documents.");
         }
         _logger.LogInformation("Parallel processing completed in {TotalSeconds} seconds. Successfully converted {successCount}/{totalDocs} documents.", elapsed.TotalSeconds, successCount, totalDocs);
+        return Task.CompletedTask;
     }
 
     public IEnumerable<ConversionResult> ConvertDocuments(List<string> inputDocPaths)
@@ -163,23 +167,37 @@ public class PDFParser
         foreach (var page in pdf.GetPages())
         {
             var tables = GetPdfTables(page);
+            var images = GetPdfPictures(page);
+            var words = GetPdfWords(page);
             result.Document.Tables.AddRange(tables);
+            result.Document.Words.AddRange(words);
+            result.Document.Pictures.AddRange(images);
             result.Document.Pages.Add(page);
         }
         return result;
     }
 
-    private static IEnumerable<Tabula.Table> GetPdfTables(UglyToad.PdfPig.Content.Page page)
+    private static IEnumerable<(Page, IPdfImage)> GetPdfPictures(Page page)
+    {
+        return (page.GetImages() ?? []).Select(img => (page, img));
+    }
+
+    private static IEnumerable<(Page, Word)> GetPdfWords(Page page)
+    {
+        return (page.GetWords() ?? []).Select(word => (page, word));
+    }
+
+    private static IEnumerable<(Page, Tabula.Table)> GetPdfTables(Page page)
     {
         var tables = page.GetTablesLattice();
         if (tables.Any() && tables.First().Rows.Count > 0)
         {
-            return tables;
+            tables = page.GetTablesStream();
         }
 
-        return page.GetTablesStream();
+        return (tables ?? []).Select(t => (page, t));
     }
-    
+
     private (int successCount, int failureCount) ProcessDocuments(IEnumerable<ConversionResult> convResults)
     {
         int successCount = 0, failureCount = 0;
@@ -189,9 +207,7 @@ public class PDFParser
             {
                 successCount++;
                 var processor = new JsonReportProcessor(_debugDataPath, _metadataLookup);
-                var data = convRes.Document.ExportToDict();
-                var normalizedData = NormalizePageSequence(data);
-                var processedReport = processor.AssembleReport(convRes, normalizedData);
+                var processedReport = processor.AssembleReport(convRes);
                 var docFilename = Path.GetFileNameWithoutExtension(convRes.Input.File.Name);
                 if (!string.IsNullOrWhiteSpace(docFilename))
                 {
@@ -207,29 +223,6 @@ public class PDFParser
         }
         _logger.LogInformation("Processed {TotalCount} docs, of which {FailureCount} failed", successCount + failureCount, failureCount);
         return (successCount, failureCount);
-    }
-
-    private static Dictionary<string, object> NormalizePageSequence(Dictionary<string, object> data)
-    {
-        if (!data.TryGetValue("content", out object? value)) return data;
-        if (value is not List<Dictionary<string, object>> content) return data;
-
-        var existingPages = content.Select(p => Convert.ToInt32(p["page"])).ToHashSet();
-        int maxPage = existingPages.Max();
-        var newContent = new List<Dictionary<string, object>>();
-        for (int pageNum = 1; pageNum <= maxPage; pageNum++)
-        {
-            var page = content.FirstOrDefault(p => Convert.ToInt32(p["page"]) == pageNum);
-            page ??= new Dictionary<string, object>
-            {
-                ["page"] = pageNum,
-                ["content"] = new List<object>(),
-                ["page_dimensions"] = new Dictionary<string, object>()
-            };
-            newContent.Add(page);
-        }
-        data["content"] = newContent;
-        return data;
     }
 }
 
@@ -271,30 +264,8 @@ public class ConversionResult
 
 public class ParsedDocument
 {
-    public List<UglyToad.PdfPig.Content.Page> Pages { get; set; } = [];
-    public List<Tabula.Table> Tables { get; set; } = [];
-
-    public Dictionary<string, object> ExportToDict()
-    {
-        var result = new Dictionary<string, object>();
-        var contentList = new List<Dictionary<string, object>>();
-
-        foreach (var doc in Pages)
-        {
-            var pageData = new Dictionary<string, object>
-            {
-                ["page"] = doc.Number,
-                ["content"] = doc.Text,
-                ["page_dimensions"] = new Dictionary<string, object>
-                {
-                    ["width"] = doc.Width,
-                    ["height"] = doc.Height
-                }
-            };
-            contentList.Add(pageData);
-        }
-
-        result["content"] = contentList;
-        return result;
-    }
+    public List<Page> Pages { get; set; } = [];
+    public List<(Page, Tabula.Table)> Tables { get; set; } = [];
+    public List<(Page, IPdfImage)> Pictures { get; set; } = [];
+    public List<(Page, Word)> Words { get; set; } = [];
 }

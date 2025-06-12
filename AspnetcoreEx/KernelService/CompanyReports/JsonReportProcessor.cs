@@ -1,4 +1,6 @@
 
+using Path = System.IO.Path;
+
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
 public class JsonReportProcessor
@@ -11,47 +13,166 @@ public class JsonReportProcessor
         _metadataLookup = metadataLookup ?? [];
     }
 
-    public Dictionary<string, object> AssembleReport(ConversionResult convResult, Dictionary<string, object> normalizedData)
+    public PdfReport AssembleReport(ConversionResult data)
     {
-        var data = normalizedData ?? convResult.Document.ExportToDict();
-
-        var assembledReport = new Dictionary<string, object>
+        var pdfReport = new PdfReport
         {
-            ["metainfo"] = AssembleMetainfo(data),
-            ["content"] = AssembleContent(data),
-            ["tables"] = AssembleTables(convResult.Document.Tables, data),
-            ["pictures"] = AssemblePictures(data)
+            Metainfo = AssembleMetainfo(data),
+            Content = AssembleContent(data),
+            Tables = AssembleTables(data),
+            Pictures = AssemblePictures(data)
         };
 
-        DebugData(data);
-        return assembledReport;
+        DebugData(pdfReport);
+        return pdfReport;
     }
 
-    private object AssembleMetainfo(Dictionary<string, object> data)
+    private Metainfo AssembleMetainfo(ConversionResult data)
     {
-        // TODO: Implement actual metainfo assembling logic
-        return new { Placeholder = "Metainfo" };
+        var metainfo = new Metainfo();
+        var sha1Name = Path.GetFileNameWithoutExtension(data.Input.File.Name);
+        metainfo.Sha1Name = sha1Name;
+        metainfo.PagesAmount = data.Document.Pages?.Count ?? 0;
+        metainfo.TextBlocksAmount = 0;
+        metainfo.TablesAmount = data.Document.Tables?.Count ?? 0;
+        metainfo.PicturesAmount = data.Document.Pictures?.Count ?? 0;
+        metainfo.EquationsAmount = 0;
+        metainfo.FootnotesAmount = 0;
+
+        if (_metadataLookup?.TryGetValue(sha1Name, out var csvMeta) == true)
+        {
+            metainfo.CompanyName = csvMeta.CompanyName;
+        }
+        return metainfo;
     }
 
-    private object AssembleContent(Dictionary<string, object> data)
+    private static List<ReportContent> AssembleContent(ConversionResult data)
     {
-        // TODO: Implement actual content assembling logic
-        return new { Placeholder = "Content" };
+        List<ReportContent> result = [];
+        foreach (var (page, word) in data.Document.Words)
+        {
+            var con = new ReportContent
+            {
+                Page = page.Number,
+                Content = [new ReportContentItem
+                {
+                    Text = word.Text,
+                    Type =   "text"
+                }],
+                PageDimensions = new()
+                {
+                    B = word.BoundingBox.Bottom,
+                    L = word.BoundingBox.Left,
+                    R = word.BoundingBox.Right,
+                    T = word.BoundingBox.Top
+                }
+            };
+            result.Add(con);
+        }
+
+        var tableid = 1;
+        foreach (var (page, table) in data.Document.Tables)
+        {
+            var con = new ReportContent
+            {
+                Page = page.Number,
+                Content = [new ReportContentItem
+                {
+                    TableId = tableid,
+                    Type =   "table"
+                }],
+                PageDimensions = new()
+                {
+                    B = table.BoundingBox.Bottom,
+                    L = table.BoundingBox.Left,
+                    R = table.BoundingBox.Right,
+                    T = table.BoundingBox.Top
+                }
+            };
+            result.Add(con);
+            tableid++;
+        }
+
+        var pictureId = 1;
+        foreach (var (page, picture) in data.Document.Pictures)
+        {
+            var con = new ReportContent
+            {
+                Page = page.Number,
+                Content = [new ReportContentItem
+                {
+                    PictureId = pictureId,
+                    Type =   "picture"
+                }],
+                PageDimensions = new()
+                {
+                    B = picture.Bounds.Bottom,
+                    L = picture.Bounds.Left,
+                    R = picture.Bounds.Right,
+                    T = picture.Bounds.Top
+                }
+            };
+            result.Add(con);
+            pictureId++;
+        }
+        return result;
     }
 
-    private object AssembleTables(List<Tabula.Table> tables, Dictionary<string, object> data)
+    private static List<ReportTable> AssembleTables(ConversionResult data)
     {
-        // TODO: Implement actual table assembling logic
-        return new { Placeholder = "Tables", TableCount = tables?.Count ?? 0 };
-    }
+        List<ReportTable> result = [];
+        var tableid = 1;
+        foreach (var (page, table) in data.Document.Tables)
+        {
+            var con = new ReportTable
+            {
+                Page = page.Number,
+                TableId = tableid,
+                Bbox = new()
+                {
+                    B = table.BoundingBox.Bottom,
+                    L = table.BoundingBox.Left,
+                    R = table.BoundingBox.Right,
+                    T = table.BoundingBox.Top
+                },
+                Rows = table.Rows.Count,
+                Cols = table.Cells.Count,
+                Markdown = MarkdownBuilder.ToTable(table.TableGrid()),
+                Html = HtmlTagsExporter.ExportGridToHtml(table.TableGrid()),
+                Json = JsonSerializer.Serialize(table),
+            };
+            result.Add(con);
+            tableid++;
+        }
 
-    private object AssemblePictures(Dictionary<string, object> data)
+        return result;
+    }
+    private static List<ReportPicture> AssemblePictures(ConversionResult data)
     {
-        // TODO: Implement actual picture assembling logic
-        return new { Placeholder = "Pictures" };
+        var assembledPictures = new List<ReportPicture>();
+        var refNum = 1;
+        foreach (var (page, picture) in data.Document.Pictures)
+        {
+            var pictureObj = new ReportPicture
+            {
+                PictureId = refNum,
+                Page = page.Number,
+                Bbox = new ReportBbox
+                {
+                    B = picture.Bounds.Bottom,
+                    L = picture.Bounds.Left,
+                    R = picture.Bounds.Right,
+                    T = picture.Bounds.Top
+                },
+            };
+            assembledPictures.Add(pictureObj);
+            refNum++;
+        }
+
+        return assembledPictures;
     }
 
-    private void DebugData(Dictionary<string, object> data)
+    private void DebugData(PdfReport data)
     {
         if (_debugDataPath != null)
         {
@@ -62,4 +183,10 @@ public class JsonReportProcessor
             File.WriteAllText(_debugDataPath, json);
         }
     }
+
+}
+
+public static class TabulaTableExtensions
+{
+    public static List<List<string>> TableGrid(this Tabula.Table table) => [.. table.Rows.Select(row => row.Select(c => c.GetText()).ToList())];
 }
