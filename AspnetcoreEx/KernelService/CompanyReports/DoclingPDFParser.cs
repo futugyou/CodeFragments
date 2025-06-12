@@ -514,7 +514,7 @@ public class ReportContent
     [JsonPropertyName("content")]
     public List<ReportContentItem> Content { get; internal set; }
     [JsonPropertyName("page_dimensions")]
-    public DoclingBbox PageDimensions { get; internal set; }
+    public ReportBbox PageDimensions { get; internal set; }
 }
 
 public class ReportTable
@@ -547,6 +547,17 @@ public class ReportBbox
     public double R { get; set; }  // Right
     [JsonPropertyName("b")]
     public double B { get; set; }  // Bottom
+
+    public static implicit operator ReportBbox(DoclingBbox bbox)
+    {
+        return new ReportBbox
+        {
+            L = bbox.L,
+            T = bbox.T,
+            R = bbox.R,
+            B = bbox.B
+        };
+    }
 }
 
 public class ReportPicture
