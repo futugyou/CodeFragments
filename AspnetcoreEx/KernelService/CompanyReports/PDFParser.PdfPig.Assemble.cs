@@ -33,11 +33,11 @@ public class JsonReportProcessor
         var sha1Name = Path.GetFileNameWithoutExtension(data.Input.File.Name);
         metainfo.Sha1Name = sha1Name;
         metainfo.PagesAmount = data.Document.Pages?.Count ?? 0;
-        metainfo.TextBlocksAmount = 0;
+        metainfo.TextBlocksAmount = data.Document.TextBlocks?.Count ?? 0;
         metainfo.TablesAmount = data.Document.Tables?.Count ?? 0;
         metainfo.PicturesAmount = data.Document.Pictures?.Count ?? 0;
         metainfo.EquationsAmount = 0;
-        metainfo.FootnotesAmount = 0;
+        metainfo.FootnotesAmount = data.Document.HeaderFooters?.Count ?? 0;
 
         if (_metadataLookup?.TryGetValue(sha1Name, out var csvMeta) == true)
         {

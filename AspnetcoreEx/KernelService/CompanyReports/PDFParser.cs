@@ -116,6 +116,17 @@ public class ReportBbox
     [JsonPropertyName("b")]
     public double B { get; set; }  // Bottom
 
+    public static ReportBbox Union(ReportBbox a, ReportBbox b)
+    {
+        return new ReportBbox
+        {
+            L = Math.Min(a.L, b.L),
+            T = Math.Max(a.T, b.T),
+            R = Math.Max(a.R, b.R),
+            B = Math.Min(a.B, b.B)
+        };
+    }
+
     public static implicit operator ReportBbox(DoclingBbox bbox)
     {
         return new ReportBbox

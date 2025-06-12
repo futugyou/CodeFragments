@@ -139,11 +139,16 @@ public class PdfPigParser : IPDFParser
             var tables = GetPdfTables(page);
             var images = GetPdfPictures(page);
             var words = GetPdfWords(page);
+            var headerFooters = ExtractHeaderFooter(page);
             result.Document.Tables.AddRange(tables);
             result.Document.Words.AddRange(words);
             result.Document.Pictures.AddRange(images);
+            result.Document.HeaderFooters.AddRange(headerFooters);
             result.Document.Pages.Add(page);
         }
+
+        result.Document.TextBlocks = PdfTextBlockExtractor.ExtractTextBlocks(pdf.GetPages());
+
         return result;
     }
 
@@ -194,6 +199,23 @@ public class PdfPigParser : IPDFParser
         _logger.LogInformation("Processed {TotalCount} docs, of which {FailureCount} failed", successCount + failureCount, failureCount);
         return (successCount, failureCount);
     }
+
+    private static PageHeaderFooter ExtractHeaderFooter(Page page)
+    {
+        var height = page.Height;
+
+        var headerText = page.Letters
+            .Where(l => l.GlyphRectangle.Bottom > height - 50) // top 50 units
+            .Select(l => l.Value)
+            .Aggregate("", (a, b) => a + b);
+
+        var footerText = page.Letters
+            .Where(l => l.GlyphRectangle.Top < 50) // bottom 50 units
+            .Select(l => l.Value)
+            .Aggregate("", (a, b) => a + b);
+
+        return new PageHeaderFooter { PageNumber = page.Number, HeaderText = headerText, FooterText = footerText };
+    }
 }
 
 public enum ConversionStatus
@@ -219,6 +241,15 @@ public class ParsedDocument
 {
     public List<Page> Pages { get; set; } = [];
     public List<(Page, Tabula.Table)> Tables { get; set; } = [];
+    public List<PageHeaderFooter> HeaderFooters { get; set; } = [];
     public List<(Page, IPdfImage)> Pictures { get; set; } = [];
     public List<(Page, Word)> Words { get; set; } = [];
+    public List<TextBlock> TextBlocks { get; set; } = [];
+}
+
+public class PageHeaderFooter
+{
+    public int PageNumber { get; set; }
+    public string HeaderText { get; set; }
+    public string FooterText { get; set; }
 }
