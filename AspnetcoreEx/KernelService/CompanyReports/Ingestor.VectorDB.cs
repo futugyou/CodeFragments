@@ -1,14 +1,9 @@
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.Extensions.AI;
 using OpenAI;
+using Path = System.IO.Path;
 
 public class VectorDBIngestor : IIngestor
 {
@@ -33,25 +28,27 @@ public class VectorDBIngestor : IIngestor
         return embeddings;
     }
 
-    public async Task ProcessReportsAsync(string allReportsDir, string outputDir)
+    public async Task ProcessReportsAsync(string allReportsDir, string outputDir, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(outputDir);
         var allReportPaths = Directory.GetFiles(allReportsDir, "*.json");
 
         foreach (var reportPath in allReportPaths)
         {
-            using var f = File.OpenRead(reportPath);
-            var reportData = await JsonSerializer.DeserializeAsync<JsonElement>(f);
+            var reportData = JsonSerializer.Deserialize<ProcessedReport>(await File.ReadAllTextAsync(reportPath, cancellationToken));
+            if (reportData == null)
+            {
+                continue;
+            }
 
-            var chunks = reportData.GetProperty("content").GetProperty("chunks")
-                .EnumerateArray().Select(chunk => chunk.GetProperty("text").GetString() ?? "").Where(p => !string.IsNullOrEmpty(p)).ToList();
+            var chunks = (reportData.Content?.Chunks ?? []).Select(chunk => chunk.Text ?? "").Where(p => !string.IsNullOrEmpty(p)).ToList();
 
             var embeddings = await GetEmbeddingsAsync(chunks);
 
-            var sha1Name = reportData.GetProperty("metainfo").GetProperty("sha1_name").GetString();
+            var sha1Name = reportData.Metainfo.Sha1Name;
             var outputFile = Path.Combine(outputDir, $"{sha1Name}.vectors.json");
             var json = JsonSerializer.Serialize(embeddings);
-            await File.WriteAllTextAsync(outputFile, json);
+            await File.WriteAllTextAsync(outputFile, json, cancellationToken);
         }
 
         Console.WriteLine($"Processed {allReportPaths.Length} reports");

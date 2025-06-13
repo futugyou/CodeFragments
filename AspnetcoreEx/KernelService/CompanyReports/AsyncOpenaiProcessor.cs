@@ -1,16 +1,11 @@
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.AI;
 using OpenAI;
+using Path = System.IO.Path;
 
 public class AsyncOpenaiProcessor
 {

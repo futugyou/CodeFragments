@@ -1,7 +1,6 @@
 
 
 using Microsoft.Extensions.AI;
-using Microsoft.SemanticKernel.ChatCompletion;
 using OpenAI;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;

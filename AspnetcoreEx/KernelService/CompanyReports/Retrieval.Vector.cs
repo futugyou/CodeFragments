@@ -1,14 +1,10 @@
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 using OpenAI;
 using FaissMask;
 using System.Numerics.Tensors;
+using Path = System.IO.Path;
 
 public class VectorRetriever
 {

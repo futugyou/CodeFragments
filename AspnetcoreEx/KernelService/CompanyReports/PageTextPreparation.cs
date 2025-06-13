@@ -4,13 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using Path = System.IO.Path;
 
 /// <summary>
 /// Clean and format structured reports (JSON files), combine their contents (such as tables, lists, paragraphs, headers, etc.) into Markdown text according to rules,
