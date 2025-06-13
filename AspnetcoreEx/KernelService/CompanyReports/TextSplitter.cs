@@ -1,82 +1,83 @@
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 public class TextSplitter
 {
     private readonly ITokenCounter _tokenCounter = new SharpTokenCounter();
-    public JsonObject SplitReport(JsonObject fileContent, string? serializedTablesPath = null)
+    public async Task<ProcessedReport> SplitReportAsync(ProcessedReport fileContent, string? serializedTablesPath = null, CancellationToken cancellationToken = default)
     {
-        var chunks = new JsonArray();
+        List<ProcessedChunk> chunks = [];
         int chunkId = 0;
 
-        var tablesByPage = new Dictionary<int, List<JsonObject>>();
+        var tablesByPage = new Dictionary<int, List<ProcessedChunk>>();
         if (!string.IsNullOrEmpty(serializedTablesPath) && File.Exists(serializedTablesPath))
         {
-            var json = JsonNode.Parse(File.ReadAllText(serializedTablesPath))?.AsObject();
-            var tables = json?["tables"]?.AsArray() ?? new JsonArray();
-            tablesByPage = GetSerializedTablesByPage(tables);
+            var reportData = JsonSerializer.Deserialize<PdfReport>(await File.ReadAllTextAsync(serializedTablesPath, cancellationToken));
+            tablesByPage = GetSerializedTablesByPage(reportData?.Tables ?? []);
         }
 
-        foreach (var page in fileContent["content"]!["pages"]!.AsArray())
+        foreach (var page in fileContent.Content.Pages)
         {
-            int pageNumber = page!["page"]!.GetValue<int>();
-            var pageText = page!["text"]!.GetValue<string>();
+            int pageNumber = page.Page;
+            var pageText = page.Text;
             var pageChunks = SplitPage(pageText, pageNumber);
 
             foreach (var chunk in pageChunks)
             {
-                chunk["id"] = chunkId++;
-                chunk["type"] = "content";
+                chunk.Id = chunkId++;
+                chunk.Type = "content";
                 chunks.Add(chunk);
             }
 
-            if (tablesByPage.TryGetValue(pageNumber, out List<JsonObject>? value))
+            if (tablesByPage.TryGetValue(pageNumber, out List<ProcessedChunk>? value))
             {
                 foreach (var table in value)
                 {
-                    table["id"] = chunkId++;
-                    table["type"] = "serialized_table";
+                    table.Id = chunkId++;
+                    table.Type = "serialized_table";
                     chunks.Add(table);
                 }
             }
         }
 
-        fileContent["content"]!["chunks"] = chunks;
+        fileContent.Content.Chunks = chunks;
         return fileContent;
     }
 
-    private Dictionary<int, List<JsonObject>> GetSerializedTablesByPage(JsonArray tables)
+    private Dictionary<int, List<ProcessedChunk>> GetSerializedTablesByPage(List<ReportTable> tables)
     {
-        var result = new Dictionary<int, List<JsonObject>>();
-        foreach (var t in tables)
+        var result = new Dictionary<int, List<ProcessedChunk>>();
+        foreach (var table in tables)
         {
-            var table = t!.AsObject();
-            if (!table.ContainsKey("serialized")) continue;
+            if (string.IsNullOrEmpty(table.Serialized))
+            {
+                continue;
+            }
 
-            int page = table["page"]!.GetValue<int>();
-            var infoBlocks = table["serialized"]!["information_blocks"]!.AsArray();
-            var text = string.Join("\n", infoBlocks.Select(b => b!["information_block"]!.GetValue<string>()));
+
+            int page = table.Page;
+            var infoBlocks = JsonSerializer.Deserialize<TableBlocksCollection>(table.Serialized)?.InformationBlocks ?? [];
+            var text = string.Join("\n", infoBlocks.Select(b => b.InformationBlock));
 
             if (!result.ContainsKey(page))
                 result[page] = [];
 
-            result[page].Add(new JsonObject
+            result[page].Add(new ProcessedChunk
             {
-                ["page"] = page,
-                ["text"] = text,
-                ["table_id"] = table["table_id"]!.GetValue<string>(),
-                ["length_tokens"] = _tokenCounter.Count(text)
+                Page = page,
+                Text = text,
+                TableId = table.TableId,
+                LengthTokens = _tokenCounter.Count(text)
             });
         }
 
         return result;
     }
 
-    private List<JsonObject> SplitPage(string text, int page, int chunkSize = 300, int overlap = 50)
+    private List<ProcessedChunk> SplitPage(string text, int page, int chunkSize = 300, int overlap = 50)
     {
-        var chunks = new List<JsonObject>();
+        var chunks = new List<ProcessedChunk>();
         int pos = 0;
 
         while (pos < text.Length)
@@ -85,11 +86,12 @@ public class TextSplitter
             string chunkText = text.Substring(pos, len);
             int tokens = _tokenCounter.Count(chunkText);
 
-            chunks.Add(new JsonObject
+            chunks.Add(new ProcessedChunk
             {
-                ["page"] = page,
-                ["text"] = chunkText,
-                ["length_tokens"] = tokens
+                Page = page,
+                Text = chunkText,
+                LengthTokens = tokens,
+                TableId = -1
             });
 
             pos += chunkSize - overlap;
@@ -98,7 +100,7 @@ public class TextSplitter
         return chunks;
     }
 
-    public void SplitAllReports(string inputDir, string outputDir, string? serializedTableDir = null)
+    public async Task SplitAllReportsAsync(string inputDir, string outputDir, string? serializedTableDir = null, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(outputDir);
         var files = Directory.GetFiles(inputDir, "*.json");
@@ -110,9 +112,13 @@ public class TextSplitter
                 ? System.IO.Path.Combine(serializedTableDir, filename)
                 : null;
 
-            var content = JsonNode.Parse(File.ReadAllText(file))!.AsObject();
-            var updated = SplitReport(content, serializedPath);
-            File.WriteAllText(System.IO.Path.Combine(outputDir, filename), updated.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+            var content = JsonSerializer.Deserialize<ProcessedReport>(await File.ReadAllTextAsync(file, cancellationToken));
+            if (content == null)
+            {
+                continue;
+            }
+            var updated = await SplitReportAsync(content, serializedPath, cancellationToken);
+            File.WriteAllText(System.IO.Path.Combine(outputDir, filename), JsonSerializer.Serialize(updated));
         }
 
         Console.WriteLine($"Split {files.Length} files.");

@@ -166,11 +166,11 @@ public class Pipeline
         Console.WriteLine($"Reports saved to {paths.ReportsMarkdownPath}");
     }
 
-    public void ChunkReports(bool includeSerializedTables = false)
+    public async Task ChunkReports(bool includeSerializedTables = false)
     {
         var textSplitter = new TextSplitter();
         var serializedTablesDir = includeSerializedTables ? paths.ParsedReportsPath : null;
-        textSplitter.SplitAllReports(paths.MergedReportsPath, paths.DocumentsDir, serializedTablesDir);
+        await textSplitter.SplitAllReportsAsync(paths.MergedReportsPath, paths.DocumentsDir, serializedTablesDir);
         Console.WriteLine($"Chunked reports saved to {paths.DocumentsDir}");
     }
 
@@ -204,7 +204,7 @@ public class Pipeline
         Console.WriteLine("Step 2: Exporting reports to markdown...");
         await ExportReportsToMarkdown();
         Console.WriteLine("Step 3: Chunking reports...");
-        ChunkReports();
+        await ChunkReports();
         Console.WriteLine("Step 4: Creating vector databases...");
         await CreateVectorDbs();
         Console.WriteLine("Reports processing pipeline completed successfully!");

@@ -464,7 +464,7 @@ public class ProcessedReport
 public class ProcessedReportContent
 {
     [JsonPropertyName("chunks")]
-    public object Chunks { get; set; }
+    public List<ProcessedChunk> Chunks { get; set; }
     [JsonPropertyName("pages")]
     public List<ProcessedPageData> Pages { get; set; }
 }
@@ -477,3 +477,18 @@ public class ProcessedPageData
     public string Text { get; set; }
 }
 
+public class ProcessedChunk
+{
+    [JsonPropertyName("page")]
+    public int Page { get; set; }
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+    [JsonPropertyName("table_id")]
+    public int TableId { get; set; }
+    [JsonPropertyName("length_tokens")]
+    public int LengthTokens { get; set; }
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+}
