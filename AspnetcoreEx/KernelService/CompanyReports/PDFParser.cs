@@ -11,9 +11,9 @@ public interface IPDFParser
 {
     Task ParseAndExportAsync(string doclingDirPath, CancellationToken cancellationToken = default);
     Task ParseAndExportParallelAsync(string doclingDirPath, int optimalWorkers = 10, int? chunkSize = null, CancellationToken cancellationToken = default);
-    static Dictionary<string, Metadata> ParseCsvMetadata(string csvPath)
+    static Dictionary<string, CsvMetadata> ParseCsvMetadata(string csvPath)
     {
-        var lookup = new Dictionary<string, Metadata>();
+        var lookup = new Dictionary<string, CsvMetadata>();
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true,
@@ -25,7 +25,7 @@ public interface IPDFParser
         using var reader = new StreamReader(csvPath);
         using var csv = new CsvReader(reader, config);
 
-        foreach (var record in csv.GetRecords<Metadata>())
+        foreach (var record in csv.GetRecords<CsvMetadata>())
         {
             if (!string.IsNullOrWhiteSpace(record.Sha1))
             {
@@ -165,7 +165,27 @@ public class PdfReport
     public List<ReportPicture> Pictures { get; set; }
 }
 
-public class Metadata
+public class Metainfo
+{
+    [JsonPropertyName("sha1_name")]
+    public string Sha1Name { get; set; }
+    [JsonPropertyName("pages_amount")]
+    public int PagesAmount { get; set; }
+    [JsonPropertyName("text_blocks_amount")]
+    public int TextBlocksAmount { get; set; }
+    [JsonPropertyName("tables_amount")]
+    public int TablesAmount { get; set; }
+    [JsonPropertyName("pictures_amount")]
+    public int PicturesAmount { get; set; }
+    [JsonPropertyName("equations_amount")]
+    public int EquationsAmount { get; set; }
+    [JsonPropertyName("footnotes_amount")]
+    public int FootnotesAmount { get; set; }
+    [JsonPropertyName("company_name")]
+    public string CompanyName { get; set; }
+}
+
+public class CsvMetadata
 {
     [Name("sha1")]
     public string Sha1 { get; set; }

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Clean and format structured reports (JSON files), combine their contents (such as tables, lists, paragraphs, headers, etc.) into Markdown text according to rules,
@@ -26,7 +27,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
     public bool UseSerializedTables { get; } = useSerializedTables;
     public bool SerializedTablesInsteadOfMarkdown { get; } = serializedTablesInsteadOfMarkdown;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
-    private ReportData _reportData;
+    private PdfReport _reportData;
     private static readonly Dictionary<string, string> CommandMapping = new()
     {
         ["zero"] = "0",
@@ -59,7 +60,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
     private static readonly Regex _glyphRegex = GlyphRegex();
     private static readonly Regex _atoZRegex = AtoZRegex();
 
-    public List<ProcessedReport> ProcessReports(string reportsDir, List<string> reportsPaths, string outputDir = "")
+    public async Task<List<ProcessedReport>> ProcessReportsAsync(string reportsDir, List<string> reportsPaths, string outputDir = "", CancellationToken cancellationToken = default)
     {
         var allReports = new List<ProcessedReport>();
         if (!string.IsNullOrEmpty(reportsDir))
@@ -69,7 +70,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
 
         foreach (var reportPath in reportsPaths)
         {
-            var reportData = JsonSerializer.Deserialize<ReportData>(File.ReadAllText(reportPath));
+            var reportData = JsonSerializer.Deserialize<PdfReport>(await File.ReadAllTextAsync(reportPath, cancellationToken));
             if (reportData == null)
             {
                 continue;
@@ -92,10 +93,10 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return allReports;
     }
 
-    public ProcessedReportContent ProcessReport(ReportData reportData)
+    public ProcessedReportContent ProcessReport(PdfReport reportData)
     {
         _reportData = reportData;
-        var processedPages = new List<PageData>();
+        var processedPages = new List<ProcessedPageData>();
         int totalCorrections = 0;
         var correctionsList = new List<string>();
 
@@ -106,7 +107,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             (string cleanedText, int correctionsCount, List<string> corrections) = CleanText(pageText);
             totalCorrections += correctionsCount;
             correctionsList.AddRange(corrections);
-            processedPages.Add(new PageData
+            processedPages.Add(new ProcessedPageData
             {
                 Page = pageNumber,
                 Text = cleanedText
@@ -144,12 +145,12 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return string.Join("\n", finalBlocks);
     }
 
-    public void ExportToMarkdown(string reportsDir, string outputDir)
+    public async Task ExportToMarkdownAsync(string reportsDir, string outputDir, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(outputDir);
         foreach (var reportPath in Directory.GetFiles(reportsDir, "*.json"))
         {
-            var reportData = JsonSerializer.Deserialize<ReportData>(File.ReadAllText(reportPath));
+            var reportData = JsonSerializer.Deserialize<PdfReport>(await File.ReadAllTextAsync(reportPath, cancellationToken));
             if (reportData == null)
             {
                 continue;
@@ -164,19 +165,19 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             }
 
             var reportName = reportData.Metainfo.Sha1Name;
-            File.WriteAllText(Path.Combine(outputDir, $"{reportName}.md"), sb.ToString());
+            await File.WriteAllTextAsync(Path.Combine(outputDir, $"{reportName}.md"), sb.ToString(), cancellationToken);
         }
     }
 
     #region Private Methods
-    private PageContent? GetPageData(int pageNumber)
+    private ReportContent? GetPageData(int pageNumber)
     {
         return _reportData.Content.FirstOrDefault(p => p.Page == pageNumber);
     }
 
-    private static List<Block> FilterBlocks(List<Block> blocks)
+    private static List<ReportContentItem> FilterBlocks(List<ReportContentItem> blocks)
     {
-        var ignoredTypes = new HashSet<BlockType> { BlockType.PageFooter, BlockType.Picture };
+        var ignoredTypes = new HashSet<string> { "pagefooter", "picture" };
         return [.. blocks.Where(b => b != null && !string.IsNullOrWhiteSpace(b.Text) && !ignoredTypes.Contains(b.Type))];
     }
 
@@ -224,18 +225,18 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return (text, occurrencesAmount, corrections);
     }
 
-    private static bool BlockEndsWithColon(Block block)
+    private static bool BlockEndsWithColon(ReportContentItem block)
     {
         return block.Text != null && block.Text.Trim().EndsWith(':');
     }
 
-    private List<string> ApplyFormattingRules(List<Block> blocks)
+    private List<string> ApplyFormattingRules(List<ReportContentItem> blocks)
     {
         var finalBlocks = new List<string>();
         bool pageHeaderInFirst3 = false;
         for (int j = 0; j < Math.Min(3, blocks.Count); j++)
         {
-            if (blocks[j].Type == BlockType.PageHeader) pageHeaderInFirst3 = true;
+            if (blocks[j].Type == "pageheader") pageHeaderInFirst3 = true;
         }
 
         int firstSectionHeaderIndex = 0;
@@ -247,14 +248,14 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             var blockType = block.Type;
             var text = block.Text?.Trim() ?? string.Empty;
             // Handle headers
-            if (blockType == BlockType.PageHeader)
+            if (blockType == "pageheader")
             {
                 var prefix = i < 3 ? "\n# " : "\n## ";
                 finalBlocks.Add($"{prefix}{text}\n");
                 i++;
                 continue;
             }
-            if (blockType == BlockType.SectionHeader)
+            if (blockType == "sectionheader")
             {
                 firstSectionHeaderIndex++;
                 string prefix = (firstSectionHeaderIndex == 1 && i < 3 && !pageHeaderInFirst3) ? "\n# " : "\n## ";
@@ -262,12 +263,12 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                 i++;
                 continue;
             }
-            if (blockType == BlockType.Paragraph)
+            if (blockType == "paragraph")
             {
                 if (BlockEndsWithColon(block) && i + 1 < n)
                 {
                     var nextBlockType = blocks[i + 1].Type;
-                    if (nextBlockType != BlockType.Table && nextBlockType != BlockType.ListItem)
+                    if (nextBlockType != "table" && nextBlockType != "listitem")
                     {
                         finalBlocks.Add($"\n### {text}\n");
                         i++;
@@ -279,11 +280,11 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                 continue;
             }
             // Handle table groups
-            if (blockType == BlockType.Table ||
-                (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == BlockType.Table))
+            if (blockType == "table" ||
+                (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == "table"))
             {
-                var groupBlocks = new List<Block>();
-                Block? headerForTable;
+                var groupBlocks = new List<ReportContentItem>();
+                ReportContentItem? headerForTable;
                 if (BlockEndsWithColon(block) && i + 1 < n)
                 {
                     headerForTable = block;
@@ -298,15 +299,15 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                     i++;
                 }
                 // Process subsequent text/footnote
-                if (i < n && blocks[i].Type == BlockType.Text)
+                if (i < n && blocks[i].Type == "text")
                 {
-                    if ((i + 1 < n) && blocks[i + 1].Type == BlockType.Footnote)
+                    if ((i + 1 < n) && blocks[i + 1].Type == "footnote")
                     {
                         groupBlocks.Add(blocks[i]);
                         i++;
                     }
                 }
-                while (i < n && blocks[i].Type == BlockType.Footnote)
+                while (i < n && blocks[i].Type == "footnote")
                 {
                     groupBlocks.Add(blocks[i]);
                     i++;
@@ -316,29 +317,29 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                 continue;
             }
             // Handle list groups
-            if (blockType == BlockType.ListItem ||
-                (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == BlockType.ListItem))
+            if (blockType == "listtime" ||
+                (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == "listtime"))
             {
-                var groupBlocks = new List<Block>();
+                var groupBlocks = new List<ReportContentItem>();
                 if (BlockEndsWithColon(block) && i + 1 < n)
                 {
                     groupBlocks.Add(block);
                     i++;
                 }
-                while (i < n && blocks[i].Type == BlockType.ListItem)
+                while (i < n && blocks[i].Type == "listtime")
                 {
                     groupBlocks.Add(blocks[i]);
                     i++;
                 }
-                if (i < n && blocks[i].Type == BlockType.Text)
+                if (i < n && blocks[i].Type == "text")
                 {
-                    if ((i + 1 < n) && blocks[i + 1].Type == BlockType.Footnote)
+                    if ((i + 1 < n) && blocks[i + 1].Type == "footnote")
                     {
                         groupBlocks.Add(blocks[i]);
                         i++;
                     }
                 }
-                while (i < n && blocks[i].Type == BlockType.Footnote)
+                while (i < n && blocks[i].Type == "footnote")
                 {
                     groupBlocks.Add(blocks[i]);
                     i++;
@@ -348,8 +349,8 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                 continue;
             }
             // Handle normal blocks
-            if (blockType == BlockType.Text || blockType == BlockType.Caption || blockType == BlockType.Footnote ||
-                blockType == BlockType.CheckboxSelected || blockType == BlockType.CheckboxUnselected || blockType == BlockType.Formula)
+            if (blockType == "text" || blockType == "caption" || blockType == "footnote" ||
+                blockType == "checkboxselected" || blockType == "checkboxunselected" || blockType == "formula")
             {
                 if (string.IsNullOrWhiteSpace(text))
                 {
@@ -365,7 +366,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return finalBlocks;
     }
 
-    private string RenderTableGroup(List<Block> groupBlocks)
+    private string RenderTableGroup(List<ReportContentItem> groupBlocks)
     {
         var sb = new StringBuilder();
         sb.AppendLine();
@@ -373,17 +374,17 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         {
             switch (blk.Type)
             {
-                case BlockType.Text:
-                case BlockType.Caption:
-                case BlockType.SectionHeader:
-                case BlockType.Paragraph:
+                case "text":
+                case "caption":
+                case "sectionheader":
+                case "paragraph":
                     sb.AppendLine(blk.Text);
                     break;
-                case BlockType.Table:
-                    if (blk.TableId == null) continue;
-                    sb.AppendLine(GetTableById(blk.TableId.Value));
+                case "table":
+                    if (blk.TableId <= 0) continue;
+                    sb.AppendLine(GetTableById(blk.TableId));
                     break;
-                case BlockType.Footnote:
+                case "footnote":
                     sb.AppendLine(blk.Text);
                     break;
                 default:
@@ -394,7 +395,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return sb.ToString();
     }
 
-    private static string RenderListGroup(List<Block> groupBlocks)
+    private static string RenderListGroup(List<ReportContentItem> groupBlocks)
     {
         var sb = new StringBuilder();
         sb.AppendLine();
@@ -402,16 +403,16 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         {
             switch (blk.Type)
             {
-                case BlockType.Text:
-                case BlockType.Caption:
-                case BlockType.SectionHeader:
-                case BlockType.Paragraph:
+                case "text":
+                case "caption":
+                case "sectionheader":
+                case "paragraph":
                     sb.AppendLine(blk.Text);
                     break;
-                case BlockType.ListItem:
+                case "listitem":
                     sb.AppendLine("- " + (blk.Text?.Trim() ?? string.Empty));
                     break;
-                case BlockType.Footnote:
+                case "footnote":
                     sb.AppendLine(blk.Text);
                     break;
                 default:
@@ -431,13 +432,13 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return table.Markdown ?? string.Empty;
     }
 
-    private static string GetSerializedTableText(Table table, bool serializedTablesInsteadOfMarkdown)
+    private static string GetSerializedTableText(ReportTable table, bool serializedTablesInsteadOfMarkdown)
     {
         if (table.Serialized == null)
             return table.Markdown ?? string.Empty;
 
-        var infoBlocks = table.Serialized.InformationBlocks ?? [];
-        var serializedText = string.Join("\n", infoBlocks.Select(b => b.InformationBlockText));
+        var infoBlocks = JsonSerializer.Deserialize<TableBlocksCollection>(table.Serialized)?.InformationBlocks ?? [];
+        var serializedText = string.Join("\n", infoBlocks.Select(b => b.InformationBlock));
         if (serializedTablesInsteadOfMarkdown)
             return serializedText;
         else
@@ -452,87 +453,27 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
 
 }
 
-public class ReportData
-{
-    public Metainfo Metainfo { get; set; }
-    public List<PageContent> Content { get; set; }
-    public List<Table> Tables { get; set; }
-}
-
-public class Metainfo
-{
-    public string Sha1Name { get; set; }
-    public int PagesAmount { get; set; }
-    public int TextBlocksAmount { get; set; }
-    public int TablesAmount { get; set; }
-    public int PicturesAmount { get; set; }
-    public int EquationsAmount { get; set; }
-    public int FootnotesAmount { get; set; }
-    public string CompanyName { get; set; }
-}
-
-public class PageContent
-{
-    public int Page { get; set; }
-    public List<Block> Content { get; set; }
-}
-
-public class Block
-{
-    public BlockType Type { get; set; }
-    public string Text { get; set; }
-    public int? TableId { get; set; }
-}
-
-public enum BlockType
-{
-    PageHeader,
-    SectionHeader,
-    Paragraph,
-    Table,
-    ListItem,
-    Text,
-    Caption,
-    Footnote,
-    CheckboxSelected,
-    CheckboxUnselected,
-    Formula,
-    PageFooter,
-    Picture,
-}
-
-public class Table
-{
-    public int TableId { get; set; }
-    public string Markdown { get; set; }
-    public TableSerialized Serialized { get; set; }
-}
-
-public class TableSerialized
-{
-    public List<InformationBlock> InformationBlocks { get; set; }
-}
-
-public class InformationBlock
-{
-    public string InformationBlockText { get; set; }
-}
-
 public class ProcessedReport
 {
+    [JsonPropertyName("metainfo")]
     public Metainfo Metainfo { get; set; }
+    [JsonPropertyName("content")]
     public ProcessedReportContent Content { get; set; }
 }
 
 public class ProcessedReportContent
 {
+    [JsonPropertyName("chunks")]
     public object Chunks { get; set; }
-    public List<PageData> Pages { get; set; }
+    [JsonPropertyName("pages")]
+    public List<ProcessedPageData> Pages { get; set; }
 }
 
-public class PageData
+public class ProcessedPageData
 {
+    [JsonPropertyName("page")]
     public int Page { get; set; }
+    [JsonPropertyName("text")]
     public string Text { get; set; }
 }
 

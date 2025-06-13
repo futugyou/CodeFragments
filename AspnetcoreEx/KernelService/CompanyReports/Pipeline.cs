@@ -152,17 +152,17 @@ public class Pipeline
         // serializer.ProcessDirectoryParallel(paths.ParsedReportsPath, maxWorkers);
     }
 
-    public void MergeReports()
+    public async Task MergeReports()
     {
         var ptp = new PageTextPreparation(runConfig.UseSerializedTables);
-        ptp.ProcessReports(reportsDir: paths.ParsedReportsPath, [], outputDir: paths.MergedReportsPath);
+        await ptp.ProcessReportsAsync(reportsDir: paths.ParsedReportsPath, [], outputDir: paths.MergedReportsPath);
         Console.WriteLine($"Reports saved to {paths.MergedReportsPath}");
     }
 
-    public void ExportReportsToMarkdown()
+    public async Task ExportReportsToMarkdown()
     {
         var ptp = new PageTextPreparation(runConfig.UseSerializedTables);
-        ptp.ExportToMarkdown(paths.ParsedReportsPath, paths.ReportsMarkdownPath);
+        await ptp.ExportToMarkdownAsync(paths.ParsedReportsPath, paths.ReportsMarkdownPath);
         Console.WriteLine($"Reports saved to {paths.ReportsMarkdownPath}");
     }
 
@@ -200,9 +200,9 @@ public class Pipeline
     {
         Console.WriteLine("Starting reports processing pipeline...");
         Console.WriteLine("Step 1: Merging reports...");
-        MergeReports();
+        await MergeReports();
         Console.WriteLine("Step 2: Exporting reports to markdown...");
-        ExportReportsToMarkdown();
+        await ExportReportsToMarkdown();
         Console.WriteLine("Step 3: Chunking reports...");
         ChunkReports();
         Console.WriteLine("Step 4: Creating vector databases...");

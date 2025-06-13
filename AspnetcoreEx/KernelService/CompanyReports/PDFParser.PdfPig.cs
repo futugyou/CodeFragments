@@ -14,7 +14,7 @@ public class PdfPigParser : IPDFParser
 {
     private readonly ILogger<PdfPigParser> _logger;
     private readonly string _outputDir;
-    private readonly Dictionary<string, Metadata> _metadataLookup;
+    private readonly Dictionary<string, CsvMetadata> _metadataLookup;
     private readonly string? _debugDataPath;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
 

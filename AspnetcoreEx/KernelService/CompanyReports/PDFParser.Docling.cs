@@ -17,7 +17,7 @@ public class DoclingPDFParser : IPDFParser
 {
     private readonly ILogger<DoclingPDFParser> _logger;
     private readonly string _outputDir;
-    private readonly Dictionary<string, Metadata> _metadataLookup;
+    private readonly Dictionary<string, CsvMetadata> _metadataLookup;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { WriteIndented = true };
 
     public DoclingPDFParser(ILogger<DoclingPDFParser>? logger, string outputDir, string? csvMetadataPath = null)
