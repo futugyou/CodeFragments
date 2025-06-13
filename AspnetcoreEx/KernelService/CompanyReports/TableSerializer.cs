@@ -106,7 +106,10 @@ public class TableSerializer
             var query = "";
             if (!string.IsNullOrEmpty(contextBefore))
                 query += $"Here is additional text before the table that might be relevant (or not):\n\"\"\"{contextBefore}\"\"\"\n\n";
-            query += $"Here is a table in HTML format:\n\"\"\"{tableContent}\"\"\"";
+
+            if (!string.IsNullOrEmpty(tableContent))
+                query += $"Here is a table in HTML format:\n\"\"\"{tableContent}\"\"\"";
+
             if (!string.IsNullOrEmpty(contextAfter))
                 query += $"\n\nHere is additional text after the table that might be relevant (or not):\n\"\"\"{contextAfter}\"\"\"";
 
@@ -148,10 +151,96 @@ public class TableSerializer
         return tables.FirstOrDefault(p => p.TableId.ToString() == tableId);
     }
 
-    //
-    private static (string contextBefore, string contextAfter) GetTableContext(PdfReport jsonReport, string tableIndex)
+    private static (string ContextBefore, string ContextAfter) GetTableContext(PdfReport jsonReport, string targetTableIndex)
     {
-        // TODO
-        return ("", "");
+        var tableInfo = FindTableById(jsonReport.Tables, targetTableIndex);
+        if (tableInfo == null)
+        {
+            return ("", "");
+        }
+
+        int pageNum = tableInfo.Page;
+
+        var page = jsonReport.Content.FirstOrDefault(p => p.Page == pageNum);
+        var pageContent = page?.Content ?? [];
+
+        if (page == null || pageContent.Count == 0)
+        {
+            return ("", "");
+        }
+
+        int currentTablePosition = -1;
+        for (int i = 0; i < pageContent.Count; i++)
+        {
+            var block = pageContent[i];
+            if (block.Type == "table" && block.TableId.ToString() == targetTableIndex)
+            {
+                currentTablePosition = i;
+                break;
+            }
+        }
+
+        int previousTablePosition = -1;
+        for (int i = currentTablePosition - 1; i >= 0; i--)
+        {
+            if (pageContent[i].Type == "table")
+            {
+                previousTablePosition = i;
+                break;
+            }
+        }
+
+        int nextTablePosition = -1;
+        for (int i = currentTablePosition + 1; i < pageContent.Count; i++)
+        {
+            if (pageContent[i].Type == "table")
+            {
+                nextTablePosition = i;
+                break;
+            }
+        }
+
+        // Get the text block above the current table
+        int startPosition = previousTablePosition != -1 ? previousTablePosition + 1 : 0;
+        var contextBeforeBlocks = pageContent
+            .Skip(startPosition)
+            .Take(currentTablePosition - startPosition)
+            .Where(b => !string.IsNullOrEmpty(b.Text))
+            .Select(b => b.Text);
+
+        // Get the text block below the current table
+        List<ReportContentItem> contextAfterBlocks = [];
+        if (nextTablePosition == -1)
+        {
+            contextAfterBlocks = [.. pageContent
+                .Skip(currentTablePosition + 1)
+                .Take(3)];
+        }
+        else
+        {
+            int blocksBetween = nextTablePosition - (currentTablePosition + 1);
+            if (blocksBetween > 3)
+            {
+                contextAfterBlocks = [.. pageContent
+                    .Skip(currentTablePosition + 1)
+                    .Take(3)];
+            }
+            else if (blocksBetween > 1)
+            {
+                contextAfterBlocks = [.. pageContent
+                    .Skip(currentTablePosition + 1)
+                    .Take(blocksBetween)];
+            }
+        }
+
+        var contextAfter = contextAfterBlocks
+            .Where(b => !string.IsNullOrEmpty(b.Text))
+            .Select(b => b.Text);
+
+        return (
+            string.Join("\n", contextBeforeBlocks),
+            string.Join("\n", contextAfter)
+        );
     }
+
 }
