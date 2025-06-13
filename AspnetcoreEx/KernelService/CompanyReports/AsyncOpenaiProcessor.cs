@@ -2,6 +2,7 @@
 namespace AspnetcoreEx.KernelService.CompanyReports;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -49,7 +50,6 @@ public class AsyncOpenaiProcessor
         Type responseFormat,
         bool preserveRequests,
         bool preserveResults,
-        int loggingLevel,
         string requestsFilepath,
         string saveFilepath,
         CancellationToken cancellationToken)
@@ -79,74 +79,79 @@ public class AsyncOpenaiProcessor
         saveFilepath = GetUniqueFilePath(saveFilepath);
 
         // 3. Write requests to JSONL file
-        await File.WriteAllLinesAsync(requestsFilepath, jsonlRequests.ConvertAll<string>(x => JsonSerializer.Serialize(x)), cancellationToken);
+        await File.WriteAllLinesAsync(requestsFilepath, jsonlRequests.ConvertAll(x => JsonSerializer.Serialize(x)), cancellationToken);
 
         // 4. Process API requests
-        var results = new List<(int index, object question, object answer)>();
+        var results = new ConcurrentBag<(int index, object question, object answer)>();
         var client = _client.GetChatClient(model ?? DefaultModel).AsIChatClient();
 
-        for (int i = 0; i < jsonlRequests.Count; i++)
+        var parallelOptions = new ParallelOptions
         {
-            var req = jsonlRequests[i];
-            var messages = new[]
+            MaxDegreeOfParallelism = Environment.ProcessorCount,
+            CancellationToken = cancellationToken
+        };
+
+        await Parallel.ForEachAsync(
+            Enumerable.Range(0, jsonlRequests.Count),
+            parallelOptions,
+            async (i, ct) =>
             {
-                new ChatMessage(ChatRole.System, systemContent),
-                new ChatMessage(ChatRole.User, queries[i])
-            };
-            var options = new ChatOptions
-            {
-                Temperature = temperature,
-                // Seed = null,
-                // ResponseFormat = responseFormat?.Name
-            };
-            try
-            {
-                var content = await client.GetResponseAsync(messages, options, cancellationToken: cancellationToken);
-                string answerContent = content?.Text ?? "";
-                object answerObj;
+                var req = jsonlRequests[i];
+                var messages = new[]
+                {
+                    new ChatMessage(ChatRole.System, systemContent),
+                    new ChatMessage(ChatRole.User, queries[i])
+                };
+                var options = new ChatOptions
+                {
+                    Temperature = temperature,
+                    ResponseFormat = ChatResponseFormat.Json,
+                };
                 try
                 {
-                    answerObj = JsonSerializer.Deserialize(answerContent, responseFormat!) ?? throw new OperationException("data can not be deserialize");
+                    var content = await client.GetResponseAsync(messages, options, cancellationToken: ct);
+                    string answerContent = content?.Text ?? "";
+                    object answerObj;
+                    try
+                    {
+                        answerObj = JsonSerializer.Deserialize(answerContent, responseFormat!) ?? throw new OperationException("data can not be deserialize");
+                    }
+                    catch
+                    {
+                        answerObj = answerContent;
+                    }
+                    results.Add((i, messages, answerObj));
                 }
-                catch
+                catch (Exception ex)
                 {
-                    answerObj = answerContent;
+                    results.Add((i, messages, $"[ERROR] {ex.Message}"));
                 }
-                results.Add((i, messages, answerObj));
             }
-            catch (Exception ex)
-            {
-                results.Add((i, messages, $"[ERROR] {ex.Message}"));
-            }
-        }
+        );
 
         // 5. Write result file
-        using (var sw = new StreamWriter(saveFilepath))
+        string line;
+        using var sw = new StreamWriter(saveFilepath);
+        foreach (var (index, question, answer) in results)
         {
-            foreach (var r in results)
-            {
-                var line = JsonSerializer.Serialize(new object[] { r.question, r.answer, new { original_index = r.index } });
-                await sw.WriteLineAsync(line);
-            }
+            line = JsonSerializer.Serialize(new object[] { question, answer, new { original_index = index } });
+            await sw.WriteLineAsync(line);
         }
 
         // 6. Read and sort the results
         var validatedDataList = new Dictionary<int, dynamic>();
-        using (var sr = new StreamReader(saveFilepath))
+        using var sr = new StreamReader(saveFilepath);
+        while ((line = await sr.ReadLineAsync(cancellationToken) ?? "") != "")
         {
-            string? line;
-            while ((line = await sr.ReadLineAsync(cancellationToken)) != null)
+            try
             {
-                try
-                {
-                    var arr = JsonSerializer.Deserialize<JsonElement[]>(line);
-                    var idx = arr[2].GetProperty("original_index").GetInt32();
-                    var answer = arr[1];
-                    validatedDataList[idx] = answer;
-                }
-                catch
-                {
-                }
+                var arr = JsonSerializer.Deserialize<JsonElement[]>(line) ?? [];
+                var idx = arr[2].GetProperty("original_index").GetInt32();
+                var answer = arr[1];
+                validatedDataList[idx] = answer;
+            }
+            catch
+            {
             }
         }
 

@@ -125,7 +125,6 @@ public class TableSerializer
             responseFormat: typeof(TableBlocksCollection),
             preserveRequests: false,
             preserveResults: false,
-            loggingLevel: 20,
             requestsFilepath: requestsFilepath,
             saveFilepath: resultsFilepath,
             cancellationToken: cancellationToken
@@ -151,6 +150,18 @@ public class TableSerializer
         return tables.FirstOrDefault(p => p.TableId.ToString() == tableId);
     }
 
+    // | page | type     | conent |
+    // | -- | --------- | -- |
+    // | 1  | paragraph | A  |
+    // | 1  | paragraph | B  |
+    // | 1  | table     | table1 |
+    // | 1  | paragraph | C  |
+    // | 1  | table     | table2 |
+    // | 1  | paragraph | D  |
+    // | 1  | paragraph | E  |
+    // If you search for table_id = table1, this code will return:
+    // context_before: "A\nB"
+    // context_after: "C"
     private static (string ContextBefore, string ContextAfter) GetTableContext(PdfReport jsonReport, string targetTableIndex)
     {
         var tableInfo = FindTableById(jsonReport.Tables, targetTableIndex);
