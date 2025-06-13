@@ -117,12 +117,11 @@ public class TableSerializer
         }
 
         // Call OpenAI 
-        var results = await openaiProcessor.ProcessStructuredOutputsRequestsAsync(
+        var results = await openaiProcessor.ProcessStructuredOutputsRequestsAsync<TableBlocksCollection>(
             model: "gpt-4o-mini-2024-07-18",
             temperature: 0,
             systemContent: TableSerialization.SystemPrompt,
             queries: queries,
-            responseFormat: typeof(TableBlocksCollection),
             preserveRequests: false,
             preserveResults: false,
             requestsFilepath: requestsFilepath,
@@ -138,7 +137,18 @@ public class TableSerializer
 
             if (tableInfo != null)
             {
-                tableInfo.Serialized = result.Answer;
+                if (!string.IsNullOrEmpty(result.Error))
+                {
+                    tableInfo.Serialized = result.Error;
+                }
+                else if (result.Answer != null)
+                {
+                    tableInfo.Serialized = JsonSerializer.Serialize(result.Answer);
+                }
+                else
+                {
+                    tableInfo.Serialized = result.AnswerRaw;
+                }
             }
         }
 

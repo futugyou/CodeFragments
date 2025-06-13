@@ -6,12 +6,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.AI;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
 using OpenAI;
 
 public class AsyncOpenaiProcessor
@@ -42,12 +40,11 @@ public class AsyncOpenaiProcessor
         return newPath;
     }
 
-    public async Task<Dictionary<int, dynamic>> ProcessStructuredOutputsRequestsAsync(
+    public async Task<List<StructuredResult<T>>> ProcessStructuredOutputsRequestsAsync<T>(
         string model,
         int temperature,
         string systemContent,
         List<string> queries,
-        Type responseFormat,
         bool preserveRequests,
         bool preserveResults,
         string requestsFilepath,
@@ -62,13 +59,11 @@ public class AsyncOpenaiProcessor
             {
                 model,
                 temperature,
-                seed = (int?)null,
                 messages = new[]
                 {
                     new { role = "system", content = systemContent },
                     new { role = "user", content = queries[idx] }
                 },
-                response_format = responseFormat?.Name,
                 metadata = new { original_index = idx }
             };
             jsonlRequests.Add(request);
@@ -82,7 +77,7 @@ public class AsyncOpenaiProcessor
         await File.WriteAllLinesAsync(requestsFilepath, jsonlRequests.ConvertAll(x => JsonSerializer.Serialize(x)), cancellationToken);
 
         // 4. Process API requests
-        var results = new ConcurrentBag<(int index, object question, object answer)>();
+        var results = new ConcurrentBag<StructuredResult<T>>();
         var client = _client.GetChatClient(model ?? DefaultModel).AsIChatClient();
 
         var parallelOptions = new ParallelOptions
@@ -111,20 +106,19 @@ public class AsyncOpenaiProcessor
                 {
                     var content = await client.GetResponseAsync(messages, options, cancellationToken: ct);
                     string answerContent = content?.Text ?? "";
-                    object answerObj;
+                    T? answerObj = default;
                     try
                     {
-                        answerObj = JsonSerializer.Deserialize(answerContent, responseFormat!) ?? throw new OperationException("data can not be deserialize");
+                        answerObj = JsonSerializer.Deserialize<T>(answerContent);
                     }
                     catch
                     {
-                        answerObj = answerContent;
                     }
-                    results.Add((i, messages, answerObj));
+                    results.Add(new() { Index = i, ChatMessages = messages, Answer = answerObj, AnswerRaw = answerContent });
                 }
                 catch (Exception ex)
                 {
-                    results.Add((i, messages, $"[ERROR] {ex.Message}"));
+                    results.Add(new() { Index = i, ChatMessages = messages, Error = $"[ERROR] {ex.Message}" });
                 }
             }
         );
@@ -132,23 +126,24 @@ public class AsyncOpenaiProcessor
         // 5. Write result file
         string line;
         using var sw = new StreamWriter(saveFilepath);
-        foreach (var (index, question, answer) in results)
+        foreach (var item in results)
         {
-            line = JsonSerializer.Serialize(new object[] { question, answer, new { original_index = index } });
+            line = JsonSerializer.Serialize(item);
             await sw.WriteLineAsync(line);
         }
 
         // 6. Read and sort the results
-        var validatedDataList = new Dictionary<int, dynamic>();
+        List<StructuredResult<T>> validatedDataList = [];
         using var sr = new StreamReader(saveFilepath);
         while ((line = await sr.ReadLineAsync(cancellationToken) ?? "") != "")
         {
             try
             {
-                var arr = JsonSerializer.Deserialize<JsonElement[]>(line) ?? [];
-                var idx = arr[2].GetProperty("original_index").GetInt32();
-                var answer = arr[1];
-                validatedDataList[idx] = answer;
+                var arr = JsonSerializer.Deserialize<StructuredResult<T>>(line);
+                if (arr != null)
+                {
+                    validatedDataList.Add(arr);
+                }
             }
             catch
             {
@@ -163,4 +158,18 @@ public class AsyncOpenaiProcessor
 
         return validatedDataList;
     }
+}
+
+public class StructuredResult<T>
+{
+    [JsonPropertyName("original_index")]
+    public int Index { get; set; }
+    [JsonPropertyName("question")]
+    public ChatMessage[] ChatMessages { get; set; }
+    [JsonPropertyName("answer_content")]
+    public string AnswerRaw { get; set; } = "";
+    [JsonPropertyName("answer")]
+    public T? Answer { get; set; }
+    [JsonPropertyName("error")]
+    public string Error { get; set; } = "";
 }
