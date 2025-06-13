@@ -103,6 +103,8 @@ public class ReportTable
     public string Html { get; set; }
     [JsonPropertyName("json")]
     public string Json { get; set; }
+    [JsonPropertyName("serialized")]
+    public string Serialized { get; set; }
 }
 
 public class ReportBbox
