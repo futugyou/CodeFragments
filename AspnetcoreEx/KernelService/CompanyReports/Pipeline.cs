@@ -148,8 +148,8 @@ public class Pipeline
 
     public void SerializeTables(int maxWorkers = 10)
     {
-        var serializer = new TableSerializer();
-        serializer.ProcessDirectoryParallel(paths.ParsedReportsPath, maxWorkers);
+        // var serializer = new TableSerializer();
+        // serializer.ProcessDirectoryParallel(paths.ParsedReportsPath, maxWorkers);
     }
 
     public void MergeReports()
