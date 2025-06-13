@@ -28,6 +28,12 @@ public static class Prompts
 
         return instruction.Trim() + schema + example;
     }
+
+    public static string BuildSystemPrompt<T>(string instruction = "", string example = "")
+    {
+        var pydanticSchema = DefaultJsonOptions.GetJsonSchemaAsNode(typeof(T)).ToString();
+        return BuildSystemPrompt(instruction, example, pydanticSchema);
+    }
 }
 
 public static class RephrasedQuestionsPrompt

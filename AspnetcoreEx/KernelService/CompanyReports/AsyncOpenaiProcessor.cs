@@ -61,7 +61,7 @@ public class AsyncOpenaiProcessor
                 temperature,
                 messages = new[]
                 {
-                    new { role = "system", content = systemContent },
+                    new { role = "system", content = Prompts.BuildSystemPrompt<T> (systemContent) },
                     new { role = "user", content = queries[idx] }
                 },
                 metadata = new { original_index = idx }
@@ -94,7 +94,7 @@ public class AsyncOpenaiProcessor
                 var req = jsonlRequests[i];
                 var messages = new[]
                 {
-                    new ChatMessage(ChatRole.System, systemContent),
+                    new ChatMessage(ChatRole.System, Prompts.BuildSystemPrompt<T> (systemContent)),
                     new ChatMessage(ChatRole.User, queries[i])
                 };
                 var options = new ChatOptions
