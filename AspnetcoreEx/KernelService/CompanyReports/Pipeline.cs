@@ -13,12 +13,12 @@ public class RunConfig
     public bool LlmReranking { get; set; } = true;
     public int LlmRerankingSampleSize { get; set; } = 10;
     public int TopNRetrieval { get; set; } = 5;
-    public bool ParallelRequests { get; set; } = true;
+    public int ParallelRequests { get; set; } = 10;
     public string ApiProvider { get; set; } = "OpenAI";
     public string LlmApiKey { get; set; } = "";
     public string AnsweringModel { get; set; } = "gpt-3.5-turbo";
     public bool FullContext { get; set; } = false;
-    public string SubmissionFile { get; set; } = "";
+    public bool SubmissionFile { get; set; }
     public string TeamEmail { get; set; } = "";
     public string SubmissionName { get; set; } = "";
     public string PipelineDetails { get; set; } = "";
@@ -230,7 +230,7 @@ public class Pipeline
         }
     }
 
-    public void ProcessQuestions()
+    public async Task ProcessQuestions()
     {
         var processor = new QuestionsProcessor(
             paths.VectorDbDir,
@@ -248,7 +248,7 @@ public class Pipeline
             runConfig.FullContext
         );
         var outputPath = GetNextAvailableFilename(paths.AnswersFilePath);
-        processor.ProcessAllQuestions(
+        await processor.ProcessAllQuestionsAsync(
             outputPath,
             runConfig.SubmissionFile,
             runConfig.TeamEmail,
