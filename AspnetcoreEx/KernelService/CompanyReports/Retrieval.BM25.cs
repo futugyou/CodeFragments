@@ -4,7 +4,7 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 using AspnetcoreEx.KernelService.Tools;
 using Path = System.IO.Path;
 
-public class BM25Retriever
+public class BM25Retriever : IRetrieval
 {
     private readonly string bm25DbDir;
     private readonly string documentsDir;
@@ -15,15 +15,28 @@ public class BM25Retriever
         this.documentsDir = documentsDir;
     }
 
-    public List<Dictionary<string, object>> RetrieveByCompanyName(string companyName, string query, int topN = 3, bool returnParentPages = false)
+    public Task<List<RetrievalResult>> RetrieveAllAsync(string companyName, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<List<RetrievalResult>> RetrieveByCompanyNameAsync(
+        string companyName,
+        string query,
+        int topN = 6,
+        bool returnParentPages = false,
+        int llmRerankingSampleSize = 28,
+        int documentsBatchSize = 2,
+        double llmWeight = 0.7,
+        CancellationToken cancellationToken = default)
     {
         string documentPath = "";
-        dynamic? document = null;
+        ProcessedReport? document = null;
 
         foreach (var path in Directory.GetFiles(documentsDir, "*.json"))
         {
-            var json = File.ReadAllText(path, Encoding.UTF8);
-            var doc = JsonSerializer.Deserialize<dynamic>(json) ?? throw new Exception($"Failed to deserialize document at {path}.");
+            var json = await File.ReadAllTextAsync(path, Encoding.UTF8, cancellationToken);
+            var doc = JsonSerializer.Deserialize<ProcessedReport>(json) ?? throw new Exception($"Failed to deserialize document at {path}.");
             if (doc.Metainfo.CompanyName == companyName)
             {
                 documentPath = path;
@@ -55,35 +68,35 @@ public class BM25Retriever
             .Select(x => x.idx)
             .ToList();
 
-        var retrievalResults = new List<Dictionary<string, object>>();
+        List<RetrievalResult> retrievalResults = [];
         var seenPages = new HashSet<int>();
 
         foreach (var index in topIndices)
         {
             double score = Math.Round(scores[index], 4);
             var chunk = chunks[index];
-            var parentPage = ((List<dynamic>)pages).First(p => (int)p.Page == (int)chunk.Page);
+            var parentPage = pages.First(p => p.Page == chunk.Page);
 
             if (returnParentPages)
             {
                 if (!seenPages.Contains(parentPage.Page))
                 {
                     seenPages.Add(parentPage.Page);
-                    retrievalResults.Add(new Dictionary<string, object>
+                    retrievalResults.Add(new RetrievalResult
                     {
-                        { "distance", score },
-                        { "page", parentPage.Page },
-                        { "text", parentPage.Text }
+                        Distance = score,
+                        Page = parentPage.Page,
+                        Text = parentPage.Text
                     });
                 }
             }
             else
             {
-                retrievalResults.Add(new Dictionary<string, object>
+                retrievalResults.Add(new RetrievalResult
                 {
-                    { "distance", score },
-                    { "page", chunk.Page  },
-                    { "text", chunk.Text }
+                    Distance = score,
+                    Page = chunk.Page,
+                    Text = chunk.Text
                 });
             }
         }

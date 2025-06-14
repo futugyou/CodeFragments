@@ -4,7 +4,7 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 public class APIProcessorManager
 {
     private readonly IAPIProcessor processor;
-    public dynamic ResponseData => processor.ResponseData;
+    public ResponseData ResponseData => processor.ResponseData;
 
     public APIProcessorManager(IEnumerable<IAPIProcessor> processors, string provider = "openai")
     {

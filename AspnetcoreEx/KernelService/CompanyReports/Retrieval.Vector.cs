@@ -6,7 +6,7 @@ using FaissMask;
 using System.Numerics.Tensors;
 using Path = System.IO.Path;
 
-public class VectorRetriever
+public class VectorRetriever : IRetrieval
 {
     private readonly string _vectorDbDir;
     private readonly string _documentsDir;
@@ -44,8 +44,8 @@ public class VectorRetriever
             }
             try
             {
-                var document = JsonSerializer.Deserialize<Dictionary<string, object>>(File.ReadAllText(documentPath));
-                if (document == null || !document.ContainsKey("metainfo") || !document.ContainsKey("content"))
+                var document = JsonSerializer.Deserialize<ProcessedReport>(File.ReadAllText(documentPath));
+                if (document == null || document.Metainfo == null || document.Content == null)
                 {
                     Console.WriteLine($"Skipping {documentPath}: does not match the expected schema.");
                     continue;
@@ -66,33 +66,41 @@ public class VectorRetriever
         return allDbs;
     }
 
-    public static async Task<double> GetStringsCosineSimilarity(string str1, string str2, CancellationToken cancellationToken = default)
+    public static async Task<double> GetStringsCosineSimilarityAsync(string str1, string str2, CancellationToken cancellationToken = default)
     {
         var llm = SetUpLlm();
         var embeddings = await llm.GetEmbeddingClient("text-embedding-3-large").GenerateEmbeddingsAsync([str1, str2], cancellationToken: cancellationToken);
         return CosineSimilarity(embeddings.Value[0].ToFloats().Span, embeddings.Value[1].ToFloats().Span);
     }
 
-    public async Task<List<Dictionary<string, object>>> RetrieveByCompanyName(
-        string companyName, string query, int topN = 3, bool returnParentPages = false, CancellationToken cancellationToken = default)
+    public async Task<List<RetrievalResult>> RetrieveByCompanyNameAsync(
+        string companyName,
+        string query,
+        int topN = 6,
+        bool returnParentPages = false,
+        int llmRerankingSampleSize = 28,
+        int documentsBatchSize = 2,
+        double llmWeight = 0.7,
+        CancellationToken cancellationToken = default
+    )
     {
         var targetReport = _allDbs.FirstOrDefault(r =>
         {
-            var metainfo = ((JsonElement)r.Document["metainfo"]).Deserialize<Dictionary<string, object>>();
-            return metainfo != null && metainfo.ContainsKey("company_name") && (string)metainfo["company_name"] == companyName;
+            var metainfo = r.Document.Metainfo;
+            return metainfo != null && metainfo.CompanyName == companyName;
         }) ?? throw new Exception($"No report found with '{companyName}' company name.");
 
-        var document = targetReport.Document;
-        var content = ((JsonElement)document["content"]).Deserialize<Dictionary<string, object>>() ?? throw new Exception("Document content is missing or malformed.");
-        var chunks = ((JsonElement)content["chunks"]).Deserialize<List<Dictionary<string, object>>>() ?? throw new Exception("Document chunks are missing or malformed.");
-        var pages = ((JsonElement)content["pages"]).Deserialize<List<Dictionary<string, object>>>() ?? throw new Exception("Document pages are missing or malformed.");
+        var document = targetReport.Document ?? throw new Exception("Document can not be null.");
+        var content = document.Content ?? throw new Exception("Document content is missing or malformed.");
+        var pages = content.Pages ?? throw new Exception("Document pages are missing or malformed.");
+        var chunks = content.Chunks ?? throw new Exception("Document chunks are missing or malformed.");
 
         int actualTopN = Math.Min(topN, chunks.Count);
         var embedding = await _llm.GetEmbeddingClient("text-embedding-3-large").GenerateEmbeddingsAsync([query,], cancellationToken: cancellationToken);
 
         var results = targetReport.VectorDb.Search(embedding.Value[0].ToFloats().ToArray(), actualTopN);
 
-        var retrievalResults = new List<Dictionary<string, object>>();
+        List<RetrievalResult> retrievalResults = [];
         var seenPages = new HashSet<int>();
 
         foreach (var result in results)
@@ -100,51 +108,51 @@ public class VectorRetriever
             var distance = Math.Round(result.Distance, 4);
             // TODO: long to int conversion have risk
             var chunk = chunks[(int)result.Label];
-            var pageNum = Convert.ToInt32(chunk["page"]);
-            var parentPage = pages.First(p => Convert.ToInt32(p["page"]) == pageNum);
+            var pageNum = Convert.ToInt32(chunk.Page);
+            var parentPage = pages.First(p => p.Page == pageNum);
             if (returnParentPages)
             {
                 if (seenPages.Add(pageNum))
                 {
-                    retrievalResults.Add(new Dictionary<string, object>
+                    retrievalResults.Add(new RetrievalResult
                     {
-                        { "distance", distance },
-                        { "page", parentPage["page"] },
-                        { "text", parentPage["text"] }
+                        Distance = distance,
+                        Page = parentPage.Page,
+                        Text = parentPage.Text
                     });
                 }
             }
             else
             {
-                retrievalResults.Add(new Dictionary<string, object>
+                retrievalResults.Add(new RetrievalResult
                 {
-                    { "distance", distance },
-                    { "page", chunk["page"] },
-                    { "text", chunk["text"] }
+                    Distance = distance,
+                    Page = chunk.Page,
+                    Text = chunk.Text
                 });
             }
         }
         return retrievalResults;
     }
 
-    public List<Dictionary<string, object>> RetrieveAll(string companyName)
+    public Task<List<RetrievalResult>> RetrieveAllAsync(string companyName, CancellationToken cancellationToken = default)
     {
         var targetReport = _allDbs.FirstOrDefault(r =>
         {
-            var metainfo = ((JsonElement)r.Document["metainfo"]).Deserialize<Dictionary<string, object>>();
-            return metainfo != null && metainfo.ContainsKey("company_name") && (string)metainfo["company_name"] == companyName;
+            var metainfo = r.Document.Metainfo;
+            return metainfo != null && metainfo.CompanyName == companyName;
         }) ?? throw new Exception($"No report found with '{companyName}' company name.");
-        var document = targetReport.Document;
-        var content = ((JsonElement)document["content"]).Deserialize<Dictionary<string, object>>() ?? throw new Exception("Document content is missing or malformed.");
-        var pages = ((JsonElement)content["pages"]).Deserialize<List<Dictionary<string, object>>>() ?? throw new Exception("Document pages are missing or malformed.");
+        var document = targetReport.Document ?? throw new Exception("Document can not be null.");
+        var content = document.Content ?? throw new Exception("Document content is missing or malformed.");
+        var pages = content.Pages ?? throw new Exception("Document pages are missing or malformed.");
 
-        return [.. pages.OrderBy(p => Convert.ToInt32(p["page"]))
-            .Select(p => new Dictionary<string, object>
+        return Task.FromResult<List<RetrievalResult>>([.. pages.OrderBy(p =>  p.Page )
+            .Select(p => new RetrievalResult
             {
-                { "distance", 0.5 },
-                { "page", p["page"] },
-                { "text", p["text"] }
-            })];
+              Distance = 0.5,
+                    Page = p.Page,
+                    Text = p.Text
+            })]);
     }
 
     // internal class
@@ -152,7 +160,7 @@ public class VectorRetriever
     {
         public string Name { get; set; }
         public IndexFlat VectorDb { get; set; }
-        public Dictionary<string, object> Document { get; set; }
+        public ProcessedReport Document { get; set; }
     }
 
     #region private methods

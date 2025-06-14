@@ -26,6 +26,8 @@ public class RephrasedQuestions
     [JsonPropertyName("questions")]
     [Description("List of rephrased questions for each company")]
     public List<RephrasedQuestion> Questions { get; set; } = [];
+    [JsonPropertyName("references")]
+    public List<Dictionary<string, object>> References { get; set; } = [];
 }
 
 /// <summary>
