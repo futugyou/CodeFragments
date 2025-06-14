@@ -4,54 +4,67 @@
 
 ## 1. Initialization
 
-- `__init__`: Initialize path, configuration, and convert subset.json to subset.csv if needed.
+- Initialize path, configuration, and convert subset.json to subset.csv if needed.
 
 ## 2. Download Docling model (optional)
 
 - This step will download some relatively large LLM models,
 and my local PC does not have enough space to complete this task.
 
-- `download_docling_models`: Download Docling related models on Huggingface in advance.
+- Download Docling related models on Huggingface in advance.
+
+```py
+pip install docling
+python docling_example.py
+```
 
 ## 3. Parse PDF report
 
+- This operation will generate `PdfReport` array, and write it in file.
+
 - C# does not have a powerful PDF library like `Docling`,
-so it is recommended to use `Docling` to process the `PDF` data(`docling_example.py`),
+so it is recommended to use `Docling` to process the `PDF` data(`like docling_example.py`),
 and then C# to handle (`PDFParser.Docling.cs`) the rest of the process.
 
-- C# alse can use `UglyToad.PdfPig` to handle PDF.
+- C# alse can use `UglyToad.PdfPig` to handle PDF (`PDFParser.PdfPig.cs`).
 
-- `parse_pdf_reports`: Parse PDF report (optional concurrent/serial).
+- `ParseAndExportAsync`: Parse PDF report (optional concurrent/serial).
 
-- `parse_pdf_reports_parallel` or `parse_pdf_reports_sequential`
+- `ParseAndExportParallelAsync`
 
-## 4. Serialize table
+## 4. Serialize table  (`TableSerializer.cs`)
 
-- `serialize_tables`: Parallel processing of tables in parsed reports.
+- This operation fills the `Serialized` field for `ReportTable` object of `PdfReport`
 
-## 5. Merge report
+- `ProcessDirectoryParallelAsync`: Parallel processing of tables in parsed reports.
 
-- `merge_reports`: Merge complex JSON reports into simple structures.
+## 5. Merge report (`PageTextPreparation.cs`)
 
-## 6. Export reports to Markdown
+- This operation will generate `ProcessedReport` array, and write it in file.
 
-- `export_reports_to_markdown`: Export the processed reports to Markdown format.
+- `ProcessReportsAsync`: Merge complex JSON reports into simple structures.
 
-## 7. Split reports
+## 6. Export reports to Markdown (`PageTextPreparation.cs`)
 
-- `chunk_reports`: Split reports into smaller chunks.
+- `ExportToMarkdownAsync`: Export the processed reports to Markdown format.
 
-## 8. Create vector databases
+## 7. Split reports (`TextSplitter.cs`)
 
-- `create_vector_dbs`: Create vector databases based on the split reports.
+- This operation fills the `Chunks` field for `ProcessedReportContent` object of `ProcessedReport`
 
-## 9. Create BM25 databases
+- `SplitAllReportsAsync`: Split reports into smaller chunks.
 
-- `create_bm25_db`: Create BM25 databases based on the split reports.
+## 8. Create vector databases (`Ingestor.VectorDB.cs`)
 
-## 10. Process questions
+- `ProcessReportsAsync`: Create vector databases based on the split reports.
 
-- `process_questions`: Process all questions and output answers.
+## 9. Create BM25 databases (`Ingestor.BM25.cs`)
+
+- `ProcessReportsAsync`: Create BM25 databases based on the split reports.
+
+## 10. Process questions (`QuestionsProcessor.cs`)
+
+- `ProcessAllQuestionsAsync`: Process all questions and output answers.
 
 ---
 
