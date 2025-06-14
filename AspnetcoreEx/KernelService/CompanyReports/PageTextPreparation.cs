@@ -121,25 +121,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             Pages = processedPages
         };
     }
-
-    public string PreparePageText(int pageNumber)
-    {
-        var pageData = GetPageData(pageNumber);
-        if (pageData == null || pageData.Content == null)
-            return string.Empty;
-
-        var filteredBlocks = FilterBlocks(pageData.Content);
-        var finalBlocks = ApplyFormattingRules(filteredBlocks);
-
-        if (finalBlocks.Count > 0)
-        {
-            finalBlocks[0] = finalBlocks[0].TrimStart();
-            finalBlocks[^1] = finalBlocks.Last().TrimEnd();
-        }
-
-        return string.Join("\n", finalBlocks);
-    }
-
+    
     public async Task ExportToMarkdownAsync(string reportsDir, string outputDir, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(outputDir);
@@ -164,7 +146,42 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         }
     }
 
+    public async Task ExportToMarkdownAsync(List<ProcessedReport> processedReports, string outputDir, CancellationToken cancellationToken = default)
+    {
+        Directory.CreateDirectory(outputDir);
+        foreach (var processedReport in processedReports)
+        {  
+            var sb = new StringBuilder();
+            foreach (var page in processedReport.Content!.Pages??[])
+            {
+                sb.AppendLine($"\n\n---\n\n# Page {page.Page}\n\n");
+                sb.AppendLine(page.Text);
+            }
+
+            var reportName = processedReport.Metainfo.Sha1Name;
+            await File.WriteAllTextAsync(Path.Combine(outputDir, $"{reportName}.md"), sb.ToString(), cancellationToken);
+        }
+    }
+
     #region Private Methods
+    private string PreparePageText(int pageNumber)
+    {
+        var pageData = GetPageData(pageNumber);
+        if (pageData == null || pageData.Content == null)
+            return string.Empty;
+
+        var filteredBlocks = FilterBlocks(pageData.Content);
+        var finalBlocks = ApplyFormattingRules(filteredBlocks);
+
+        if (finalBlocks.Count > 0)
+        {
+            finalBlocks[0] = finalBlocks[0].TrimStart();
+            finalBlocks[^1] = finalBlocks.Last().TrimEnd();
+        }
+
+        return string.Join("\n", finalBlocks);
+    }
+
     private ReportContent? GetPageData(int pageNumber)
     {
         return _reportData.Content.FirstOrDefault(p => p.Page == pageNumber);
@@ -176,16 +193,40 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         return [.. blocks.Where(b => b != null && !string.IsNullOrWhiteSpace(b.Text) && !ignoredTypes.Contains(b.Type))];
     }
 
+    // This method is suitable for batch cleaning text with special command marks into ordinary text, and can track all replacement details.
+    // Typical application scenarios include: speech to text, OCR post-processing, special format text parsing, etc.
+    // 
+    // 1. Command substitution: replace commands like /zero.tnum, /comma.pl with corresponding characters (such as 0,, etc.).
+    // 2. Glyph tag removal: remove the content of glyph<...>.
+    // 3. Uppercase letter command substitution: replace commands like /A.cap with A.
+    // 4. Count replacement times: count the occurrence times of all replaced commands, glyph tags and uppercase letter commands.
+    // 5. Record replacement details: record the original content and the replaced content of each replacement.
+    // 
+    // text = "The value is /one.tnum, not /zero.tnum. glyph<abc> /A.cap /comma.pl"
+    // result = CleanText(text)
+    // (
+    //   "The value is 1, not 0.  A ,",  # Replaced text
+    //   5,                              # Total number of replacements
+    //   [
+    //     ('/one.tnum', '1'),
+    //     ('/zero.tnum', '0'),
+    //     ('glyph<abc>', ''),
+    //     ('/A.cap', 'A'),
+    //     ('/comma.pl', ',')
+    //   ]                                # Replacement Details
+    // )
+    //
     private static (string, int, List<string>) CleanText(string text)
     {
         var corrections = new List<string>();
 
+        // Build command regular expression: concatenate all commands into regular expressions, matching such as /zero.tnum, /comma.pl, etc.
         string recognizedCommands = string.Join("|", CommandMapping.Keys);
         string slashCommandPattern = @$"/({recognizedCommands})(\.pl\.tnum|\.tnum\.pl|\.pl|\.tnum|\.case|\.sups)";
 
         int occurrencesAmount = 0;
 
-        // Count matches
+        // Count the number of occurrences: Count the number of occurrences of commands, glyph labels, and /A.cap separately and add them up.
         occurrencesAmount += Regex.Matches(text, slashCommandPattern).Count;
         occurrencesAmount += _glyphRegex.Matches(text).Count;
         occurrencesAmount += _atoZRegex.Matches(text).Count;
@@ -231,7 +272,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
         bool pageHeaderInFirst3 = false;
         for (int j = 0; j < Math.Min(3, blocks.Count); j++)
         {
-            if (blocks[j].Type == "pageheader") pageHeaderInFirst3 = true;
+            if (blocks[j].Type == "page_header") pageHeaderInFirst3 = true;
         }
 
         int firstSectionHeaderIndex = 0;
@@ -243,14 +284,14 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             var blockType = block.Type;
             var text = block.Text?.Trim() ?? string.Empty;
             // Handle headers
-            if (blockType == "pageheader")
+            if (blockType == "page_header")
             {
                 var prefix = i < 3 ? "\n# " : "\n## ";
                 finalBlocks.Add($"{prefix}{text}\n");
                 i++;
                 continue;
             }
-            if (blockType == "sectionheader")
+            if (blockType == "section_header")
             {
                 firstSectionHeaderIndex++;
                 string prefix = (firstSectionHeaderIndex == 1 && i < 3 && !pageHeaderInFirst3) ? "\n# " : "\n## ";
@@ -263,7 +304,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                 if (BlockEndsWithColon(block) && i + 1 < n)
                 {
                     var nextBlockType = blocks[i + 1].Type;
-                    if (nextBlockType != "table" && nextBlockType != "listitem")
+                    if (nextBlockType != "table" && nextBlockType != "list_item")
                     {
                         finalBlocks.Add($"\n### {text}\n");
                         i++;
@@ -312,8 +353,8 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                 continue;
             }
             // Handle list groups
-            if (blockType == "listtime" ||
-                (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == "listtime"))
+            if (blockType == "list_item" ||
+                (BlockEndsWithColon(block) && i + 1 < n && blocks[i + 1].Type == "list_item"))
             {
                 var groupBlocks = new List<ReportContentItem>();
                 if (BlockEndsWithColon(block) && i + 1 < n)
@@ -321,7 +362,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
                     groupBlocks.Add(block);
                     i++;
                 }
-                while (i < n && blocks[i].Type == "listtime")
+                while (i < n && blocks[i].Type == "list_item")
                 {
                     groupBlocks.Add(blocks[i]);
                     i++;
@@ -345,7 +386,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             }
             // Handle normal blocks
             if (blockType == "text" || blockType == "caption" || blockType == "footnote" ||
-                blockType == "checkboxselected" || blockType == "checkboxunselected" || blockType == "formula")
+                blockType == "checkbox_selected" || blockType == "checkbox_unselected" || blockType == "formula")
             {
                 if (string.IsNullOrWhiteSpace(text))
                 {
@@ -371,7 +412,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             {
                 case "text":
                 case "caption":
-                case "sectionheader":
+                case "section_header":
                 case "paragraph":
                     sb.AppendLine(blk.Text);
                     break;
@@ -400,11 +441,11 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             {
                 case "text":
                 case "caption":
-                case "sectionheader":
+                case "section_header":
                 case "paragraph":
                     sb.AppendLine(blk.Text);
                     break;
-                case "listitem":
+                case "list_item":
                     sb.AppendLine("- " + (blk.Text?.Trim() ?? string.Empty));
                     break;
                 case "footnote":
@@ -429,7 +470,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
 
     private static string GetSerializedTableText(ReportTable table, bool serializedTablesInsteadOfMarkdown)
     {
-        if (table.Serialized == null)
+        if (string.IsNullOrEmpty(table.Serialized))
             return table.Markdown ?? string.Empty;
 
         var infoBlocks = JsonSerializer.Deserialize<TableBlocksCollection>(table.Serialized)?.InformationBlocks ?? [];
