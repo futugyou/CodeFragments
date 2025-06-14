@@ -126,12 +126,6 @@ public class Pipeline
         }
     }
 
-    public static async Task DownloadDoclingModels()
-    {
-        var parser = new DoclingPDFParser(null, "./output");
-        await parser.ParseAndExportAsync("src/dummy_report.pdf");
-    }
-
     public async Task ParsePdfReportsSequential()
     {
         var pdfParser = new DoclingPDFParser(null, paths.ParsedReportsPath, paths.SubsetPath);
