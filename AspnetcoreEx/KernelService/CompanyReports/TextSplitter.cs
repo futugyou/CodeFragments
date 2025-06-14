@@ -5,7 +5,35 @@ using System.Text.Json;
 public class TextSplitter
 {
     private readonly ITokenCounter _tokenCounter = new SharpTokenCounter();
-    public async Task<ProcessedReport> SplitReportAsync(ProcessedReport fileContent, string? serializedTablesPath = null, CancellationToken cancellationToken = default)
+
+    public async Task SplitAllReportsAsync(string inputDir, string outputDir, string? serializedTableDir = null, CancellationToken cancellationToken = default)
+    {
+        Directory.CreateDirectory(outputDir);
+        var files = Directory.GetFiles(inputDir, "*.json");
+
+        foreach (var file in files)
+        {
+            string filename = System.IO.Path.GetFileName(file);
+            string? serializedPath = serializedTableDir != null
+                ? System.IO.Path.Combine(serializedTableDir, filename)
+                : null;
+
+            var content = JsonSerializer.Deserialize<ProcessedReport>(await File.ReadAllTextAsync(file, cancellationToken));
+            if (content == null)
+            {
+                continue;
+            }
+            var updated = await SplitReportAsync(content, serializedPath, cancellationToken);
+            File.WriteAllText(System.IO.Path.Combine(outputDir, filename), JsonSerializer.Serialize(updated));
+        }
+
+        Console.WriteLine($"Split {files.Length} files.");
+    }
+
+
+
+    #region private methods
+    private async Task<ProcessedReport> SplitReportAsync(ProcessedReport fileContent, string? serializedTablesPath = null, CancellationToken cancellationToken = default)
     {
         List<ProcessedChunk> chunks = [];
         int chunkId = 0;
@@ -75,52 +103,21 @@ public class TextSplitter
         return result;
     }
 
-    private List<ProcessedChunk> SplitPage(string text, int page, int chunkSize = 300, int overlap = 50)
+    private IEnumerable<ProcessedChunk> SplitPage(string text, int page, int chunkSize = 300, int overlap = 50)
     {
-        var chunks = new List<ProcessedChunk>();
-        int pos = 0;
-
-        while (pos < text.Length)
+        var splitTexts = RecursiveTokenTextSplitter.SharpTokenSplitText(text, chunkSize: chunkSize, chunkOverlap: overlap);
+        foreach (var splitText in splitTexts)
         {
-            int len = Math.Min(chunkSize, text.Length - pos);
-            string chunkText = text.Substring(pos, len);
-            int tokens = _tokenCounter.Count(chunkText);
-
-            chunks.Add(new ProcessedChunk
+            yield return new ProcessedChunk
             {
                 Page = page,
-                Text = chunkText,
-                LengthTokens = tokens,
+                Text = splitText,
+                LengthTokens = _tokenCounter.Count(splitText),
                 TableId = -1
-            });
-
-            pos += chunkSize - overlap;
+            };
         }
-
-        return chunks;
     }
 
-    public async Task SplitAllReportsAsync(string inputDir, string outputDir, string? serializedTableDir = null, CancellationToken cancellationToken = default)
-    {
-        Directory.CreateDirectory(outputDir);
-        var files = Directory.GetFiles(inputDir, "*.json");
+    #endregion
 
-        foreach (var file in files)
-        {
-            string filename = System.IO.Path.GetFileName(file);
-            string? serializedPath = serializedTableDir != null
-                ? System.IO.Path.Combine(serializedTableDir, filename)
-                : null;
-
-            var content = JsonSerializer.Deserialize<ProcessedReport>(await File.ReadAllTextAsync(file, cancellationToken));
-            if (content == null)
-            {
-                continue;
-            }
-            var updated = await SplitReportAsync(content, serializedPath, cancellationToken);
-            File.WriteAllText(System.IO.Path.Combine(outputDir, filename), JsonSerializer.Serialize(updated));
-        }
-
-        Console.WriteLine($"Split {files.Length} files.");
-    }
 }
