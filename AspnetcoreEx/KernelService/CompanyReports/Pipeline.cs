@@ -13,18 +13,23 @@ public class Pipeline
     private readonly IIngestor bm25Ingestor;
     private readonly IIngestor vectorDBIngestor;
     private readonly QuestionsProcessor questionsProcessor;
+    private readonly ILogger<Pipeline> logger;
+
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    public Pipeline(IOptionsMonitor<CompanyReportlOptions> runConfig,
-    [FromKeyedServices("docling")] IPDFParser pdfParser,
-    TableSerializer tableSerializer,
-    [FromKeyedServices("BM25")] IIngestor bm25Ingestor,
-    [FromKeyedServices("VectorDB")] IIngestor vectorDBIngestor,
-    QuestionsProcessor questionsProcessor)
+    public Pipeline(
+        ILogger<Pipeline> logger,
+        IOptionsMonitor<CompanyReportlOptions> runConfig,
+        [FromKeyedServices("docling")] IPDFParser pdfParser,
+        TableSerializer tableSerializer,
+        [FromKeyedServices("BM25")] IIngestor bm25Ingestor,
+        [FromKeyedServices("VectorDB")] IIngestor vectorDBIngestor,
+        QuestionsProcessor questionsProcessor)
     {
+        this.logger = logger;
         this.runConfig = runConfig;
         this.pdfParser = pdfParser;
         this.tableSerializer = tableSerializer;
@@ -69,7 +74,7 @@ public class Pipeline
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error converting JSON to CSV: {e.Message}");
+                logger.LogError("Error converting JSON to CSV: {Message}", e.Message);
             }
         }
     }
@@ -78,14 +83,14 @@ public class Pipeline
     {
         var config = runConfig.CurrentValue;
         await pdfParser.ParseAndExportAsync(config.PdfReportsDir, cancellation);
-        Console.WriteLine($"PDF reports parsed and saved to {config.ParsedReportsPath}");
+        logger.LogInformation("PDF reports parsed and saved to {ParsedReportsPath}", config.ParsedReportsPath);
     }
 
     public async Task ParsePdfReportsParallel(int chunkSize = 2, int maxWorkers = 10, CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
         await pdfParser.ParseAndExportParallelAsync(config.PdfReportsDir, maxWorkers, chunkSize, cancellation);
-        Console.WriteLine($"PDF reports parsed and saved to {config.ParsedReportsPath}");
+        logger.LogInformation("PDF reports parsed and saved to {ParsedReportsPath}", config.ParsedReportsPath);
     }
 
     public async Task SerializeTables(int maxWorkers = 10, CancellationToken cancellation = default)
@@ -97,18 +102,18 @@ public class Pipeline
     public async Task<List<ProcessedReport>> MergeReports(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
-        var ptp = new PageTextPreparation(config.UseSerializedTables);
+        var ptp = new PageTextPreparation(config.UseSerializedTables, config.SerializedTablesInsteadOfMarkdown);
         var result = await ptp.ProcessReportsAsync(reportsDir: config.ParsedReportsPath, [], outputDir: config.MergedReportsPath, cancellation);
-        Console.WriteLine($"Reports saved to {config.MergedReportsPath}");
+        logger.LogInformation("Reports saved to {MergedReportsPath}", config.MergedReportsPath);
         return result;
     }
 
     public async Task ExportReportsToMarkdown(List<ProcessedReport> processedReports, CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
-        var ptp = new PageTextPreparation(config.UseSerializedTables);
+        var ptp = new PageTextPreparation(config.UseSerializedTables, config.SerializedTablesInsteadOfMarkdown);
         await ptp.ExportToMarkdownAsync(processedReports, config.ReportsMarkdownPath, cancellation);
-        Console.WriteLine($"Reports saved to {config.ReportsMarkdownPath}");
+        logger.LogInformation("Reports saved to {ReportsMarkdownPath}", config.ReportsMarkdownPath);
     }
 
     public async Task ExportReportsToMarkdown(CancellationToken cancellation = default)
@@ -116,7 +121,7 @@ public class Pipeline
         var config = runConfig.CurrentValue;
         var ptp = new PageTextPreparation(config.UseSerializedTables);
         await ptp.ExportToMarkdownAsync(config.ParsedReportsPath, config.ReportsMarkdownPath, cancellation);
-        Console.WriteLine($"Reports saved to {config.ReportsMarkdownPath}");
+        logger.LogInformation("Reports saved to {ReportsMarkdownPath}", config.ReportsMarkdownPath);
     }
 
     public async Task ChunkReports(bool includeSerializedTables = false, CancellationToken cancellation = default)
@@ -125,21 +130,21 @@ public class Pipeline
         var textSplitter = new TextSplitter();
         var serializedTablesDir = includeSerializedTables ? config.ParsedReportsPath : null;
         await textSplitter.SplitAllReportsAsync(config.MergedReportsPath, config.DocumentsDir, serializedTablesDir, cancellation);
-        Console.WriteLine($"Chunked reports saved to {config.DocumentsDir}");
+        logger.LogInformation("Chunked reports saved to {DocumentsDir}", config.DocumentsDir);
     }
 
     public async Task CreateVectorDbs(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
         await vectorDBIngestor.ProcessReportsAsync(config.DocumentsDir, config.VectorDbDir, cancellation);
-        Console.WriteLine($"Vector databases created in {config.VectorDbDir}");
+        logger.LogInformation("Vector databases created in {VectorDbDir}", config.VectorDbDir);
     }
 
     public async Task CreateBm25Db(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
         await bm25Ingestor.ProcessReportsAsync(config.DocumentsDir, config.Bm25DbPath, cancellation);
-        Console.WriteLine($"BM25 database created at {config.Bm25DbPath}");
+        logger.LogInformation("BM25 database created at {Bm25DbPath}", config.Bm25DbPath);
     }
 
     public async Task ParsePdfReports(bool parallel = true, int chunkSize = 2, int maxWorkers = 10, CancellationToken cancellation = default)
@@ -153,16 +158,16 @@ public class Pipeline
     public async Task ProcessParsedReports(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
-        Console.WriteLine("Starting reports processing pipeline...");
-        Console.WriteLine("Step 1: Merging reports...");
+        logger.LogInformation("Starting reports processing pipeline...");
+        logger.LogInformation("Step 1: Merging reports...");
         var mergeDatas = await MergeReports(cancellation);
-        Console.WriteLine("Step 2: Exporting reports to markdown...");
+        logger.LogInformation("Step 2: Exporting reports to markdown...");
         await ExportReportsToMarkdown(mergeDatas, cancellation);
-        Console.WriteLine("Step 3: Chunking reports...");
+        logger.LogInformation("Step 3: Chunking reports...");
         await ChunkReports(config.UseSerializedTables, cancellation);
-        Console.WriteLine("Step 4: Creating vector databases...");
+        logger.LogInformation("Step 4: Creating vector databases...");
         await CreateVectorDbs(cancellation);
-        Console.WriteLine("Reports processing pipeline completed successfully!");
+        logger.LogInformation("Reports processing pipeline completed successfully!");
     }
 
     private static string GetNextAvailableFilename(string basePath)
@@ -195,6 +200,6 @@ public class Pipeline
             config.PipelineDetails,
             cancellation
         );
-        Console.WriteLine($"Answers saved to {outputPath}");
+        logger.LogInformation("Answers saved to {outputPath}", outputPath);
     }
 }

@@ -12,14 +12,15 @@ public class VectorRetriever : IRetrieval
     private readonly string _documentsDir;
     private readonly List<ReportDb> _allDbs;
     private readonly OpenAIClient _llm;
-
-    public VectorRetriever([FromKeyedServices("report")] OpenAIClient client, IOptionsMonitor<CompanyReportlOptions> optionsMonitor)
+    private readonly ILogger<VectorRetriever> logger;
+    public VectorRetriever([FromKeyedServices("report")] OpenAIClient client, IOptionsMonitor<CompanyReportlOptions> optionsMonitor, ILogger<VectorRetriever> logger)
     {
         var config = optionsMonitor.CurrentValue;
         _vectorDbDir = config.VectorDbDir;
         _documentsDir = config.DocumentsDir;
         _allDbs = LoadDbs();
         _llm = client;
+        this.logger = logger;
     }
 
     private List<ReportDb> LoadDbs()
@@ -34,7 +35,7 @@ public class VectorRetriever : IRetrieval
             var stem = Path.GetFileNameWithoutExtension(documentPath);
             if (!vectorDbFiles.ContainsKey(stem))
             {
-                Console.WriteLine($"No matching vector DB found for document {documentPath}");
+                logger.LogInformation("No matching vector DB found for document {documentPath}", documentPath);
                 continue;
             }
             try
@@ -42,7 +43,7 @@ public class VectorRetriever : IRetrieval
                 var document = JsonSerializer.Deserialize<ProcessedReport>(File.ReadAllText(documentPath));
                 if (document == null || document.Metainfo == null || document.Content == null)
                 {
-                    Console.WriteLine($"Skipping {documentPath}: does not match the expected schema.");
+                    logger.LogInformation("Skipping {documentPath}: does not match the expected schema.", documentPath);
                     continue;
                 }
                 var vectorDb = IndexFlat.Read(vectorDbFiles[stem]);
@@ -55,7 +56,7 @@ public class VectorRetriever : IRetrieval
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading {documentPath}: {ex.Message}");
+                logger.LogError("Error loading {documentPath}: {Message}", documentPath, ex.Message);
             }
         }
         return allDbs;

@@ -6,6 +6,7 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 public class CompanyReportlOptions
 {
     public bool UseSerializedTables { get; set; } = false;
+    public bool SerializedTablesInsteadOfMarkdown { get; set; } = false;
     public bool ParentDocumentRetrieval { get; set; } = true;
     public bool LlmReranking { get; set; } = true;
     public int ParallelRequests { get; set; } = 10;

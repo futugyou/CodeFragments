@@ -6,6 +6,12 @@ using Path = System.IO.Path;
 
 public class BM25Ingestor : IIngestor
 {
+    private readonly ILogger<BM25Ingestor> logger;
+    public BM25Ingestor(ILogger<BM25Ingestor> logger)
+    {
+        this.logger = logger;
+    }
+
     public async Task ProcessReportsAsync(string allReportsDir, string outputDir, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(outputDir);
@@ -29,6 +35,6 @@ public class BM25Ingestor : IIngestor
             await File.WriteAllTextAsync(outputFile, json, cancellationToken);
         }
 
-        Console.WriteLine($"Processed {allReportPaths.Length} reports");
+        logger.LogInformation("Processed {Length} reports", allReportPaths.Length);
     }
 }

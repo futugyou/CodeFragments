@@ -9,10 +9,12 @@ using Path = System.IO.Path;
 public class VectorDBIngestor : IIngestor
 {
     private readonly OpenAIClient _client;
+    private readonly ILogger<VectorDBIngestor> logger;
 
-    public VectorDBIngestor([FromKeyedServices("report")] OpenAIClient client)
+    public VectorDBIngestor([FromKeyedServices("report")] OpenAIClient client, ILogger<VectorDBIngestor> logger)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client), "OpenAIClient cannot be null.");
+        this.logger = logger;
     }
 
     public async Task ProcessReportsAsync(string allReportsDir, string outputDir, CancellationToken cancellationToken = default)
@@ -45,7 +47,7 @@ public class VectorDBIngestor : IIngestor
             await File.WriteAllTextAsync(outputFile, json, cancellationToken);
         }
 
-        Console.WriteLine($"Processed {allReportPaths.Length} reports");
+        logger.LogInformation("Processed {Length} reports", allReportPaths.Length);
     }
 
     #region private methods 

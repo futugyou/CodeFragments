@@ -8,7 +8,7 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 public class QuestionsProcessor
 {
     private readonly APIProcessorManager openaiProcessor;
-    private readonly IOptionsMonitor<CompanyReportlOptions> runConfig;
+    private readonly ILogger<QuestionsProcessor> logger;
     private readonly IRetrieval vectorRetriever;
     private readonly IRetrieval hybridRetriever;
     private readonly CompanyReportlOptions options;
@@ -17,13 +17,14 @@ public class QuestionsProcessor
     private Dictionary<string, CsvMetadata> companies_datas = [];
 
     public QuestionsProcessor(
+        ILogger<QuestionsProcessor> logger,
         APIProcessorManager openaiProcessor,
         IOptionsMonitor<CompanyReportlOptions> runConfig,
         [FromKeyedServices("VectorRetriever")] IRetrieval vectorRetriever,
         [FromKeyedServices("HybridRetriever")] IRetrieval hybridRetriever)
     {
         this.openaiProcessor = openaiProcessor;
-        this.runConfig = runConfig;
+        this.logger = logger;
         this.vectorRetriever = vectorRetriever;
         this.hybridRetriever = hybridRetriever;
         this.options = runConfig.CurrentValue;
@@ -277,7 +278,7 @@ public class QuestionsProcessor
         return string.Join("\n\n---\n\n", contextParts);
     }
 
-    private static List<int> ValidatePageReferences(
+    private List<int> ValidatePageReferences(
         List<int> claimedPages,
         List<RetrievalResult> retrievalResults,
         int minPages = 2,
@@ -295,7 +296,7 @@ public class QuestionsProcessor
         if (validatedPages.Count < claimedPages.Count)
         {
             var removedPages = claimedPages.Except(validatedPages).ToList();
-            Console.WriteLine($"Warning: Removed {removedPages.Count} hallucinated page references: {string.Join(", ", removedPages)}");
+            logger.LogWarning("Warning: Removed {Count} hallucinated page references: {removedPages}", removedPages.Count, string.Join(", ", removedPages));
         }
 
         // If the number of valid pages is less than minPages, add more from the search results
@@ -318,7 +319,7 @@ public class QuestionsProcessor
         // If the maximum number of pages is exceeded, the page will be cropped
         if (validatedPages.Count > maxPages)
         {
-            Console.WriteLine($"Trimming references from {validatedPages.Count} to {maxPages} pages");
+            logger.LogInformation("Trimming references from {Count} to {maxPages} pages", validatedPages.Count, maxPages);
             validatedPages = [.. validatedPages.Take(maxPages)];
         }
 
@@ -388,7 +389,7 @@ public class QuestionsProcessor
         }
     }
 
-    private static QuestionStatistics CalculateStatistics(List<Question> processedQuestions, bool printStats = false)
+    private QuestionStatistics CalculateStatistics(List<Question> processedQuestions, bool printStats = false)
     {
         int totalQuestions = processedQuestions.Count;
         int errorCount = processedQuestions.Count(q => !string.IsNullOrEmpty(q.Error));
@@ -404,11 +405,14 @@ public class QuestionsProcessor
 
         if (printStats)
         {
-            Console.WriteLine("\nFinal Processing Statistics:");
-            Console.WriteLine($"Total questions: {totalQuestions}");
-            Console.WriteLine($"Errors: {errorCount} ({(totalQuestions > 0 ? (errorCount * 100.0 / totalQuestions) : 0):F1}%)");
-            Console.WriteLine($"N/A answers: {naCount} ({(totalQuestions > 0 ? (naCount * 100.0 / totalQuestions) : 0):F1}%)");
-            Console.WriteLine($"Successfully answered: {successCount} ({(totalQuestions > 0 ? (successCount * 100.0 / totalQuestions) : 0):F1}%)\n");
+            logger.LogDebug("\nFinal Processing Statistics:");
+            logger.LogDebug("Total questions: {totalQuestions}", totalQuestions);
+            var errorPercentage = totalQuestions > 0 ? (errorCount * 100.0 / totalQuestions) : 0;
+            var naPercentage = totalQuestions > 0 ? (naCount * 100.0 / totalQuestions) : 0;
+            var successPercentage = totalQuestions > 0 ? (successCount * 100.0 / totalQuestions) : 0;
+            logger.LogDebug("Errors: {errorCount} ({errorPercentage:F1}%)", errorCount, errorPercentage);
+            logger.LogDebug("N/A answers: {naCount} ({naPercentage:F1}%)", naCount, naPercentage);
+            logger.LogDebug("Successfully answered: {successCount} ({successPercentage:F1}%)", successCount, successPercentage);
         }
 
         return new QuestionStatistics
