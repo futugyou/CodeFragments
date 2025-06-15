@@ -28,12 +28,11 @@ public class QuestionsProcessor
     private List<AnswerDetail> AnswerDetailList = []; 
     private Dictionary<string, CsvMetadata> companies_datas = [];
 
-    public QuestionsProcessor(string vectorDbDir, string documentsDir, string questionsFilePath, bool v, string subsetPath, bool parentDocumentRetrieval, bool llmReranking, int llmRerankingSampleSize, int topNRetrieval, int parallelRequests, string apiProvider, string answeringModel, bool fullContext)
+    public QuestionsProcessor(string vectorDbDir, string documentsDir, string questionsFilePath, bool newChallengePipeline, string subsetPath, bool parentDocumentRetrieval, bool llmReranking, int llmRerankingSampleSize, int topNRetrieval, int parallelRequests, string apiProvider, string answeringModel, bool fullContext)
     {
         this.vectorDbDir = vectorDbDir;
         this.documentsDir = documentsDir;
         this.questionsFilePath = questionsFilePath;
-        this.v = v;
         this.subsetPath = subsetPath;
         this.parentDocumentRetrieval = parentDocumentRetrieval;
         this.llmReranking = llmReranking;
@@ -43,6 +42,7 @@ public class QuestionsProcessor
         this.apiProvider = apiProvider;
         this.answeringModel = answeringModel;
         this.fullContext = fullContext;
+        this.newChallengePipeline = newChallengePipeline;
     }
 
     public async Task<ProcessQuestionsResult> ProcessAllQuestionsAsync(string outputPath, bool submissionFile, string teamEmail, string submissionName, string pipelineDetails, CancellationToken cancellationToken = default)
@@ -100,11 +100,11 @@ public class QuestionsProcessor
                 });
         }
 
-        var statistics = CalculateStatistics(processedQuestions.ToList(), printStats: true);
+        var statistics = CalculateStatistics([.. processedQuestions], printStats: true);
 
         return new ProcessQuestionsResult
         {
-            Questions = processedQuestions.ToList(),
+            Questions = [.. processedQuestions],
             AnswerDetails = AnswerDetailList,
             Statistics = statistics
         };
@@ -507,8 +507,6 @@ public class QuestionsProcessor
 
         return submissionAnswers;
     }
-
-
 
     /// <summary>
     /// Processes a single question and returns a strongly typed result.
