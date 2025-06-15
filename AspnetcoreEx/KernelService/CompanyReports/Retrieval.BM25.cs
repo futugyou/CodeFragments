@@ -9,15 +9,16 @@ public class BM25Retriever : IRetrieval
     private readonly string bm25DbDir;
     private readonly string documentsDir;
 
-    public BM25Retriever(string bm25DbDir, string documentsDir)
+    public BM25Retriever(IOptionsMonitor<CompanyReportlOptions> optionsMonitor)
     {
-        this.bm25DbDir = bm25DbDir;
-        this.documentsDir = documentsDir;
+        var config = optionsMonitor.CurrentValue;
+        this.bm25DbDir = config.Bm25DbPath;
+        this.documentsDir = config.DocumentsDir;
     }
 
     public Task<List<RetrievalResult>> RetrieveAllAsync(string companyName, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<List<RetrievalResult>>([]);
     }
 
     public async Task<List<RetrievalResult>> RetrieveByCompanyNameAsync(

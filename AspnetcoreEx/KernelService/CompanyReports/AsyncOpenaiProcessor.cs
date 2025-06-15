@@ -12,7 +12,7 @@ public class AsyncOpenaiProcessor
     private readonly OpenAIClient _client;
     private const string DefaultModel = "gpt-4o-mini-2024-07-18";
 
-    public AsyncOpenaiProcessor(OpenAIClient client)
+    public AsyncOpenaiProcessor([FromKeyedServices("report")] OpenAIClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client), "OpenAIClient cannot be null.");
     }

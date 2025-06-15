@@ -13,18 +13,13 @@ public class VectorRetriever : IRetrieval
     private readonly List<ReportDb> _allDbs;
     private readonly OpenAIClient _llm;
 
-    public VectorRetriever(string vectorDbDir, string documentsDir)
+    public VectorRetriever([FromKeyedServices("report")] OpenAIClient client, IOptionsMonitor<CompanyReportlOptions> optionsMonitor)
     {
-        _vectorDbDir = vectorDbDir;
-        _documentsDir = documentsDir;
+        var config = optionsMonitor.CurrentValue;
+        _vectorDbDir = config.VectorDbDir;
+        _documentsDir = config.DocumentsDir;
         _allDbs = LoadDbs();
-        _llm = SetUpLlm();
-    }
-
-    private static OpenAIClient SetUpLlm()
-    {
-        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-        return new OpenAIClient(apiKey);
+        _llm = client;
     }
 
     private List<ReportDb> LoadDbs()
@@ -66,10 +61,9 @@ public class VectorRetriever : IRetrieval
         return allDbs;
     }
 
-    public static async Task<double> GetStringsCosineSimilarityAsync(string str1, string str2, CancellationToken cancellationToken = default)
+    public async Task<double> GetStringsCosineSimilarityAsync(string str1, string str2, CancellationToken cancellationToken = default)
     {
-        var llm = SetUpLlm();
-        var embeddings = await llm.GetEmbeddingClient("text-embedding-3-large").GenerateEmbeddingsAsync([str1, str2], cancellationToken: cancellationToken);
+        var embeddings = await _llm.GetEmbeddingClient("text-embedding-3-large").GenerateEmbeddingsAsync([str1, str2], cancellationToken: cancellationToken);
         return CosineSimilarity(embeddings.Value[0].ToFloats().Span, embeddings.Value[1].ToFloats().Span);
     }
 

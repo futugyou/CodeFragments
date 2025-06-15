@@ -10,9 +10,9 @@ public class VectorDBIngestor : IIngestor
 {
     private readonly OpenAIClient _client;
 
-    public VectorDBIngestor(string openAiApiKey)
+    public VectorDBIngestor([FromKeyedServices("report")] OpenAIClient client)
     {
-        _client = new OpenAIClient(openAiApiKey);
+        _client = client ?? throw new ArgumentNullException(nameof(client), "OpenAIClient cannot be null.");
     }
 
     public async Task ProcessReportsAsync(string allReportsDir, string outputDir, CancellationToken cancellationToken = default)

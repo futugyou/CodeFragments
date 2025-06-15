@@ -3,18 +3,18 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 
 public class HybridRetriever : IRetrieval
 {
-    private readonly VectorRetriever _vectorRetriever;
+    private readonly IRetrieval _vectorRetriever;
     private readonly LLMReranker _reranker;
 
-    public HybridRetriever(string vectorDbDir, string documentsDir)
+    public HybridRetriever([FromKeyedServices("VectorRetriever")] IRetrieval vectorRetriever, LLMReranker lLMReranker)
     {
-        _vectorRetriever = new VectorRetriever(vectorDbDir, documentsDir);
-        _reranker = new LLMReranker();
+        _vectorRetriever = vectorRetriever;
+        _reranker = lLMReranker;
     }
 
     public Task<List<RetrievalResult>> RetrieveAllAsync(string companyName, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<List<RetrievalResult>>([]);
     }
 
     /// <summary>

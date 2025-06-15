@@ -7,7 +7,7 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 
 public class OpenaiProcessor : IAPIProcessor
 {
-    public OpenaiProcessor(OpenAIClient client)
+    public OpenaiProcessor([FromKeyedServices("report")] OpenAIClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client), "OpenAIClient cannot be null.");
     }
@@ -31,7 +31,7 @@ public class OpenaiProcessor : IAPIProcessor
         {
             Temperature = temperature,
             Seed = seed,
-            // ResponseFormat = responseFormat, 
+            ResponseFormat = ChatResponseFormat.Json,
         };
         var content = await client.GetResponseAsync(history, options, cancellationToken: cancellationToken);
 

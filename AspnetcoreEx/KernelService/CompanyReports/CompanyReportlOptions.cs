@@ -11,6 +11,8 @@ public class CompanyReportlOptions
     public int ParallelRequests { get; set; } = 10;
     public int LlmRerankingSampleSize { get; set; } = 10;
     public int TopNRetrieval { get; set; } = 5;
+    public bool ReturnParentPages { get; set; }
+    public bool NewChallengePipeline { get; set; }
     public string SubmissionName { get; set; } = "";
     public string PipelineDetails { get; set; } = "";
     public string AnsweringModel { get; set; } = "gpt-3.5-turbo";
@@ -25,7 +27,7 @@ public class CompanyReportlOptions
     public string SubsetName { get; set; } = "subset.csv";
     public string QuestionsFileName { get; set; } = "questions.json";
     public string PdfReportsName { get; set; } = "pdf_reports";
-   
+
     public string SubsetPath => Path.Combine(RootPath, SubsetName);
     public string QuestionsFilePath => Path.Combine(RootPath, QuestionsFileName);
     public string PdfReportsDir => Path.Combine(RootPath, PdfReportsName);

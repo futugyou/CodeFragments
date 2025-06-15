@@ -10,16 +10,27 @@ public class Pipeline
     private readonly IOptionsMonitor<CompanyReportlOptions> runConfig;
     private readonly IPDFParser pdfParser;
     private readonly TableSerializer tableSerializer;
+    private readonly IIngestor bm25Ingestor;
+    private readonly IIngestor vectorDBIngestor;
+    private readonly QuestionsProcessor questionsProcessor;
     private readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    public Pipeline(IOptionsMonitor<CompanyReportlOptions> runConfig, IPDFParser pdfParser, TableSerializer tableSerializer)
+    public Pipeline(IOptionsMonitor<CompanyReportlOptions> runConfig,
+    [FromKeyedServices("docling")] IPDFParser pdfParser,
+    TableSerializer tableSerializer,
+    [FromKeyedServices("BM25")] IIngestor bm25Ingestor,
+    [FromKeyedServices("VectorDB")] IIngestor vectorDBIngestor,
+    QuestionsProcessor questionsProcessor)
     {
         this.runConfig = runConfig;
         this.pdfParser = pdfParser;
         this.tableSerializer = tableSerializer;
+        this.bm25Ingestor = bm25Ingestor;
+        this.vectorDBIngestor = vectorDBIngestor;
+        this.questionsProcessor = questionsProcessor;
         ConvertJsonToCsvIfNeeded();
     }
 
@@ -120,15 +131,13 @@ public class Pipeline
     public async Task CreateVectorDbs(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
-        var vdbIngestor = new VectorDBIngestor(config.LlmApiKey);
-        await vdbIngestor.ProcessReportsAsync(config.DocumentsDir, config.VectorDbDir, cancellation);
+        await vectorDBIngestor.ProcessReportsAsync(config.DocumentsDir, config.VectorDbDir, cancellation);
         Console.WriteLine($"Vector databases created in {config.VectorDbDir}");
     }
 
     public async Task CreateBm25Db(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
-        var bm25Ingestor = new BM25Ingestor();
         await bm25Ingestor.ProcessReportsAsync(config.DocumentsDir, config.Bm25DbPath, cancellation);
         Console.WriteLine($"BM25 database created at {config.Bm25DbPath}");
     }
@@ -177,23 +186,8 @@ public class Pipeline
     public async Task ProcessQuestions(CancellationToken cancellation = default)
     {
         var config = runConfig.CurrentValue;
-        var processor = new QuestionsProcessor(
-            config.VectorDbDir,
-            config.DocumentsDir,
-            config.QuestionsFilePath,
-            true,
-            config.SubsetPath,
-            config.ParentDocumentRetrieval,
-            config.LlmReranking,
-            config.LlmRerankingSampleSize,
-            config.TopNRetrieval,
-            config.ParallelRequests,
-            config.ApiProvider,
-            config.AnsweringModel,
-            config.FullContext
-        );
         var outputPath = GetNextAvailableFilename(config.AnswersFilePath);
-        await processor.ProcessAllQuestionsAsync(
+        await questionsProcessor.ProcessAllQuestionsAsync(
             outputPath,
             config.SubmissionFile,
             config.TeamEmail,

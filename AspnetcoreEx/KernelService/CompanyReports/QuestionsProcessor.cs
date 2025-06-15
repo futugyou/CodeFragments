@@ -7,47 +7,31 @@ namespace AspnetcoreEx.KernelService.CompanyReports;
 
 public class QuestionsProcessor
 {
-    // TODO: DI
     private readonly APIProcessorManager openaiProcessor;
-    private string vectorDbDir;
-    private string documentsDir;
-    private string questionsFilePath;
-    private bool v;
-    private string subsetPath;
-    private bool parentDocumentRetrieval;
-    private bool llmReranking;
-    private int llmRerankingSampleSize;
-    private int topNRetrieval;
-    private int parallelRequests;
-    private string apiProvider;
-    private string answeringModel;
-    private bool fullContext;
+    private readonly IOptionsMonitor<CompanyReportlOptions> runConfig;
+    private readonly IRetrieval vectorRetriever;
+    private readonly IRetrieval hybridRetriever;
+    private readonly CompanyReportlOptions options;
     private ResponseData responseData;
-    private bool newChallengePipeline = false;
-    private bool returnParentPages = false;
-    private List<AnswerDetail> AnswerDetailList = []; 
+    private List<AnswerDetail> AnswerDetailList = [];
     private Dictionary<string, CsvMetadata> companies_datas = [];
 
-    public QuestionsProcessor(string vectorDbDir, string documentsDir, string questionsFilePath, bool newChallengePipeline, string subsetPath, bool parentDocumentRetrieval, bool llmReranking, int llmRerankingSampleSize, int topNRetrieval, int parallelRequests, string apiProvider, string answeringModel, bool fullContext)
+    public QuestionsProcessor(
+        APIProcessorManager openaiProcessor,
+        IOptionsMonitor<CompanyReportlOptions> runConfig,
+        [FromKeyedServices("VectorRetriever")] IRetrieval vectorRetriever,
+        [FromKeyedServices("HybridRetriever")] IRetrieval hybridRetriever)
     {
-        this.vectorDbDir = vectorDbDir;
-        this.documentsDir = documentsDir;
-        this.questionsFilePath = questionsFilePath;
-        this.subsetPath = subsetPath;
-        this.parentDocumentRetrieval = parentDocumentRetrieval;
-        this.llmReranking = llmReranking;
-        this.llmRerankingSampleSize = llmRerankingSampleSize;
-        this.topNRetrieval = topNRetrieval;
-        this.parallelRequests = parallelRequests;
-        this.apiProvider = apiProvider;
-        this.answeringModel = answeringModel;
-        this.fullContext = fullContext;
-        this.newChallengePipeline = newChallengePipeline;
+        this.openaiProcessor = openaiProcessor;
+        this.runConfig = runConfig;
+        this.vectorRetriever = vectorRetriever;
+        this.hybridRetriever = hybridRetriever;
+        this.options = runConfig.CurrentValue;
     }
 
     public async Task<ProcessQuestionsResult> ProcessAllQuestionsAsync(string outputPath, bool submissionFile, string teamEmail, string submissionName, string pipelineDetails, CancellationToken cancellationToken = default)
     {
-        var datas = await File.ReadAllTextAsync(questionsFilePath, cancellationToken) ?? "[]";
+        var datas = await File.ReadAllTextAsync(options.QuestionsFilePath, cancellationToken) ?? "[]";
         var reportData = JsonSerializer.Deserialize<List<QuestionRoot>>(datas) ?? [];
         return await ProcessQuestionsListAsync(reportData, outputPath, submissionFile, teamEmail, submissionName, pipelineDetails, cancellationToken);
     }
@@ -70,7 +54,7 @@ public class QuestionsProcessor
         AnswerDetailList = [.. new AnswerDetail[totalQuestions]];
         var processedQuestions = new Question[totalQuestions];
 
-        if (parallelRequests <= 1)
+        if (options.ParallelRequests <= 1)
         {
             for (int i = 0; i < totalQuestions; i++)
             {
@@ -87,7 +71,7 @@ public class QuestionsProcessor
             // Use Parallel.ForEachAsync for parallel processing
             await Parallel.ForEachAsync(
                 questionsWithIndex,
-                new ParallelOptions { MaxDegreeOfParallelism = parallelRequests },
+                new ParallelOptions { MaxDegreeOfParallelism = options.ParallelRequests },
                 async (question, cancellationToken) =>
                 {
                     // Simulate async work if needed
@@ -113,23 +97,17 @@ public class QuestionsProcessor
     public async Task<RephrasedQuestions> GetAnswerForCompanyAsync(string companyName, string question, string schema, CancellationToken cancellation = default)
     {
         IRetrieval retriever;
-        if (llmReranking)
+        if (options.LlmReranking)
         {
-            retriever = new HybridRetriever(
-                vectorDbDir: vectorDbDir,
-                documentsDir: documentsDir
-            );
+            retriever = hybridRetriever;
         }
         else
         {
-            retriever = new VectorRetriever(
-                vectorDbDir: vectorDbDir,
-                documentsDir: documentsDir
-            );
+            retriever = vectorRetriever;
         }
 
         List<RetrievalResult> retrievalResults;
-        if (fullContext)
+        if (options.FullContext)
         {
             retrievalResults = await retriever.RetrieveAllAsync(companyName, cancellation);
         }
@@ -138,9 +116,9 @@ public class QuestionsProcessor
             retrievalResults = await retriever.RetrieveByCompanyNameAsync(
                 companyName: companyName,
                 query: question,
-                llmRerankingSampleSize: llmRerankingSampleSize,
-                topN: topNRetrieval,
-                returnParentPages: returnParentPages,
+                llmRerankingSampleSize: options.LlmRerankingSampleSize,
+                topN: options.TopNRetrieval,
+                returnParentPages: options.ReturnParentPages,
                 cancellationToken: cancellation);
         }
 
@@ -154,12 +132,12 @@ public class QuestionsProcessor
             question: question,
             ragContext: ragContext,
             schema: schema,
-            model: answeringModel,
+            model: options.AnsweringModel,
             cancellationToken: cancellation
         );
         responseData = openaiProcessor.ResponseData;
 
-        if (newChallengePipeline)
+        if (options.NewChallengePipeline)
         {
             var pages = answerDict.RelevantPages ?? [];
             var validatedPages = ValidatePageReferences(pages, retrievalResults);
@@ -172,7 +150,7 @@ public class QuestionsProcessor
     public async Task<RephrasedQuestions> ProcessQuestionAsync(string question, string schema, CancellationToken cancellation = default)
     {
         List<string> extractedCompanies = [];
-        if (newChallengePipeline)
+        if (options.NewChallengePipeline)
         {
             extractedCompanies = ExtractCompaniesFromSubset(question);
         }
@@ -266,7 +244,7 @@ public class QuestionsProcessor
         // Step 3: Generate a comparative answer using all individual answers
         var contextStr = string.Join(Environment.NewLine, individualAnswers.Select(kv => $"{kv.Key}: {kv.Value}"));
 
-        var comparativeAnswer = await openaiProcessor.GetAnswerFromRagContextAsync(question: question, ragContext: contextStr, schema: "comparative", model: answeringModel, cancellationToken: cancellation);
+        var comparativeAnswer = await openaiProcessor.GetAnswerFromRagContextAsync(question: question, ragContext: contextStr, schema: "comparative", model: options.AnsweringModel, cancellationToken: cancellation);
         responseData = openaiProcessor.ResponseData;
 
         // Add reference
@@ -349,10 +327,10 @@ public class QuestionsProcessor
 
     private List<ReferenceKey> ExtractReferences(List<int> pagesList, string companyName)
     {
-        if (string.IsNullOrEmpty(subsetPath))
+        if (string.IsNullOrEmpty(options.SubsetPath))
             throw new ArgumentException("subsetPath is required for new challenge pipeline when processing references.");
 
-        companies_datas = IPDFParser.ParseCsvMetadata(subsetPath);
+        companies_datas = IPDFParser.ParseCsvMetadata(options.SubsetPath);
 
         var company = companies_datas.FirstOrDefault(c => c.Value.GetCompanyName() == companyName);
         string companySha1 = company.Value.Sha1 ?? "";
@@ -520,7 +498,7 @@ public class QuestionsProcessor
         string questionText;
         string schemaOrKind;
 
-        if (newChallengePipeline)
+        if (options.NewChallengePipeline)
         {
             questionText = questionData.Text ?? "";
             schemaOrKind = questionData.Kind ?? "";
@@ -540,7 +518,7 @@ public class QuestionsProcessor
             {
                 var detailRef = CreateAnswerDetailRef(new(), questionIndex);
 
-                if (newChallengePipeline)
+                if (options.NewChallengePipeline)
                 {
                     return new Question
                     {
@@ -567,7 +545,7 @@ public class QuestionsProcessor
             }
 
             var answerDetailsRef = CreateAnswerDetailRef(answerDict, questionIndex);
-            if (newChallengePipeline)
+            if (options.NewChallengePipeline)
             {
                 return new Question
                 {
@@ -609,7 +587,7 @@ public class QuestionsProcessor
 
         AnswerDetailList[questionIndex] = errorDetail;
 
-        if (newChallengePipeline)
+        if (options.NewChallengePipeline)
         {
             return new Question
             {
@@ -642,10 +620,10 @@ public class QuestionsProcessor
         // Load companies from CSV if not already loaded
         if (companies_datas == null)
         {
-            if (string.IsNullOrEmpty(subsetPath))
+            if (string.IsNullOrEmpty(options.SubsetPath))
                 throw new InvalidOperationException("subsetPath must be provided to use subset extraction");
 
-            companies_datas = IPDFParser.ParseCsvMetadata(subsetPath);
+            companies_datas = IPDFParser.ParseCsvMetadata(options.SubsetPath);
         }
 
         var foundCompanies = new List<string>();

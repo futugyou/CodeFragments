@@ -13,19 +13,9 @@ public class LLMReranker
     private readonly string _schemaSingleBlock;
     private readonly string _schemaMultipleBlocks;
 
-    public LLMReranker(OpenAIClient client, string systemPromptSingle, string systemPromptMulti, string schemaSingle, string schemaMulti)
+    public LLMReranker([FromKeyedServices("report")] OpenAIClient client)
     {
         _llmClient = client;
-        _systemPromptSingleBlock = systemPromptSingle;
-        _systemPromptMultipleBlocks = systemPromptMulti;
-        _schemaSingleBlock = schemaSingle;
-        _schemaMultipleBlocks = schemaMulti;
-    }
-
-    public LLMReranker()
-    {
-        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-        _llmClient = new OpenAIClient(apiKey);
         _systemPromptSingleBlock = RerankingPrompt.SystemPrompt;
         _systemPromptMultipleBlocks = RerankingPrompt.SystemPromptMultipleBlocks;
         _schemaSingleBlock = Prompts.DefaultJsonOptions.GetJsonSchemaAsNode(typeof(RetrievalRankingSingleBlock)).ToString();
