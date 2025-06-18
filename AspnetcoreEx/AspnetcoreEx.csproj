@@ -25,20 +25,20 @@
 		<PackageReference Include="FaissMask" Version="0.4.2" />
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.2.0" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
-		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.Data" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.Data.Spatial" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.Execution" Version="15.1.5" />
+		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.Data" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.Data.Spatial" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.Execution" Version="15.1.6" />
 		<PackageReference Include="HotChocolate.PersistedQueries.FileSystem" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.PersistedQueries.InMemory" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.PersistedQueries.Redis" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.Stitching" Version="14.0.0-tags-13-1-0-preview-5.1" />
 		<PackageReference Include="HotChocolate.Stitching.Redis" Version="14.0.0-tags-13-1-0-preview-5.1" />
-		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="15.1.5" />
-		<PackageReference Include="HotChocolate.Types.Scalars" Version="15.1.5" />
+		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="15.1.6" />
+		<PackageReference Include="HotChocolate.Types.Scalars" Version="15.1.6" />
 		<PackageReference Include="HtmlTags" Version="9.0.0" />
 		<PackageReference Include="HttpMachine" Version="0.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
