@@ -40,19 +40,21 @@ public class KernelServiceController : ControllerBase
     {
         var responseList = new List<string>();
         ChatHistory history = [];
-        history.AddUserMessage("Hello");
-        responseList.Add("User > Hello");
+        history.ToString();
+        await CallLightFunction("Hello", responseList, history);
+        await CallLightFunction("Can you turn on the lights", responseList, history);
+        await CallLightFunction("Light name is `Chandelier`", responseList, history);
+        await CallLightFunction("Ok, turn off it", responseList, history);
+        return [.. responseList];
+    }
+
+    private async Task CallLightFunction(string input, List<string> responseList, ChatHistory history)
+    {
+        history.AddUserMessage(input);
+        responseList.Add("User > " + input);
         var result = await _chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: _kernel);
         history.AddMessage(result.Role, result.Content ?? "");
         responseList.Add("Assistant > " + result);
-
-        history.AddUserMessage("Can you turn on the lights");
-        responseList.Add("User > Can you turn on the lights");
-        result = await _chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: _kernel);
-        history.AddMessage(result.Role, result.Content ?? "");
-        responseList.Add("Assistant > " + result);
-
-        return [.. responseList];
     }
 
     [Route("prompt/one")]
