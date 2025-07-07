@@ -67,12 +67,14 @@ public static class KernelServiceExtensions
             await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
         }
 
-        kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, new Uri(config.Endpoint), config.Key);
+        //TODO: wait for an anwaer https://github.com/microsoft/semantic-kernel/issues/10842
+        var httpClient = new HttpClient(new ResponseInterceptorHandler()) { };
+        kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, new Uri(config.Endpoint), config.Key, httpClient: httpClient);
         // for now AddOpenAIEmbeddingGenerator/AddOpenAITextToImage need httpclient to use other endpoint
         // kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key);
         // kernelBuilder.AddOpenAITextToImage(config.Key);
 
-        kernelBuilder.Plugins.AddFromType<LightPlugin>();
+        kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();
         kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
