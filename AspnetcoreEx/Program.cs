@@ -151,7 +151,7 @@ builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
 await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);
 
-builder.Services.AddMQTTExtension(configuration);
+// builder.Services.AddMQTTExtension(configuration);
 
 builder.Services.Configure<AspnetcoreEx.Controllers.TestOption>(configuration);
 configuration.AddAwsParameterStore();
