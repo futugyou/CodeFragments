@@ -67,18 +67,10 @@ public static class KernelServiceExtensions
             await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
         }
 
-        if (!string.IsNullOrWhiteSpace(config.Endpoint))
-        {
-            kernelBuilder.AddAzureOpenAIChatCompletion(config.ChatModel, config.Endpoint, config.Key);
-            kernelBuilder.AddAzureOpenAIEmbeddingGenerator(config.Embedding, config.Endpoint, config.Key);
-            kernelBuilder.AddAzureOpenAITextToImage(config.Image, config.Endpoint, config.Key);
-        }
-        else
-        {
-            kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, config.Key);
-            kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key);
-            kernelBuilder.AddOpenAITextToImage(config.Key);
-        }
+        kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, new Uri(config.Endpoint), config.Key);
+        // for now AddOpenAIEmbeddingGenerator/AddOpenAITextToImage need httpclient to use other endpoint
+        // kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key);
+        // kernelBuilder.AddOpenAITextToImage(config.Key);
 
         kernelBuilder.Plugins.AddFromType<LightPlugin>();
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();
@@ -90,8 +82,10 @@ public static class KernelServiceExtensions
 
         IHttpClientBuilder httpClientBuilder = services.AddHttpClient("qdrant", c =>
         {
-            UriBuilder builder = new(config.QdrantHost);
-            builder.Port = config.QdrantPort;
+            UriBuilder builder = new(config.QdrantHost)
+            {
+                Port = config.QdrantPort
+            };
             c.BaseAddress = builder.Uri;
             if (!string.IsNullOrEmpty(config.QdrantKey))
             {
@@ -101,7 +95,7 @@ public static class KernelServiceExtensions
 
         httpClientBuilder.AddResilienceHandler(
             "AdvancedPipeline",
-            static (ResiliencePipelineBuilder<HttpResponseMessage> builder, ResilienceHandlerContext context) =>
+            static (builder, context) =>
             {
                 // Enable reloads whenever the named options change
                 context.EnableReloads<HttpRetryStrategyOptions>("RetryOptions");
@@ -188,40 +182,23 @@ public static class KernelServiceExtensions
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
         var memoryBuilder = new KernelMemoryBuilder().WithSimpleVectorDb();
 
-        if (!string.IsNullOrWhiteSpace(config.Endpoint))
+        memoryBuilder.WithOpenAITextEmbeddingGeneration(new OpenAIConfig
         {
-            memoryBuilder.WithAzureOpenAITextEmbeddingGeneration(new AzureOpenAIConfig
-            {
-                Deployment = config.Embedding,
-                Endpoint = config.Endpoint,
-                Auth = AzureOpenAIConfig.AuthTypes.APIKey,
-                APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
-                APIKey = config.Key
-            });
-            memoryBuilder.WithAzureOpenAITextGeneration(new AzureOpenAIConfig
-            {
-                Deployment = config.TextCompletion,
-                Endpoint = config.Endpoint,
-                Auth = AzureOpenAIConfig.AuthTypes.APIKey,
-                APIType = AzureOpenAIConfig.APITypes.EmbeddingGeneration,
-                APIKey = config.Key
-            });
-        }
-        else
+            EmbeddingModel = config.Embedding,
+            Endpoint = config.Endpoint,
+            APIKey = config.Key
+        });
+        memoryBuilder.WithOpenAITextGeneration(new OpenAIConfig
         {
-            // memoryBuilder.WithOpenAITextEmbeddingGeneration(new OpenAIConfig
-            // {
-            //     EmbeddingModel = config.Embedding,
-            //     APIKey = config.Key,
-            // });
-            // Remove the call to WithOpenAITextGeneration as it does not exist
-        }
+            TextModel = config.TextCompletion,
+            Endpoint = config.Endpoint,
+            APIKey = config.Key
+        });
 
         services.AddSingleton(sp =>
         {
             return memoryBuilder.Build();
         });
-
 
         return services;
     }

@@ -75,16 +75,16 @@ builder.Services.AddTransient<TestAuthHandler>();
 builder.Services.AddTransient<EnrichmentHandler>();
 builder.Services.ConfigureHttpClientDefaults(static http =>
 {
-    http.AddLogger<SimpleConsoleLogger>();
-    http.AddLogger<RequestIdLogger>();
-    http.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
+    // http.AddLogger<SimpleConsoleLogger>();
+    // http.AddLogger<RequestIdLogger>();
+    // http.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
     // b.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
-    http.AddHttpMessageHandler<TestAuthHandler>();
-    http.AddHttpMessageHandler<EnrichmentHandler>();
+    // http.AddHttpMessageHandler<TestAuthHandler>();
+    // http.AddHttpMessageHandler<EnrichmentHandler>();
     // http.AddHttpMessageHandler<ClientSideRateLimitedHandler>();
     // it will remove all log, see read,md in HttpDiagnosticsExtensions
     // b.RemoveAllLoggers();
-    http.AddServiceDiscovery();
+    // http.AddServiceDiscovery();
 });
 
 // consume-events-in-process
