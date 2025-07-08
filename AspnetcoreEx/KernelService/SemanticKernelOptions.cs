@@ -8,10 +8,7 @@ public class SemanticKernelOptions
     public string JiraAddress { get; set; }
     public string JiraEmailAddress { get; set; }
     public string JiraApiKey { get; set; }
-    public string QdrantHost { get; set; }
-    public string QdrantKey { get; set; }
-    public int QdrantPort { get; set; }
-    public int QdrantVectorSize { get; set; }
+    public string VectorStoreName { get; set; } 
     public string TextCompletion { get; set; }
     public string Embedding { get; set; }
     public string Image { get; set; }

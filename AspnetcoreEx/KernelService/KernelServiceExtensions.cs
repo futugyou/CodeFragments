@@ -3,15 +3,12 @@ using AspnetcoreEx.KernelService.Ingestion;
 using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.VectorData;
 using Microsoft.KernelMemory;
-using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Microsoft.SemanticKernel.Plugins.Core;
 using ModelContextProtocol.Client;
 using OpenAI;
-using Qdrant.Client;
 using System.ClientModel;
 using System.Collections.Concurrent;
 
@@ -33,6 +30,9 @@ public static class KernelServiceExtensions
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         var sp = services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+
+        // mongo db, it will register `VectorStore` as singleton
+        services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.VectorStoreName);
 
         // mcp server
         // Here we use `mcpserver` alone. `SemanticKernel` has more comprehensive examples to explain how to use `SemanticKernel` with `mcpserver`
@@ -56,12 +56,6 @@ public static class KernelServiceExtensions
             services.AddSingleton<SemanticSearch>();
             services.AddScoped<DataIngestor>();
         }
-
-        services.AddSingleton<VectorStore>(sp =>
-        {
-            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            return new QdrantVectorStore(new QdrantClient(host: config.QdrantHost, port: config.QdrantPort, apiKey: config.QdrantKey, loggerFactory: loggerFactory), true);
-        });
 
         services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
         services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, "ingestioncache");
@@ -97,19 +91,6 @@ public static class KernelServiceExtensions
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
 
         kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
-
-        IHttpClientBuilder httpClientBuilder = services.AddHttpClient("qdrant", c =>
-        {
-            UriBuilder builder = new(config.QdrantHost)
-            {
-                Port = config.QdrantPort
-            };
-            c.BaseAddress = builder.Uri;
-            if (!string.IsNullOrEmpty(config.QdrantKey))
-            {
-                c.DefaultRequestHeaders.Add("api-key", config.QdrantKey);
-            }
-        });
 
         return services;
     }

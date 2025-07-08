@@ -56,7 +56,7 @@
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.98.250508.3" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.2" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.59.0" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.55.0-preview" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.MongoDB" Version="1.59.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.59.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.55.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.55.0-alpha" />
