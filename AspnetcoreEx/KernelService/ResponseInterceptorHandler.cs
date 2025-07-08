@@ -14,16 +14,16 @@ public class ResponseInterceptorHandler : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken);
 
         // Read the original response content
-        var originalContent = await response.Content.ReadAsStringAsync();
+        var originalContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var originalJson = JsonSerializer.Deserialize<JsonNode>(originalContent);
 
         //Set the id to a random value if not assigned a value
-        var choices = originalJson?["choices"] as JsonArray ?? new JsonArray();
+        var choices = originalJson?["choices"] as JsonArray ?? [];
         foreach (var choice in choices)
         {
             var message = choice?["message"] as JsonObject;
-            var toolCalls = message?["tool_calls"] as JsonArray ?? new JsonArray();
+            var toolCalls = message?["tool_calls"] as JsonArray ?? [];
             foreach (var toolCall in toolCalls)
             {
                 var toolCallObj = toolCall as JsonObject;
