@@ -111,20 +111,6 @@ public static class KernelServiceExtensions
             }
         });
 
-        httpClientBuilder.AddResilienceHandler(
-            "AdvancedPipeline",
-            static (builder, context) =>
-            {
-                // Enable reloads whenever the named options change
-                context.EnableReloads<HttpRetryStrategyOptions>("RetryOptions");
-
-                // Retrieve the named options
-                var retryOptions = context.GetOptions<HttpRetryStrategyOptions>("RetryOptions");
-
-                // Add retries using the resolved options
-                builder.AddRetry(retryOptions);
-            });
-
         return services;
     }
 

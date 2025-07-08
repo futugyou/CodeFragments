@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
+using Microsoft.Extensions.Http.Resilience;
 
 namespace AspnetcoreEx.HttpDiagnosticsExtensions;
+
 public static class HttpExtensions
 {
     internal static IServiceCollection AddClientSideRateLimited(this IServiceCollection services, IConfiguration configuration)
@@ -30,12 +32,23 @@ public static class HttpExtensions
         // FixedWindowRateLimiter
         // PartitionedRateLimiter
         // SlidingWindowRateLimiter
-        
+
         services
         .AddHttpClient("ClientSideRate", c => { })
         .ConfigurePrimaryHttpMessageHandler(() =>
         {
             return new ClientSideRateLimitedHandler(limiter: tokenLiniter);
+        })
+        .AddResilienceHandler("AdvancedPipeline", static (builder, context) =>
+        {
+            // Enable reloads whenever the named options change
+            context.EnableReloads<HttpRetryStrategyOptions>("RetryOptions");
+
+            // Retrieve the named options
+            var retryOptions = context.GetOptions<HttpRetryStrategyOptions>("RetryOptions");
+
+            // Add retries using the resolved options
+            builder.AddRetry(retryOptions);
         });
 
         return services;
