@@ -26,6 +26,7 @@ public static class KernelServiceExtensions
         await Task.CompletedTask;
     }
 
+    // The configuration of SemanticKernel in this extension is the focus, and the others are secondary and can be deleted.
     internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
         // configuration
@@ -34,9 +35,12 @@ public static class KernelServiceExtensions
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
 
         // mcp server
+        // Here we use `mcpserver` alone. `SemanticKernel` has more comprehensive examples to explain how to use `SemanticKernel` with `mcpserver`
         services.AddMcpServer().WithToolsFromAssembly().WithHttpTransport();
 
+        // MEAI
         // dotnet new install Microsoft.Extensions.AI.Templates
+        // This is just a demonstration. Under the premise of `SemanticKernel`, there is no active use of the interface provided by `MEAI`
         var credential = new ApiKeyCredential(config.Key ?? throw new InvalidOperationException("Missing configuration: GitHubModels:Token. See the README for details."));
         var openAIOptions = new OpenAIClientOptions()
         {
@@ -44,8 +48,14 @@ public static class KernelServiceExtensions
         };
 
         var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-        var chatClient = ghModelsClient.GetChatClient(config.ChatModel).AsIChatClient();
-        var embeddingGenerator = ghModelsClient.GetEmbeddingClient(config.Embedding).AsIEmbeddingGenerator();
+        var chatClient = ghModelsClient.GetChatClient(config.TextCompletion).AsIChatClient();
+        if (!string.IsNullOrEmpty(config.Embedding))
+        {
+            var embeddingGenerator = ghModelsClient.GetEmbeddingClient(config.Embedding).AsIEmbeddingGenerator();
+            services.AddEmbeddingGenerator(embeddingGenerator);
+            services.AddSingleton<SemanticSearch>();
+            services.AddScoped<DataIngestor>();
+        }
 
         services.AddSingleton<VectorStore>(sp =>
         {
@@ -54,9 +64,6 @@ public static class KernelServiceExtensions
         });
 
         services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
-        services.AddEmbeddingGenerator(embeddingGenerator);
-        services.AddSingleton<SemanticSearch>();
-        services.AddScoped<DataIngestor>();
         services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, "ingestioncache");
 
         // Microsoft.SemanticKernel
@@ -68,11 +75,20 @@ public static class KernelServiceExtensions
         }
 
         //TODO: wait for an anwaer https://github.com/microsoft/semantic-kernel/issues/10842
-        var httpClient = new HttpClient(new ResponseInterceptorHandler()) { };
-        kernelBuilder.AddOpenAIChatCompletion(config.ChatModel, new Uri(config.Endpoint), config.Key, httpClient: httpClient);
-        // for now AddOpenAIEmbeddingGenerator/AddOpenAITextToImage need httpclient to use other endpoint
-        // kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key);
-        // kernelBuilder.AddOpenAITextToImage(config.Key);
+        var httpClient = new HttpClient(new ResponseInterceptorHandler())
+        {
+            BaseAddress = new Uri(config.Endpoint),
+        };
+        kernelBuilder.AddOpenAIChatCompletion(config.TextCompletion, new Uri(config.Endpoint), config.Key, httpClient: httpClient);
+
+        if (!string.IsNullOrEmpty(config.Image))
+        {
+            kernelBuilder.AddOpenAITextToImage(config.Image, config.Key, httpClient: httpClient);
+        }
+        if (!string.IsNullOrEmpty(config.Embedding))
+        {
+            kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key, httpClient: httpClient);
+        }
 
         kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();

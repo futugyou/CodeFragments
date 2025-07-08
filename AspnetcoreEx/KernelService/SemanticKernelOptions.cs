@@ -3,9 +3,8 @@
 public class SemanticKernelOptions
 {
     public string Key { get; set; }
-    public string GoogleApikey { get; set; }
-    public string GoogleEngine { get; set; }
-    public string GithubToken { get; set; }
+    public string Endpoint { get; set; } // e.g. https://api.openai.com, https://models.github.ai/inference, https://generativelanguage.googleapis.com/v1beta/openai, 
+
     public string JiraAddress { get; set; }
     public string JiraEmailAddress { get; set; }
     public string JiraApiKey { get; set; }
@@ -13,12 +12,10 @@ public class SemanticKernelOptions
     public string QdrantKey { get; set; }
     public int QdrantPort { get; set; }
     public int QdrantVectorSize { get; set; }
-    public string Embedding { get; set; }
     public string TextCompletion { get; set; }
+    public string Embedding { get; set; }
     public string Image { get; set; }
-    public string ChatModel { get; set; }
-    // for azure
-    public string Endpoint { get; set; }
+    // for kernel memory
     public string KernelMemoryEndpoint { get; set; }
     public string KernelMemoryApiKey { get; set; }
     // for mcp server
