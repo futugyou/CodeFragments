@@ -85,6 +85,7 @@ public static class KernelServiceExtensions
         }
 
         kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
+        kernelBuilder.Plugins.AddFromType<DataGenerationPlugin>("Generator");
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();
         kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();

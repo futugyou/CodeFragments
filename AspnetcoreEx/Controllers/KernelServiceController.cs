@@ -34,12 +34,25 @@ public class KernelServiceController : ControllerBase
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
     }
 
+    [Route("generation")]
+    [HttpPost]
+    public async Task<string[]> Generation(string input)
+    {
+        ChatHistory history = [];
+        history.AddSystemMessage("""
+        You are a data generation assistant. 
+        You will receive a class name or a JSON Schema of the class or C# class definition string. 
+        Please use this as a basis to generate at least 3 demo data.
+        """);
+        await CallLightFunction(input, history);
+        return [.. history.Select(x => x.Role + " > " + x.Content)];
+    }
+
     [Route("plugin/light")]
     [HttpPost]
     public async Task<string[]> PluginLight()
     {
         ChatHistory history = [];
-        history.ToString();
         await CallLightFunction("Hello", history);
         await CallLightFunction("Can you turn on the lights", history);
         await CallLightFunction("Light name is `Chandelier`", history);
