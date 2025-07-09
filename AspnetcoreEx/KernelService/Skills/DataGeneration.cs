@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Text.Json.Schema;
+using AspnetcoreEx.KernelService.Tools;
 
 namespace AspnetcoreEx.KernelService.Skills;
 
@@ -72,6 +73,19 @@ public class DataGenerationPlugin
     public string GenerateFromSchema(string jsonSchema, int count)
     {
         return BuildPrompt(jsonSchema, count);
+    }
+
+    [KernelFunction]
+    [Description("Generate JSON data based on a C# class definition string")]
+    public string GenerateDataFromClassDefinition(string classDefinition, int count = 5)
+    {
+        var type = TypeFromStringCompiler.GenerateTypeFromClassBody(classDefinition);
+        if (type == null)
+        {
+            return "Invalid class definition provided.";
+        }
+        var schema = DefaultJsonOptions.GetJsonSchemaAsNode(type, exporterOptions).ToString();
+        return BuildPrompt(schema, count);
     }
 
     private static string BuildPrompt(string schemaJson, int count)
