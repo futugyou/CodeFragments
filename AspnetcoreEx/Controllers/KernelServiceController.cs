@@ -580,7 +580,7 @@ public class KernelServiceController : ControllerBase
     [HttpPost]
     public async Task<string> ClientImportWeb(string url, string documentId, string question)
     {
-        var memory = new MemoryWebClient(endpoint: _options.KernelMemoryEndpoint, apiKey: _options.KernelMemoryApiKey);
+        var memory = new MemoryWebClient(endpoint: _options.KernelMemory.Endpoint, apiKey: _options.KernelMemory.ApiKey);
         await memory.ImportWebPageAsync(url);
 
         while (!await memory.IsDocumentReadyAsync(documentId))
