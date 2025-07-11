@@ -6,10 +6,12 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.VectorData;
 using Microsoft.KernelMemory;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
 using ModelContextProtocol.Client;
 using OpenAI;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Collections.Concurrent;
 
 namespace AspnetcoreEx.KernelService;
@@ -81,7 +83,7 @@ public static class KernelServiceExtensions
         }
         if (!string.IsNullOrEmpty(config.Embedding))
         {
-            kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key, httpClient: httpClient);
+            kernelBuilder.AddOpenAIEmbeddingGenerator(config.Embedding, config.Key, endpoint: new Uri(config.Endpoint), httpClient: httpClient);
         }
 
         kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
@@ -188,5 +190,131 @@ public static class KernelServiceExtensions
 
         return services;
     }
+
+    public static IKernelBuilder AddOpenAIEmbeddingGenerator(
+            this IKernelBuilder builder,
+            string modelId,
+            string apiKey,
+            string? orgId = null,
+            int? dimensions = null,
+            string? serviceId = null,
+            Uri? endpoint = null,
+            HttpClient? httpClient = null)
+    {
+
+        builder.Services.AddOpenAIEmbeddingGenerator(
+            modelId,
+            apiKey,
+            orgId,
+            dimensions,
+            serviceId,
+            endpoint,
+            httpClient);
+
+        return builder;
+    }
+    public static IServiceCollection AddOpenAIEmbeddingGenerator(
+        this IServiceCollection services,
+        string modelId,
+        string apiKey,
+        string? orgId = null,
+        int? dimensions = null,
+        string? serviceId = null,
+        Uri? endpoint = null,
+        HttpClient? httpClient = null,
+        string? openTelemetrySourceName = null,
+        Action<OpenTelemetryEmbeddingGenerator<string, Embedding<float>>>? openTelemetryConfig = null)
+    {
+        return services.AddKeyedSingleton<IEmbeddingGenerator<string, Embedding<float>>>(serviceId, (serviceProvider, _) =>
+        {
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+
+            var builder = new OpenAIClient(
+                   credential: new ApiKeyCredential(apiKey),
+                   options: GetOpenAIClientOptions(httpClient: httpClient, endpoint: endpoint, orgId: orgId))
+               .GetEmbeddingClient(modelId)
+               .AsIEmbeddingGenerator(dimensions)
+               .AsBuilder()
+               .UseOpenTelemetry(loggerFactory, openTelemetrySourceName, openTelemetryConfig);
+
+            if (loggerFactory is not null)
+            {
+                builder.UseLogging(loggerFactory);
+            }
+
+            return builder.Build();
+        });
+    }
+
+    internal static OpenAIClientOptions GetOpenAIClientOptions(HttpClient? httpClient, Uri? endpoint = null, string? orgId = null)
+    {
+        OpenAIClientOptions options = new()
+        {
+            UserAgentApplicationId = "Semantic-Kernel",
+        };
+
+        if (endpoint is not null)
+        {
+            options.Endpoint = endpoint;
+        }
+
+        options.AddPolicy(CreateRequestHeaderPolicy("Semantic-Kernel-Version", GetAssemblyVersion(typeof(OpenAIFunctionParameter))), PipelinePosition.PerCall);
+
+        if (orgId is not null)
+        {
+            options.OrganizationId = orgId;
+        }
+
+        if (httpClient is not null)
+        {
+            options.Transport = new HttpClientPipelineTransport(httpClient);
+            options.RetryPolicy = new ClientRetryPolicy(maxRetries: 0); // Disable retry policy if and only if a custom HttpClient is provided.
+            options.NetworkTimeout = Timeout.InfiniteTimeSpan; // Disable default timeout
+        }
+
+        return options;
+    }
+
+    static GenericActionPipelinePolicy CreateRequestHeaderPolicy(string headerName, string headerValue)
+    {
+        return new GenericActionPipelinePolicy((message) =>
+        {
+            if (message?.Request?.Headers?.TryGetValue(headerName, out string? _) == false)
+            {
+                message.Request.Headers.Set(headerName, headerValue);
+            }
+        });
+    }
+    public static string GetAssemblyVersion(Type type)
+    {
+        return type.Assembly.GetName().Version!.ToString();
+    }
 }
 
+internal sealed class GenericActionPipelinePolicy : PipelinePolicy
+{
+    private readonly Action<PipelineMessage> _processMessageAction;
+
+    internal GenericActionPipelinePolicy(Action<PipelineMessage> processMessageAction)
+    {
+        this._processMessageAction = processMessageAction;
+    }
+
+    public override void Process(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+    {
+        this._processMessageAction(message);
+        if (currentIndex < pipeline.Count - 1)
+        {
+            pipeline[currentIndex + 1].Process(message, pipeline, currentIndex + 1);
+        }
+    }
+
+    public override async ValueTask ProcessAsync(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+    {
+        this._processMessageAction(message);
+        if (currentIndex < pipeline.Count - 1)
+        {
+            await pipeline[currentIndex + 1].ProcessAsync(message, pipeline, currentIndex + 1).ConfigureAwait(false);
+        }
+    }
+}
