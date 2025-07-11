@@ -191,23 +191,19 @@ public static class KernelServiceExtensions
         var textGenerationService = sp.GetService<ITextGenerationService>();
         var embeddingGenerator = sp.GetService<IEmbeddingGenerator<string, Embedding<float>>>();
 
-        var memoryBuilder = new KernelMemoryBuilder().WithSimpleVectorDb();
-
         SemanticKernelConfig semanticKernelConfig = new();
-        if (textGenerationService != null)
+        services.AddKernelMemory(memoryBuilder =>
         {
-            memoryBuilder.WithSemanticKernelTextGenerationService(textGenerationService, semanticKernelConfig);
-        }
-        if (embeddingGenerator != null)
-        {
-            memoryBuilder.WithSemanticKernelTextEmbeddingGenerationService(embeddingGenerator, semanticKernelConfig);
-        }
-
-        services.AddSingleton(sp =>
-        {
-            return memoryBuilder.Build();
+            memoryBuilder.WithSimpleVectorDb();
+            if (textGenerationService != null)
+            {
+                memoryBuilder.WithSemanticKernelTextGenerationService(textGenerationService, semanticKernelConfig);
+            }
+            if (embeddingGenerator != null)
+            {
+                memoryBuilder.WithSemanticKernelTextEmbeddingGenerationService(embeddingGenerator, semanticKernelConfig);
+            }
         });
-
         return services;
     }
 }
