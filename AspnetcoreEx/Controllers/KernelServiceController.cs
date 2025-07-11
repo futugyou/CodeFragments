@@ -1,6 +1,7 @@
 ﻿
 using System.Reflection;
 using AspnetcoreEx.KernelService;
+using Microsoft.Extensions.AI;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -21,6 +22,7 @@ public class KernelServiceController : ControllerBase
     private readonly IKernelMemory _kernelMemory;
     private readonly SemanticKernelOptions _options;
     private readonly IChatCompletionService _chatCompletionService;
+    private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
     private OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
     {
         ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
@@ -32,6 +34,21 @@ public class KernelServiceController : ControllerBase
         _kernelMemory = kernelMemory;
         _options = optionsMonitor.CurrentValue;
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        _embeddingGenerator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
+    }
+
+    [Route("embedding/create")]
+    [HttpPost]
+    public async Task<string[]> EmbeddingCreate()
+    {
+        var datas = SemanticSearchRecord.CreateDemoDatas();
+        var embeddings = await _embeddingGenerator.GenerateAsync(datas.Select(d => d.Text));
+        var results = new List<string>();
+        foreach (var (data, embedding) in datas.Zip(embeddings))
+        {
+            results.Add($"Key: {data.Key}, FileName: {data.FileName}, PageNumber: {data.PageNumber}, Text: {data.Text}, Vector: [{string.Join(", ", embedding.Vector.ToArray())}]");
+        }
+        return [.. results];
     }
 
     [Route("generation")]
