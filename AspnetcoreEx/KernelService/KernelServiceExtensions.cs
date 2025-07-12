@@ -11,6 +11,11 @@ using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.TextGeneration;
 using ModelContextProtocol.Client;
 using OpenAI;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.ClientModel;
 using System.Collections.Concurrent;
 
@@ -28,12 +33,17 @@ public static class KernelServiceExtensions
     // The configuration of SemanticKernel in this extension is the focus, and the others are secondary and can be deleted.
     internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // otel
+        // SemanticKernelOpenTelemetry(services);
+
         // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
         var sp = services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
 
         // mongo db, it will register `VectorStore` as singleton
+        // TODO: Currently, Microsoft.SemanticKernel.Connectors.MongoDB can only use MongoDB.Driver 2.30.0, 3.X.X will report an error, 
+        // but all my other libraries that depend on MongoDB are 3.3.0 and above.
         services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
         services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, "ingestioncache");
 
@@ -67,22 +77,22 @@ public static class KernelServiceExtensions
             await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
         }
 
-
         if (!string.IsNullOrEmpty(config.TextCompletion.ModelId))
         {
             // https://github.com/microsoft/semantic-kernel/issues/10842
             // The purpose is to use OpenAI to call Gemini. Now that Gemini-specific packages have been added, they are no longer needed.
-            // var httpClient = new HttpClient(new ResponseInterceptorHandler())
-            // {
-            //     BaseAddress = new Uri(config.TextCompletion.Endpoint),
-            // };
+            var httpClient = new HttpClient(new ResponseInterceptorHandler())
+            {
+                BaseAddress = new Uri(config.TextCompletion.Endpoint),
+            };
             if (config.TextCompletion.Provider == "google")
             {
-                kernelBuilder.AddGoogleAIGeminiChatCompletion(config.TextCompletion.ModelId, config.TextCompletion.ApiKey);
+
+                kernelBuilder.AddGoogleAIGeminiChatCompletion(config.TextCompletion.ModelId, config.TextCompletion.ApiKey, new Uri(config.TextCompletion.Endpoint), httpClient: httpClient);
             }
             if (config.TextCompletion.Provider == "openai")
             {
-                kernelBuilder.AddOpenAIChatCompletion(config.TextCompletion.ModelId, new Uri(config.TextCompletion.Endpoint), config.TextCompletion.ApiKey);
+                kernelBuilder.AddOpenAIChatCompletion(config.TextCompletion.ModelId, new Uri(config.TextCompletion.Endpoint), config.TextCompletion.ApiKey, httpClient: httpClient);
             }
         }
 
@@ -115,6 +125,42 @@ public static class KernelServiceExtensions
 
         kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
 
+        return services;
+    }
+
+    private static IServiceCollection SemanticKernelOpenTelemetry(IServiceCollection services)
+    {
+        var resourceBuilder = ResourceBuilder
+            .CreateDefault()
+            .AddService("TelemetryConsoleQuickstart");
+
+        // Enable model diagnostics with sensitive data.
+        AppContext.SetSwitch("Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive", true);
+        var traceProvider = Sdk.CreateTracerProviderBuilder()
+             .SetResourceBuilder(resourceBuilder)
+             .AddSource("Microsoft.SemanticKernel*")
+             .AddConsoleExporter()
+             .Build();
+        var meterProvider = Sdk.CreateMeterProviderBuilder()
+              .SetResourceBuilder(resourceBuilder)
+              .AddMeter("Microsoft.SemanticKernel*")
+              .AddConsoleExporter()
+              .Build();
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            // Add OpenTelemetry as a logging provider
+            builder.AddOpenTelemetry(options =>
+            {
+                options.SetResourceBuilder(resourceBuilder);
+                options.AddConsoleExporter();
+                // Format log messages. This is default to false.
+                options.IncludeFormattedMessage = true;
+                options.IncludeScopes = true;
+            });
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+
+        services.AddSingleton(loggerFactory);
         return services;
     }
 
