@@ -2,6 +2,7 @@
 using System.Reflection;
 using AspnetcoreEx.KernelService;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.VectorData;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -23,32 +24,61 @@ public class KernelServiceController : ControllerBase
     private readonly SemanticKernelOptions _options;
     private readonly IChatCompletionService _chatCompletionService;
     private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
+    private readonly VectorStore _vectorStore;
     private OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
     {
         ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
     };
 
-    public KernelServiceController(Kernel kernel, IKernelMemory kernelMemory, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
+    public KernelServiceController(Kernel kernel, IKernelMemory kernelMemory, VectorStore vectorStore, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
     {
         _kernel = kernel;
         _kernelMemory = kernelMemory;
         _options = optionsMonitor.CurrentValue;
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        _vectorStore = vectorStore;
         _embeddingGenerator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
     }
 
     [Route("embedding/create")]
     [HttpPost]
-    public async Task<string[]> EmbeddingCreate()
+    public async IAsyncEnumerable<string> EmbeddingCreate()
     {
-        var datas = SemanticSearchRecord.CreateDemoDatas();
+        var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>("semantic_search", new VectorStoreCollectionDefinition
+        {
+            Properties =
+             [
+                 new VectorStoreVectorProperty("Vector", typeof(ReadOnlyMemory<float>), dimensions:1536) { DistanceFunction = DistanceFunction.CosineSimilarity, IndexKind = IndexKind.Hnsw },
+            ]
+        });
+        // Ensure the collection is created
+        await collection.EnsureCollectionExistsAsync();
+        var en = await collection.GetAsync("1");
+        if (en is not null)
+        {
+            yield return "Collection already exists.";
+            yield break;
+        }
+
+        var datas = SemanticSearchRecord.CreateDemoDatas().ToList();
         var embeddings = await _embeddingGenerator.GenerateAsync(datas.Select(d => d.Text));
-        var results = new List<string>();
+        if (embeddings.Count != datas.Count)
+        {
+            yield return "Embedding count does not match data count.";
+            yield break;
+        }
         foreach (var (data, embedding) in datas.Zip(embeddings))
         {
-            results.Add($"Key: {data.Key}, FileName: {data.FileName}, PageNumber: {data.PageNumber}, Text: {data.Text}, Vector: [{string.Join(", ", embedding.Vector.ToArray())}]");
+            data.Vector = embedding.Vector;
         }
-        return [.. results];
+
+        await collection.UpsertAsync(datas);
+
+        var upsertedRecords = collection.GetAsync(datas.Select(p => p.Key), new RecordRetrievalOptions { IncludeVectors = true });
+        await foreach (var data in upsertedRecords)
+        {
+            yield return $"Key: {data.Key}, FileName: {data.FileName}, PageNumber: {data.PageNumber}, Text: {data.Text}, Vector: [{string.Join(", ", data.Vector.ToArray())}]";
+        }
     }
 
     [Route("generation")]
