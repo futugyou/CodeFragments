@@ -38,7 +38,7 @@ public class SKEmbeddingController : ControllerBase
     public async IAsyncEnumerable<string> EmbeddingSearch(string input)
     {
         var embeddings = await _embeddingGenerator.GenerateAsync(input);
-        var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>("semantic_search", new VectorStoreCollectionDefinition
+        var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName(), new VectorStoreCollectionDefinition
         {
             Properties =
              [
@@ -56,7 +56,7 @@ public class SKEmbeddingController : ControllerBase
     [HttpPost]
     public async IAsyncEnumerable<string> EmbeddingCreate()
     {
-        var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>("semantic_search", new VectorStoreCollectionDefinition
+        var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName(), new VectorStoreCollectionDefinition
         {
             Properties =
              [

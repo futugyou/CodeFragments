@@ -9,7 +9,7 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
     public async Task<IReadOnlyList<SemanticSearchRecord>> SearchAsync(string text, string? filenameFilter, int maxResults)
     {
         var queryEmbedding = await embeddingGenerator.GenerateVectorAsync(text);
-        var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-test-ingested");
+        var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
         Expression<Func<SemanticSearchRecord, bool>>? filter = filenameFilter is { Length: > 0 }
             ? record => record.FileName == filenameFilter
             : null;
@@ -68,5 +68,10 @@ public class SemanticSearchRecord
             PageNumber = 3,
             Text = "Retrieval Augmented Generation - a term that refers to the process of retrieving additional data to provide as context to an LLM to use when generating a response (completion) to a user’s question (prompt)."
         };
+    }
+
+    public static string GetCollectionName()
+    {
+        return "semantic_search";
     }
 }

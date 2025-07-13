@@ -19,7 +19,7 @@ public class DataIngestor(
 
     public async Task IngestDataAsync(IIngestionSource source)
     {
-        var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-test-ingested");
+        var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
         await vectorCollection.EnsureCollectionExistsAsync();
 
         var documentsForSource = ingestionCacheDb.Documents
