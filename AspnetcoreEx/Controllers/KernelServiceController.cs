@@ -25,7 +25,7 @@ public class KernelServiceController : ControllerBase
     private readonly IChatCompletionService _chatCompletionService;
     private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
     private readonly VectorStore _vectorStore;
-    private OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+    private readonly OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
     {
         ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
     };
@@ -38,6 +38,25 @@ public class KernelServiceController : ControllerBase
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
         _vectorStore = vectorStore;
         _embeddingGenerator = kernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
+    }
+
+    [Route("embedding/search")]
+    [HttpGet]
+    public async IAsyncEnumerable<string> EmbeddingSearch(string input)
+    {
+        var embeddings = await _embeddingGenerator.GenerateAsync(input);
+        var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>("semantic_search", new VectorStoreCollectionDefinition
+        {
+            Properties =
+             [
+                 new VectorStoreVectorProperty("Vector", typeof(ReadOnlyMemory<float>), dimensions:1536) { DistanceFunction = DistanceFunction.CosineSimilarity, IndexKind = IndexKind.Hnsw },
+            ]
+        });
+        var searchResult = collection.SearchAsync(embeddings, top: 2);
+        await foreach (var record in searchResult)
+        {
+            yield return $"Found key: {record.Record.Key}, score: {record.Score}, text: {record.Record.Text}";
+        }
     }
 
     [Route("embedding/create")]
