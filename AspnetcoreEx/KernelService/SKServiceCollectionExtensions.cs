@@ -4,13 +4,9 @@ using AspnetcoreEx.KernelService.Internal;
 using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.VectorData;
-using Microsoft.KernelMemory;
-using Microsoft.KernelMemory.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
-using Microsoft.SemanticKernel.TextGeneration;
-using ModelContextProtocol.Client;
 using OpenAI;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
@@ -18,12 +14,12 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.ClientModel;
-using System.Collections.Concurrent;
+using System.ClientModel.Primitives;
 
 namespace AspnetcoreEx.KernelService;
 
 [Experimental("SKEXP0011")]
-public static class KernelServiceExtensions
+public static class SKServiceCollectionExtensions
 {
     internal static async Task InitAIData(this WebApplication app)
     {
@@ -35,7 +31,7 @@ public static class KernelServiceExtensions
     internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
         // otel
-        // SemanticKernelOpenTelemetry(services);
+        services.AddSemanticKernelOpenTelemetry();
 
         // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
@@ -81,7 +77,6 @@ public static class KernelServiceExtensions
         if (!string.IsNullOrEmpty(config.TextCompletion.ModelId))
         {
             // https://github.com/microsoft/semantic-kernel/issues/10842
-            // The purpose is to use OpenAI to call Gemini. Now that Gemini-specific packages have been added, they are no longer needed.
             var httpClient = new HttpClient(new ResponseInterceptorHandler())
             {
                 BaseAddress = new Uri(config.TextCompletion.Endpoint),
@@ -129,7 +124,7 @@ public static class KernelServiceExtensions
         return services;
     }
 
-    private static IServiceCollection SemanticKernelOpenTelemetry(IServiceCollection services)
+    public static IServiceCollection AddSemanticKernelOpenTelemetry(this IServiceCollection services)
     {
         var resourceBuilder = ResourceBuilder
             .CreateDefault()
@@ -165,92 +160,70 @@ public static class KernelServiceExtensions
         return services;
     }
 
-    private static readonly ConcurrentDictionary<string, IKernelBuilderPlugins> SseMap = new();
-
-    /// <summary>
-    /// Creates a Model Content Protocol plugin from an SSE server that contains the specified MCP functions and adds it into the plugin collection.
-    /// </summary>
-    /// <param name="endpoint"></param>
-    /// <param name="serverName"></param>
-    /// <param name="cancellationToken">The optional <see cref="CancellationToken"/>.</param>
-    /// <param name="plugins"></param>
-    /// <returns>A <see cref="KernelPlugin"/> containing the functions.</returns>
-    public static async Task<IKernelBuilderPlugins> AddMcpFunctionsFromSseServerAsync(this IKernelBuilderPlugins plugins,
-        string name, McpServer server, CancellationToken cancellationToken = default)
+    public static IServiceCollection AddOpenAIEmbeddingGenerator(
+        this IServiceCollection services,
+        string modelId,
+        string apiKey,
+        string? orgId = null,
+        int? dimensions = null,
+        string? serviceId = null,
+        Uri? endpoint = null,
+        HttpClient? httpClient = null,
+        string? openTelemetrySourceName = null,
+        Action<OpenTelemetryEmbeddingGenerator<string, Embedding<float>>>? openTelemetryConfig = null)
     {
-        var key = PluginNameSanitizer.ToSafePluginName(name);
-
-        if (SseMap.TryGetValue(key, out var sseKernelPlugin))
+        return services.AddKeyedSingleton(serviceId, (serviceProvider, _) =>
         {
-            return sseKernelPlugin;
-        }
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
 
-        var mcpClient = await GetClientAsync(name, server, cancellationToken).ConfigureAwait(false);
-        var functions = await mcpClient.MapToFunctionsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var builder = new OpenAIClient(
+                   credential: new ApiKeyCredential(apiKey),
+                   options: GetOpenAIClientOptions(httpClient: HttpClientProvider.GetHttpClient(httpClient, serviceProvider), endpoint: endpoint, orgId: orgId))
+               .GetEmbeddingClient(modelId)
+               .AsIEmbeddingGenerator(dimensions)
+               .AsBuilder()
+               .UseOpenTelemetry(loggerFactory, openTelemetrySourceName, openTelemetryConfig);
 
-        cancellationToken.Register(() => mcpClient.DisposeAsync().ConfigureAwait(false).GetAwaiter().GetResult());
+            if (loggerFactory is not null)
+            {
+                builder.UseLogging(loggerFactory);
+            }
 
-        sseKernelPlugin = plugins.AddFromFunctions(key, functions);
-        return SseMap[key] = sseKernelPlugin;
+            return builder.Build();
+        });
     }
 
-    private static async Task<IMcpClient> GetClientAsync(string name, McpServer mcpServer, CancellationToken cancellationToken)
+    private static OpenAIClientOptions GetOpenAIClientOptions(HttpClient? httpClient, Uri? endpoint = null, string? orgId = null)
     {
-        IClientTransport clientTransport;
-        if (!string.IsNullOrEmpty(mcpServer.Url))
+        OpenAIClientOptions options = new()
         {
-            clientTransport = new SseClientTransport(new()
-            {
-                Name = name,
-                Endpoint = new Uri(mcpServer.Url),
-                ConnectionTimeout = TimeSpan.FromSeconds(30),
-            });
-        }
-        else
-        {
-            clientTransport = new StdioClientTransport(new()
-            {
-                Name = name,
-                Command = mcpServer.Command,
-                Arguments = mcpServer.Args,
-                EnvironmentVariables = mcpServer.Env,
-            });
-        }
-
-        var transportType = clientTransport.GetType().Name;
-        McpClientOptions options = new()
-        {
-            ClientInfo = new()
-            {
-                Name = $"{name} {transportType}Client",
-                Version = "1.0.0"
-            }
+            UserAgentApplicationId = "Semantic-Kernel",
         };
 
-        return await McpClientFactory.CreateAsync(clientTransport, options, NullLoggerFactory.Instance, cancellationToken);
+        if (endpoint is not null)
+        {
+            options.Endpoint = endpoint;
+        }
+
+        options.AddPolicy(GenericActionPipelinePolicy.CreateRequestHeaderPolicy("Semantic-Kernel-Version", GetAssemblyVersion(typeof(OpenAIFunctionParameter))), PipelinePosition.PerCall);
+
+        if (orgId is not null)
+        {
+            options.OrganizationId = orgId;
+        }
+
+        if (httpClient is not null)
+        {
+            options.Transport = new HttpClientPipelineTransport(httpClient);
+            options.RetryPolicy = new ClientRetryPolicy(maxRetries: 0); // Disable retry policy if and only if a custom HttpClient is provided.
+            options.NetworkTimeout = Timeout.InfiniteTimeSpan; // Disable default timeout
+        }
+
+        return options;
     }
 
-    internal static IServiceCollection AddKernelMemoryServices(this IServiceCollection services, IConfiguration configuration)
+    private static string GetAssemblyVersion(Type type)
     {
-        services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
-        var textGenerationService = sp.GetService<ITextGenerationService>();
-        var embeddingGenerator = sp.GetService<IEmbeddingGenerator<string, Embedding<float>>>();
-
-        SemanticKernelConfig semanticKernelConfig = new();
-        services.AddKernelMemory(memoryBuilder =>
-        {
-            memoryBuilder.WithSimpleVectorDb();
-            if (textGenerationService != null)
-            {
-                memoryBuilder.WithSemanticKernelTextGenerationService(textGenerationService, semanticKernelConfig);
-            }
-            if (embeddingGenerator != null)
-            {
-                memoryBuilder.WithSemanticKernelTextEmbeddingGenerationService(embeddingGenerator, semanticKernelConfig);
-            }
-        });
-        return services;
+        return type.Assembly.GetName().Version!.ToString();
     }
 }

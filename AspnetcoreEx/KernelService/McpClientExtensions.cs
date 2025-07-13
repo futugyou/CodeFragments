@@ -4,9 +4,9 @@ namespace AspnetcoreEx.KernelService;
 
 [Experimental("SKEXP0001")]
 /// <summary>
-/// Extension methods for ModelContextProtocol
+/// Extension methods for McpClient
 /// </summary>
-public static class ModelContextProtocolExtensions
+public static class McpClientExtensions
 {
     /// <summary>
     /// Map the tools exposed on this <see cref="IMcpClient"/> to a collection of <see cref="KernelFunction"/> instances for use with the Semantic Kernel.
