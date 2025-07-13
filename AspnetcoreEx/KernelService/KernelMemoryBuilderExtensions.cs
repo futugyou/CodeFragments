@@ -1,4 +1,5 @@
 
+using AspnetcoreEx.KernelService.Internal;
 using Microsoft.Extensions.AI;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.AI;
@@ -6,15 +7,14 @@ using Microsoft.KernelMemory.SemanticKernel;
 
 namespace AspnetcoreEx.KernelService;
 
+[Experimental("SKEXP0010")]
 public static class KernelMemoryBuilderExtensions
 {
     public static IKernelMemoryBuilder WithSemanticKernelTextEmbeddingGenerationService(
         this IKernelMemoryBuilder builder,
         IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-        SemanticKernelConfig config,
-#pragma warning disable KMEXP00 
-        ITextTokenizer? textTokenizer = null,
-#pragma warning restore KMEXP00 
+        SemanticKernelConfig config, 
+        ITextTokenizer? textTokenizer = null, 
         ILoggerFactory? loggerFactory = null,
         bool onlyForRetrieval = false)
     {

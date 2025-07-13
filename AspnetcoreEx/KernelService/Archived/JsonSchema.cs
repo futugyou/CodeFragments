@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AspnetcoreEx.KernelService;
+namespace AspnetcoreEx.KernelService.Archived;
 
 public class JsonSchema
 {
@@ -22,7 +22,7 @@ public class JsonSchema
     [JsonPropertyName("required")]
     public List<string>? Required { get; set; }
 }
- 
+
 /// <summary>
 /// Represents a property in a JSON schema.
 /// <see href="https://github.com/modelcontextprotocol/specification/blob/main/schema/2024-11-05/schema.json">See the schema for details</see>

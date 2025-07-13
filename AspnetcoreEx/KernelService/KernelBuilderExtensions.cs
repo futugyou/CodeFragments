@@ -2,6 +2,7 @@
 
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using AspnetcoreEx.KernelService.Internal;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Google;
@@ -65,6 +66,7 @@ public static class KernelBuilderExtensions
 
         return builder;
     }
+
     public static IServiceCollection AddOpenAIEmbeddingGenerator(
         this IServiceCollection services,
         string modelId,
@@ -126,7 +128,6 @@ public static class KernelBuilderExtensions
 
         return options;
     }
-
 
     public static string GetAssemblyVersion(Type type)
     {

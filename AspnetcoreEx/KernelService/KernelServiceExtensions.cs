@@ -1,5 +1,6 @@
 
 using AspnetcoreEx.KernelService.Ingestion;
+using AspnetcoreEx.KernelService.Internal;
 using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.Extensions.AI;

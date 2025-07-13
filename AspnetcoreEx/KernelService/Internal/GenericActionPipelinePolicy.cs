@@ -1,6 +1,6 @@
 using System.ClientModel.Primitives;
 
-namespace AspnetcoreEx.KernelService;
+namespace AspnetcoreEx.KernelService.Internal;
 
 internal sealed class GenericActionPipelinePolicy : PipelinePolicy
 {

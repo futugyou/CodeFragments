@@ -6,14 +6,13 @@ using Microsoft.KernelMemory.Diagnostics;
 using Microsoft.KernelMemory.SemanticKernel;
 using Embedding = Microsoft.KernelMemory.Embedding;
 
-namespace AspnetcoreEx.KernelService;
+namespace AspnetcoreEx.KernelService.Internal;
 
-public sealed class SKTextEmbeddingGenerator : ITextEmbeddingGenerator
+[Experimental("SKEXP0010")]
+internal sealed class SKTextEmbeddingGenerator : ITextEmbeddingGenerator
 {
     private readonly IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
-#pragma warning disable KMEXP00
     private readonly ITextTokenizer _tokenizer;
-#pragma warning restore KMEXP00
     private readonly ILogger<SKTextEmbeddingGenerator> _log;
 
     /// <inheritdoc />
@@ -28,9 +27,7 @@ public sealed class SKTextEmbeddingGenerator : ITextEmbeddingGenerator
     public SKTextEmbeddingGenerator(
         IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
         SemanticKernelConfig config,
-#pragma warning disable KMEXP00 
         ITextTokenizer? textTokenizer = null,
-#pragma warning restore KMEXP00  
         ILoggerFactory? loggerFactory = null)
     {
         ArgumentNullExceptionEx.ThrowIfNull(embeddingGenerator, nameof(embeddingGenerator), "Embedding generation service is null");

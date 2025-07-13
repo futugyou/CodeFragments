@@ -1,8 +1,8 @@
 using System.Text.Json.Nodes;
 
-namespace AspnetcoreEx.KernelService;
+namespace AspnetcoreEx.KernelService.Internal;
 
-public class ResponseInterceptorHandler : DelegatingHandler
+internal class ResponseInterceptorHandler : DelegatingHandler
 {
     public ResponseInterceptorHandler() : base(new HttpClientHandler())
     {

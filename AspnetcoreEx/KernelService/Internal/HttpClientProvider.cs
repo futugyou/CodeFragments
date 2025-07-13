@@ -1,9 +1,6 @@
 using System.Net.Security;
 
-#pragma warning disable CA2000 // Dispose objects before losing scope
-#pragma warning disable CA2215 // Dispose methods should call base class dispose
-
-namespace AspnetcoreEx.KernelService;
+namespace AspnetcoreEx.KernelService.Internal;
 
 /// <summary>
 /// Provides functionality for retrieving instances of HttpClient.

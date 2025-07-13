@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace AspnetcoreEx.KernelService;
+namespace AspnetcoreEx.KernelService.Internal;
 
 internal static partial class PluginNameSanitizer
 {
