@@ -169,4 +169,56 @@ public class SKPluginsController : ControllerBase
         string text = await documentPlugin.ReadTextAsync(filePath);
         return text;
     }
+
+    [Route("file")]
+    [HttpPost]
+    public async Task<string[]> CallFilePlugin()
+    {
+        ChatHistory history = [];
+        history.AddUserMessage("Hello");
+        history.AddAssistantMessage("Hello, it's a pleasure to serve you. How can I assist you today?");
+        history.AddUserMessage("Recently, the marketing team has made considerable progress.");
+        history.AddAssistantMessage("Yes, I already understand this situation. How can I help you with it?");
+
+        var prompts = _kernel.CreatePluginFromPromptDirectory("KernelService/Skills");
+        string request = "I want to send an email to the marketing team celebrating their recent milestone.";
+
+        var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(
+            prompts["chat"], // "Skills","chat",           
+            new() {
+                { "request", request },
+                { "history", string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) }
+            }
+        );
+
+        // Stream the response
+        string message = "";
+        await foreach (var chunk in chatResult)
+        {
+            if (chunk.Role.HasValue) Console.Write(chunk.Role + " > ");
+            message += chunk;
+        }
+
+        // Append to history
+        history.AddUserMessage(request!);
+        history.AddAssistantMessage(message);
+
+        return [.. history.Select(x => x.Role + " > " + x.Content)];
+    }
+
+    [Route("summary")]
+    [HttpPost]
+    public async Task<string[]> Summary()
+    {
+        ChatHistory history = [];
+        history.AddUserMessage("Hello");
+        history.AddAssistantMessage("Hello, it's a pleasure to serve you. How can I assist you today?");
+        history.AddUserMessage("Recently, the marketing team has made considerable progress.");
+        history.AddAssistantMessage("Yes, I already understand this situation. How can I help you with it?");
+
+        var summaryPlugin = _kernel.Plugins.GetFunction("ConversationSummaryPlugin", "SummarizeConversation");
+        FunctionResult summary = await _kernel.InvokeAsync(summaryPlugin, new() { ["input"] = string.Join("\n", history.Select(x => x.Role + ": " + x.Content)) });
+
+        return [summary.GetValue<string>() ?? "No summary available."];
+    }
 }
