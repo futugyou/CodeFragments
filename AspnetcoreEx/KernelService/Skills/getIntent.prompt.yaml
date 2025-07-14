@@ -13,7 +13,7 @@ template: |
   {{/each}}
 
   # Summary
-  {{ConversationSummaryPlugin.SummarizeConversation history}}
+  {{ConversationSummaryPlugin-SummarizeConversation history}}
 
   <message role="user">{{request}}</message>
   <message role="system">Intent:</message>
