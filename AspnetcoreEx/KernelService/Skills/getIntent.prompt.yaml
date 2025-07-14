@@ -5,12 +5,14 @@ template: |
   Do not explain the reasoning, just reply back with the intent. If you are unsure, reply with {{choices[0]}}.
   Choices: {{choices}}.</message>
 
+  # Examples
   {{#each fewShotExamples}}
       {{#each this}}
           <message role="{{role}}">{{content}}</message>
       {{/each}}
   {{/each}}
 
+  # Summary
   {{ConversationSummaryPlugin.SummarizeConversation history}}
 
   <message role="user">{{request}}</message>
@@ -26,6 +28,9 @@ input_variables:
   - name:          request
     description:   The user's request
     is_required:   true
+  - name:          history
+    description:   chat history to summarize
+    is_required:   false
 execution_settings:
   default:
     max_tokens:   10

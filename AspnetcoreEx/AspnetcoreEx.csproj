@@ -90,7 +90,7 @@
 		<EmbeddedResource Include="Resources\30-user-prompt.txt" />
 		<EmbeddedResource Include="Resources\30-system-prompt.txt" />
 		<EmbeddedResource Include="Resources\30-user-context.txt" />
-		<EmbeddedResource Include="KernelService\Skill\**\*.yaml" />
+		<EmbeddedResource Include="KernelService\Skills\**\*.yaml" />
 	</ItemGroup>
 	
 	<ItemGroup>

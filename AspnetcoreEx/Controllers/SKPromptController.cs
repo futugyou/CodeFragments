@@ -338,57 +338,44 @@ public class SKPromptController : ControllerBase
     [HttpPost]
     public async Task<string[]> PromptYAML()
     {
-        var responseList = new List<string>();
-        ChatHistory history = [];
-        string request = "I want to send an email to the marketing team celebrating their recent milestone.";
-        responseList.Add(request);
-        using StreamReader reader = new(Assembly.GetExecutingAssembly().GetManifestResourceStream("KernelService.Skills.getIntent.prompt.yaml")!);
-        KernelFunction getIntent = _kernel.CreateFunctionFromPromptYaml(
-            reader.ReadToEnd(),
-            promptTemplateFactory: new HandlebarsPromptTemplateFactory()
-        );
-        // Create choices
+        using StreamReader reader = new(Assembly.GetExecutingAssembly().GetManifestResourceStream("AspnetcoreEx.KernelService.Skills.getIntent.prompt.yaml")!);
         List<string> choices = ["ContinueConversation", "EndConversation"];
+        ChatHistory history = [];
+        history.AddUserMessage("Hello");
+        history.AddSystemMessage("Intent:");
+        history.AddAssistantMessage("ContinueConversation");
 
-        // Create few-shot examples
-        List<ChatHistory> fewShotExamples = [
-            [
-                new ChatMessageContent(AuthorRole.User, "Can you send a very quick approval to the marketing team?"),
-                new ChatMessageContent(AuthorRole.System, "Intent:"),
-                new ChatMessageContent(AuthorRole.Assistant, "ContinueConversation"),
-            ],
-            [
-                new ChatMessageContent(AuthorRole.User, "Thanks, I'm done for now"),
-                new ChatMessageContent(AuthorRole.System, "Intent:"),
-                new ChatMessageContent(AuthorRole.Assistant, "EndConversation")
-            ]
-        ];
+        var arguments = new KernelArguments()
+        {
+            { "fewShotExamples", new[]
+                {
+                    new[]{
+                        new { role = "user", content = "Can you send a very quick approval to the marketing team?" },
+                        new { role = "system", content = "Intent:" },
+                        new { role = "assistant", content = "ContinueConversation" },
+                    },
+                    new[]{
+                        new { role = "user", content = "Thanks, I'm done for now" },
+                        new { role = "system", content = "Intent:" },
+                        new { role = "assistant", content = "EndConversation" },
+                    }
+                }
+            },
+            { "request", "I want to send an email to the marketing team celebrating their recent milestone." },
+            { "choices", choices },
+            { "history", history },
+        };
 
-        // Invoke prompt
-        var intent = await _kernel.InvokeAsync(
-            getIntent,
-            new() {
-                { "request", request },
-                { "choices", choices },
-                { "history", history },
-                { "fewShotExamples", fewShotExamples }
-            }
-        );
+        var templateFactory = new HandlebarsPromptTemplateFactory();
+        var promptTemplateConfig = new PromptTemplateConfig()
+        {
+            Template = reader.ReadToEnd(),
+            TemplateFormat = "handlebars",
+            Name = "ContosoChatPrompt",
+        };
+        var promptTemplate = templateFactory.Create(promptTemplateConfig);
+        var renderedPrompt = await promptTemplate.RenderAsync(_kernel, arguments);
 
-        responseList.Add(intent.ToString());
-
-        request = "i want go home.";
-        intent = await _kernel.InvokeAsync(
-            getIntent,
-            new() {
-                { "request", request },
-                { "choices", choices },
-                { "history", history },
-                { "fewShotExamples", fewShotExamples }
-            }
-        );
-        responseList.Add(request);
-        responseList.Add(intent.ToString());
-        return [.. responseList];
+        return [renderedPrompt];
     }
 }

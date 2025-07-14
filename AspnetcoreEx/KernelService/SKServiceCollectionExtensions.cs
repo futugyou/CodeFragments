@@ -31,7 +31,7 @@ public static class SKServiceCollectionExtensions
     internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
         // otel
-        services.AddSemanticKernelOpenTelemetry();
+        // services.AddSemanticKernelOpenTelemetry();
 
         // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
