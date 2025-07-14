@@ -23,7 +23,7 @@
 		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2" />
 		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.2.2" />
 		<PackageReference Include="FaissMask" Version="0.4.2" />
-		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.2.0" />
+		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.0" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.7" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.7" />
