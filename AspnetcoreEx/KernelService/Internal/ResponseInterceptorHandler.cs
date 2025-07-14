@@ -12,6 +12,13 @@ internal class ResponseInterceptorHandler : DelegatingHandler
     {
         // Send the original request
         var response = await base.SendAsync(request, cancellationToken);
+        if (response.Content.Headers.ContentType?.MediaType is string mediaType)
+        {
+            if (mediaType == "text/event-stream")
+            {
+                return response;
+            }
+        }
 
         // Read the original response content
         var originalContent = await response.Content.ReadAsStringAsync(cancellationToken);
