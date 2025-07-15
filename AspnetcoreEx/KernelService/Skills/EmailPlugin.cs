@@ -5,6 +5,12 @@ namespace AspnetcoreEx.KernelService.Skills;
 
 public class EmailPlugin
 {
+    private readonly IEmailService EmailService;
+    public EmailPlugin(IEmailService emailService)
+    {
+        EmailService = emailService;
+    }
+
     [KernelFunction]
     [Description("Sends an email to a recipient.")]
     public async Task SendEmailAsync(
@@ -14,9 +20,22 @@ public class EmailPlugin
         string body
     )
     {
-        await ValueTask.CompletedTask;
+        await EmailService.SendEmailAsync();
         // Add logic to send an email using the recipientEmails, subject, and body
         // For now, we'll just print out a success message to the console
         Console.WriteLine("Email sent!");
+    }
+}
+
+public interface IEmailService
+{
+    Task SendEmailAsync();
+}
+
+public class EmailService : IEmailService
+{
+    public Task SendEmailAsync()
+    {
+        return Task.CompletedTask;
     }
 }

@@ -113,10 +113,13 @@ public static class SKServiceCollectionExtensions
             services.AddScoped<DataIngestor>();
         }
 
+        services.AddSingleton<IEmailService, EmailService>();
+
         kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
         kernelBuilder.Plugins.AddFromType<DataGenerationPlugin>("Generator");
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();
-        kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
+        // `AuthorEmailPlanner` will cause llm to call it instead of `EmailPlugin` in `EmailSender`
+        // kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
         KernelPlugin infrProplugin = await OpenApiKernelPluginFactory.CreateFromOpenApiAsync(

@@ -74,46 +74,37 @@ public class SKPluginsController : ControllerBase
     public async Task<string[]> EmailSender()
     {
         ChatHistory chatMessages = new ChatHistory("""
-            You are a friendly assistant who likes to follow the rules. You will complete required steps
-            and request approval before taking any consequential actions. If the user doesn't provide
-            enough information for you to complete a task, you will keep asking questions until you have
-            enough information to complete the task.
+            You are a mail assistant who helps users send mail to the specified address.
             """);
-
-        var user_inputs = new string[] {
-            "Can you help me write an email for my boss?" ,
-            """
-            I want to give her an update on last months sales. We broke a bunch of records that
-            I want to share with her, but we did have a challenge selling the X4321 model.
-            """,
-            "Email's sarah@contoso.com",
-        };
 
         // Get the chat completions
         OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
         {
             ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
         };
+        chatMessages.AddUserMessage("""
+            The marketing team has made considerable progress, 
+            I want to send an email to the marketing team celebrating their recent milestone.
+            Once the email is written, it can be sent directly without confirming it with me.
+            """);
+        // `Once the email is written...` will send the email directly without confirmation, but It will use a random email address and signature. 
+        // I can add the signature in the prompt, but if I add the `email` address it will report an `error`.
+        // The response was filtered due to the prompt triggering Azure OpenAI's content management policy. Please modify your prompt and retry. To learn more about our content filtering policies please read our documentation: https://go.microsoft.com/fwlink/?linkid=2198766
+        var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(
+            chatMessages,
+            executionSettings: openAIPromptExecutionSettings,
+            kernel: _kernel);
 
-        foreach (var request in user_inputs)
+        // Stream the results
+        string fullMessage = "";
+        await foreach (var content in result)
         {
-            chatMessages.AddUserMessage(request);
-            var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(
-                chatMessages,
-                executionSettings: openAIPromptExecutionSettings,
-                kernel: _kernel);
-
-            // Stream the results
-            string fullMessage = "";
-            await foreach (var content in result)
-            {
-                fullMessage += content.Content;
-            }
-
-            // Add the message from the agent to the chat history
-            chatMessages.AddAssistantMessage(fullMessage);
-
+            fullMessage += content.Content;
         }
+
+        // Add the message from the agent to the chat history
+        chatMessages.AddAssistantMessage(fullMessage);
+
         return [.. chatMessages.Select(x => x.Role + " > " + x.Content)];
     }
 
