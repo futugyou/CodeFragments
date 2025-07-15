@@ -73,7 +73,6 @@ public class SKPluginsController : ControllerBase
     [HttpPost]
     public async Task<string[]> EmailSender()
     {
-        var responseList = new List<string>();
         ChatHistory chatMessages = new ChatHistory("""
             You are a friendly assistant who likes to follow the rules. You will complete required steps
             and request approval before taking any consequential actions. If the user doesn't provide
@@ -87,21 +86,18 @@ public class SKPluginsController : ControllerBase
             I want to give her an update on last months sales. We broke a bunch of records that
             I want to share with her, but we did have a challenge selling the X4321 model.
             """,
-            "Sure! It's sarah@contoso.com",
-            "Yes please!",
-            "Please sign it with Stephen and then you can go ahead and send it to Sarah",
+            "Email's sarah@contoso.com",
+        };
+
+        // Get the chat completions
+        OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+        {
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
         };
 
         foreach (var request in user_inputs)
         {
             chatMessages.AddUserMessage(request);
-            responseList.Add(request);
-
-            // Get the chat completions
-            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
-            {
-                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
-            };
             var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(
                 chatMessages,
                 executionSettings: openAIPromptExecutionSettings,
@@ -111,26 +107,19 @@ public class SKPluginsController : ControllerBase
             string fullMessage = "";
             await foreach (var content in result)
             {
-                if (content.Role.HasValue)
-                {
-                    Console.Write("Assistant > ");
-                }
-                Console.Write(content.Content);
                 fullMessage += content.Content;
             }
-            Console.WriteLine();
 
             // Add the message from the agent to the chat history
             chatMessages.AddAssistantMessage(fullMessage);
-            responseList.Add(fullMessage);
 
         }
-        return [.. responseList];
+        return [.. chatMessages.Select(x => x.Role + " > " + x.Content)];
     }
 
     [Route("math-executor")]
     [HttpPost]
-    public async Task<string> MathExecutor()
+    public async Task<string[]> MathExecutor()
     {
         // double answer = await _kernel.InvokeAsync<double>(
         // "MathExPlugin", "Sqrt",
@@ -157,19 +146,15 @@ public class SKPluginsController : ControllerBase
 
         // Stream the results
         string fullMessage = "";
-        var first = true;
         await foreach (var content in result)
         {
-            if (content.Role.HasValue && first)
-            {
-                Console.Write("Assistant > ");
-                first = false;
-            }
-            Console.Write(content.Content);
             fullMessage += content.Content;
         }
 
-        return fullMessage;
+        // Add the message from the agent to the chat history
+        history.AddAssistantMessage(fullMessage);
+
+        return [.. history.Select(x => x.Role + " > " + x.Content)];
     }
 
     [Route("word-reader")]
@@ -206,7 +191,6 @@ public class SKPluginsController : ControllerBase
         string message = "";
         await foreach (var chunk in chatResult)
         {
-            if (chunk.Role.HasValue) Console.Write(chunk.Role + " > ");
             message += chunk;
         }
 
