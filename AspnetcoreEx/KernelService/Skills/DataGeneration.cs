@@ -46,9 +46,8 @@ public class DataGenerationPlugin
         }
     };
 
-    [KernelFunction]
-    [Description("Generate data (by type name)")]
-    public string GenerateFromType(string typeName, int count)
+    [KernelFunction("generate_data_by_class_type")]
+    public string GenerateDataByClassType(string typeName, int count)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var type = assembly.GetTypes()
@@ -68,16 +67,15 @@ public class DataGenerationPlugin
         return BuildPrompt(schema, count);
     }
 
-    [KernelFunction]
-    [Description("Generate data from JSON Schema")]
-    public string GenerateFromSchema(string jsonSchema, int count)
+    [KernelFunction("generate_data_by_json_schema")]
+    public string GenerateDataByJsonSchema(string jsonSchema, int count)
     {
         return BuildPrompt(jsonSchema, count);
     }
 
-    [KernelFunction]
+    [KernelFunction("generate_data_by_class_definition")]
     [Description("Generate JSON data based on a C# class definition string")]
-    public string GenerateDataFromClassDefinition(string classDefinition, int count = 5)
+    public string GenerateDataByClassDefinition(string classDefinition, int count = 5)
     {
         var type = TypeFromStringCompiler.GenerateTypeFromClassBody(classDefinition);
         if (type == null)
