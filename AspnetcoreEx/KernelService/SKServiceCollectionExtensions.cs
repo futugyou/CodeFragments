@@ -7,6 +7,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
+using Microsoft.SemanticKernel.Plugins.OpenApi;
 using OpenAI;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
@@ -118,6 +119,16 @@ public static class SKServiceCollectionExtensions
         kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
+        KernelPlugin infrProplugin = await OpenApiKernelPluginFactory.CreateFromOpenApiAsync(
+          pluginName: "InfrastructureProject",
+          filePath: "Resources/infr-project.yaml",
+          executionParameters: new OpenApiFunctionExecutionParameters()
+          {
+              EnablePayloadNamespacing = true
+          }
+        );
+
+        kernelBuilder.Plugins.Add(infrProplugin);
 
         kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
 

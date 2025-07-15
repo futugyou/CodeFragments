@@ -25,6 +25,17 @@ public class SKPluginsController : ControllerBase
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
     }
 
+    [Route("infr-project-platforms-count")]
+    [HttpPost]
+    public async Task<string[]> InfrProjectPlatformsCount()
+    {
+        ChatHistory history = [];
+        history.AddUserMessage("How many platforms is InfrastructureProject currently connected to?");
+        var result = await _chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: _kernel);
+        history.AddMessage(result.Role, result.Content ?? "");
+        return [.. history.Select(x => x.Role + " > " + x.Content)];
+    }
+
     [Route("data-generator")]
     [HttpPost]
     public async Task<string[]> DataGenerator(string input)

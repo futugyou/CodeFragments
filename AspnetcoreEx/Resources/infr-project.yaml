@@ -1,0 +1,76 @@
+openapi: 3.0.1
+info:
+  title: InfrastructureProject
+  contact: {}
+  version: "1.0"
+servers:
+- url: https://goproject-jet.vercel.app/api
+paths:
+  /v1/platform:
+    get:
+      tags:
+      - Platform
+      summary: search platforms
+      description: search platforms
+      parameters:
+      - name: name
+        in: query
+        description: name - Fuzzy Search
+        schema:
+          type: string
+      - name: activate
+        in: query
+        description: activate
+        schema:
+          type: boolean
+      - name: tags
+        in: query
+        description: Tags
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: page
+        in: query
+        description: Page number
+        schema:
+          type: integer
+          default: 1
+      - name: size
+        in: query
+        description: Page size
+        schema:
+          type: integer
+          default: 100
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/viewmodels.PlatformView'
+components:
+  schemas:
+    viewmodels.PlatformView:
+      type: object
+      properties:
+        activate:
+          type: boolean
+        id:
+          type: string
+        is_deleted:
+          type: boolean
+        name:
+          type: string
+        provider:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
