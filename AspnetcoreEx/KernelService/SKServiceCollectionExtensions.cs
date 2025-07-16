@@ -75,6 +75,9 @@ public static class SKServiceCollectionExtensions
             await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
         }
 
+        services.AddSingleton<IAutoFunctionInvocationFilter, ToolCallIdFilter>();
+        services.AddSingleton<IFunctionInvocationFilter, ToolCallIdFilter>();
+
         if (!string.IsNullOrEmpty(config.TextCompletion.ModelId))
         {
             // https://github.com/microsoft/semantic-kernel/issues/10842
