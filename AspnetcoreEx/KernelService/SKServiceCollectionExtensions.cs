@@ -75,8 +75,8 @@ public static class SKServiceCollectionExtensions
             await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
         }
 
-        services.AddSingleton<IAutoFunctionInvocationFilter, ToolCallIdFilter>();
-        services.AddSingleton<IFunctionInvocationFilter, ToolCallIdFilter>();
+        // services.AddSingleton<IAutoFunctionInvocationFilter, ToolCallIdFilter>();
+        // services.AddSingleton<IFunctionInvocationFilter, ToolCallIdFilter>();
 
         if (!string.IsNullOrEmpty(config.TextCompletion.ModelId))
         {
@@ -125,6 +125,7 @@ public static class SKServiceCollectionExtensions
         // kernelBuilder.Plugins.AddFromType<AuthorEmailPlanner>();
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
+        kernelBuilder.Plugins.AddFromType<WebSearch>("WebSearch");
         KernelPlugin infrProplugin = await OpenApiKernelPluginFactory.CreateFromOpenApiAsync(
           pluginName: "InfrastructureProject",
           filePath: "Resources/infr-project.yaml",

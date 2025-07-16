@@ -13,19 +13,23 @@ public class WebSearch(IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
 
     [KernelFunction("common_web_search")]
     [Description("Use the corresponding browser engine to search the web page and only return the text collection")]
-    public async IAsyncEnumerable<string> CommonWebSearchAsync(string engine = "bing", string query = "", int count = 10)
+    public async Task<List<string>> CommonWebSearchAsync(string engine = "bing", string query = "", int count = 1)
     {
+        // SK do not support IAsyncEnumerable<string> as function.
+        // System.NotSupportedException: The type 'AspnetcoreEx.KernelService.Skills.WebSearch+<CommonWebSearchAsync>d__2' can only be serialized using async serialization methods. Path: $.
         SemanticKernelOptions options = _options.CurrentValue;
         ITextSearch textSearch = engine switch
         {
             "bing" => new BingTextSearch(apiKey: options.WebSearch.BingApiKey),
-            "google" => new GoogleTextSearch(searchEngineId: options.WebSearch.GoogleSearchEngineId, apiKey: options.WebSearch.BingApiKey),
+            "google" => new GoogleTextSearch(searchEngineId: options.WebSearch.GoogleSearchEngineId, apiKey: options.WebSearch.GoogleApiKey),
             _ => throw new Exception("No suitable search engine"),
         };
         var stringResults = await textSearch.SearchAsync(query, new() { Top = count, Skip = 0 });
-        await foreach (var result in stringResults.Results)
+        List<string> result = [];
+        await foreach (var res in stringResults.Results)
         {
-            yield return result;
+            result.Add(res);
         }
+        return result;
     }
 }

@@ -25,6 +25,21 @@ public class SKPluginsController : ControllerBase
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
     }
 
+    [Route("search")]
+    [HttpPost]
+    public async Task<string[]> WebSearch(string input)
+    {
+        ChatHistory history = [];
+        history.AddAssistantMessage("""
+        You are a search engine assistant that can help users find content of interest from search engines such as Google/Bing/DuckDuckGo.
+        Don't generate answers directly, but use tools to get answers.
+        """);
+        history.AddUserMessage(input);
+        var result = await _chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: _kernel);
+        history.AddMessage(result.Role, result.Content ?? "");
+        return [.. history.Select(x => x.Role + " > " + x.Content)];
+    }
+
     [Route("infr-project-platforms-count")]
     [HttpPost]
     public async Task<string[]> InfrProjectPlatformsCount()
