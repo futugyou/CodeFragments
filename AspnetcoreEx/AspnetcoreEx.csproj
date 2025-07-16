@@ -62,6 +62,7 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.55.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.55.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi" Version="1.60.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.60.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" Version="1.60.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Liquid" Version="1.60.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.60.0" />

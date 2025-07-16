@@ -21,9 +21,11 @@
 			"settings": {
 				"editor.formatOnSave": true,
 				"[csharp]": {
-				  "editor.defaultFormatter": "ms-dotnettools.csdevkit",
-				  "editor.formatOnSave": true
-				}
+					"editor.defaultFormatter": "ms-dotnettools.csdevkit",
+					"editor.formatOnSave": true
+				},
+				"safe.directory": "/workspaces/CodeFragments",
+				"git.openRepositoryInParentFolders": "always"
 			}
 		}
 	},

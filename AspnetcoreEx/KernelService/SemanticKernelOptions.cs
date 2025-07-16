@@ -7,8 +7,16 @@ public class SemanticKernelOptions
     public ModelConfig Image { get; set; } = new();
     public JiraConfig Jira { get; set; } = new();
     public KernelMemoryConfig KernelMemory { get; set; } = new();
+    public WebSearchConfig WebSearch { get; set; } = new();
     // for mcp server
     public Dictionary<string, McpServer> McpServers { get; set; } = [];
+}
+
+public class WebSearchConfig
+{
+    public string BingApiKey { get; set; } = "";
+    public string GoogleApiKey { get; set; } = "";
+    public string GoogleSearchEngineId { get; set; } = "";
 }
 
 public class ModelConfig
