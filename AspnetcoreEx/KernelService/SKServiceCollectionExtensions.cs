@@ -1,4 +1,5 @@
 
+using AspnetcoreEx.KernelService.Duckduckgo;
 using AspnetcoreEx.KernelService.Ingestion;
 using AspnetcoreEx.KernelService.Internal;
 using AspnetcoreEx.KernelService.Planners;
@@ -33,6 +34,8 @@ public static class SKServiceCollectionExtensions
     {
         // otel
         // services.AddSemanticKernelOpenTelemetry();
+
+        // services.AddDuckduckgoTextSearch();
 
         // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));

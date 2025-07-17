@@ -1,4 +1,5 @@
 ﻿
+using AspnetcoreEx.KernelService.Duckduckgo;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Document;
@@ -23,6 +24,16 @@ public class SKPluginsController : ControllerBase
     {
         _kernel = kernel;
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+    }
+
+    [Route("duck")]
+    [HttpPost]
+    public async Task<IAsyncEnumerable<string>> Dock(string input)
+    {
+        // Cannot be used, will trigger duck's verification code
+        var search = new DuckduckgoTextSearch();
+        var results = await search.SearchAsync(input);
+        return results.Results;
     }
 
     [Route("search")]
