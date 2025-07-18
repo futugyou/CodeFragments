@@ -35,7 +35,7 @@ public class SKPluginsController : ControllerBase
 
     [Route("google")]
     [HttpPost]
-    public async Task<string> GoogleSearchAsPlugin(string input)
+    public async Task<string> GoogleSearchAsPlugin(string input, bool isFunctionCall = false)
     {
         var config = _optionsMonitor.CurrentValue;
         var kernel = _kernel.Clone();
@@ -46,7 +46,10 @@ public class SKPluginsController : ControllerBase
             "GoogleSearchPlugin", "Search github site only",
             [textSearch.CreateGetTextSearchResults(searchOptions: searchOptions)]);
         kernel.Plugins.Add(searchPlugin);
-        string promptTemplate = """
+
+        if (!isFunctionCall)
+        {
+            string promptTemplate = """
             {{#with (GoogleSearchPlugin-GetTextSearchResults query)}}  
               {{#each this}}  
                 Name: {{Name}}
@@ -60,16 +63,24 @@ public class SKPluginsController : ControllerBase
 
             Include citations to the relevant information where it is referenced in the response.
             """;
-        KernelArguments arguments = new() { { "query", input } };
-        HandlebarsPromptTemplateFactory promptTemplateFactory = new();
-        var reesult = await kernel.InvokePromptAsync(
-            promptTemplate,
-            arguments,
-            templateFormat: HandlebarsPromptTemplateFactory.HandlebarsTemplateFormat,
-            promptTemplateFactory: promptTemplateFactory
-        );
+            KernelArguments arguments = new() { { "query", input } };
+            HandlebarsPromptTemplateFactory promptTemplateFactory = new();
+            var reesult = await kernel.InvokePromptAsync(
+                promptTemplate,
+                arguments,
+                templateFormat: HandlebarsPromptTemplateFactory.HandlebarsTemplateFormat,
+                promptTemplateFactory: promptTemplateFactory
+            );
 
-        return reesult?.ToString() ?? "";
+            return reesult?.ToString() ?? "";
+        }
+        else
+        {
+            OpenAIPromptExecutionSettings settings = new() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() };
+            KernelArguments arguments = new(settings);
+            var reesult = await kernel.InvokePromptAsync(input, arguments);
+            return reesult?.ToString() ?? "";
+        }
     }
 
     [Route("duck")]
