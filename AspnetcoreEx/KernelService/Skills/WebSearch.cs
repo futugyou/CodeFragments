@@ -13,7 +13,7 @@ public class WebSearch(IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
 
     [KernelFunction("simple_web_search")]
     [Description("Use the corresponding browser engine to search the web page and only return the simple text collection")]
-    public async Task<List<string>> SimpleWebSearchAsync(string engine = "bing", string query = "", int count = 1)
+    public async Task<List<string>> SimpleWebSearchAsync(string engine = "google", string query = "", int count = 1)
     {
         // SK do not support IAsyncEnumerable<string> as function.
         // System.NotSupportedException: The type 'AspnetcoreEx.KernelService.Skills.WebSearch+<CommonWebSearchAsync>d__2' can only be serialized using async serialization methods. Path: $.
@@ -35,7 +35,7 @@ public class WebSearch(IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
 
     [KernelFunction("common_web_search")]
     [Description("Use the corresponding browser engine to search the web page and return a collection containing name, link, and value.")]
-    public async Task<List<TextSearchResult>> CommonWebSearchAsync(string engine = "bing", string query = "", int count = 1)
+    public async Task<List<TextSearchResult>> CommonWebSearchAsync(string engine = "google", string query = "", int count = 1)
     {
         SemanticKernelOptions options = _options.CurrentValue;
         ITextSearch textSearch = engine switch

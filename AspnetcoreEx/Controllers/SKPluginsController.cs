@@ -1,10 +1,14 @@
 ﻿
+using AspnetcoreEx.KernelService;
 using AspnetcoreEx.KernelService.Duckduckgo;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Data;
 using Microsoft.SemanticKernel.Plugins.Document;
 using Microsoft.SemanticKernel.Plugins.Document.FileSystem;
 using Microsoft.SemanticKernel.Plugins.Document.OpenXml;
+using Microsoft.SemanticKernel.Plugins.Web.Google;
+using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 
 namespace AspnetcoreEx.Controllers;
 
@@ -19,11 +23,53 @@ public class SKPluginsController : ControllerBase
     {
         ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
     };
+    private readonly IOptionsMonitor<SemanticKernelOptions> _optionsMonitor;
 
-    public SKPluginsController(Kernel kernel)
+    public SKPluginsController(Kernel kernel, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
     {
         _kernel = kernel;
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        _optionsMonitor = optionsMonitor;
+    }
+
+
+    [Route("google")]
+    [HttpPost]
+    public async Task<string> GoogleSearchAsPlugin(string input)
+    {
+        var config = _optionsMonitor.CurrentValue;
+        var kernel = _kernel.Clone();
+        var textSearch = new GoogleTextSearch(searchEngineId: config.WebSearch.GoogleSearchEngineId, apiKey: config.WebSearch.GoogleApiKey);
+        var filter = new TextSearchFilter().Equality("siteSearch", "github.com");
+        var searchOptions = new TextSearchOptions() { Filter = filter };
+        var searchPlugin = KernelPluginFactory.CreateFromFunctions(
+            "GoogleSearchPlugin", "Search github site only",
+            [textSearch.CreateGetTextSearchResults(searchOptions: searchOptions)]);
+        kernel.Plugins.Add(searchPlugin);
+        string promptTemplate = """
+            {{#with (GoogleSearchPlugin-GetTextSearchResults query)}}  
+              {{#each this}}  
+                Name: {{Name}}
+                Value: {{Value}}
+                Link: {{Link}}
+                -----------------
+              {{/each}}  
+            {{/with}}  
+
+            {{query}}
+
+            Include citations to the relevant information where it is referenced in the response.
+            """;
+        KernelArguments arguments = new() { { "query", input } };
+        HandlebarsPromptTemplateFactory promptTemplateFactory = new();
+        var reesult = await kernel.InvokePromptAsync(
+            promptTemplate,
+            arguments,
+            templateFormat: HandlebarsPromptTemplateFactory.HandlebarsTemplateFormat,
+            promptTemplateFactory: promptTemplateFactory
+        );
+
+        return reesult?.ToString() ?? "";
     }
 
     [Route("duck")]
