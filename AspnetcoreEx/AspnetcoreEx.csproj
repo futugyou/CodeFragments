@@ -58,6 +58,7 @@
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.2" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.60.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.60.0-alpha" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" Version="1.60.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.MongoDB" Version="1.59.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.60.0" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.55.0-preview" />

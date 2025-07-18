@@ -39,6 +39,7 @@ public class SKPluginsController : ControllerBase
     {
         var config = _optionsMonitor.CurrentValue;
         var kernel = _kernel.Clone();
+        kernel.Plugins.Clear();
         var textSearch = new GoogleTextSearch(searchEngineId: config.WebSearch.GoogleSearchEngineId, apiKey: config.WebSearch.GoogleApiKey);
         var filter = new TextSearchFilter().Equality("siteSearch", "github.com");
         var searchOptions = new TextSearchOptions() { Filter = filter };

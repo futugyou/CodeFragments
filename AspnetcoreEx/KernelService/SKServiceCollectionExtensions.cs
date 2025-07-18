@@ -45,8 +45,18 @@ public static class SKServiceCollectionExtensions
         // mongo db, it will register `VectorStore` as singleton
         // TODO: Currently, Microsoft.SemanticKernel.Connectors.MongoDB can only use MongoDB.Driver 2.30.0, 3.X.X will report an error, 
         // but all my other libraries that depend on MongoDB are 3.3.0 and above.
-        services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
-        services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, "ingestioncache");
+        if (config.UseMemoryVectorStore)
+        {
+            services.AddInMemoryVectorStore();
+            services.AddInMemoryVectorStoreRecordCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+        }
+        else
+        {
+            services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
+            services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+        }
+
+        services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
 
         // mcp server
         // Here we use `mcpserver` alone. `SemanticKernel` has more comprehensive examples to explain how to use `SemanticKernel` with `mcpserver`
