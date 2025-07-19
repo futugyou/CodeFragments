@@ -6,6 +6,7 @@ using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
+using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.Plugins.OpenApi;
@@ -131,6 +132,7 @@ public static class SKServiceCollectionExtensions
 
         services.AddSingleton<IEmailService, EmailService>();
 
+        #region Plugins
         // It is best to register the `plugin` in each usage scenario, which can greatly reduce the judgment options of `LLM`.
         // This is just a demo, for convenience
         kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
@@ -151,8 +153,28 @@ public static class SKServiceCollectionExtensions
         );
 
         kernelBuilder.Plugins.Add(infrProplugin);
-
         kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
+        #endregion
+
+        #region Agent
+        services.AddSingleton<ArtDirectorAgentFactory>();
+        services.AddSingleton<CopyWriterAgentFactory>();
+        services.AddTransient<ArtReviewerAgentChat>();
+        services.AddKeyedSingleton<ChatCompletionAgent>(
+            "CopyWriter",
+            (sp, key) =>
+            {
+                var factory = sp.GetRequiredService<CopyWriterAgentFactory>();
+                return factory.Create();
+            });
+        services.AddKeyedSingleton<ChatCompletionAgent>(
+            "ArtDirector",
+            (sp, key) =>
+            {
+                var factory = sp.GetRequiredService<ArtDirectorAgentFactory>();
+                return factory.Create();
+            });
+        #endregion
 
         return services;
     }

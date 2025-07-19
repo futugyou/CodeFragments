@@ -1,5 +1,6 @@
 ﻿
 using AspnetcoreEx.KernelService;
+using AspnetcoreEx.KernelService.Internal;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
@@ -13,11 +14,13 @@ public class SKAgentController : ControllerBase
 {
     private readonly Kernel _kernel;
     private readonly SemanticKernelOptions _options;
+    private readonly ArtReviewerAgentChat _artReviewerAgent;
 
-    public SKAgentController(Kernel kernel, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
+    public SKAgentController(Kernel kernel, IOptionsMonitor<SemanticKernelOptions> optionsMonitor, ArtReviewerAgentChat artReviewerAgent)
     {
         _kernel = kernel;
         _options = optionsMonitor.CurrentValue;
+        _artReviewerAgent = artReviewerAgent;
     }
 
     [Route("joker")]
@@ -174,6 +177,27 @@ public class SKAgentController : ControllerBase
         yield return $"[IS COMPLETED: {chat.IsComplete}]";
     }
 
+    [Route("di")]
+    [HttpPost]
+    /// <summary>
+    /// sk agent demo for chat
+    /// </summary>
+    /// <returns></returns>
+    public async IAsyncEnumerable<string> DI(int maximumIterations = 4)
+    {
+        ChatMessageContent input = new(AuthorRole.User, "concept: maps made out of egg cartons.");
+
+        yield return $"#{input.Role}: {input.Content}";
+        _artReviewerAgent.UpdateMaximumIterations(maximumIterations);
+
+        await foreach (ChatMessageContent response in _artReviewerAgent.RunAsync(input))
+        {
+            yield return $"#{response.Role} - {response.AuthorName}: {response.Content}";
+        }
+
+        yield return $"[IS COMPLETED: {_artReviewerAgent.Chat.IsComplete}]";
+
+    }
     #region private methods
     private static KernelFunctionTerminationStrategy CreateTerminationStrategy(Kernel kernel, ChatCompletionAgent agent, int maximumIterations = 4)
     {
