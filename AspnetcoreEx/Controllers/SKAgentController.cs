@@ -109,7 +109,7 @@ public class SKAgentController : ControllerBase
     /// sk agent demo for chat
     /// </summary>
     /// <returns></returns>
-    public async IAsyncEnumerable<string> Chat(int maximumIterations = 2)
+    public async IAsyncEnumerable<string> Chat(int maximumIterations = 4)
     {
         ChatCompletionAgent agentReviewer =
         new()
@@ -148,14 +148,16 @@ public class SKAgentController : ControllerBase
                     {
                         // Here a TerminationStrategy subclass is used that will terminate when
                         // an assistant message contains the term "approve".
-                        TerminationStrategy =
-                            new ApprovalTerminationStrategy()
-                            {
-                                // Only the art-director may approve.
-                                Agents = [agentReviewer],
-                                // Limit total number of turns
-                                MaximumIterations = maximumIterations,
-                            }
+                        // TerminationStrategy =
+                        //     new ApprovalTerminationStrategy()
+                        //     {
+                        //         // Only the art-director may approve.
+                        //         Agents = [agentReviewer],
+                        //         // Limit total number of turns
+                        //         MaximumIterations = maximumIterations,
+                        //     }
+                        TerminationStrategy = CreateTerminationStrategy(_kernel, agentReviewer, maximumIterations),
+                        SelectionStrategy = CreateSelectionStrategy(_kernel, agentWriter),
                     }
             };
 
@@ -172,6 +174,74 @@ public class SKAgentController : ControllerBase
         yield return $"[IS COMPLETED: {chat.IsComplete}]";
     }
 
+    #region private methods
+    private static KernelFunctionTerminationStrategy CreateTerminationStrategy(Kernel kernel, ChatCompletionAgent agent, int maximumIterations = 4)
+    {
+        KernelFunction terminationFunction =
+            AgentGroupChat.CreatePromptFunctionForStrategy(
+                """
+                Determine if the copy has been approved.  If so, respond with a single word: yes
+
+                History:
+                {{$history}}
+                """,
+                safeParameterNames: "history");
+        ChatHistoryTruncationReducer strategyReducer = new(1);
+
+        return new KernelFunctionTerminationStrategy(terminationFunction, kernel)
+        {
+            // Only the art-director may approve.
+            Agents = [agent],
+            // Customer result parser to determine if the response is "yes"
+            ResultParser = (result) => result.GetValue<string>()?.Contains("yes", StringComparison.OrdinalIgnoreCase) ?? false,
+            // The prompt variable name for the history argument.
+            HistoryVariableName = "history",
+            // Limit total number of turns
+            MaximumIterations = maximumIterations,
+            // Save tokens by not including the entire history in the prompt
+            HistoryReducer = strategyReducer,
+        };
+    }
+
+    private static KernelFunctionSelectionStrategy CreateSelectionStrategy(Kernel kernel, ChatCompletionAgent agent)
+    {
+        KernelFunction selectionFunction =
+            AgentGroupChat.CreatePromptFunctionForStrategy(
+                $$$"""
+                Determine which participant takes the next turn in a conversation based on the the most recent participant.
+                State only the name of the participant to take the next turn.
+                No participant should take more than one turn in a row.
+
+                Choose only from these participants:
+                - ArtDirector
+                - CopyWriter
+
+                Always follow these rules when selecting the next participant:
+                - After CopyWriter, it is ArtDirector's turn.
+                - After ArtDirector, it is CopyWriter's turn.
+
+                History:
+                {{$history}}
+                """,
+                safeParameterNames: "history");
+        ChatHistoryTruncationReducer strategyReducer = new(1);
+
+        return new KernelFunctionSelectionStrategy(selectionFunction, kernel)
+        {
+            // Always start with the writer agent.
+            InitialAgent = agent,
+            // Returns the entire result value as a string.
+            ResultParser = (result) => result.GetValue<string>() ?? "CopyWriter",
+            // The prompt variable name for the history argument.
+            HistoryVariableName = "history",
+            // Save tokens by not including the entire history in the prompt
+            HistoryReducer = strategyReducer,
+            // Only include the agent names and not the message content
+            EvaluateNameOnly = true,
+        };
+    }
+
+    #endregion
 }
 
 [Experimental("SKEXP0011")]
