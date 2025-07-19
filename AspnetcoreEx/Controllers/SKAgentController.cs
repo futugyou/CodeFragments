@@ -2,6 +2,7 @@
 using AspnetcoreEx.KernelService;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Agents;
+using Microsoft.SemanticKernel.Agents.Chat;
 using Microsoft.SemanticKernel.ChatCompletion;
 namespace AspnetcoreEx.Controllers;
 
@@ -102,4 +103,82 @@ public class SKAgentController : ControllerBase
         }
     }
 
+    [Route("chat")]
+    [HttpPost]
+    /// <summary>
+    /// sk agent demo for chat
+    /// </summary>
+    /// <returns></returns>
+    public async IAsyncEnumerable<string> Chat(int maximumIterations = 2)
+    {
+        ChatCompletionAgent agentReviewer =
+        new()
+        {
+            Instructions = """
+        You are an art director who has opinions about copywriting born of a love for David Ogilvy.
+        The goal is to determine if the given copy is acceptable to print.
+        If so, state that it is approved.
+        If not, provide insight on how to refine suggested copy without example.
+        """,
+            Name = "ArtDirector",
+            Kernel = _kernel,
+        };
+
+        ChatCompletionAgent agentWriter =
+            new()
+            {
+                Instructions = """
+        You are a copywriter with ten years of experience and are known for brevity and a dry humor.
+        The goal is to refine and decide on the single best copy as an expert in the field.
+        Only provide a single proposal per response.
+        You're laser focused on the goal at hand.
+        Don't waste time with chit chat.
+        Consider suggestions when refining an idea.
+        """,
+                Name = "CopyWriter",
+                Kernel = _kernel,
+            };
+
+        // Create a chat for agent interaction.
+        AgentGroupChat chat =
+            new(agentWriter, agentReviewer)
+            {
+                ExecutionSettings =
+                    new()
+                    {
+                        // Here a TerminationStrategy subclass is used that will terminate when
+                        // an assistant message contains the term "approve".
+                        TerminationStrategy =
+                            new ApprovalTerminationStrategy()
+                            {
+                                // Only the art-director may approve.
+                                Agents = [agentReviewer],
+                                // Limit total number of turns
+                                MaximumIterations = maximumIterations,
+                            }
+                    }
+            };
+
+        // Invoke chat and display messages.
+        ChatMessageContent input = new(AuthorRole.User, "concept: maps made out of egg cartons.");
+        chat.AddChatMessage(input);
+        yield return $"#{input.Role}: {input.Content}";
+
+        await foreach (ChatMessageContent response in chat.InvokeAsync())
+        {
+            yield return $"#{response.Role} - {response.AuthorName}: {response.Content}";
+        }
+
+        yield return $"[IS COMPLETED: {chat.IsComplete}]";
+    }
+
+}
+
+[Experimental("SKEXP0011")]
+sealed class ApprovalTerminationStrategy : TerminationStrategy
+{
+    // Terminate when the final message contains the term "approve"
+    // The `This copy is not approved` also case `approve`.
+    protected override Task<bool> ShouldAgentTerminateAsync(Agent agent, IReadOnlyList<ChatMessageContent> history, CancellationToken cancellationToken)
+        => Task.FromResult(history[history.Count - 1].Content?.Contains("approve", StringComparison.OrdinalIgnoreCase) ?? false);
 }
