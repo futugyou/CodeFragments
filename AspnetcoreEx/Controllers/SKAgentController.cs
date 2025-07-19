@@ -15,12 +15,26 @@ public class SKAgentController : ControllerBase
     private readonly Kernel _kernel;
     private readonly SemanticKernelOptions _options;
     private readonly ArtReviewerAgentChat _artReviewerAgent;
-
+    private readonly ChatCompletionAgent jokerAgent;
+    private readonly ChatCompletionAgent lightsAgent;
     public SKAgentController(Kernel kernel, IOptionsMonitor<SemanticKernelOptions> optionsMonitor, ArtReviewerAgentChat artReviewerAgent)
     {
         _kernel = kernel;
         _options = optionsMonitor.CurrentValue;
         _artReviewerAgent = artReviewerAgent;
+        jokerAgent = new ChatCompletionAgent()
+        {
+            Instructions = "You are good at telling jokes.",
+            Name = "Joker",
+            Kernel = _kernel,
+        };
+        lightsAgent = new ChatCompletionAgent()
+        {
+            Name = "lights",
+            Instructions = "You are good at check the light status and control the light switch.",
+            Kernel = _kernel,
+            Arguments = new KernelArguments(new PromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() }),
+        };
     }
 
     [Route("joker")]
@@ -31,14 +45,6 @@ public class SKAgentController : ControllerBase
     /// <returns></returns>
     public async IAsyncEnumerable<string> Joker()
     {
-        ChatCompletionAgent agent =
-            new()
-            {
-                Name = "Joker",
-                Instructions = "You are good at telling jokes.",
-                Kernel = _kernel,
-            };
-
         AgentThread? thread = new ChatHistoryAgentThread(
             [
                 new ChatMessageContent(AuthorRole.User, "Tell me a joke about a pirate."),
@@ -60,7 +66,7 @@ public class SKAgentController : ControllerBase
         {
             ChatMessageContent message = new(AuthorRole.User, input);
             yield return $"Role: {message.Role}, Content: {message.Content}";
-            await foreach (AgentResponseItem<ChatMessageContent> response in agent.InvokeAsync(message, thread))
+            await foreach (AgentResponseItem<ChatMessageContent> response in jokerAgent.InvokeAsync(message, thread))
             {
                 yield return $"Role: {response.Message.Role}, Content: {response.Message.Content}";
             }
@@ -75,17 +81,9 @@ public class SKAgentController : ControllerBase
     /// <returns></returns>
     public async IAsyncEnumerable<string> Lights()
     {
-        ChatCompletionAgent agent =
-            new()
-            {
-                Name = "lights",
-                Instructions = "You are good at check the light status and control the light switch.",
-                Kernel = _kernel,
-                Arguments = new KernelArguments(new PromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() }),
-            };
         // System.ArgumentException: An item with the same key has already been added. Key: Lights
         // It has been registered in the kernel during setup, so it cannot be registered again here.
-        // agent.Kernel.Plugins.AddFromType<LightPlugin>("Lights");
+        // lightsAgent.Kernel.Plugins.AddFromType<LightPlugin>("Lights");
 
         ChatHistoryAgentThread thread = new();
 
@@ -99,7 +97,7 @@ public class SKAgentController : ControllerBase
         {
             ChatMessageContent message = new(AuthorRole.User, input);
             yield return $"Role: {message.Role}, Content: {message.Content}";
-            await foreach (AgentResponseItem<ChatMessageContent> response in agent.InvokeAsync(message, thread))
+            await foreach (AgentResponseItem<ChatMessageContent> response in lightsAgent.InvokeAsync(message, thread))
             {
                 yield return $"Role: {response.Message.Role}, Content: {response.Message.Content}";
             }
@@ -114,23 +112,21 @@ public class SKAgentController : ControllerBase
     /// <returns></returns>
     public async IAsyncEnumerable<string> Chat(int maximumIterations = 4)
     {
-        ChatCompletionAgent agentReviewer =
-        new()
+        var agentReviewer = new ChatCompletionAgent()
         {
             Instructions = """
-        You are an art director who has opinions about copywriting born of a love for David Ogilvy.
-        The goal is to determine if the given copy is acceptable to print.
-        If so, state that it is approved.
-        If not, provide insight on how to refine suggested copy without example.
-        """,
+            You are an art director who has opinions about copywriting born of a love for David Ogilvy.
+            The goal is to determine if the given copy is acceptable to print.
+            If so, state that it is approved.
+            If not, provide insight on how to refine suggested copy without example.
+            """,
             Name = "ArtDirector",
             Kernel = _kernel,
         };
 
-        ChatCompletionAgent agentWriter =
-            new()
-            {
-                Instructions = """
+        var agentWriter = new ChatCompletionAgent()
+        {
+            Instructions = """
         You are a copywriter with ten years of experience and are known for brevity and a dry humor.
         The goal is to refine and decide on the single best copy as an expert in the field.
         Only provide a single proposal per response.
@@ -138,31 +134,28 @@ public class SKAgentController : ControllerBase
         Don't waste time with chit chat.
         Consider suggestions when refining an idea.
         """,
-                Name = "CopyWriter",
-                Kernel = _kernel,
-            };
-
+            Name = "CopyWriter",
+            Kernel = _kernel,
+        };
         // Create a chat for agent interaction.
-        AgentGroupChat chat =
-            new(agentWriter, agentReviewer)
+        AgentGroupChat chat = new(agentWriter, agentReviewer)
+        {
+            ExecutionSettings = new()
             {
-                ExecutionSettings =
-                    new()
-                    {
-                        // Here a TerminationStrategy subclass is used that will terminate when
-                        // an assistant message contains the term "approve".
-                        // TerminationStrategy =
-                        //     new ApprovalTerminationStrategy()
-                        //     {
-                        //         // Only the art-director may approve.
-                        //         Agents = [agentReviewer],
-                        //         // Limit total number of turns
-                        //         MaximumIterations = maximumIterations,
-                        //     }
-                        TerminationStrategy = CreateTerminationStrategy(_kernel, agentReviewer, maximumIterations),
-                        SelectionStrategy = CreateSelectionStrategy(_kernel, agentWriter),
-                    }
-            };
+                // Here a TerminationStrategy subclass is used that will terminate when
+                // an assistant message contains the term "approve".
+                // TerminationStrategy =
+                //     new ApprovalTerminationStrategy()
+                //     {
+                //         // Only the art-director may approve.
+                //         Agents = [agentReviewer],
+                //         // Limit total number of turns
+                //         MaximumIterations = maximumIterations,
+                //     }
+                TerminationStrategy = CreateTerminationStrategy(_kernel, agentReviewer, maximumIterations),
+                SelectionStrategy = CreateSelectionStrategy(_kernel, agentWriter),
+            }
+        };
 
         // Invoke chat and display messages.
         ChatMessageContent input = new(AuthorRole.User, "concept: maps made out of egg cartons.");
@@ -180,7 +173,7 @@ public class SKAgentController : ControllerBase
     [Route("di")]
     [HttpPost]
     /// <summary>
-    /// sk agent demo for chat
+    /// sk agent demo for di
     /// </summary>
     /// <returns></returns>
     public async IAsyncEnumerable<string> DI(int maximumIterations = 4)
@@ -196,8 +189,56 @@ public class SKAgentController : ControllerBase
         }
 
         yield return $"[IS COMPLETED: {_artReviewerAgent.Chat.IsComplete}]";
-
     }
+
+    [Route("function")]
+    [HttpPost]
+    /// <summary>
+    /// sk agent demo for agent as function
+    /// </summary>
+    /// <returns></returns>
+    public async IAsyncEnumerable<string> Function()
+    {
+        var kernel = _kernel.Clone();
+        var agentPlugin = KernelPluginFactory.CreateFromFunctions("AgentPlugin",
+           [
+               AgentKernelFunctionFactory.CreateFromAgent(jokerAgent),
+                AgentKernelFunctionFactory.CreateFromAgent(lightsAgent),
+            ]);
+        kernel.Plugins.Add(agentPlugin);
+
+        // Define the agent
+        ChatCompletionAgent agent =
+            new()
+            {
+                Name = "ToolAssistant",
+                Instructions = "You are a tool assistant. Delegate to the provided agents to help the user with tell jokes and control lights.",
+                Kernel = kernel,
+                Arguments = new KernelArguments(new PromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() }),
+            };
+
+        // Invoke the agent and display the responses
+        string[] messages =
+            [
+                "Tell me a joke about a pirate..",
+                "Can you tell me the status of all the lights?."
+            ];
+
+        AgentThread? agentThread = null;
+        foreach (var message in messages)
+        {
+            var input = new ChatMessageContent(AuthorRole.User, message);
+            yield return $"#{input.Role}: {input.Content}";
+
+            await foreach (var response in agent.InvokeAsync(input, agentThread))
+            {
+                agentThread = response.Thread;
+
+                yield return $"#{response.Message.Role} - {response.Message.AuthorName}: {response.Message.Content}";
+            }
+        }
+    }
+
     #region private methods
     private static KernelFunctionTerminationStrategy CreateTerminationStrategy(Kernel kernel, ChatCompletionAgent agent, int maximumIterations = 4)
     {
