@@ -1,5 +1,6 @@
 ﻿
 using AspnetcoreEx.KernelService;
+using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 namespace AspnetcoreEx.Controllers;
@@ -20,6 +21,10 @@ public class SKAgentController : ControllerBase
 
     [Route("joker")]
     [HttpPost]
+    /// <summary>
+    /// base sk agent demo
+    /// </summary>
+    /// <returns></returns>
     public async IAsyncEnumerable<string> Joker()
     {
         ChatCompletionAgent agent =
@@ -58,5 +63,43 @@ public class SKAgentController : ControllerBase
         }
     }
 
+    [Route("lights")]
+    [HttpPost]
+    /// <summary>
+    /// sk agent demo with plugin
+    /// </summary>
+    /// <returns></returns>
+    public async IAsyncEnumerable<string> Lights()
+    {
+        ChatCompletionAgent agent =
+            new()
+            {
+                Name = "lights",
+                Instructions = "You are good at check the light status and control the light switch.",
+                Kernel = _kernel,
+                Arguments = new KernelArguments(new PromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() }),
+            };
+        // System.ArgumentException: An item with the same key has already been added. Key: Lights
+        // It has been registered in the kernel during setup, so it cannot be registered again here.
+        // agent.Kernel.Plugins.AddFromType<LightPlugin>("Lights");
+
+        ChatHistoryAgentThread thread = new();
+
+        await foreach (var message in InvokeAgentAsync("Can you tell me the status of all the lights?"))
+        {
+            yield return message;
+        }
+
+        // Local function to invoke agent and display the conversation messages.
+        async IAsyncEnumerable<string> InvokeAgentAsync(string input)
+        {
+            ChatMessageContent message = new(AuthorRole.User, input);
+            yield return $"Role: {message.Role}, Content: {message.Content}";
+            await foreach (AgentResponseItem<ChatMessageContent> response in agent.InvokeAsync(message, thread))
+            {
+                yield return $"Role: {response.Message.Role}, Content: {response.Message.Content}";
+            }
+        }
+    }
 
 }

@@ -88,8 +88,8 @@ public static class SKServiceCollectionExtensions
             await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
         }
 
-        // services.AddSingleton<IAutoFunctionInvocationFilter, ToolCallIdFilter>();
-        // services.AddSingleton<IFunctionInvocationFilter, ToolCallIdFilter>();
+        services.AddSingleton<IAutoFunctionInvocationFilter, ToolCallIdFilter>();
+        services.AddSingleton<IFunctionInvocationFilter, ToolCallIdFilter>();
 
         if (!string.IsNullOrEmpty(config.TextCompletion.ModelId))
         {
@@ -131,6 +131,8 @@ public static class SKServiceCollectionExtensions
 
         services.AddSingleton<IEmailService, EmailService>();
 
+        // It is best to register the `plugin` in each usage scenario, which can greatly reduce the judgment options of `LLM`.
+        // This is just a demo, for convenience
         kernelBuilder.Plugins.AddFromType<LightPlugin>("Lights");
         kernelBuilder.Plugins.AddFromType<DataGenerationPlugin>("Generator");
         kernelBuilder.Plugins.AddFromType<ConversationSummaryPlugin>();

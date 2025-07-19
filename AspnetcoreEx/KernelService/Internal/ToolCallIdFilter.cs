@@ -1,7 +1,4 @@
 
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-
 namespace AspnetcoreEx.KernelService.Internal;
 
 /// <summary>
@@ -10,15 +7,21 @@ namespace AspnetcoreEx.KernelService.Internal;
 /// finally, an error is reported in OpenAI.Chat.ToolChatMessage..ctor
 /// It cannot be solved by filtering. It seems that the only way to fix it is to patch it through httphandle <see cref="ResponseInterceptorHandler"/>.
 /// </summary>
-public class ToolCallIdFilter : IAutoFunctionInvocationFilter, IFunctionInvocationFilter
+public class ToolCallIdFilter(ILogger<ToolCallIdFilter> logger) : IAutoFunctionInvocationFilter, IFunctionInvocationFilter
 {
+    private readonly ILogger<ToolCallIdFilter> _logger = logger;
+
     public async Task OnAutoFunctionInvocationAsync(AutoFunctionInvocationContext context, Func<AutoFunctionInvocationContext, Task> next)
     {
+        _logger.LogInformation("1. Auto invocating: {name}", context.Function.Name);
         await next(context);
+        _logger.LogInformation("4. Auto invocating result: {result}", context.Result);
     }
 
     public async Task OnFunctionInvocationAsync(FunctionInvocationContext context, Func<FunctionInvocationContext, Task> next)
     {
+        _logger.LogInformation("2. Invocating: {name}", context.Function.Name);
         await next(context);
+        _logger.LogInformation("3. Invocating result: {result}", context.Result);
     }
 }

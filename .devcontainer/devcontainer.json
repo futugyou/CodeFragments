@@ -25,7 +25,8 @@
 					"editor.formatOnSave": true
 				},
 				"safe.directory": "/workspaces/CodeFragments",
-				"git.openRepositoryInParentFolders": "always"
+				"git.openRepositoryInParentFolders": "always",
+				"git.autofetch": true
 			}
 		}
 	},
