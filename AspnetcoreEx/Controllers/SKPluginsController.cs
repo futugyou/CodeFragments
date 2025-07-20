@@ -1,6 +1,7 @@
 ﻿
 using AspnetcoreEx.KernelService;
 using AspnetcoreEx.KernelService.Duckduckgo;
+using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Data;
@@ -157,6 +158,11 @@ public class SKPluginsController : ControllerBase
     [HttpPost]
     public async Task<string[]> EmailSender()
     {
+        var kernel = _kernel.Clone();
+        kernel.Plugins.Clear();
+        // kernel.Plugins.AddFromType<EmailPlugin>("EmailPlugin", kernel.Services);
+        // or
+        kernel.ImportPluginFromType<EmailPlugin>("EmailPlugin");
         ChatHistory chatMessages = new ChatHistory("""
             You are a mail assistant who helps users send mail to the specified address.
             """);
@@ -177,7 +183,7 @@ public class SKPluginsController : ControllerBase
         var result = _chatCompletionService.GetStreamingChatMessageContentsAsync(
             chatMessages,
             executionSettings: openAIPromptExecutionSettings,
-            kernel: _kernel);
+            kernel: kernel);
 
         // Stream the results
         string fullMessage = "";
