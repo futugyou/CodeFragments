@@ -18,6 +18,11 @@ public class Knight : IGamePiece
         return _moveGen.ValidMovesFor(CurrentPosition).Where(p => !board.IsOccupied(p));
     }
 
+    public IGamePiece Clone()
+    {
+        return new Knight(new Position(CurrentPosition.X, CurrentPosition.Y));
+    }
+
     private class KnightMove
     {
         public static readonly int[,] Moves = new[,] { { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }, { 2, 1 }, { -2, 1 }, { 2, -1 }, { -2, -1 } };

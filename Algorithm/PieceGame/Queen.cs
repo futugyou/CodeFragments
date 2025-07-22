@@ -21,6 +21,11 @@ public class Queen : IGamePiece
         });
     }
 
+    public IGamePiece Clone()
+    {
+        return new Queen(new Position(CurrentPosition.X, CurrentPosition.Y));
+    }
+
     private IEnumerable<Position> GetMoves(Board board, (int dx, int dy)[] directions)
     {
         foreach (var (dx, dy) in directions)

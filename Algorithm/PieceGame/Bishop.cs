@@ -17,6 +17,11 @@ public class Bishop : IGamePiece
         return GetMoves(board, new[] { (1, 1), (1, -1), (-1, 1), (-1, -1) });
     }
 
+    public IGamePiece Clone()
+    {
+        return new Bishop(new Position(CurrentPosition.X, CurrentPosition.Y));
+    }
+
     private IEnumerable<Position> GetMoves(Board board, (int dx, int dy)[] directions)
     {
         foreach (var (dx, dy) in directions)
