@@ -21,7 +21,7 @@ jobs:
       package-name: Vishel.AWS.S3.Tools
       
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
       uses: actions/setup-dotnet@v4
       with:
