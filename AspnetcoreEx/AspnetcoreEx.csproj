@@ -20,8 +20,8 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
-		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.1" />
-		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.2.9" />
+		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.2" />
+		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.2.10" />
 		<PackageReference Include="FaissMask" Version="0.4.2" />
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.0" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
