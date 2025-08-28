@@ -25,8 +25,8 @@
 		<PackageReference Include="FaissMask" Version="0.4.2" />
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.0" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
-		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.8" />
-		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.8" />
+		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.9" />
+		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.9" />
 		<PackageReference Include="HotChocolate.Data" Version="15.1.9" />
 		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.9" />
 		<PackageReference Include="HotChocolate.Data.MongoDb" Version="15.1.9" />
