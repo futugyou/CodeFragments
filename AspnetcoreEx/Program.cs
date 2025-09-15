@@ -225,6 +225,12 @@ if (builder.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ResponseBodyFeature v1"));
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapSwagger("/openapi/{documentName}.json");
+    app.MapScalarApiReference("/docs");
+}
+
 app.UseRouting();
 
 app.UseAuthentication();
