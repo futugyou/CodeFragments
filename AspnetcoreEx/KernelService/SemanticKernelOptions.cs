@@ -8,7 +8,7 @@ public class SemanticKernelOptions
     public JiraConfig Jira { get; set; } = new();
     public KernelMemoryConfig KernelMemory { get; set; } = new();
     public WebSearchConfig WebSearch { get; set; } = new();
-    public bool UseMemoryVectorStore { get; set; } = true;
+    public string VectorStore { get; set; } = "memory";
     // for mcp server
     public Dictionary<string, McpServer> McpServers { get; set; } = [];
 }

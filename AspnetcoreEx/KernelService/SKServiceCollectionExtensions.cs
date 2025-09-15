@@ -46,15 +46,22 @@ public static class SKServiceCollectionExtensions
         // mongo db, it will register `VectorStore` as singleton
         // TODO: Currently, Microsoft.SemanticKernel.Connectors.MongoDB can only use MongoDB.Driver 2.30.0, 3.X.X will report an error, 
         // but all my other libraries that depend on MongoDB are 3.3.0 and above.
-        if (config.UseMemoryVectorStore)
+        switch (config.VectorStore)
         {
-            services.AddInMemoryVectorStore();
-            services.AddInMemoryVectorStoreRecordCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
-        }
-        else
-        {
-            services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
-            services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+            case "memory":
+                services.AddInMemoryVectorStore();
+                services.AddInMemoryVectorStoreRecordCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+                break;
+            case "mongo":
+                services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
+                services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+                break;
+            case "postgres":
+                services.AddPostgresVectorStore(configuration.GetConnectionString("Postgres")!);
+                services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+                break;
+            default:
+                throw new NotImplementedException();
         }
 
         services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
