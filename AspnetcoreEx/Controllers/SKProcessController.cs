@@ -4,6 +4,8 @@ using Microsoft.SemanticKernel;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Process.Tools;
+using AspnetcoreEx.KernelService.Internal;
 
 namespace AspnetcoreEx.Controllers;
 
@@ -21,29 +23,46 @@ public class SKProcessController : ControllerBase
         _options = optionsMonitor.CurrentValue;
     }
 
+    // https://github.com/microsoft/semantic-kernel/tree/main/dotnet/samples/GettingStartedWithProcesses/Step01
     [Route("sample")]
     [HttpPost]
     public async IAsyncEnumerable<string> Sample()
     {
         ProcessBuilder process = new("ChatBot");
-        var startStep = process.AddStepFromType<StartStep>();
-        var lastStep = process.AddStepFromType<EndStep>();
+        var introStep = process.AddStepFromType<IntroStep>();
+        var userInputStep = process.AddStepFromType<ChatUserInputStep>();
+        var responseStep = process.AddStepFromType<ChatBotResponseStep>();
 
-        // Define the process flow
+        // Define the behavior when the process receives an external event
         process
             .OnInputEvent("StartProcess")
-            .SendEventTo(new ProcessFunctionTargetBuilder(startStep));
+            .SendEventTo(new ProcessFunctionTargetBuilder(introStep));
 
-        startStep
+        // When the intro is complete, notify the userInput step
+        introStep
             .OnFunctionResult()
-            .SendEventTo(new ProcessFunctionTargetBuilder(lastStep));
+            .SendEventTo(new ProcessFunctionTargetBuilder(userInputStep));
 
-        lastStep
-            .OnFunctionResult()
+        // When the userInput step emits an exit event, send it to the end step
+        userInputStep
+            .OnEvent("Exit")
             .StopProcess();
+
+        // When the userInput step emits a user input event, send it to the assistantResponse step
+        userInputStep
+            .OnEvent("UserInputReceived")
+            .SendEventTo(new ProcessFunctionTargetBuilder(responseStep, parameterName: "userMessage"));
+
+        // When the assistantResponse step emits a response, send it to the userInput step
+        responseStep
+            .OnEvent("AssistantResponseGenerated")
+            .SendEventTo(new ProcessFunctionTargetBuilder(userInputStep));
 
         // Build the process to get a handle that can be started
         KernelProcess kernelProcess = process.Build();
+
+        string mermaidGraph = kernelProcess.ToMermaid();
+        yield return "mermaid: " + mermaidGraph;
 
         // Start the process with an initial external event
         await using var runningProcess = await kernelProcess.StartAsync(
@@ -62,22 +81,101 @@ public class SKProcessController : ControllerBase
     }
 }
 
-
-[Experimental("SKEXP0011")]
-public sealed class StartStep : KernelProcessStep
+public sealed class IntroStep : KernelProcessStep
 {
+    /// <summary>
+    /// Prints an introduction message to the console.
+    /// </summary>
     [KernelFunction]
-    public async ValueTask ExecuteAsync(KernelProcessStepContext context)
+    public void PrintIntroMessage()
     {
-        Console.WriteLine("Start\n");
+        Console.WriteLine("Welcome to Processes in Semantic Kernel.\n");
     }
 }
-[Experimental("SKEXP0011")]
-public sealed class EndStep : KernelProcessStep
+
+public sealed class ChatBotResponseStep : KernelProcessStep<ChatBotState>
 {
-    [KernelFunction]
-    public async ValueTask ExecuteAsync(KernelProcessStepContext context)
+    public static class ProcessFunctions
     {
-        Console.WriteLine("This is the Final Step...\n");
+        public const string GetChatResponse = nameof(GetChatResponse);
+    }
+
+    /// <summary>
+    /// The internal state object for the chat bot response step.
+    /// </summary>
+    internal ChatBotState? _state;
+
+    /// <summary>
+    /// ActivateAsync is the place to initialize the state object for the step.
+    /// </summary>
+    /// <param name="state">An instance of <see cref="ChatBotState"/></param>
+    /// <returns>A <see cref="ValueTask"/></returns>
+    public override ValueTask ActivateAsync(KernelProcessStepState<ChatBotState> state)
+    {
+        _state = state.State;
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
+    /// Generates a response from the chat completion service.
+    /// </summary>
+    /// <param name="context">The context for the current step and process. <see cref="KernelProcessStepContext"/></param>
+    /// <param name="userMessage">The user message from a previous step.</param>
+    /// <param name="_kernel">A <see cref="Kernel"/> instance.</param>
+    /// <returns></returns>
+    [KernelFunction(ProcessFunctions.GetChatResponse)]
+    public async Task GetChatResponseAsync(KernelProcessStepContext context, string userMessage, Kernel _kernel)
+    {
+        _state!.ChatMessages.Add(new(AuthorRole.User, userMessage));
+        IChatCompletionService chatService = _kernel.Services.GetRequiredService<IChatCompletionService>();
+        ChatMessageContent response = await chatService.GetChatMessageContentAsync(_state.ChatMessages).ConfigureAwait(false);
+        if (response == null)
+        {
+            throw new InvalidOperationException("Failed to get a response from the chat completion service.");
+        }
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"ASSISTANT: {response.Content}");
+        Console.ResetColor();
+
+        // Update state with the response
+        _state.ChatMessages.Add(response);
+
+        // emit event: assistantResponse
+        await context.EmitEventAsync(new KernelProcessEvent { Id = "AssistantResponseGenerated", Data = response });
+    }
+}
+
+/// <summary>
+/// The state object for the <see cref="ChatBotResponseStep"/>.
+/// </summary>
+public sealed class ChatBotState
+{
+    internal ChatHistory ChatMessages { get; } = new();
+}
+
+
+public sealed class ChatUserInputStep : ScriptedUserInputStep
+{
+    public override void PopulateUserInputs(UserInputState state)
+    {
+        state.UserInputs.Add("How tall is the tallest mountain?");
+        state.UserInputs.Add("exit");
+        state.UserInputs.Add("This text will be ignored because exit process condition was already met at this point.");
+    }
+
+    public override async ValueTask GetUserInputAsync(KernelProcessStepContext context)
+    {
+        var userMessage = this.GetNextUserMessage();
+
+        if (string.Equals(userMessage, "exit", StringComparison.OrdinalIgnoreCase))
+        {
+            // exit condition met, emitting exit event
+            await context.EmitEventAsync(new() { Id = "Exit", Data = userMessage });
+            return;
+        }
+
+        // emitting userInputReceived event
+        await context.EmitEventAsync(new() { Id = "UserInputReceived", Data = userMessage });
     }
 }
