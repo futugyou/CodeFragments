@@ -12,7 +12,7 @@ public class HttpListenerServer : IServer
     public HttpListenerServer(params string[] urls)
     {
         _httpListener = new HttpListener();
-        _urls = urls.Any() ? urls : new string[]{ "http://localhost:5005/" };
+        _urls = urls.Any() ? urls : new string[] { "http://localhost:5005/" };
     }
 
     public Task StartAsync(RequestDelegate handler)
@@ -37,10 +37,10 @@ public class HttpListenerServer : IServer
                 await handler(httpContext);
                 listnerContext.Response.Close();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }           
+            }
         }
     }
 }

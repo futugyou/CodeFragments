@@ -21,7 +21,7 @@ public static class CompanyReportExtensions
             return new APIProcessorManager(apiProcessors, config.ApiProvider);
         });
         services.AddScoped<AsyncOpenaiProcessor>();
-        
+
         services.AddScoped<TableSerializer>();
 
         services.AddKeyedScoped<IIngestor, BM25Ingestor>("BM25");

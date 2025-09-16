@@ -12,7 +12,7 @@ public class ActionDescriptor
     public string ActionName { get; }
     public ParameterDescriptor[] Parameters { get; }
     public ActionDescriptor(
-        MethodInfo methodInfo, 
+        MethodInfo methodInfo,
         IRouteTemplateProvider? routeTemplateProvider)
     {
         MethodInfo = methodInfo;
@@ -26,6 +26,6 @@ public class ActionDescriptor
 
 public class ParameterDescriptor(ParameterInfo parameterInfo)
 {
-    public ParameterInfo ParameterInfo 
+    public ParameterInfo ParameterInfo
         => parameterInfo;
 }

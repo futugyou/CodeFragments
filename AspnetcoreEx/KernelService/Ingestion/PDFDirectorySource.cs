@@ -52,7 +52,7 @@ public class PDFDirectorySource(string sourceDirectory) : IIngestionSource
     {
         using var pdf = PdfDocument.Open(System.IO.Path.Combine(sourceDirectory, documentId));
         var paragraphs = pdf.GetPages().SelectMany(GetPageParagraphs).ToList();
-        
+
         var embeddings = await embeddingGenerator.GenerateAsync(paragraphs.Select(c => c.Text));
 
         return paragraphs.Zip(embeddings).Select((pair, index) => new SemanticSearchRecord

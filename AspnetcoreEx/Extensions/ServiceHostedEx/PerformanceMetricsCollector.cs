@@ -25,9 +25,9 @@ public sealed class PerformanceMetricsCollector : IHostedService
         _metricsDeliver = metricsDeliver;
         _lifeTime = lifeTime;
 
-        _lifeTime.ApplicationStarted.Register(()=>Console.WriteLine("[{0}] Application Started", DateTimeOffset.Now));
-        _lifeTime.ApplicationStopping.Register(()=>Console.WriteLine("[{0}] Application Stopping", DateTimeOffset.Now));
-        _lifeTime.ApplicationStopped.Register(()=>Console.WriteLine("[{0}] Application Stopped", DateTimeOffset.Now));
+        _lifeTime.ApplicationStarted.Register(() => Console.WriteLine("[{0}] Application Started", DateTimeOffset.Now));
+        _lifeTime.ApplicationStopping.Register(() => Console.WriteLine("[{0}] Application Stopping", DateTimeOffset.Now));
+        _lifeTime.ApplicationStopped.Register(() => Console.WriteLine("[{0}] Application Stopped", DateTimeOffset.Now));
     }
 
     public Task StartAsync(CancellationToken cancellationToken)

@@ -29,7 +29,7 @@ public class RoutePatternCase
         builder.AppendLine("ParameterPolicies ");
         foreach (var policy in pattern.ParameterPolicies)
         {
-            builder.AppendLine($"\t{policy.Key} = {string.Join(',',policy.Value.Select(it => it.Content))}");  
+            builder.AppendLine($"\t{policy.Key} = {string.Join(',', policy.Value.Select(it => it.Content))}");
         }
 
         builder.AppendLine("RequiredValues ");
@@ -42,7 +42,7 @@ public class RoutePatternCase
 
         string ToString(RoutePatternPart part)
         {
-            return part switch 
+            return part switch
             {
                 RoutePatternLiteralPart literal => $"Literal: {literal.Content}",
                 RoutePatternSeparatorPart separator => $"Separator: {separator.Content}",

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ActionConstraints;
 namespace AspnetcoreEx.MiniMVC;
 
 public class ActionEndpointDataSource : EndpointDataSource
-{   
+{
     private readonly List<(string RouteName, string Template, RouteValueDictionary? Defaults, IDictionary<string, object?>? Constraints, RouteValueDictionary? DataTokens, List<Action<EndpointBuilder>> Conventions, List<Action<EndpointBuilder>> FinallyConventions)> _conventionalRoutes = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly IActionDescriptorCollectionProvider _actions;
@@ -20,7 +20,7 @@ public class ActionEndpointDataSource : EndpointDataSource
     private int _routeOrder;
 
     private List<Endpoint>? _endpoints;
- 
+
     public ActionEndpointDataSource(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -50,7 +50,7 @@ public class ActionEndpointDataSource : EndpointDataSource
         }
         else
         {
-           yield return  CreateAttributeEndpoint(actionDescriptor, routeValues, attributes);
+            yield return CreateAttributeEndpoint(actionDescriptor, routeValues, attributes);
         }
     }
 

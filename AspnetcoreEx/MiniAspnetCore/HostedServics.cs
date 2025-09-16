@@ -1,7 +1,7 @@
 namespace AspnetcoreEx.MiniAspnetCore;
 
 public class WebHostedService : IHostedService
-{   
+{
     private readonly IServer _server;
     private readonly RequestDelegate _handler;
     public WebHostedService(IServer server, RequestDelegate handler)
@@ -9,14 +9,14 @@ public class WebHostedService : IHostedService
         _server = server;
         _handler = handler;
     }
-    
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         try
         {
             await _server.StartAsync(_handler);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }

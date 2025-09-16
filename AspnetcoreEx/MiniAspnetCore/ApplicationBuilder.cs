@@ -3,12 +3,12 @@ namespace AspnetcoreEx.MiniAspnetCore;
 public interface IApplicationBuilder
 {
     RequestDelegate Build();
-    IApplicationBuilder Use(Func<RequestDelegate,RequestDelegate> middleware);
+    IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware);
 }
 
 public class ApplicationBuilder : IApplicationBuilder
 {
-    private readonly List<Func<RequestDelegate,RequestDelegate>> _middlewares = new List<Func<RequestDelegate,RequestDelegate>>();
+    private readonly List<Func<RequestDelegate, RequestDelegate>> _middlewares = new List<Func<RequestDelegate, RequestDelegate>>();
 
     public RequestDelegate Build()
     {
@@ -26,7 +26,7 @@ public class ApplicationBuilder : IApplicationBuilder
         return next;
     }
 
-    public IApplicationBuilder Use(Func<RequestDelegate,RequestDelegate> middleware)
+    public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware)
     {
         _middlewares.Add(middleware);
         return this;

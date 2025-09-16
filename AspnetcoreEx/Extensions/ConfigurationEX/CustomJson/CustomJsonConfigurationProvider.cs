@@ -20,7 +20,7 @@ public class CustomJsonConfigurationProvider : JsonConfigurationProvider
     }
 }
 
-public class CustomJsonConfigurationSource: JsonConfigurationSource
+public class CustomJsonConfigurationSource : JsonConfigurationSource
 {
     public override IConfigurationProvider Build(IConfigurationBuilder builder)
     {

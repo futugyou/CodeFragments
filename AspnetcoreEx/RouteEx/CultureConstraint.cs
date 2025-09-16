@@ -17,7 +17,7 @@ public class CultureConstraint : IRouteConstraint
         }
         catch
         {
-            
+
             return false;
         }
     }

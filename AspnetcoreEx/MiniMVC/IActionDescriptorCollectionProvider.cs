@@ -13,8 +13,8 @@ public class ActionDescriptorCollectionProvider : IActionDescriptorCollectionPro
 {
     private readonly Assembly _assembly;
     private List<ActionDescriptor>? _actionDescriptors;
-    public IReadOnlyList<ActionDescriptor> ActionDescriptors 
-        => _actionDescriptors 
+    public IReadOnlyList<ActionDescriptor> ActionDescriptors
+        => _actionDescriptors
         ??= [.. Resolve(_assembly.GetExportedTypes())];
 
     public ActionDescriptorCollectionProvider(IWebHostEnvironment environment)
@@ -28,7 +28,7 @@ public class ActionDescriptorCollectionProvider : IActionDescriptorCollectionPro
         var methods = types
             .Where(IsValidController)
             .SelectMany(type => type.GetMethods()
-                .Where(method => method.DeclaringType == type 
+                .Where(method => method.DeclaringType == type
                     && IsValidAction(method)));
 
         foreach (var method in methods)
@@ -49,10 +49,10 @@ public class ActionDescriptorCollectionProvider : IActionDescriptorCollectionPro
         }
     }
 
-    private static bool IsValidController(Type candidate) 
-        => candidate.IsPublic 
-        && !candidate.IsAbstract 
+    private static bool IsValidController(Type candidate)
+        => candidate.IsPublic
+        && !candidate.IsAbstract
         && candidate.Name.EndsWith("Controller");
-    private static bool IsValidAction(MethodInfo methodInfo) 
+    private static bool IsValidAction(MethodInfo methodInfo)
         => methodInfo.IsPublic | !methodInfo.IsAbstract;
 }

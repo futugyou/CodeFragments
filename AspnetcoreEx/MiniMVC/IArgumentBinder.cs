@@ -43,7 +43,7 @@ public class ArgumentBinder : IArgumentBinder
         }
 
         // From default value
-        var defaultValue = _defaults.GetOrAdd(parameterType, type=> _method.MakeGenericMethod(parameterType).Invoke(null,null));
+        var defaultValue = _defaults.GetOrAdd(parameterType, type => _method.MakeGenericMethod(parameterType).Invoke(null, null));
         return ValueTask.FromResult(defaultValue);
     }
     public static T GetDefaultValue<T>() => default!;

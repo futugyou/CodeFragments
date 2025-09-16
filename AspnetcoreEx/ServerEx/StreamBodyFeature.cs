@@ -24,7 +24,7 @@ public class StreamBodyFeature : IHttpResponseBodyFeature
 
     public void DisableBuffering()
     {
-        
+
     }
 
     public Task StartAsync(CancellationToken cancellationToken = default)

@@ -8,7 +8,7 @@ public class ExceptionExtensions
         {
             ExceptionHandler = httpContext =>
             {
-                httpContext.Response.StatusCode =404;
+                httpContext.Response.StatusCode = 404;
                 return Task.CompletedTask;
             },
             AllowStatusCode404Response = allowStatusCode404Response

@@ -23,13 +23,13 @@ public static partial class MiniExtensions
     {
         configure?.Invoke(builder.ApplicationBuilder);
         return builder;
-    } 
+    }
 
     public static IHostBuilder ConfigureWebHost(this IHostBuilder builder, Action<WebHostBuilder> configure)
     {
         var webHostBuilder = new WebHostBuilder(builder, new ApplicationBuilder());
         configure?.Invoke(webHostBuilder);
-        builder.ConfigureServices(svcs => svcs.AddSingleton<IHostedService>(provider => 
+        builder.ConfigureServices(svcs => svcs.AddSingleton<IHostedService>(provider =>
         {
             var server = provider.GetRequiredService<IServer>();
             var handler = webHostBuilder.ApplicationBuilder.Build();
@@ -38,23 +38,26 @@ public static partial class MiniExtensions
         return builder;
     }
 
-    public static Task WriteAsync(this HttpResponse response ,string contents)
+    public static Task WriteAsync(this HttpResponse response, string contents)
     {
         var buffer = System.Text.Encoding.UTF8.GetBytes(contents);
         return response.Body.WriteAsync(buffer, 0, buffer.Length);
     }
 
-    public static RequestDelegate OneMiddleware (RequestDelegate next) => async context =>{
+    public static RequestDelegate OneMiddleware(RequestDelegate next) => async context =>
+    {
         await context.Response.WriteAsync("One=>");
         await next(context);
     };
 
-    public static RequestDelegate TwoMiddleware (RequestDelegate next) => async context =>{
+    public static RequestDelegate TwoMiddleware(RequestDelegate next) => async context =>
+    {
         await context.Response.WriteAsync("Two=>");
         await next(context);
     };
 
-    public static RequestDelegate ThreeMiddleware (RequestDelegate next) => async context =>{
+    public static RequestDelegate ThreeMiddleware(RequestDelegate next) => async context =>
+    {
         await context.Response.WriteAsync("Three=>");
     };
 

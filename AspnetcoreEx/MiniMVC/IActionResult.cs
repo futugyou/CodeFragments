@@ -2,7 +2,7 @@ namespace AspnetcoreEx.MiniMVC;
 
 public interface IActionResult
 {
-    Task ExecuteResultAsync(ActionContext  actionContext);
+    Task ExecuteResultAsync(ActionContext actionContext);
 }
 
 public class JsonResult(object data) : IActionResult

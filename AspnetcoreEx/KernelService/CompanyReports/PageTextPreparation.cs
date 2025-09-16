@@ -121,7 +121,7 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
             Pages = processedPages
         };
     }
-    
+
     public async Task ExportToMarkdownAsync(string reportsDir, string outputDir, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(outputDir);
@@ -150,9 +150,9 @@ public partial class PageTextPreparation(bool useSerializedTables = false, bool 
     {
         Directory.CreateDirectory(outputDir);
         foreach (var processedReport in processedReports)
-        {  
+        {
             var sb = new StringBuilder();
-            foreach (var page in processedReport.Content!.Pages??[])
+            foreach (var page in processedReport.Content!.Pages ?? [])
             {
                 sb.AppendLine($"\n\n---\n\n# Page {page.Page}\n\n");
                 sb.AppendLine(page.Text);

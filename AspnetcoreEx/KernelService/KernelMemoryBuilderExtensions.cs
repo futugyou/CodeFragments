@@ -13,8 +13,8 @@ public static class KernelMemoryBuilderExtensions
     public static IKernelMemoryBuilder WithSemanticKernelTextEmbeddingGenerationService(
         this IKernelMemoryBuilder builder,
         IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
-        SemanticKernelConfig config, 
-        ITextTokenizer? textTokenizer = null, 
+        SemanticKernelConfig config,
+        ITextTokenizer? textTokenizer = null,
         ILoggerFactory? loggerFactory = null,
         bool onlyForRetrieval = false)
     {

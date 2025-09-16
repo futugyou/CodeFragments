@@ -17,7 +17,7 @@ public interface IActionInvoker
 public class ActionInvoker(ActionContext actionContext) : IActionInvoker
 {
     public ActionContext ActionContext { get; } = actionContext;
-    
+
     public async Task InvokeAsync()
     {
         var requestServices = ActionContext.HttpContext.RequestServices;
