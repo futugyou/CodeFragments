@@ -5,6 +5,10 @@ using AspnetcoreEx.KernelService.Skills;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Agents.Orchestration;
+using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent;
+using Microsoft.SemanticKernel.Agents.Runtime.InProcess;
+
 namespace AspnetcoreEx.Controllers;
 
 [Experimental("SKEXP0011")]
@@ -238,6 +242,35 @@ public class SKAgentController : ControllerBase
             }
         }
     }
+
+    [Route("concurrent")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Concurrent(string query = "What is temperature?")
+    {
+        ChatCompletionAgent physicist = new ()
+        {
+            Name = "PhysicsExpert",
+            Instructions = "You are an expert in physics. You answer questions from a physics perspective.",
+            Kernel = _kernel.Clone(),
+        };
+
+        ChatCompletionAgent chemist = new ()
+        {
+            Name = "ChemistryExpert",
+            Instructions = "You are an expert in chemistry. You answer questions from a chemistry perspective.",
+            Kernel = _kernel.Clone(),
+        };
+
+        ConcurrentOrchestration orchestration = new(physicist, chemist);
+        InProcessRuntime runtime = new();
+        var result = await orchestration.InvokeAsync(query, runtime);
+        await runtime.StartAsync();
+
+        string[] output = await result.GetValueAsync();
+        yield return $"# RESULT:\n{string.Join("\n\n", output.Select(text => $"{text}"))}";
+        await runtime.RunUntilIdleAsync();
+    }
+
 
     #region private methods
     private static KernelFunctionTerminationStrategy CreateTerminationStrategy(Kernel kernel, ChatCompletionAgent agent, int maximumIterations = 4)
