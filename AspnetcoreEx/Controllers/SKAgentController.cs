@@ -8,6 +8,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Agents.Orchestration;
 using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent;
 using Microsoft.SemanticKernel.Agents.Orchestration.Sequential;
+using Microsoft.SemanticKernel.Agents.Orchestration.Handoff;
 using Microsoft.SemanticKernel.Agents.Orchestration.GroupChat;
 using Microsoft.SemanticKernel.Agents.Runtime.InProcess;
 using AngleSharp.Common;
@@ -377,6 +378,102 @@ public class SKAgentController : ControllerBase
         await runtime.RunUntilIdleAsync();
     }
 
+    [Route("handoff")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Handoff(string query = "I am a customer that needs help with my orders")
+    {
+        ChatCompletionAgent triageAgent = new()
+        {
+            Name = "TriageAgent",
+            Description = "Handle customer requests.",
+            Instructions = "A customer support agent that triages issues.",
+            Kernel = _kernel.Clone(),
+        };
+
+        ChatCompletionAgent statusAgent = new()
+        {
+            Name = "OrderStatusAgent",
+            Description = "A customer support agent that checks order status.",
+            Instructions = "Handle order status requests.",
+            Kernel = _kernel.Clone(),
+        };
+        statusAgent.Kernel.Plugins.Add(KernelPluginFactory.CreateFromObject(new OrderStatusPlugin()));
+
+        ChatCompletionAgent returnAgent = new()
+        {
+            Name = "OrderReturnAgent",
+            Description = "A customer support agent that handles order returns.",
+            Instructions = "Handle order return requests.",
+            Kernel = _kernel.Clone(),
+        };
+        returnAgent.Kernel.Plugins.Add(KernelPluginFactory.CreateFromObject(new OrderReturnPlugin()));
+
+        ChatCompletionAgent refundAgent = new()
+        {
+            Name = "OrderRefundAgent",
+            Description = "A customer support agent that handles order refund.",
+            Instructions = "Handle order refund requests.",
+            Kernel = _kernel.Clone(),
+        };
+        refundAgent.Kernel.Plugins.Add(KernelPluginFactory.CreateFromObject(new OrderRefundPlugin()));
+
+        var handoffs = OrchestrationHandoffs
+            .StartWith(triageAgent)
+            .Add(triageAgent, statusAgent, returnAgent, refundAgent)
+            .Add(statusAgent, triageAgent, "Transfer to this agent if the issue is not status related")
+            .Add(returnAgent, triageAgent, "Transfer to this agent if the issue is not return related")
+            .Add(refundAgent, triageAgent, "Transfer to this agent if the issue is not refund related");
+
+        ChatHistory history = [];
+
+        ValueTask responseCallback(ChatMessageContent response)
+        {
+            history.Add(response);
+            return ValueTask.CompletedTask;
+        }
+
+        // Simulate user input with a queue
+        Queue<string> responses = new();
+        responses.Enqueue("I'd like to track the status of my order");
+        responses.Enqueue("My order ID is 123");
+        responses.Enqueue("I want to return another order of mine");
+        responses.Enqueue("Order ID 321");
+        responses.Enqueue("Broken item");
+        responses.Enqueue("No, bye");
+
+        ValueTask<ChatMessageContent> interactiveCallback()
+        {
+            string input = responses.Dequeue();
+            Console.WriteLine($"\n# INPUT: {input}\n");
+            return ValueTask.FromResult(new ChatMessageContent(AuthorRole.User, input));
+        }
+
+        HandoffOrchestration orchestration = new(
+            handoffs,
+            triageAgent,
+            statusAgent,
+            returnAgent,
+            refundAgent)
+        {
+            InteractiveCallback = interactiveCallback,
+            ResponseCallback = responseCallback,
+        };
+
+        InProcessRuntime runtime = new();
+        var result = await orchestration.InvokeAsync(query, runtime);
+        await runtime.StartAsync();
+
+        string output = await result.GetValueAsync(TimeSpan.FromSeconds(20));
+        yield return $"\n# RESULT: {output}";
+
+        foreach (ChatMessageContent message in history)
+        {
+            yield return $"#{message.Role} - {message.AuthorName}: {message.Content}";
+        }
+
+        await runtime.RunUntilIdleAsync();
+    }
+
 
     #region private methods
     private static KernelFunctionTerminationStrategy CreateTerminationStrategy(Kernel kernel, ChatCompletionAgent agent, int maximumIterations = 4)
@@ -446,6 +543,25 @@ public class SKAgentController : ControllerBase
     }
 
     #endregion
+}
+
+// Plugin implementations
+public sealed class OrderStatusPlugin
+{
+    [KernelFunction]
+    public string CheckOrderStatus(string orderId) => $"Order {orderId} is shipped and will arrive in 2-3 days.";
+}
+
+public sealed class OrderReturnPlugin
+{
+    [KernelFunction]
+    public string ProcessReturn(string orderId, string reason) => $"Return for order {orderId} has been processed successfully.";
+}
+
+public sealed class OrderRefundPlugin
+{
+    [KernelFunction]
+    public string ProcessReturn(string orderId, string reason) => $"Refund for order {orderId} has been processed successfully.";
 }
 
 [Experimental("SKEXP0011")]
