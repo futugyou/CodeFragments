@@ -7,6 +7,7 @@ using Microsoft.SemanticKernel.Agents.Chat;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Agents.Orchestration;
 using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent;
+using Microsoft.SemanticKernel.Agents.Orchestration.Sequential;
 using Microsoft.SemanticKernel.Agents.Runtime.InProcess;
 
 namespace AspnetcoreEx.Controllers;
@@ -247,14 +248,14 @@ public class SKAgentController : ControllerBase
     [HttpPost]
     public async IAsyncEnumerable<string> Concurrent(string query = "What is temperature?")
     {
-        ChatCompletionAgent physicist = new ()
+        ChatCompletionAgent physicist = new()
         {
             Name = "PhysicsExpert",
             Instructions = "You are an expert in physics. You answer questions from a physics perspective.",
             Kernel = _kernel.Clone(),
         };
 
-        ChatCompletionAgent chemist = new ()
+        ChatCompletionAgent chemist = new()
         {
             Name = "ChemistryExpert",
             Instructions = "You are an expert in chemistry. You answer questions from a chemistry perspective.",
@@ -268,6 +269,58 @@ public class SKAgentController : ControllerBase
 
         string[] output = await result.GetValueAsync();
         yield return $"# RESULT:\n{string.Join("\n\n", output.Select(text => $"{text}"))}";
+        await runtime.RunUntilIdleAsync();
+    }
+
+    [Route("sequential")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Sequential(string query = "An eco-friendly stainless steel water bottle that keeps drinks cold for 24 hours")
+    {
+        ChatCompletionAgent analystAgent = new()
+        {
+            Name = "Analyst",
+            Instructions = "You are a marketing analyst. Given a product description, identify:\n- Key features\n- Target audience\n- Unique selling points",
+            Kernel = _kernel.Clone(),
+        };
+
+        ChatCompletionAgent writerAgent = new()
+        {
+            Name = "Copywriter",
+            Instructions = "You are a marketing copywriter. Given a block of text describing features, audience, and USPs, compose a compelling marketing copy (like a newsletter section) that highlights these points. Output should be short (around 150 words), output just the copy as a single text block.",
+            Kernel = _kernel.Clone(),
+        };
+
+        ChatCompletionAgent editorAgent = new()
+        {
+            Name = "Editor",
+            Instructions = "You are an editor. Given the draft copy, correct grammar, improve clarity, ensure consistent tone, give format and make it polished. Output the final improved copy as a single text block.",
+            Kernel = _kernel.Clone(),
+        };
+        ChatHistory history = [];
+
+        ValueTask responseCallback(ChatMessageContent response)
+        {
+            history.Add(response);
+            return ValueTask.CompletedTask;
+        }
+
+        SequentialOrchestration orchestration = new(analystAgent, writerAgent, editorAgent)
+        {
+            ResponseCallback = responseCallback,
+        };
+
+        InProcessRuntime runtime = new();
+        var result = await orchestration.InvokeAsync(query, runtime);
+        await runtime.StartAsync();
+
+        string output = await result.GetValueAsync(TimeSpan.FromSeconds(20));
+        yield return $"\n# RESULT: {output}";
+
+        foreach (ChatMessageContent message in history)
+        {
+            yield return $"#{message.Role} - {message.AuthorName}: {message.Content}";
+        }
+
         await runtime.RunUntilIdleAsync();
     }
 
