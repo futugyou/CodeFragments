@@ -10,6 +10,7 @@ using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent;
 using Microsoft.SemanticKernel.Agents.Orchestration.Sequential;
 using Microsoft.SemanticKernel.Agents.Orchestration.GroupChat;
 using Microsoft.SemanticKernel.Agents.Runtime.InProcess;
+using AngleSharp.Common;
 
 namespace AspnetcoreEx.Controllers;
 
@@ -329,19 +330,21 @@ public class SKAgentController : ControllerBase
     [HttpPost]
     public async IAsyncEnumerable<string> GroupChat(string query = "Create a slogan for a new electric SUV that is affordable and fun to drive.")
     {
-        ChatCompletionAgent writer = new () {
+        ChatCompletionAgent writer = new()
+        {
             Name = "CopyWriter",
             Description = "A copy writer",
             Instructions = "You are a copywriter with ten years of experience and are known for brevity and a dry humor. The goal is to refine and decide on the single best copy as an expert in the field. Only provide a single proposal per response. You're laser focused on the goal at hand. Don't waste time with chit chat. Consider suggestions when refining an idea.",
             Kernel = _kernel.Clone(),
         };
 
-        ChatCompletionAgent editor = new () {
+        ChatCompletionAgent editor = new()
+        {
             Name = "Reviewer",
             Description = "An editor.",
             Instructions = "You are an art director who has opinions about copywriting born of a love for David Ogilvy. The goal is to determine if the given copy is acceptable to print. If so, state that it is approved. If not, provide insight on how to refine suggested copy without example.",
             Kernel = _kernel.Clone(),
-        }; 
+        };
 
         ChatHistory history = [];
 
@@ -351,10 +354,10 @@ public class SKAgentController : ControllerBase
             return ValueTask.CompletedTask;
         }
 
-       GroupChatOrchestration orchestration = new (
-            new RoundRobinGroupChatManager { MaximumInvocationCount = 5 },
-            writer,
-            editor)
+        GroupChatOrchestration orchestration = new(
+             new CustomGroupChatManager { MaximumInvocationCount = 5 },
+             writer,
+             editor)
         {
             ResponseCallback = responseCallback,
         };
@@ -452,4 +455,43 @@ sealed class ApprovalTerminationStrategy : TerminationStrategy
     // The `This copy is not approved` also case `approve`.
     protected override Task<bool> ShouldAgentTerminateAsync(Agent agent, IReadOnlyList<ChatMessageContent> history, CancellationToken cancellationToken)
         => Task.FromResult(history[history.Count - 1].Content?.Contains("approve", StringComparison.OrdinalIgnoreCase) ?? false);
+}
+
+public class CustomGroupChatManager : GroupChatManager
+{
+    public override ValueTask<GroupChatManagerResult<string>> FilterResults(ChatHistory history, CancellationToken cancellationToken = default)
+    {
+        // Custom logic to filter or summarize chat results
+        return ValueTask.FromResult(new GroupChatManagerResult<string>("Summary") { Reason = "Custom summary logic." });
+    }
+
+    public override ValueTask<GroupChatManagerResult<string>> SelectNextAgent(ChatHistory history, GroupChatTeam team, CancellationToken cancellationToken = default)
+    {
+        // Randomly select an agent from the team
+        var random = new Random();
+        int index = random.Next(team.Count);
+        string nextAgent = team.GetItemByIndex(index).Key;
+        return ValueTask.FromResult(new GroupChatManagerResult<string>(nextAgent) { Reason = "Custom selection logic." });
+    }
+
+    public override ValueTask<GroupChatManagerResult<bool>> ShouldRequestUserInput(ChatHistory history, CancellationToken cancellationToken = default)
+    {
+        // Custom logic to decide if user input is needed
+        return ValueTask.FromResult(new GroupChatManagerResult<bool>(false) { Reason = "No user input required." });
+    }
+
+    public override async ValueTask<GroupChatManagerResult<bool>> ShouldTerminate(ChatHistory history, CancellationToken cancellationToken = default)
+    {
+        // Optionally call the base implementation to check for default termination logic
+        var baseResult = await base.ShouldTerminate(history, cancellationToken);
+        if (baseResult.Value)
+        {
+            // If the base logic says to terminate, respect it
+            return baseResult;
+        }
+
+        // Custom logic to determine if the chat should terminate
+        bool shouldEnd = history.Count > 10; // Example: end after 10 messages
+        return new GroupChatManagerResult<bool>(shouldEnd) { Reason = "Custom termination logic." };
+    }
 }
