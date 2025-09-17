@@ -8,6 +8,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Agents.Orchestration;
 using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent;
 using Microsoft.SemanticKernel.Agents.Orchestration.Sequential;
+using Microsoft.SemanticKernel.Agents.Orchestration.GroupChat;
 using Microsoft.SemanticKernel.Agents.Runtime.InProcess;
 
 namespace AspnetcoreEx.Controllers;
@@ -305,6 +306,55 @@ public class SKAgentController : ControllerBase
         }
 
         SequentialOrchestration orchestration = new(analystAgent, writerAgent, editorAgent)
+        {
+            ResponseCallback = responseCallback,
+        };
+
+        InProcessRuntime runtime = new();
+        var result = await orchestration.InvokeAsync(query, runtime);
+        await runtime.StartAsync();
+
+        string output = await result.GetValueAsync(TimeSpan.FromSeconds(20));
+        yield return $"\n# RESULT: {output}";
+
+        foreach (ChatMessageContent message in history)
+        {
+            yield return $"#{message.Role} - {message.AuthorName}: {message.Content}";
+        }
+
+        await runtime.RunUntilIdleAsync();
+    }
+
+    [Route("groupChat")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> GroupChat(string query = "Create a slogan for a new electric SUV that is affordable and fun to drive.")
+    {
+        ChatCompletionAgent writer = new () {
+            Name = "CopyWriter",
+            Description = "A copy writer",
+            Instructions = "You are a copywriter with ten years of experience and are known for brevity and a dry humor. The goal is to refine and decide on the single best copy as an expert in the field. Only provide a single proposal per response. You're laser focused on the goal at hand. Don't waste time with chit chat. Consider suggestions when refining an idea.",
+            Kernel = _kernel.Clone(),
+        };
+
+        ChatCompletionAgent editor = new () {
+            Name = "Reviewer",
+            Description = "An editor.",
+            Instructions = "You are an art director who has opinions about copywriting born of a love for David Ogilvy. The goal is to determine if the given copy is acceptable to print. If so, state that it is approved. If not, provide insight on how to refine suggested copy without example.",
+            Kernel = _kernel.Clone(),
+        }; 
+
+        ChatHistory history = [];
+
+        ValueTask responseCallback(ChatMessageContent response)
+        {
+            history.Add(response);
+            return ValueTask.CompletedTask;
+        }
+
+       GroupChatOrchestration orchestration = new (
+            new RoundRobinGroupChatManager { MaximumInvocationCount = 5 },
+            writer,
+            editor)
         {
             ResponseCallback = responseCallback,
         };
