@@ -132,7 +132,7 @@ builder.Services.AddRefitClient<IGitHubApi>()
 var section = builder.Configuration.GetSection("RetryOptions");
 builder.Services.Configure<HttpRetryStrategyOptions>(section);
 
-// builder.Services.AddGraphQL(configuration, builder.Environment);
+builder.Services.AddGraphQL(configuration, builder.Environment);
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
 builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
@@ -237,7 +237,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseWebSockets();
-// app.UseGraphQLCustom();
+app.UseGraphQLCustom();
 
 app.MapControllers();
 app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions

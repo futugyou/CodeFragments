@@ -59,7 +59,7 @@ public class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetAllUser(GraphQLDbContext dbContext)
+    public IQueryable<User> GetAllUser([Service]GraphQLDbContext dbContext)
     {
         return dbContext.Users;
     }

@@ -29,15 +29,10 @@ public static class GraphQLExtensions
                         IssuerSigningKey = signingKey
                     };
             });
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AtLeast21", policy =>
-                policy.Requirements.Add(new MinimumAgeRequirement(21)));
+        services.AddAuthorizationBuilder()
+        .AddPolicy("AtLeast21", policy => policy.Requirements.Add(new MinimumAgeRequirement(21)))
+        .AddPolicy("HasCountry", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
 
-            options.AddPolicy("HasCountry", policy =>
-                policy.RequireAssertion(context =>
-                    context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
-        });
         services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
         // This is the connection multiplexer that redis will use
         // services.AddSingleton(ConnectionMultiplexer.Connect("redisstring"));
@@ -82,15 +77,15 @@ public static class GraphQLExtensions
         {
             option.EnableOneOf = true;
         })
-        // .AddMutationConventions(new MutationConventionOptions
-        // {
-        //     ApplyToAllMutations = true,
-        //     InputArgumentName = "input",
-        //     InputTypeNamePattern = "{MutationName}Input",
-        //     PayloadTypeNamePattern = "{MutationName}Payload",
-        //     PayloadErrorTypeNamePattern = "{MutationName}Error",
-        //     PayloadErrorsFieldName = "errors"
-        // })
+        .AddMutationConventions(new MutationConventionOptions
+        {
+            ApplyToAllMutations = true,
+            InputArgumentName = "input",
+            InputTypeNamePattern = "{MutationName}Input",
+            PayloadTypeNamePattern = "{MutationName}Payload",
+            PayloadErrorTypeNamePattern = "{MutationName}Error",
+            PayloadErrorsFieldName = "errors"
+        })
         .AddInMemorySubscriptions()
         //.AddType(new UuidType('D'))
         .BindRuntimeType<string, StringType>()
@@ -113,7 +108,7 @@ public static class GraphQLExtensions
         // .AddRemoteSchemasFromRedis("Demo", sp => sp.GetRequiredService<ConnectionMultiplexer>())
         .InitializeOnStartup()
         .UseAutomaticPersistedOperationPipeline()
-        .AddInMemoryQueryStorage()
+        .AddInMemoryOperationDocumentStorage()
         // .AddRedisQueryStorage(services => ConnectionMultiplexer.Connect("redisstring").GetDatabase())
         // .UsePersistedQueryPipeline()
         // .AddReadOnlyFileSystemQueryStorage("./persisted_queries")
