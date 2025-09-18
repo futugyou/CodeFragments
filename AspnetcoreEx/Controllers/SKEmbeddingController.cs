@@ -56,6 +56,19 @@ public class SKEmbeddingController : ControllerBase
     [HttpPost]
     public async IAsyncEnumerable<string> EmbeddingCreate()
     {
+        // I use https://supabase.com/ pgsql, collection.UpsertAsync and collection.EnsureCollectionExistsAsync() are ok
+        // BUT collection.GetAsync throws an exception, `Exception while reading from stream`
+        // 
+        // SQL:
+        // create extension if not exists vector;
+        // create table public.semantic_search (
+        //   "Key" character varying not null,
+        //   "FileName" character varying not null,
+        //   "PageNumber" bigint null,
+        //   "Text" character varying null,
+        //   "Vector" vector(1536) null,  
+        //   constraint semantic_search_pkey primary key ("Key")
+        // );
         var collection = _vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName(), new VectorStoreCollectionDefinition
         {
             Properties =
