@@ -1,8 +1,6 @@
 
-using AspnetcoreEx.KernelService.Duckduckgo;
 using AspnetcoreEx.KernelService.Ingestion;
 using AspnetcoreEx.KernelService.Internal;
-using AspnetcoreEx.KernelService.Planners;
 using AspnetcoreEx.KernelService.Skills;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
@@ -58,7 +56,7 @@ public static class SKServiceCollectionExtensions
                 break;
             case "postgres":
                 services.AddPostgresVectorStore(configuration.GetConnectionString("Postgres")!);
-                services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+                services.AddPostgresCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
                 break;
             default:
                 throw new NotImplementedException();
