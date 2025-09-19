@@ -1,0 +1,2 @@
+
+[assembly: HotChocolate.Module("HotGraphQL")]

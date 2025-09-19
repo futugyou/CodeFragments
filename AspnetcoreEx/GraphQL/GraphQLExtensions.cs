@@ -58,6 +58,10 @@ public static class GraphQLExtensions
 
         var hotChocolateBuilder = services.AddGraphQLServer();
 
+        // code generates
+        // It's strange that the two types `Cat` and `UserRefetchable` are not recognized by `HotChocolate.Types.Analyzers`.
+        hotChocolateBuilder.AddHotGraphQL();
+
         // base
         hotChocolateBuilder
             .AddAuthorization()
@@ -86,9 +90,9 @@ public static class GraphQLExtensions
 
         // .AddTypes
         hotChocolateBuilder
-            .AddTypes([typeof(Cat), typeof(UploadType), typeof(UserRefetchable)])
-            .AddTypeExtension<UserExtension>()
-            .AddTypeExtension<QueryUserResolvers>()
+            .AddType<UploadType>()            
+            .AddType<Cat>() // type of `oneof`
+            .AddType<UserRefetchable>() // type of `node`
             .AddDirectiveType<CustomDirectiveType>();
 
         // type converter
