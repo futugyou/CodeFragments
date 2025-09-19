@@ -13,8 +13,12 @@ public static class GraphQLExtensions
 {
     public static IServiceCollection AddGraphQL(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
     {
+        // Global Services
+        services.Configure<GraphQLOptions>(configuration.GetSection("GraphQLOptions"));
+        var sp = services.BuildServiceProvider();
+        var config = sp.GetRequiredService<IOptionsMonitor<GraphQLOptions>>()!.CurrentValue;
         var signingKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("MySuperSecretKey"));
+            Encoding.UTF8.GetBytes(config.SecurityKey));
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -23,60 +27,83 @@ public static class GraphQLExtensions
                 options.TokenValidationParameters =
                     new TokenValidationParameters
                     {
-                        ValidIssuer = "https://auth.chillicream.com",
-                        ValidAudience = "https://graphql.chillicream.com",
+                        ValidIssuer = config.ValidIssuer,
+                        ValidAudience = config.ValidAudience,
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = signingKey
                     };
             });
-        services.AddAuthorizationBuilder()
-        .AddPolicy("AtLeast21", policy => policy.Requirements.Add(new MinimumAgeRequirement(21)))
-        .AddPolicy("HasCountry", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
+        services
+            .AddAuthorizationBuilder()
+            .AddPolicy("AtLeast21", policy => policy.Requirements.Add(new MinimumAgeRequirement(21)))
+            .AddPolicy("HasCountry", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
 
         services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
-        // This is the connection multiplexer that redis will use
-        // services.AddSingleton(ConnectionMultiplexer.Connect("redisstring"));
+
         services.AddTransient<UserRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();
-        // services.AddHttpClient(WellKnownSchemaNames.Myself, c => c.BaseAddress = new Uri("http://localhost:5001/graphql"));
-        // services.AddHttpClient(WellKnownSchemaNames.Myself2, c => c.BaseAddress = new Uri("http://localhost:5001/graphql"));
+
         services.AddPooledDbContextFactory<GraphQLDbContext>(b =>
         {
             b.UseInMemoryDatabase("GraphQLDb");
         });
         services.AddHttpContextAccessor();
-        // Global Services
         services.AddMemoryCache();
+
+
         // choose one of the following providers
         // services.AddMD5DocumentHashProvider(HashFormat.Hex);
         services.AddSha256DocumentHashProvider(HashFormat.Hex);
         // services.AddSha1DocumentHashProvider();
 
-        services
-        .AddGraphQLServer()
-        .AddAuthorization()
-        .AddFiltering()
-        .AddProjections() // AddProjections can get include data like ef.
-        .AddSorting()
-        .ModifyPagingOptions(op =>
-        {
-            op.MaxPageSize = 50;
-            op.IncludeTotalCount = true;
-        })
+        var hotChocolateBuilder = services.AddGraphQLServer();
+
+        // base
+        hotChocolateBuilder
+            .AddAuthorization()
+            .AddFiltering()
+            .AddProjections() // AddProjections can get include data like ef.
+            .AddSorting()
+            .ModifyPagingOptions(op =>
+            {
+                op.MaxPageSize = 50;
+                op.IncludeTotalCount = true;
+            })
+            .ModifyRequestOptions(option =>
+            {
+                option.IncludeExceptionDetails = true;
+            })
+            .ModifyOptions(option =>
+            {
+                option.EnableOneOf = true;
+            });
+
+        // .AddSpatialTypes, Currently not used in the project.
+        hotChocolateBuilder
+            .AddSpatialTypes()
+            .AddSpatialProjections()
+            .AddSpatialFiltering();
+
+        // .AddTypes
+        hotChocolateBuilder
+            .AddTypes([typeof(Cat), typeof(UploadType), typeof(UserRefetchable)])
+            .AddTypeExtension<UserExtension>()
+            .AddTypeExtension<QueryUserResolvers>()
+            .AddDirectiveType<CustomDirectiveType>();
+
+        // type converter
+        hotChocolateBuilder
+            // this will add `node`
+            .AddGlobalObjectIdentification();
+
+        // object types
+        hotChocolateBuilder
         .AddQueryType<Query>()
         .AddMutationType<Mutation>()
         .AddSubscriptionType<Subscription>()
         // .AddQueryType<QueryType>()
         // .AddMutationType<MutationType>()
         // .AddMutationType<SubscriptionType>()
-        .ModifyRequestOptions(option =>
-        {
-            option.IncludeExceptionDetails = true;
-        })
-        .ModifyOptions(option =>
-        {
-            option.EnableOneOf = true;
-        })
         .AddMutationConventions(new MutationConventionOptions
         {
             ApplyToAllMutations = true,
@@ -89,20 +116,9 @@ public static class GraphQLExtensions
         .AddInMemorySubscriptions()
         //.AddType(new UuidType('D'))
         .BindRuntimeType<string, StringType>()
-        .AddType<Dog>()
-        .AddType<Cat>()
-        .AddType<UserRefetchable>()
-        .AddTypeExtension<UserExtension>()
-        .AddTypeExtension<QueryUserResolvers>()
-        .AddDirectiveType<CustomDirectiveType>()
-        .AddGlobalObjectIdentification()
-        .AddSpatialTypes()
-        .AddSpatialProjections()
-        .AddSpatialFiltering()
         .AddHttpRequestInterceptor<HttpRequestInterceptor>()
         .AddSocketSessionInterceptor<SocketSessionInterceptor>()
         //.AllowIntrospection(env.IsDevelopment())
-        .AddType<UploadType>()
         // .AddRemoteSchema(WellKnownSchemaNames.Myself)
         // .AddRemoteSchema(WellKnownSchemaNames.Myself2)
         // .AddRemoteSchemasFromRedis("Demo", sp => sp.GetRequiredService<ConnectionMultiplexer>())
