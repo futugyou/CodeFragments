@@ -2,9 +2,26 @@ using HotChocolate.Data.Filters;
 
 namespace AspnetcoreEx.GraphQL;
 
-public class UserFilterType : FilterInputType<User>
+// public class UserFilterType : FilterInputType<User>
+// {
+//     protected override void Configure(IFilterInputTypeDescriptor<User> descriptor)
+//     {
+//         descriptor.Name("CustomerUserFilterInput");
+//         descriptor.BindFieldsExplicitly();
+//         descriptor.Field(f => f.Name).Type<CustomerFilterInputType>();
+//         descriptor.AllowAnd(false).AllowOr(false);
+//     }
+// }
+
+// Why use CustomerUserForFilter instead of UserFilterType? 
+// Because UserFilterType inherits FilterInputType<User>, this `User` will replace the default [UseFiltering] with [UseFiltering(typeof(UserFilterType))]
+public class CustomerUserForFilter
 {
-    protected override void Configure(IFilterInputTypeDescriptor<User> descriptor)
+    public string Name { get; set; }
+}
+public class CustomerUserFilterType : FilterInputType<CustomerUserForFilter>
+{
+    protected override void Configure(IFilterInputTypeDescriptor<CustomerUserForFilter> descriptor)
     {
         descriptor.Name("CustomerUserFilterInput");
         descriptor.BindFieldsExplicitly();

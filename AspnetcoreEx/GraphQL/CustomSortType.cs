@@ -2,9 +2,25 @@ using HotChocolate.Data.Sorting;
 
 namespace AspnetcoreEx.GraphQL;
 
-public class UserSortType : SortInputType<User>
+// public class UserSortType : SortInputType<User>
+// {
+//     protected override void Configure(ISortInputTypeDescriptor<User> descriptor)
+//     {
+//         descriptor.Name("CustomerUserSortType");
+//         descriptor.BindFieldsExplicitly();
+//         descriptor.Field(f => f.Name).Type<AscOnlySortEnumType>();
+//     }
+// }
+
+// same reason as CustomerUserForFilter
+public class CustomerUserForSort
 {
-    protected override void Configure(ISortInputTypeDescriptor<User> descriptor)
+    public string Name { get; set; }
+}
+
+public class CustomerUserSortType : SortInputType<CustomerUserForSort>
+{
+    protected override void Configure(ISortInputTypeDescriptor<CustomerUserForSort> descriptor)
     {
         descriptor.Name("CustomerUserSortType");
         descriptor.BindFieldsExplicitly();

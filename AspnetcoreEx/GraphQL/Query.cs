@@ -59,8 +59,9 @@ public class Query
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<User> GetAllUser([Service] GraphQLDbContext dbContext)
+    public IQueryable<User> GetAllUser([Service] IDbContextFactory<GraphQLDbContext> factory)
     {
+        var dbContext = factory.CreateDbContext();
         return dbContext.Users;
     }
 
@@ -69,8 +70,8 @@ public class Query
     //     userName
     //   }
     // }
-    [UseFiltering(typeof(UserFilterType))]
-    [UseSorting(typeof(UserSortType))]
+    [UseFiltering(typeof(CustomerUserForFilter))]
+    [UseSorting(typeof(CustomerUserSortType))]
     public Task<List<User>> GetAllUserWithCostomerFilter([Service] IUserRepository repository) => Task.FromResult(repository.GetAllUser());
 
     /// query {
@@ -171,8 +172,13 @@ public class QueryType : ObjectType<Query>
     protected override void Configure(IObjectTypeDescriptor<Query> descriptor)
     {
         descriptor
+            .Field(f => f.GetUserWithDataLoader(default!, default!))
+            .Type<UserType>();
+
+        descriptor
             .Field(f => f.GetPagingUser(default!))
             .Type<ListType<UserType>>();
+
         descriptor
             .Field(f => f.GetTakeSkipUser(default!))
             .Type<ListType<UserType>>();
