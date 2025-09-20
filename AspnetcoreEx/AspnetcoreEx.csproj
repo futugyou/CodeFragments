@@ -35,8 +35,8 @@
 		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.8.3" />
 		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.8.3" />
 		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.8.3" />
-		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="16.0.0-p.8.3" />
-		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.8.3" >
+		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.8.3" />
+		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.8.3">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>

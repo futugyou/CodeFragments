@@ -1,10 +1,9 @@
-using HotChocolate.Types.Pagination;
-using Microsoft.AspNetCore.Http.Features;
+
 using HotChocolate.Language;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
 namespace AspnetcoreEx.GraphQL;
@@ -118,6 +117,11 @@ public static class GraphQLExtensions
                 .AddSubscriptionType<Subscription>();
         }
 
+        hotChocolateBuilder.AddPostgresSubscriptions((sp, options) =>
+        {
+            options.ConnectionFactory = ct => ValueTask.FromResult(new Npgsql.NpgsqlConnection(configuration.GetConnectionString("Postgres")!));
+        });
+
         hotChocolateBuilder.AddMutationConventions(new MutationConventionOptions
         {
             ApplyToAllMutations = true,
@@ -127,8 +131,6 @@ public static class GraphQLExtensions
             PayloadErrorTypeNamePattern = "{MutationName}Error",
             PayloadErrorsFieldName = "errors"
         })
-        .AddInMemorySubscriptions()
-        //.AddType(new UuidType('D'))
         .BindRuntimeType<string, StringType>()
         .AddHttpRequestInterceptor<HttpRequestInterceptor>()
         .AddSocketSessionInterceptor<SocketSessionInterceptor>()
@@ -162,7 +164,6 @@ public static class GraphQLExtensions
         // .AddConvention<ISortConvention, CustomSortConvention>()
         // .AddConvention<ISortConvention, CustomSortConventionExtension>()
         // .AddQueryFieldToMutationPayloads()
-        // .AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect("host:port"))
         ;
         services.Configure<FormOptions>(options =>
         {
