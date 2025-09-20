@@ -8,15 +8,17 @@ public record ProfilePictureUploadPayload(string UploadUrl);
 
 public class Mutation
 {
-    /// mutation {
-    ///     addUser(user: { id: 101, name: "two", age: 20 }) {
-    ///         use {
-    ///             id
-    ///             name
-    ///             age
-    ///         }
-    ///     }
-    /// }
+    // mutation {
+    //     addUser(input: { user: { id: 101, name: "two", age: 20 } }) {
+    //         addUserResponse {
+    //         use {
+    //             id
+    //             userName
+    //             age
+    //         }
+    //         }
+    //     }
+    // }
     [Error(typeof(DuplicateException))]
     public async Task<AddUserResponse> AddUser(AddUserRequest user, [Service] IUserRepository repository, [Service] ITopicEventSender sender)
     {

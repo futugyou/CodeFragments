@@ -4,7 +4,7 @@ using HotChocolate.Subscriptions;
 namespace AspnetcoreEx.GraphQL;
 public class Subscription
 {
-    [Subscribe]
+    [Subscribe(With = nameof(UserPublished))]
     [Topic("userCreated")]
     public User UserCreated([EventMessage] User user)
     {

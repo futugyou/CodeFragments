@@ -20,8 +20,8 @@ public class User
     public int Age { get; set; }
     // [GraphQLIgnore]
     // [GraphQLType(typeof(StringType))]
-    public string Secret { get; set; }
-    public Point Location { get; set; }
+    public string? Secret { get; set; }
+    public Point? Location { get; set; }
     public List<Order> Orders { get; set; }
 
     // query {
