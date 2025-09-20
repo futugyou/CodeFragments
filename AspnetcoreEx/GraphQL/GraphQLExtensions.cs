@@ -90,7 +90,8 @@ public static class GraphQLExtensions
 
         // .AddTypes
         hotChocolateBuilder
-            .AddType<UploadType>()            
+            .AddType<UploadType>()
+            .AddType(new UuidType('D'))
             .AddType<Cat>() // type of `oneof`
             .AddType<UserRefetchable>() // type of `node`
             .AddDirectiveType<CustomDirectiveType>();
@@ -101,14 +102,23 @@ public static class GraphQLExtensions
             .AddGlobalObjectIdentification();
 
         // object types
-        hotChocolateBuilder
-        .AddQueryType<Query>()
-        .AddMutationType<Mutation>()
-        .AddSubscriptionType<Subscription>()
-        // .AddQueryType<QueryType>()
-        // .AddMutationType<MutationType>()
-        // .AddMutationType<SubscriptionType>()
-        .AddMutationConventions(new MutationConventionOptions
+        if (config.DevPattern == "Code")
+        {
+            hotChocolateBuilder
+                .AddQueryType<QueryType>()
+                .AddMutationType<MutationType>()
+                .AddSubscriptionType<SubscriptionType>();
+
+        }
+        else
+        {
+            hotChocolateBuilder
+                .AddQueryType<Query>()
+                .AddMutationType<Mutation>()
+                .AddSubscriptionType<Subscription>();
+        }
+
+        hotChocolateBuilder.AddMutationConventions(new MutationConventionOptions
         {
             ApplyToAllMutations = true,
             InputArgumentName = "input",
