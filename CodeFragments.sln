@@ -63,7 +63,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceDiscovery", "Service
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsulDemo", "ServiceDiscovery\ConsulDemo\ConsulDemo.csproj", "{371A56DA-FE04-4A91-9D49-1C65772A3E87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspnetcoreEx", "AspnetcoreEx\AspnetcoreEx.csproj", "{8D294489-E874-40D7-AF18-CE6AA94FE3E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KaleidoCode", "KaleidoCode\KaleidoCode.csproj", "{8D294489-E874-40D7-AF18-CE6AA94FE3E9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{209660A2-2BD1-4716-8B33-AF9384341593}"
 EndProject
