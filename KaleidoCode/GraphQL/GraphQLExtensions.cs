@@ -1,10 +1,6 @@
 
 using HotChocolate.Language;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 
 namespace KaleidoCode.GraphQL;
 
@@ -16,28 +12,6 @@ public static class GraphQLExtensions
         services.Configure<GraphQLOptions>(configuration.GetSection("GraphQLOptions"));
         var sp = services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<GraphQLOptions>>()!.CurrentValue;
-        var signingKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(config.SecurityKey));
-
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters =
-                    new TokenValidationParameters
-                    {
-                        ValidIssuer = config.ValidIssuer,
-                        ValidAudience = config.ValidAudience,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = signingKey
-                    };
-            });
-        services
-            .AddAuthorizationBuilder()
-            .AddPolicy("AtLeast21", policy => policy.Requirements.Add(new MinimumAgeRequirement(21)))
-            .AddPolicy("HasCountry", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
-
-        services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
 
         services.AddTransient<UserRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();

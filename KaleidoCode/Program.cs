@@ -1,4 +1,5 @@
 using KaleidoCode;
+using KaleidoCode.Auth;
 using KaleidoCode.Elasticsearch;
 using KaleidoCode.Extensions;
 using KaleidoCode.GraphQL;
@@ -8,9 +9,9 @@ using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
 using KaleidoCode.HttpDiagnosticsExtensions;
 using KaleidoCode.KernelService;
-using Microsoft.Extensions.Http.Resilience;
 using KaleidoCode.HostedService;
 using KaleidoCode.OpenTelemetry;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.ServiceDiscovery;
 using KaleidoCode.MQTT;
 
@@ -47,13 +48,6 @@ builder.Services.AddHsts(options =>
     options.Preload = true;
 });
 
-
-// Concurrency Limiter middleware has been deprecated
-// builder.Services.Configure<ConcurrencyLimiterOptions>(options =>
-// {
-//     options.OnRejected = ConcurrencyRejectAsync;
-// });
-
 builder.Services.AddQueuePolicy(options =>
 {
     options.MaxConcurrentRequests = 20;
@@ -89,9 +83,11 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
 builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
 
 var configuration = builder.Configuration;
+configuration.AddJsonFileExtensions("ok.json", true, true);
 
 builder.Services.AddOpenTelemetryExtension(configuration);
-//configuration.AddJsonFileExtensions("appsettings.json", true, true);
+builder.Services.AddAuthExtension(configuration);
+
 
 Console.WriteLine(builder.Environment.ApplicationName);
 Console.WriteLine(builder.Environment.ContentRootPath);

@@ -1,7 +1,8 @@
 using HotChocolate.Resolvers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.Auth;
+
 public class MinimumAgeHandler : AuthorizationHandler<MinimumAgeRequirement, IResolverContext>
 {
     protected override Task HandleRequirementAsync(
