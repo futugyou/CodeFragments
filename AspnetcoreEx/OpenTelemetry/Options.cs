@@ -12,6 +12,9 @@ public class ExportersSettings
     public OtlpExporterSettings Otlp { get; set; } = new();
     public JaegerExporterSettings Jaeger { get; set; } = new();
     public ConsoleExporterSettings Console { get; set; } = new();
+    public bool AllowAspNetCoreInstrumentation { get; set; } = false;
+    public bool AllowRuntimeInstrumentation { get; set; } = false;
+    public bool AllowHttpClientInstrumentation { get; set; } = false;
 }
 
 public class OtlpExporterSettings

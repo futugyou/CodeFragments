@@ -36,9 +36,6 @@ public static class OpenTelemetryExtension
         {
             meterProviderBuilder
                 .AddMeter("Microsoft.SemanticKernel*")
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation()
                 .AddConfiguredExporters(config.Exporters);
         });
 
@@ -121,6 +118,21 @@ public static class OpenTelemetryExtension
         if (exporters.Console.Enabled)
         {
             builder.AddConsoleExporter();
+        }
+
+        if (exporters.AllowAspNetCoreInstrumentation)
+        {
+            builder.AddAspNetCoreInstrumentation();
+        }
+
+        if (exporters.AllowRuntimeInstrumentation)
+        {
+            builder.AddRuntimeInstrumentation();
+        }
+
+        if (exporters.AllowHttpClientInstrumentation)
+        {
+            builder.AddHttpClientInstrumentation();
         }
 
         return builder;

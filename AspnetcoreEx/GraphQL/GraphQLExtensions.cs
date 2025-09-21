@@ -55,7 +55,7 @@ public static class GraphQLExtensions
         services.AddSha256DocumentHashProvider(HashFormat.Hex);
         // services.AddSha1DocumentHashProvider();
 
-        var hotChocolateBuilder = services.AddGraphQLServer();
+        var hotChocolateBuilder = services.AddGraphQLServer().AddInstrumentation();
 
         // code generates
         // It's strange that the two types `Cat` and `UserRefetchable` are not recognized by `HotChocolate.Types.Analyzers`.
