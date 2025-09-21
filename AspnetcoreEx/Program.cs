@@ -10,6 +10,7 @@ using AspnetcoreEx.HttpDiagnosticsExtensions;
 using AspnetcoreEx.KernelService;
 using Microsoft.Extensions.Http.Resilience;
 using AspnetcoreEx.HostedService;
+using AspnetcoreEx.OpenTelemetry;
 using Microsoft.Extensions.ServiceDiscovery;
 using AspnetcoreEx.MQTT;
 // using AspnetcoreEx.MiniMVC;
