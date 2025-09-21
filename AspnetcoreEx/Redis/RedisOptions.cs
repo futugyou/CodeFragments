@@ -1,4 +1,4 @@
-namespace AspnetcoreEx.RedisExtensions;
+namespace AspnetcoreEx.Redis;
 
 public class RedisOptions
 {

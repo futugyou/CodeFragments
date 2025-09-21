@@ -1,6 +1,6 @@
 using StackExchange.Redis;
 
-namespace AspnetcoreEx.RedisExtensions;
+namespace AspnetcoreEx.Redis;
 
 public interface IRedisClient
 {
@@ -20,9 +20,10 @@ public class RedisClient : IRedisClient, IDisposable
     private readonly RedisOptions _redisOptions;
     private readonly ConnectionMultiplexer _redis;
     private readonly IDatabase _db;
-    private readonly List<IServer> _servers = new List<IServer>();
+    private readonly List<IServer> _servers = new();
     private readonly ISubscriber _sub;
     private readonly RedisProfiler _redisProfiler;
+    private bool _disposed;
 
     private const string LOCKSTRING = @"local isnx = redis.call('SETNX', @key, @value)
                                         if isnx == 1 then
@@ -141,16 +142,28 @@ public class RedisClient : IRedisClient, IDisposable
 
     public void Dispose()
     {
-        var session = _redisProfiler.GetSession();
-        if (session != null)
-        {
-            var timings = session.FinishProfiling();
-            string? message = string.Join(",", timings.ToList().Select(p => p.Command));
-            _logger.LogInformation(message);
-            // do what you will with `timings` here
-        }
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (!_disposed)
+            {
+                var session = _redisProfiler.GetSession();
+                if (session != null)
+                {
+                    var timings = session.FinishProfiling();
+                    string? message = string.Join(",", timings.ToList().Select(p => p.Command));
+                    _logger.LogInformation("message: {message}", message);
+                }
+            }
+
+            _disposed = true;
+        }
+    }
     public async Task<string> WriteStream(string streamKey, string fieldName, string value)
     {
         string? messageId = await _db.StreamAddAsync(streamKey, fieldName, value);
@@ -159,14 +172,14 @@ public class RedisClient : IRedisClient, IDisposable
 
     public async Task<string> WriteStream(string streamKey, Dictionary<string, string> streamPairs)
     {
-        var values = new NameValueEntry[streamPairs.Count];
-        foreach (var item in streamPairs)
-        {
-            values.Append(new NameValueEntry(item.Key, item.Value));
-        }
+        var values = streamPairs
+            .Select(kv => new NameValueEntry(kv.Key, kv.Value))
+            .ToArray();
+
         string? messageId = await _db.StreamAddAsync(streamKey, values);
         return messageId ?? "";
     }
+
 
     public async Task<Dictionary<string, Dictionary<string, string>>> ReadStream(string streamKey, string position, int maxCount = 0)
     {

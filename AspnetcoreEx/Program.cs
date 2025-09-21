@@ -3,7 +3,7 @@ using AspnetcoreEx.Elasticsearch;
 using AspnetcoreEx.Extensions;
 using AspnetcoreEx.GraphQL;
 using AspnetcoreEx.HealthCheckExtensions;
-using AspnetcoreEx.RedisExtensions;
+using AspnetcoreEx.Redis;
 using AspnetcoreEx.RouteEx;
 using AspnetcoreEx.StaticFileEx;
 using AspnetcoreEx.HttpDiagnosticsExtensions;

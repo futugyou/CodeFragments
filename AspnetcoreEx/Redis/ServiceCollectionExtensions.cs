@@ -1,6 +1,6 @@
-namespace AspnetcoreEx.RedisExtensions;
+namespace AspnetcoreEx.Redis;
 
-public static class DependencyInjectionExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRedisExtension(this IServiceCollection services)
     {

@@ -1,6 +1,6 @@
 using StackExchange.Redis.Profiling;
 
-namespace AspnetcoreEx.RedisExtensions;
+namespace AspnetcoreEx.Redis;
 
 public class RedisProfiler
 {
