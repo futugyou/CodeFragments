@@ -9,11 +9,6 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.Plugins.OpenApi;
 using OpenAI;
-using OpenTelemetry;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 
@@ -31,9 +26,6 @@ public static class SKServiceCollectionExtensions
     // The configuration of SemanticKernel in this extension is the focus, and the others are secondary and can be deleted.
     internal static async Task<IServiceCollection> AddKernelServiceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // otel
-        // services.AddSemanticKernelOpenTelemetry();
-
         // services.AddDuckduckgoTextSearch();
 
         // configuration
@@ -181,42 +173,6 @@ public static class SKServiceCollectionExtensions
             });
         #endregion
 
-        return services;
-    }
-
-    public static IServiceCollection AddSemanticKernelOpenTelemetry(this IServiceCollection services)
-    {
-        var resourceBuilder = ResourceBuilder
-            .CreateDefault()
-            .AddService("TelemetryConsoleQuickstart");
-
-        // Enable model diagnostics with sensitive data.
-        AppContext.SetSwitch("Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive", true);
-        var traceProvider = Sdk.CreateTracerProviderBuilder()
-             .SetResourceBuilder(resourceBuilder)
-             .AddSource("Microsoft.SemanticKernel*")
-             .AddConsoleExporter()
-             .Build();
-        var meterProvider = Sdk.CreateMeterProviderBuilder()
-              .SetResourceBuilder(resourceBuilder)
-              .AddMeter("Microsoft.SemanticKernel*")
-              .AddConsoleExporter()
-              .Build();
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            // Add OpenTelemetry as a logging provider
-            builder.AddOpenTelemetry(options =>
-            {
-                options.SetResourceBuilder(resourceBuilder);
-                options.AddConsoleExporter();
-                // Format log messages. This is default to false.
-                options.IncludeFormattedMessage = true;
-                options.IncludeScopes = true;
-            });
-            builder.SetMinimumLevel(LogLevel.Information);
-        });
-
-        services.AddSingleton(loggerFactory);
         return services;
     }
 

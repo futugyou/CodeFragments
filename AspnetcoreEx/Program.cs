@@ -94,6 +94,7 @@ builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
 
 var configuration = builder.Configuration;
 
+builder.Services.AddOpenTelemetryExtension(configuration);
 //configuration.AddJsonFileExtensions("appsettings.json", true, true);
 
 Console.WriteLine(builder.Environment.ApplicationName);
