@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using System.Diagnostics.CodeAnalysis;
 
-namespace KaleidoCode.MiniMVC;
+namespace MinimizeAspnet.MiniMVC;
 
 public static class MiniMvcExtensions
 {

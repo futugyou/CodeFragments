@@ -1,6 +1,6 @@
 using System.Collections.Specialized;
 
-namespace KaleidoCode.MiniAspnetCore;
+namespace MinimizeAspnet.MiniAspnetCore;
 
 public class HttpContext
 {

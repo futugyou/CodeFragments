@@ -1,0 +1,16 @@
+﻿
+global using global::Microsoft.AspNetCore.Connections;
+global using global::Microsoft.AspNetCore.Http.Extensions;
+global using global::Microsoft.AspNetCore.Mvc;
+global using global::Microsoft.AspNetCore.Rewrite;
+global using global::Microsoft.AspNetCore.Server.Kestrel.Https;
+global using global::Microsoft.Extensions.DependencyInjection;
+global using global::Microsoft.Extensions.DependencyInjection.Extensions;
+global using global::Microsoft.Extensions.FileProviders;
+global using global::Microsoft.Extensions.Options;
+global using global::System.Collections.Generic;
+global using global::System.Net;
+global using global::System.Threading.Tasks;
+global using global::System.Text;
+global using global::System.Text.Json;
+global using global::System.Diagnostics.CodeAnalysis;

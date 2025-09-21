@@ -1,4 +1,4 @@
-namespace KaleidoCode.MiniAspnetCore;
+namespace MinimizeAspnet.MiniAspnetCore;
 
 public class WebHostedService : IHostedService
 {

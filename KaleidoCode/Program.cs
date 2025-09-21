@@ -13,9 +13,6 @@ using KaleidoCode.HostedService;
 using KaleidoCode.OpenTelemetry;
 using Microsoft.Extensions.ServiceDiscovery;
 using KaleidoCode.MQTT;
-// using KaleidoCode.MiniMVC;
-
-// MiniExtensions.StartMiniAspnetCore();
 
 var options = new WebApplicationOptions
 {
@@ -90,8 +87,6 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
 
 // consume-events-in-process
 builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
-
-// builder.Services.AddMiniMvcControllers();
 
 var configuration = builder.Configuration;
 
@@ -193,11 +188,6 @@ builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 });
 
 var app = builder.Build();
-
-// app.MapMiniMvcControllerRoute(name: "default", pattern: "{controller}/{action}/{id?}");
-
-// 'ConcurrencyLimiterExtensions.UseConcurrencyLimiter(IApplicationBuilder)' is obsolete
-// app.UseConcurrencyLimiter();
 
 var rewriteOptions = new RewriteOptions()
     // client redirect

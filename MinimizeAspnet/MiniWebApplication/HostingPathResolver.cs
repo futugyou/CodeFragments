@@ -1,4 +1,4 @@
-namespace KaleidoCode.MiniWebApplication;
+namespace MinimizeAspnet.MiniWebApplication;
 
 
 internal static class HostingPathResolver

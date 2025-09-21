@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace KaleidoCode.MiniMVC;
+namespace MinimizeAspnet.MiniMVC;
 
 public interface IArgumentBinder
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
 
-namespace KaleidoCode.MiniWebApplication;
+namespace MinimizeAspnet.MiniWebApplication;
 
 public sealed class ConfigureWebHostBuilder : IWebHostBuilder, ISupportsStartup
 {

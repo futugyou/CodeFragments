@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 
-namespace KaleidoCode.MiniMVC;
+namespace MinimizeAspnet.MiniMVC;
 
 public class ActionEndpointDataSource : EndpointDataSource
 {

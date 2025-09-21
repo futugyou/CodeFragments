@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace KaleidoCode.MiniMVC;
+namespace MinimizeAspnet.MiniMVC;
 
 public class ActionContext(HttpContext httpContext, ActionDescriptor actionDescriptor)
 {

@@ -1,4 +1,4 @@
-namespace KaleidoCode.MiniWebApplication;
+namespace MinimizeAspnet.MiniWebApplication;
 
 public class ConfigureHostBuilder : IHostBuilder
 {

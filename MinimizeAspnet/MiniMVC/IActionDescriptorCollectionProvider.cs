@@ -2,7 +2,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Routing;
 
-namespace KaleidoCode.MiniMVC;
+namespace MinimizeAspnet.MiniMVC;
 
 public interface IActionDescriptorCollectionProvider
 {

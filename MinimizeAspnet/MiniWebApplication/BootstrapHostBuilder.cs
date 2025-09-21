@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting.Internal;
 
-namespace KaleidoCode.MiniWebApplication;
+namespace MinimizeAspnet.MiniWebApplication;
 
 public class BootstrapHostBuilder : IHostBuilder
 {

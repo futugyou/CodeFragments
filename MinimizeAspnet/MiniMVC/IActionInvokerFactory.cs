@@ -1,5 +1,5 @@
 
-namespace KaleidoCode.MiniMVC;
+namespace MinimizeAspnet.MiniMVC;
 
 public interface IActionInvokerFactory
 {

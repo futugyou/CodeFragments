@@ -1,3 +1,3 @@
-namespace KaleidoCode.MiniAspnetCore;
+namespace MinimizeAspnet.MiniAspnetCore;
 
 public delegate Task RequestDelegate(HttpContext context);
