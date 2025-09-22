@@ -1,4 +1,4 @@
-using KaleidoCode;
+
 using KaleidoCode.Auth;
 using KaleidoCode.Elasticsearch;
 using KaleidoCode.Extensions;
@@ -12,6 +12,7 @@ using KaleidoCode.KernelService;
 using KaleidoCode.HostedService;
 using KaleidoCode.OpenTelemetry;
 using Microsoft.Extensions.Http.Resilience;
+using KaleidoCode.RefitClient;
 using Microsoft.Extensions.ServiceDiscovery;
 using KaleidoCode.MQTT;
 
@@ -25,6 +26,9 @@ var options = new WebApplicationOptions
 };
 
 var builder = WebApplication.CreateBuilder(options);
+
+var configuration = builder.Configuration;
+configuration.AddJsonFileExtensions("ok.json", true, true);
 
 //  Overriding address(es) 'https://localhost:58176, http://localhost:58177'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
 //builder.WebHost.UseKestrel(kestrel =>
@@ -60,7 +64,6 @@ builder.Services.AddStackPolicy(options =>
     options.RequestQueueLimit = 20;
 });
 
-
 builder.Services.AddSingleton<SimpleConsoleLogger>();
 builder.Services.AddSingleton<RequestIdLogger>();
 builder.Services.AddTransient<TestAuthHandler>();
@@ -82,9 +85,6 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
 // consume-events-in-process
 builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
 
-var configuration = builder.Configuration;
-configuration.AddJsonFileExtensions("ok.json", true, true);
-
 builder.Services.AddOpenTelemetryExtension(configuration);
 builder.Services.AddAuthExtension(configuration);
 
@@ -94,7 +94,7 @@ Console.WriteLine(builder.Environment.ContentRootPath);
 Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
 
-builder.Services.AddSingleton<ILogger>(sp => sp.GetRequiredService<ILogger<Program>>());
+// builder.Services.AddSingleton<ILogger>(sp => sp.GetRequiredService<ILogger<Program>>());
 
 builder.Services.AddRouteExtension();
 builder.Services.AddElasticClientExtension(configuration);
@@ -107,20 +107,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "ResponseBodyFeature", Version = "v1" });
 });
 
-// 类型“TimeoutRejectedException”同时存在于“Polly.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=c8a3ffc3f8f825cc”和
-// “Polly, Version=7.0.0.0, Culture=neutral, PublicKeyToken=c8a3ffc3f8f825cc”中
-// Polly.Timeout.TimeoutRejectedException fullname does not work.
-// var retryPolicy = HttpPolicyExtensions
-//     .HandleTransientHttpError()
-//     .Or<Polly.Timeout.TimeoutRejectedException>()
-//     .WaitAndRetryAsync(10, _ => TimeSpan.FromMilliseconds(5000));
-
-var timeoutPolicy = Polly.Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(30000));
-
-builder.Services.AddRefitClient<IGitHubApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.github.com"))
-    // .AddPolicyHandler(retryPolicy)
-    .AddPolicyHandler(timeoutPolicy);
+builder.Services.AddRefitClientExtension(configuration);
 
 var section = builder.Configuration.GetSection("RetryOptions");
 builder.Services.Configure<HttpRetryStrategyOptions>(section);

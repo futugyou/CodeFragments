@@ -1,4 +1,7 @@
-﻿namespace KaleidoCode.Controllers;
+﻿
+using KaleidoCode.RefitClient;
+
+namespace KaleidoCode.Controllers;
 
 [ApiController]
 [Route("[controller]")]
