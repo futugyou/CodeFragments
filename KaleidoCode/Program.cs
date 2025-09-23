@@ -29,40 +29,11 @@ var builder = WebApplication.CreateBuilder(options);
 
 var configuration = builder.Configuration;
 configuration.AddJsonFileExtensions("ok.json", true, true);
+configuration.AddAwsParameterStore();
 
-//  Overriding address(es) 'https://localhost:58176, http://localhost:58177'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
-//builder.WebHost.UseKestrel(kestrel =>
-//{
-//    kestrel.Listen(IPAddress.Any, 58177);
-//    kestrel.Listen(IPAddress.Any, 58176, listener =>
-//    {
-//        listener.UseHttps(https =>
-//        {
-//            https.ServerCertificateSelector = SelectServerCertificate;
-//        });
-//    });
-//});
+builder.Services.Configure<KaleidoCode.Controllers.TestOption>(configuration);
 
-builder.Services.AddHttpsRedirection(options => options.HttpsPort = 58176);
-
-builder.Services.AddHsts(options =>
-{
-    options.MaxAge = TimeSpan.FromDays(365);
-    options.IncludeSubDomains = true;
-    options.Preload = true;
-});
-
-builder.Services.AddQueuePolicy(options =>
-{
-    options.MaxConcurrentRequests = 20;
-    options.RequestQueueLimit = 20;
-});
-
-builder.Services.AddStackPolicy(options =>
-{
-    options.MaxConcurrentRequests = 20;
-    options.RequestQueueLimit = 20;
-});
+builder.AddKestrelExtensions(configuration);
 
 builder.Services.AddHttpDiagnosticsExtensions(configuration);
 builder.Services.AddOpenTelemetryExtension(configuration);
@@ -89,9 +60,6 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddRefitClientExtension(configuration);
 
-var section = builder.Configuration.GetSection("RetryOptions");
-builder.Services.Configure<HttpRetryStrategyOptions>(section);
-
 builder.Services.AddGraphQL(configuration, builder.Environment);
 
 builder.Services.AddHealthChecksUI().AddInMemoryStorage();
@@ -101,42 +69,10 @@ builder.Services.AddDIExtension();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 
-
-
 await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);
 
 // builder.Services.AddMQTTExtension(configuration);
-
-builder.Services.Configure<KaleidoCode.Controllers.TestOption>(configuration);
-configuration.AddAwsParameterStore();
-
-// this will use aspire, not base asp.net core
-// builder.Services.AddPassThroughServiceEndPointResolver();
-// builder.Services.AddConfigurationServiceEndPointResolver(options =>
-// {
-//     options.SectionName = "Services";
-
-//     // Configure the logic for applying host name metadata
-//     options.ApplyHostNameMetadata = static endpoint =>
-//     {
-//         // Your custom logic here. For example:
-//         return endpoint.EndPoint is DnsEndPoint dnsEp && dnsEp.Host.StartsWith("internal");
-//     };
-// });
-// builder.Services.Configure<ConfigurationServiceEndPointResolverOptions>(
-//     static options =>
-//     {
-//         options.SectionName = "MyServiceEndpoints";
-
-//         // Configure the logic for applying host name metadata
-//         options.ApplyHostNameMetadata = static endpoint =>
-//         {
-//             // Your custom logic here. For example:
-//             return endpoint.EndPoint is DnsEndPoint dnsEp
-//                 && dnsEp.Host.StartsWith("internal");
-//         };
-//     });
 
 builder.Services.AddHostedService<QueuedHostedService>();
 builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
@@ -206,27 +142,3 @@ await app.InitAIData();
 app.MapMcp();
 
 app.Run();
-
-static X509Certificate2? SelectServerCertificate(ConnectionContext? context, string? domain)
-{
-    return domain?.ToLowerInvariant() switch
-    {
-        "dome.com" => CertificateLoader.LoadFromStoreCert("dome.com", "my", StoreLocation.CurrentUser, true),
-        _ => null,
-    };
-}
-
-static Task ConcurrencyRejectAsync(HttpContext httpContext)
-{
-    var request = httpContext.Request;
-    if (!request.Query.ContainsKey("reject"))
-    {
-        var response = httpContext.Response;
-        response.StatusCode = 307;
-        var queryString = request.QueryString.Add("reject", "add");
-        var newUrl = UriHelper.BuildAbsolute(request.Scheme, request.Host, request.PathBase, request.Path, queryString);
-        response.Headers.Location = newUrl;
-    }
-
-    return Task.CompletedTask;
-}

@@ -8,6 +8,9 @@ public static class HttpExtensions
 {
     internal static IServiceCollection AddClientSideRateLimited(this IServiceCollection services, IConfiguration configuration)
     {
+        var section = configuration.GetSection("RetryOptions");
+        services.Configure<HttpRetryStrategyOptions>(section);
+
         var options = new TokenBucketRateLimiterOptions
         {
             TokenLimit = 8,
