@@ -5,7 +5,7 @@ using System.Buffers;
 using System.IO.Pipelines;
 using System.Text;
 
-namespace KaleidoCode.ServerEx;
+namespace KaleidoCode.MinimizeAspnet;
 
 public class HostedApplication<TContext> : ConnectionHandler where TContext : notnull
 {

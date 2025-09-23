@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace KaleidoCode.ServerEx;
+namespace KaleidoCode.MinimizeAspnet;
 
 public class MiniKestrelServer : IServer
 {

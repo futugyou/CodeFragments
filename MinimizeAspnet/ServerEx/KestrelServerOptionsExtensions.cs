@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Reflection;
 
+namespace KaleidoCode.MinimizeAspnet;
+
 public static class KestrelServerOptionsExtensions
 {
     public static IEnumerable<ListenOptions> GetListenOptions(this KestrelServerOptions options)

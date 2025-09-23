@@ -1,6 +1,8 @@
 using System.IO.Pipelines;
 using Microsoft.AspNetCore.Http.Features;
 
+namespace KaleidoCode.MinimizeAspnet;
+
 public class StreamBodyFeature : IHttpResponseBodyFeature
 {
     public Stream Stream { get; }

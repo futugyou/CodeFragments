@@ -1,7 +1,8 @@
 ﻿using HttpMachine;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace KaleidoCode.ServerEx;
+namespace KaleidoCode.MinimizeAspnet;
+
 public class HttpParserHandler : IHttpParserHandler
 {
     public HttpRequestFeature Request { get; } = new HttpRequestFeature();
