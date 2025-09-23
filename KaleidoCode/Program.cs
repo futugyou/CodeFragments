@@ -64,31 +64,10 @@ builder.Services.AddStackPolicy(options =>
     options.RequestQueueLimit = 20;
 });
 
-builder.Services.AddSingleton<SimpleConsoleLogger>();
-builder.Services.AddSingleton<RequestIdLogger>();
-builder.Services.AddTransient<TestAuthHandler>();
-builder.Services.AddTransient<EnrichmentHandler>();
-builder.Services.ConfigureHttpClientDefaults(static http =>
-{
-    // http.AddLogger<SimpleConsoleLogger>();
-    // http.AddLogger<RequestIdLogger>();
-    // http.ConfigureHttpClient(c => c.DefaultRequestHeaders.UserAgent.ParseAdd("HttpClient/8.0"));
-    // b.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseCookies = false });
-    // http.AddHttpMessageHandler<TestAuthHandler>();
-    // http.AddHttpMessageHandler<EnrichmentHandler>();
-    // http.AddHttpMessageHandler<ClientSideRateLimitedHandler>();
-    // it will remove all log, see read,md in HttpDiagnosticsExtensions
-    // b.RemoveAllLoggers();
-    // http.AddServiceDiscovery();
-});
-
-// consume-events-in-process
-builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
-
+builder.Services.AddHttpDiagnosticsExtensions(configuration);
 builder.Services.AddOpenTelemetryExtension(configuration);
 builder.Services.AddCustomMetricsSimulation(configuration);
 builder.Services.AddAuthExtension(configuration);
-
 
 Console.WriteLine(builder.Environment.ApplicationName);
 Console.WriteLine(builder.Environment.ContentRootPath);
