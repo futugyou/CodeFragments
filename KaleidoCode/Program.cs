@@ -86,6 +86,7 @@ builder.Services.ConfigureHttpClientDefaults(static http =>
 builder.Services.AddTelemetryConsumer<YarpTelemetryConsumer>();
 
 builder.Services.AddOpenTelemetryExtension(configuration);
+builder.Services.AddCustomMetricsSimulation(configuration);
 builder.Services.AddAuthExtension(configuration);
 
 
@@ -121,12 +122,7 @@ builder.Services.AddDIExtension();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 
-var counter = new MetricsCollector();
-builder.Services.AddHostedService<PerformanceMetricsCollector>();
-builder.Services.AddSingleton<IProcessorMetricsCollector>(counter);
-builder.Services.AddSingleton<IMemoryMetricsCollector>(counter);
-builder.Services.AddSingleton<INetworkMetricsCollector>(counter);
-builder.Services.AddSingleton<IMetricsDeliver, MetricsDeliver>();
+
 
 await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);

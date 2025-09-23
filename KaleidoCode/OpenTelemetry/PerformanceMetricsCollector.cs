@@ -1,4 +1,4 @@
-namespace KaleidoCode.Extensions;
+namespace KaleidoCode.OpenTelemetry;
 
 public sealed class PerformanceMetricsCollector : IHostedService
 {
