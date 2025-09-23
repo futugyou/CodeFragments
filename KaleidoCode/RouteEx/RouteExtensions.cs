@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Routing.Patterns;
-using KaleidoCode.ExceptionEx;
+using KaleidoCode.Extensions;
 
 namespace KaleidoCode.RouteEx;
 

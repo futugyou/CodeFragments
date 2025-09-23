@@ -1,4 +1,5 @@
-namespace KaleidoCode.ExceptionEx;
+
+namespace KaleidoCode.Extensions;
 
 public class ExceptionExtensions
 {
