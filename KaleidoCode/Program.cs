@@ -29,8 +29,6 @@ var configuration = builder.Configuration;
 configuration.AddJsonFileExtensions("ok.json", true, true);
 configuration.AddAwsParameterStore();
 
-builder.Services.Configure<KaleidoCode.Controllers.TestOption>(configuration);
-
 builder.AddKestrelExtensions(configuration);
 
 builder.Services.AddHttpDiagnosticsExtensions(configuration);
@@ -42,8 +40,6 @@ Console.WriteLine(builder.Environment.ApplicationName);
 Console.WriteLine(builder.Environment.ContentRootPath);
 Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
-
-// builder.Services.AddSingleton<ILogger>(sp => sp.GetRequiredService<ILogger<Program>>());
 
 builder.Services.AddRouteExtension();
 builder.Services.AddElasticClientExtension(configuration);

@@ -1,11 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using KaleidoCode.Extensions;
+﻿
 using KaleidoCode.HostedService;
 
 namespace KaleidoCode.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/queue")]
 public class QueueController : ControllerBase
 {
     private readonly IBackgroundTaskQueue taskQueue;

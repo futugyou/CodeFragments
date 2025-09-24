@@ -3,12 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace KaleidoCode.RefitClient;
 
-public interface IWeatherAPI
-{
-    [Get("/WeatherForecast")]
-    Task<dynamic> Get();
-}
-
 [Headers("User-Agent: Refit Integration Tests")]
 //[RefitClient("github")]
 public interface IGitHubApi
