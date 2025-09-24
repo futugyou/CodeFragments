@@ -3,17 +3,15 @@ using KaleidoCode.Auth;
 using KaleidoCode.Elasticsearch;
 using KaleidoCode.Extensions;
 using KaleidoCode.GraphQL;
-using KaleidoCode.HealthCheckExtensions;
+using KaleidoCode.HealthCheck;
+using KaleidoCode.HttpDiagnosticsExtensions;
+using KaleidoCode.HostedService;
+using KaleidoCode.KernelService;
+using KaleidoCode.OpenTelemetry;
 using KaleidoCode.Redis;
+using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
-using KaleidoCode.HttpDiagnosticsExtensions;
-using KaleidoCode.KernelService;
-using KaleidoCode.HostedService;
-using KaleidoCode.OpenTelemetry;
-using Microsoft.Extensions.Http.Resilience;
-using KaleidoCode.RefitClient;
-using Microsoft.Extensions.ServiceDiscovery;
 using KaleidoCode.MQTT;
 
 var options = new WebApplicationOptions
@@ -62,8 +60,7 @@ builder.Services.AddRefitClientExtension(configuration);
 
 builder.Services.AddGraphQL(configuration, builder.Environment);
 
-builder.Services.AddHealthChecksUI().AddInMemoryStorage();
-builder.Services.AddHealthChecks().AddCheck<DemoHealthCheck>("demo-health");
+builder.Services.AddHealthCheckExtensions(configuration);
 builder.Services.AddDIExtension();
 // The path must be absolute
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
@@ -126,12 +123,7 @@ app.UseWebSockets();
 app.UseGraphQLCustom();
 
 app.MapControllers();
-app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
-});
-app.MapHealthChecksUI(options => options.UIPath = "/health-ui");
+app.UseHealthCheckExtensions(configuration);
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
 app.RoutePatternFactoryExtension();

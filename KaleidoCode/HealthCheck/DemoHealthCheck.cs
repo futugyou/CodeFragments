@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace KaleidoCode.HealthCheckExtensions;
+namespace KaleidoCode.HealthCheck;
 
 public class DemoHealthCheck : IHealthCheck
 {
