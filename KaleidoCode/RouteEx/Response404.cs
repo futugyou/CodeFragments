@@ -1,5 +1,5 @@
 
-namespace KaleidoCode.Extensions;
+namespace KaleidoCode.RouteEx;
 
 public class ExceptionExtensions
 {

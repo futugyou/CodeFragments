@@ -31,7 +31,7 @@ public class HomeController : ControllerBase
     [HttpGet("bar/{x}/{y}/{z}")]
     public ValueTask<Result> Bar(string x, int y, double z) => ValueTask.FromResult(new Result(x, y, z));
 
-    [HttpGet("/refit")]
+    [HttpGet("refit")]
     public async Task<dynamic> Refit()
     {
         return await _gitHubApi.GetUser("mojombo");
