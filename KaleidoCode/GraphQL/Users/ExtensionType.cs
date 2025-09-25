@@ -1,4 +1,5 @@
-namespace KaleidoCode.GraphQL;
+
+namespace KaleidoCode.GraphQL.Users;
 
 // A new queryable object named `userName` will be added to `user`
 [ExtendObjectType(typeof(User))]
@@ -11,20 +12,17 @@ public class UserExtension
     {
         return user.Name;
     }
-}
 
-// query{
-//     userByExtendType{
-//       id
-//       userName
-//     }
-// } 
-// A new queryable object named `userByExtendType` will be added to `query`
-[ExtendObjectType(typeof(Query))]
-public class QueryUserResolvers
-{
+
+    // query{
+    //     userByExtendType{
+    //       id
+    //       userName
+    //     }
+    // } 
     public User GetUserByExtendType([Service] IUserRepository repository)
     {
         return repository.GetUserById(1)!;
     }
 }
+ 

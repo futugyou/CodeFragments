@@ -1,7 +1,8 @@
 using HotChocolate.Execution;
 using HotChocolate.Subscriptions;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Users;
+
 public class Subscription
 {
     [Subscribe(With = nameof(UserPublished))]

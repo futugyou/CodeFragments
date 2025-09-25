@@ -1,6 +1,8 @@
-namespace KaleidoCode.GraphQL;
+
 using HotChocolate.Subscriptions;
 using Microsoft.AspNetCore.WebUtilities;
+
+namespace KaleidoCode.GraphQL.Users;
 
 public record AddUserRequest(int id, string name, int age);
 public record AddUserResponse(User use);

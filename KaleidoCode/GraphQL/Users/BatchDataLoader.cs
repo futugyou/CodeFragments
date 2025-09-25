@@ -1,4 +1,5 @@
-namespace KaleidoCode.GraphQL;
+
+namespace KaleidoCode.GraphQL.Users;
 
 public class UserBatchDataLoader : BatchDataLoader<int, User>
 {

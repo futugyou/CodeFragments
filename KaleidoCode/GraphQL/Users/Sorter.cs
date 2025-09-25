@@ -1,6 +1,6 @@
 using HotChocolate.Data.Sorting;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Users;
 
 // public class UserSortType : SortInputType<User>
 // {
@@ -13,14 +13,14 @@ namespace KaleidoCode.GraphQL;
 // }
 
 // same reason as CustomerUserForFilter
-public class CustomerUserForSort
+public class UserSorter
 {
     public string Name { get; set; }
 }
 
-public class CustomerUserSortType : SortInputType<CustomerUserForSort>
+public class CustomerUserSortType : SortInputType<UserSorter>
 {
-    protected override void Configure(ISortInputTypeDescriptor<CustomerUserForSort> descriptor)
+    protected override void Configure(ISortInputTypeDescriptor<UserSorter> descriptor)
     {
         descriptor.Name("CustomerUserSortType");
         descriptor.BindFieldsExplicitly();
@@ -34,22 +34,5 @@ public class AscOnlySortEnumType : DefaultSortEnumType
     {
         descriptor.Name("AscOnlySortEnumType");
         descriptor.Operation(DefaultSortOperations.Ascending);
-    }
-}
-
-public class CustomSortConvention : SortConvention
-{
-    protected override void Configure(ISortConventionDescriptor descriptor)
-    {
-        descriptor.AddDefaults();
-    }
-}
-
-public class CustomSortConventionExtension : SortConventionExtension
-{
-    protected override void Configure(ISortConventionDescriptor descriptor)
-    {
-        // this will instead of 'order'
-        descriptor.ArgumentName("sort");
     }
 }

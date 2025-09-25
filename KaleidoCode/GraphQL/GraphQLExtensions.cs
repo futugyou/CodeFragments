@@ -2,6 +2,7 @@
 using HotChocolate.Language;
 using Microsoft.AspNetCore.Http.Features;
 using KaleidoCode.GraphQL.DataLoaders;
+using KaleidoCode.GraphQL.Users;
 
 namespace KaleidoCode.GraphQL;
 
@@ -74,22 +75,10 @@ public static class GraphQLExtensions
             // this will add `node`
             .AddGlobalObjectIdentification();
 
-        // object types
-        if (config.DevPattern == "Code")
-        {
-            hotChocolateBuilder
-                .AddQueryType<QueryType>()
-                .AddMutationType<MutationType>()
-                .AddSubscriptionType<SubscriptionType>();
-
-        }
-        else
-        {
-            hotChocolateBuilder
-                .AddQueryType<Query>()
-                .AddMutationType<Mutation>()
-                .AddSubscriptionType<Subscription>();
-        }
+        hotChocolateBuilder
+            .AddQueryType<Query>()
+            .AddMutationType<Mutation>()
+            .AddSubscriptionType<Subscription>();
 
         hotChocolateBuilder.AddPostgresSubscriptions((sp, options) =>
         {

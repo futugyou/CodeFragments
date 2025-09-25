@@ -1,6 +1,6 @@
 using NetTopologySuite.Geometries;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Users;
 
 //[Authorize]
 // [Authorize(Roles = new[] { "Guest", "Administrator" })]

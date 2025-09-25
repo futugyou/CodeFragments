@@ -1,6 +1,7 @@
+
 using HotChocolate.Data.Filters;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Users;
 
 // public class UserFilterType : FilterInputType<User>
 // {
@@ -13,15 +14,15 @@ namespace KaleidoCode.GraphQL;
 //     }
 // }
 
-// Why use CustomerUserForFilter instead of UserFilterType? 
+// Why use UserFilter instead of UserFilterType? 
 // Because UserFilterType inherits FilterInputType<User>, this `User` will replace the default [UseFiltering] with [UseFiltering(typeof(UserFilterType))]
-public class CustomerUserForFilter
+public class UserFilter
 {
     public string Name { get; set; }
 }
-public class CustomerUserFilterType : FilterInputType<CustomerUserForFilter>
+public class CustomerUserFilterType : FilterInputType<UserFilter>
 {
-    protected override void Configure(IFilterInputTypeDescriptor<CustomerUserForFilter> descriptor)
+    protected override void Configure(IFilterInputTypeDescriptor<UserFilter> descriptor)
     {
         descriptor.Name("CustomerUserFilterInput");
         descriptor.BindFieldsExplicitly();
@@ -37,24 +38,5 @@ public class CustomerFilterInputType : StringOperationFilterInputType
         descriptor.Name("CustomerFilterInputType");
         descriptor.Operation(DefaultFilterOperations.Equals).Type<StringType>();
         //descriptor.Operation(DefaultFilterOperations.NotEquals).Type<StringType>();
-    }
-}
-
-
-public class CustomFilterConvention : FilterConvention
-{
-    protected override void Configure(IFilterConventionDescriptor descriptor)
-    {
-        descriptor.AddDefaults();
-        descriptor.AllowAnd(false).AllowOr(false);
-    }
-}
-public class CustomFilterConventionExtension : FilterConventionExtension
-{
-    protected override void Configure(IFilterConventionDescriptor descriptor)
-    {
-        // this will instead of 'where'
-        descriptor.ArgumentName("filter");
-        descriptor.AllowAnd(false).AllowOr(false);
     }
 }
