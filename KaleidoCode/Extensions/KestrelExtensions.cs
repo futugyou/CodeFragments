@@ -24,7 +24,6 @@ public static class KestrelExtensions
     // include kestrel / hsts / httpsredirection / queuepolicy / stackpolicy config.
     public static WebApplicationBuilder AddKestrelExtensions(this WebApplicationBuilder builder, IConfiguration configuration)
     {
-
         builder.Services.Configure<KestrelOptions>(configuration.GetSection("KestrelOptions"));
         var sp = builder.Services.BuildServiceProvider();
         var config = sp.GetRequiredService<IOptionsMonitor<KestrelOptions>>()!.CurrentValue;
@@ -42,16 +41,6 @@ public static class KestrelExtensions
                         https.ServerCertificateSelector = SelectServerCertificate;
                     });
                 });
-            });
-        }
-
-        if (config.AllowHstsConfig)
-        {
-            builder.Services.AddHsts(options =>
-            {
-                options.MaxAge = TimeSpan.FromDays(config.HstsMaxAge);
-                options.IncludeSubDomains = config.HstsIncludeSubDomains;
-                options.Preload = config.HstsPreload;
             });
         }
 
@@ -78,6 +67,16 @@ public static class KestrelExtensions
             builder.Services.AddHttpsRedirection(options => options.HttpsPort = config.HttpsRedirectionPort);
         }
 
+        if (config.AllowHstsConfig)
+        {
+            builder.Services.AddHsts(options =>
+            {
+                options.MaxAge = TimeSpan.FromDays(config.HstsMaxAge);
+                options.IncludeSubDomains = config.HstsIncludeSubDomains;
+                options.Preload = config.HstsPreload;
+            });
+        }
+
         return builder;
     }
 
@@ -89,4 +88,25 @@ public static class KestrelExtensions
             _ => null,
         };
     }
+}
+
+public static class WebApplicationExtension
+{
+    public static WebApplication UseKestrelExtensions(this WebApplication app)
+    {
+        var config = app.Services.GetRequiredService<IOptionsMonitor<KestrelOptions>>()!.CurrentValue;
+
+        if (config.AllowHttpsRedirectionConfig)
+        {
+            app.UseHttpsRedirection();
+        }
+
+        if (config.AllowHstsConfig)
+        {
+            app.UseHsts();
+        }
+
+        return app;
+    }
+
 }

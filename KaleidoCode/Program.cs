@@ -76,16 +76,9 @@ builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
 
 var app = builder.Build();
 
-var rewriteOptions = new RewriteOptions()
-    // client redirect
-    .AddRedirect("^text/(.*)", "bar/$1")
-    // server rewrite
-    .AddRewrite(regex: "^text/(.*)", replacement: "bar/$1", skipRemainingRules: true)
-    .AddIISUrlRewrite(fileProvider: app.Environment.ContentRootFileProvider, filePath: "rewrite.xml")
-    .AddApacheModRewrite(fileProvider: app.Environment.ContentRootFileProvider, filePath: "rewrite.config");
-app.UseRewriter(rewriteOptions);
+app.UseCustomRouteRewriter();
 
-// app.UseHttpsRedirection().UseHsts();
+app.UseKestrelExtensions();
 
 // app.Urls.Add("http://localhost:5003/");
 var environment = app.Environment;
@@ -119,7 +112,7 @@ app.UseWebSockets();
 app.UseGraphQLCustom();
 
 app.MapControllers();
-app.UseHealthCheckExtensions(configuration);
+app.UseHealthCheckExtensions();
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
 app.RoutePatternFactoryExtension();

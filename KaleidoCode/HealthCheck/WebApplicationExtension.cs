@@ -3,7 +3,7 @@ namespace KaleidoCode.HealthCheck;
 
 public static class WebApplicationExtension
 {
-    public static WebApplication UseHealthCheckExtensions(this WebApplication app, IConfiguration configuration)
+    public static WebApplication UseHealthCheckExtensions(this WebApplication app)
     {
         app.UseHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
         {
