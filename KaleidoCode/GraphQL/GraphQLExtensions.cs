@@ -1,7 +1,10 @@
 
 using HotChocolate.Language;
+using HotChocolate.Data.Filters;
+using HotChocolate.Data.Sorting;
 using Microsoft.AspNetCore.Http.Features;
-using KaleidoCode.GraphQL.DataLoaders;
+using KaleidoCode.GraphQL.Conventions;
+using KaleidoCode.GraphQL.Directives;
 using KaleidoCode.GraphQL.Users;
 
 namespace KaleidoCode.GraphQL;
@@ -30,7 +33,10 @@ public static class GraphQLExtensions
         services.AddSha256DocumentHashProvider(HashFormat.Hex);
         // services.AddSha1DocumentHashProvider();
 
-        var hotChocolateBuilder = services.AddGraphQLServer().AddInstrumentation();
+        var hotChocolateBuilder = services
+            .AddGraphQLServer()
+            .AddInstrumentation()
+            .BindRuntimeType<string, StringType>();
 
         // code generates
         // It's strange that the two types `Cat` and `UserRefetchable` are not recognized by `HotChocolate.Types.Analyzers`.
@@ -94,16 +100,12 @@ public static class GraphQLExtensions
             PayloadErrorTypeNamePattern = "{MutationName}Error",
             PayloadErrorsFieldName = "errors"
         })
-        .BindRuntimeType<string, StringType>()
         .AddHttpRequestInterceptor<HttpRequestInterceptor>()
         .AddSocketSessionInterceptor<SocketSessionInterceptor>()
-        //.AllowIntrospection(env.IsDevelopment())
-        // .AddRemoteSchema(WellKnownSchemaNames.Myself)
-        // .AddRemoteSchema(WellKnownSchemaNames.Myself2)
-        // .AddRemoteSchemasFromRedis("Demo", sp => sp.GetRequiredService<ConnectionMultiplexer>())
         .InitializeOnStartup()
         .UseAutomaticPersistedOperationPipeline()
         .AddInMemoryOperationDocumentStorage()
+        .AddQueryFieldToMutationPayloads();
         // .AddRedisQueryStorage(services => ConnectionMultiplexer.Connect("redisstring").GetDatabase())
         // .UsePersistedQueryPipeline()
         // .AddReadOnlyFileSystemQueryStorage("./persisted_queries")
@@ -122,12 +124,21 @@ public static class GraphQLExtensions
         //         sp => sp.GetRequiredService<ConnectionMultiplexer>()
         //         )
         // )
-        // .AddConvention<IFilterConvention, CustomFilterConvention>()
-        // .AddConvention<IFilterConvention, CustomFilterConventionExtension>()
-        // .AddConvention<ISortConvention, CustomSortConvention>()
-        // .AddConvention<ISortConvention, CustomSortConventionExtension>()
-        // .AddQueryFieldToMutationPayloads()
-        ;
+
+        if (config.UseGlobalFilterConvention)
+        {
+            hotChocolateBuilder
+                  // .AddConvention<IFilterConvention, GlobalFilterConvention>() or
+                  .AddConvention<IFilterConvention, GlobalFilterConventionExtension>();
+        }
+
+        if (config.UseGlobalSortConvention)
+        {
+            hotChocolateBuilder
+                // .AddConvention<ISortConvention, GlobalSortConvention>() or
+                .AddConvention<ISortConvention, GlobalSortConventionExtension>();
+        }
+
         services.Configure<FormOptions>(options =>
         {
             // Set the limit to 256 MB

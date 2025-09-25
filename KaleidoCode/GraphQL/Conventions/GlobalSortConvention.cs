@@ -1,8 +1,8 @@
 using HotChocolate.Data.Sorting;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Conventions;
 
-public class CustomSortConvention : SortConvention
+public class GlobalSortConvention : SortConvention
 {
     protected override void Configure(ISortConventionDescriptor descriptor)
     {
@@ -10,7 +10,7 @@ public class CustomSortConvention : SortConvention
     }
 }
 
-public class CustomSortConventionExtension : SortConventionExtension
+public class GlobalSortConventionExtension : SortConventionExtension
 {
     protected override void Configure(ISortConventionDescriptor descriptor)
     {

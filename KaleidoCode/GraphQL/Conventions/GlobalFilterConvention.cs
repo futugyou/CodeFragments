@@ -1,9 +1,8 @@
 using HotChocolate.Data.Filters;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Conventions;
 
-
-public class CustomFilterConvention : FilterConvention
+public class GlobalFilterConvention : FilterConvention
 {
     protected override void Configure(IFilterConventionDescriptor descriptor)
     {
@@ -11,7 +10,7 @@ public class CustomFilterConvention : FilterConvention
         descriptor.AllowAnd(false).AllowOr(false);
     }
 }
-public class CustomFilterConventionExtension : FilterConventionExtension
+public class GlobalFilterConventionExtension : FilterConventionExtension
 {
     protected override void Configure(IFilterConventionDescriptor descriptor)
     {
