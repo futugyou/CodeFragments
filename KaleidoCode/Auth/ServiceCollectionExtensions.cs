@@ -16,8 +16,7 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.Configure<AuthOptions>(configuration.GetSection("AuthOptions"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<AuthOptions>>()!.CurrentValue;
+        var config = configuration.GetSection("AuthOptions").Get<AuthOptions>() ?? new();
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
             config.JwksUri,

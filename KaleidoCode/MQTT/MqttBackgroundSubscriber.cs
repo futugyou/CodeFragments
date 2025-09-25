@@ -21,6 +21,13 @@ public class MqttBackgroundSubscriber : BackgroundService
             try
             {
                 var op = _option.CurrentValue;
+                if (!op.AllowMQTTServer)
+                {
+                    _logger.LogInformation("MQTT server is not allowed");
+                    await Task.Delay(10000, stoppingToken);
+                    continue;
+                }
+                
                 var factory = new MqttClientFactory();
                 var client = factory.CreateMqttClient();
                 var clientOptions = new MqttClientOptionsBuilder()

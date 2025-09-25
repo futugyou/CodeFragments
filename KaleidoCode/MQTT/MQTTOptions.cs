@@ -10,4 +10,5 @@ public class MQTTOptions
     public string Password { get; set; } = "password";
     public bool CleanSession { get; set; } = true;
     public string Topic { get; set; } = "test/topic";
+    public bool AllowMQTTServer { get; set; }
 }

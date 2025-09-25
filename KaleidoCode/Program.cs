@@ -7,12 +7,12 @@ using KaleidoCode.HealthCheck;
 using KaleidoCode.HttpDiagnosticsExtensions;
 using KaleidoCode.HostedService;
 using KaleidoCode.KernelService;
+using KaleidoCode.MQTT;
 using KaleidoCode.OpenTelemetry;
 using KaleidoCode.Redis;
 using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
-using KaleidoCode.MQTT;
 
 var options = new WebApplicationOptions
 {
@@ -65,7 +65,7 @@ builder.Services.AddSingleton<IFileSystem, FileSystem>();
 await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);
 
-// builder.Services.AddMQTTExtension(configuration);
+builder.Services.AddMQTTExtension(configuration);
 
 builder.Services.AddHostedService<QueuedHostedService>();
 builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>

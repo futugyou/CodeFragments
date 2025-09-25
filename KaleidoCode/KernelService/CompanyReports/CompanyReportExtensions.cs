@@ -9,8 +9,7 @@ public static class CompanyReportExtensions
     {
         // configuration
         services.Configure<CompanyReportlOptions>(configuration.GetSection("CompanyReport"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<CompanyReportlOptions>>()!.CurrentValue;
+        var config = configuration.GetSection("CompanyReport").Get<CompanyReportlOptions>() ?? new();
 
         var ghModelsClient = new OpenAIClient(config.LlmApiKey);
         services.AddKeyedScoped<OpenAIClient>("report", (sp, _) => ghModelsClient);

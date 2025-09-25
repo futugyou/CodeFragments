@@ -2,13 +2,6 @@ namespace KaleidoCode.Redis;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRedisExtension(this IServiceCollection services)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-        return services.AddRedisExtension(configuration);
-    }
-
     public static IServiceCollection AddRedisExtension(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);

@@ -10,8 +10,7 @@ public static class GraphQLExtensions
     {
         // Global Services
         services.Configure<GraphQLOptions>(configuration.GetSection("GraphQLOptions"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<GraphQLOptions>>()!.CurrentValue;
+        var config = configuration.GetSection("GraphQLOptions").Get<GraphQLOptions>() ?? new();
 
         services.AddTransient<UserRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();

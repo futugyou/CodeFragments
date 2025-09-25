@@ -30,8 +30,7 @@ public static class SKServiceCollectionExtensions
 
         // configuration
         services.Configure<SemanticKernelOptions>(configuration.GetSection("SemanticKernel"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<SemanticKernelOptions>>()!.CurrentValue;
+        var config = configuration.GetSection("SemanticKernel").Get<SemanticKernelOptions>() ?? new();
 
         // mongo db, it will register `VectorStore` as singleton
         // TODO: Currently, Microsoft.SemanticKernel.Connectors.MongoDB can only use MongoDB.Driver 2.30.0, 3.X.X will report an error, 

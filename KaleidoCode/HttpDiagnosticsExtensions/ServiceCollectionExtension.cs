@@ -6,8 +6,7 @@ public static class HttpExtension
     public static IServiceCollection AddHttpDiagnosticsExtensions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<HttpDiagnosticsOptions>(configuration.GetSection("HttpDiagnostics"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<HttpDiagnosticsOptions>>()!.CurrentValue;
+        var config = configuration.GetSection("HttpDiagnostics").Get<HttpDiagnosticsOptions>() ?? new();
 
         if (config.AllowConfigureHttpClient)
         {

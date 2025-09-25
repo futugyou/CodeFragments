@@ -7,26 +7,18 @@ namespace KaleidoCode.Elasticsearch;
 
 public static class ElasticClientExtensions
 {
-    public static IServiceCollection AddElasticClientExtension(this IServiceCollection services)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-        return services.AddElasticClientExtension(configuration);
-    }
-
     public static IServiceCollection AddElasticClientExtension(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        // services.AddOptions<ElasticOptions>().Bind(configuration.GetSection("ElasticServer"));
-        // services.Configure<ElasticOptions>(configuration.GetSection("ElasticServer"));
+        services.Configure<ElasticOptions>(configuration.GetSection("ElasticServer"));
 
         var elasticOptions = configuration.GetSection("ElasticServer").Get<ElasticOptions>() ?? new ElasticOptions();
 
-        if (elasticOptions.Uris == null || !elasticOptions.Uris.Any())
+        if (elasticOptions.Uris == null || elasticOptions.Uris.Length == 0)
         {
-            throw new ArgumentNullException("ElasticServer:Uris");
+            throw new ArgumentNullException(nameof(configuration), "ElasticServer:Uris can not be null or empty");
         }
 
         var connectionPool = new SniffingConnectionPool(elasticOptions.UriList);

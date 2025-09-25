@@ -13,8 +13,7 @@ public static class OpenTelemetryExtension
     public static IServiceCollection AddOpenTelemetryExtension(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<OpenTelemetryOptions>(configuration.GetSection("OpenTelemetry"));
-        var sp = services.BuildServiceProvider();
-        var config = sp.GetRequiredService<IOptionsMonitor<OpenTelemetryOptions>>()!.CurrentValue;
+        var config = configuration.GetSection("OpenTelemetry").Get<OpenTelemetryOptions>() ?? new();
 
         var resourceBuilder = ResourceBuilder.CreateDefault().AddService(config.ServiceName);
 
