@@ -1,6 +1,7 @@
 
 using HotChocolate.Language;
 using Microsoft.AspNetCore.Http.Features;
+using KaleidoCode.GraphQL.DataLoaders;
 
 namespace KaleidoCode.GraphQL;
 

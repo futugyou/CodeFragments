@@ -1,6 +1,6 @@
 using HotChocolate.Resolvers;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.DataLoaders;
 
 // query{
 //     user(id: 1){
