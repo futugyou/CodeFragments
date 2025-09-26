@@ -8,5 +8,6 @@ public class GraphQLOptions
     public bool UseGlobalSortConvention { get; set; } = false;
     public bool UseNetInterceptor { get; set; } = true;
     public string PersistedOperations { get; set; } = "InMemory";
+    public string SubscriptionOperations { get; set; } = "InMemory";
 
 }

@@ -90,10 +90,25 @@ public static class GraphQLExtensions
             .AddSubscriptionType<Subscription>()
             .AddQueryFieldToMutationPayloads();
 
-        hotChocolateBuilder.AddPostgresSubscriptions((sp, options) =>
+        switch (config.SubscriptionOperations)
         {
-            options.ConnectionFactory = ct => ValueTask.FromResult(new Npgsql.NpgsqlConnection(configuration.GetConnectionString("Postgres")!));
-        });
+            case "Postgres" when !string.IsNullOrEmpty(configuration.GetConnectionString("Postgres")):
+                var postgres = configuration.GetConnectionString("Postgres");
+                hotChocolateBuilder.AddPostgresSubscriptions((sp, options) =>
+                {
+                    options.ConnectionFactory = ct => ValueTask.FromResult(new Npgsql.NpgsqlConnection(postgres));
+                });
+                break;
+
+            case "Redis" when !string.IsNullOrEmpty(configuration.GetConnectionString("Redis")):
+                var redis = configuration.GetConnectionString("Redis")!;
+                hotChocolateBuilder.AddRedisSubscriptions((sp) => ConnectionMultiplexer.Connect(redis));
+                break;
+
+            default:
+                hotChocolateBuilder.AddInMemorySubscriptions();
+                break;
+        }
 
         hotChocolateBuilder.AddMutationConventions(new MutationConventionOptions
         {
