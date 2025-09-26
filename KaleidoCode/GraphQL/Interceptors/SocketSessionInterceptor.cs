@@ -15,7 +15,7 @@ public class SocketSessionInterceptor : DefaultSocketSessionInterceptor
     }
     public override ValueTask<ConnectionStatus> OnConnectAsync(ISocketSession session, IOperationMessagePayload connectionInitMessage, CancellationToken cancellationToken = default)
     {
-        // logger.LogInformation("this log from SocketSessionInterceptor.OnConnectAsync, message is :" + session.Payload);
+        logger.LogInformation("this log from SocketSessionInterceptor.OnConnectAsync, message is: {Message}", connectionInitMessage.Payload.ToString());
         return base.OnConnectAsync(session, connectionInitMessage, cancellationToken);
     }
 

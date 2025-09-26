@@ -3,7 +3,8 @@ using HotChocolate.Subscriptions;
 
 namespace KaleidoCode.GraphQL.Users;
 
-public class Subscription
+[ExtendObjectType(typeof(Subscription))]
+public class UserSubscription
 {
     [Subscribe(With = nameof(UserPublished))]
     [Topic("userCreated")]
@@ -18,22 +19,5 @@ public class Subscription
     {
         var topic = $"userCreated";
         return receiver.SubscribeAsync<User>(topic);
-    }
-}
-
-public class SubscriptionType : ObjectType
-{
-    protected override void Configure(IObjectTypeDescriptor descriptor)
-    {
-        descriptor
-            .Field("userCreated")
-            .Type<UserType>()
-            .Resolve(context => context.GetEventMessage<User>())
-            .Subscribe(async context =>
-            {
-                var receiver = context.Service<ITopicEventReceiver>();
-                var stream = await receiver.SubscribeAsync<User>("userCreated");
-                return stream;
-            });
     }
 }
