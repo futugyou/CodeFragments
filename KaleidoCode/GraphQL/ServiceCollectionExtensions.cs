@@ -8,6 +8,7 @@ using KaleidoCode.GraphQL.Directives;
 using KaleidoCode.GraphQL.Users;
 using KaleidoCode.GraphQL.Pets;
 using KaleidoCode.GraphQL.Interceptors;
+using StackExchange.Redis;
 
 namespace KaleidoCode.GraphQL;
 
@@ -86,7 +87,8 @@ public static class GraphQLExtensions
         hotChocolateBuilder
             .AddQueryType<Query>()
             .AddMutationType<Mutation>()
-            .AddSubscriptionType<Subscription>();
+            .AddSubscriptionType<Subscription>()
+            .AddQueryFieldToMutationPayloads();
 
         hotChocolateBuilder.AddPostgresSubscriptions((sp, options) =>
         {
@@ -109,28 +111,26 @@ public static class GraphQLExtensions
             hotChocolateBuilder.AddSocketSessionInterceptor<SocketSessionInterceptor>();
         }
 
-        hotChocolateBuilder.InitializeOnStartup()
-        .UseAutomaticPersistedOperationPipeline()
-        .AddInMemoryOperationDocumentStorage()
-        .AddQueryFieldToMutationPayloads();
-        // .AddRedisQueryStorage(services => ConnectionMultiplexer.Connect("redisstring").GetDatabase())
-        // .UsePersistedQueryPipeline()
-        // .AddReadOnlyFileSystemQueryStorage("./persisted_queries")
-        // .AddReadOnlyRedisQueryStorage(services => ConnectionMultiplexer.Connect("redisstring").GetDatabase())
-        // .PublishSchemaDefinition(c => c
-        //     // The name of the schema. This name should be unique
-        //     .SetName("users")
-        //     // Ignore the root types of accounts
-        //     .IgnoreRootTypes()
-        //     // Declares where the type extension is used
-        //     .AddTypeExtensionsFromFile("./Stitching.graphql")
-        //     .PublishToRedis(
-        //         // The configuration name under which the schema should be published
-        //         "Demo",
-        //         // The connection multiplexer that should be used for publishing
-        //         sp => sp.GetRequiredService<ConnectionMultiplexer>()
-        //         )
-        // )
+        hotChocolateBuilder
+            .InitializeOnStartup()
+            .UseAutomaticPersistedOperationPipeline();
+
+        switch (config.PersistedOperations)
+        {
+            case "FileSystem":
+                hotChocolateBuilder.AddFileSystemOperationDocumentStorage("./persisted_operations");
+                break;
+
+            case "Redis" when !string.IsNullOrEmpty(configuration.GetConnectionString("Redis")):
+                var redis = configuration.GetConnectionString("Redis")!;
+                hotChocolateBuilder.AddRedisOperationDocumentStorage(
+                    services => ConnectionMultiplexer.Connect(redis).GetDatabase());
+                break;
+
+            default:
+                hotChocolateBuilder.AddInMemoryOperationDocumentStorage();
+                break;
+        }
 
         if (config.UseGlobalFilterConvention)
         {

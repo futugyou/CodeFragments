@@ -34,6 +34,7 @@
 		<PackageReference Include="HotChocolate.Diagnostics" Version="16.0.0-p.8.5" />
 		<PackageReference Include="HotChocolate.Execution" Version="16.0.0-p.8.5" />
 		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.8.5" />
+		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" Version="16.0.0-p.8.5" />
 		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.8.5" />
 		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.8.5" />
 		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.8.5" />

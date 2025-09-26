@@ -7,4 +7,6 @@ public class GraphQLOptions
     public bool UseGlobalFilterConvention { get; set; } = false;
     public bool UseGlobalSortConvention { get; set; } = false;
     public bool UseNetInterceptor { get; set; } = true;
+    public string PersistedOperations { get; set; } = "InMemory";
+
 }
