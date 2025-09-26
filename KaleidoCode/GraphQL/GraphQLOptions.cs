@@ -9,5 +9,6 @@ public class GraphQLOptions
     public bool UseNetInterceptor { get; set; } = true;
     public string PersistedOperations { get; set; } = "InMemory";
     public string SubscriptionOperations { get; set; } = "InMemory";
-
+    public string HashProvider { get; set; } = "MD5";
+    public string HashFormat { get; set; } = "Base64";
 }
