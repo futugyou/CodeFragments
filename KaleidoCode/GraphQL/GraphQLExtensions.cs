@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Features;
 using KaleidoCode.GraphQL.Conventions;
 using KaleidoCode.GraphQL.Directives;
 using KaleidoCode.GraphQL.Users;
+using KaleidoCode.GraphQL.Pets;
 
 namespace KaleidoCode.GraphQL;
 
@@ -17,7 +18,7 @@ public static class GraphQLExtensions
         services.Configure<GraphQLOptions>(configuration.GetSection("GraphQLOptions"));
         var config = configuration.GetSection("GraphQLOptions").Get<GraphQLOptions>() ?? new();
 
-        services.AddTransient<UserRefetchableService>();
+        services.AddTransient<NodeRefetchableService>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddPooledDbContextFactory<GraphQLDbContext>(b =>
@@ -73,7 +74,7 @@ public static class GraphQLExtensions
             .AddType<UploadType>()
             .AddType(new UuidType('D'))
             .AddType<Cat>() // type of `oneof`
-            .AddType<UserRefetchable>() // type of `node`
+            .AddType<NodeRefetchable>() // type of `node`
             .AddDirectiveType<CustomDirectiveType>();
 
         // type converter

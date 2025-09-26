@@ -1,24 +1,24 @@
 namespace KaleidoCode.GraphQL;
 
 [Node]
-public class UserRefetchable
+public class NodeRefetchable
 {
     [ID("Id")]
     public string Id { get; set; }
     public string Name { get; set; }
 
     // [NodeResolver]
-    public static async Task<UserRefetchable> Get(string id, [Service] UserRefetchableService service)
+    public static async Task<NodeRefetchable> Get(string id, [Service] NodeRefetchableService service)
     {
-        var user = await service.GetByIdAsync(id);
-        return user;
+        var Node = await service.GetByIdAsync(id);
+        return Node;
     }
 }
 
-public class UserRefetchableService
+public class NodeRefetchableService
 {
-    public Task<UserRefetchable> GetByIdAsync(string id)
+    public Task<NodeRefetchable> GetByIdAsync(string id)
     {
-        return Task.FromResult(new UserRefetchable { Id = id, Name = "tom" });
+        return Task.FromResult(new NodeRefetchable { Id = id, Name = "tom" });
     }
 }

@@ -1,4 +1,5 @@
-namespace KaleidoCode.GraphQL;
+
+namespace KaleidoCode.GraphQL.Pets;
 
 [OneOf]
 public class PetInput
