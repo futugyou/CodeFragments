@@ -88,7 +88,6 @@
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
 		<PackageReference Include="OpenAI" Version="2.4.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />

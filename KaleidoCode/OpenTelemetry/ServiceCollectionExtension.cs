@@ -88,15 +88,6 @@ public static class OpenTelemetryExtension
             });
         }
 
-        if (exporters.Jaeger.Enabled)
-        {
-            builder.AddJaegerExporter(opt =>
-            {
-                opt.AgentHost = exporters.Jaeger.AgentHost;
-                opt.AgentPort = exporters.Jaeger.AgentPort;
-            });
-        }
-
         if (exporters.Console.Enabled)
         {
             builder.AddConsoleExporter();
