@@ -11,7 +11,7 @@ namespace KaleidoCode.GraphQL.Directives;
 // colsole print `name:"foo"`
 // `context.Result` will be `tony`
 // This function can be used for `aop` to process the `context.Result` according to specific `directive.Arguments`
-public class CustomDirectiveType : DirectiveType
+public class GlobalDirectiveType : DirectiveType
 {
     protected override void Configure(IDirectiveTypeDescriptor descriptor)
     {
@@ -29,7 +29,7 @@ public class CustomDirectiveType : DirectiveType
                 Console.WriteLine(item.Name + ":" + item.Value.ToString());
             }
             var task = next.Invoke(context);
-            Console.WriteLine("CustomDirectiveType Got Result: " + context.Result);
+            Console.WriteLine("GlobalDirectiveType Got Result: " + context.Result);
             return task;
         });
     }

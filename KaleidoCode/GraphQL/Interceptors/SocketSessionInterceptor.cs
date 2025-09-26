@@ -3,7 +3,7 @@ using HotChocolate.AspNetCore.Subscriptions;
 using HotChocolate.AspNetCore.Subscriptions.Protocols;
 using HotChocolate.Execution;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Interceptors;
 
 public class SocketSessionInterceptor : DefaultSocketSessionInterceptor
 {

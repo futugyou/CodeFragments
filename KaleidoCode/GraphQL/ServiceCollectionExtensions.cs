@@ -7,6 +7,7 @@ using KaleidoCode.GraphQL.Conventions;
 using KaleidoCode.GraphQL.Directives;
 using KaleidoCode.GraphQL.Users;
 using KaleidoCode.GraphQL.Pets;
+using KaleidoCode.GraphQL.Interceptors;
 
 namespace KaleidoCode.GraphQL;
 
@@ -75,7 +76,7 @@ public static class GraphQLExtensions
             .AddType(new UuidType('D'))
             .AddType<Cat>() // type of `oneof`
             .AddType<NodeRefetchable>() // type of `node`
-            .AddDirectiveType<CustomDirectiveType>();
+            .AddDirectiveType<GlobalDirectiveType>();
 
         // type converter
         hotChocolateBuilder
@@ -100,10 +101,15 @@ public static class GraphQLExtensions
             PayloadTypeNamePattern = "{MutationName}Payload",
             PayloadErrorTypeNamePattern = "{MutationName}Error",
             PayloadErrorsFieldName = "errors"
-        })
-        .AddHttpRequestInterceptor<HttpRequestInterceptor>()
-        .AddSocketSessionInterceptor<SocketSessionInterceptor>()
-        .InitializeOnStartup()
+        });
+
+        if (config.UseNetInterceptor)
+        {
+            hotChocolateBuilder.AddHttpRequestInterceptor<HttpRequestInterceptor>();
+            hotChocolateBuilder.AddSocketSessionInterceptor<SocketSessionInterceptor>();
+        }
+
+        hotChocolateBuilder.InitializeOnStartup()
         .UseAutomaticPersistedOperationPipeline()
         .AddInMemoryOperationDocumentStorage()
         .AddQueryFieldToMutationPayloads();
@@ -145,6 +151,7 @@ public static class GraphQLExtensions
             // Set the limit to 256 MB
             options.MultipartBodyLengthLimit = 268435456;
         });
+
         return services;
     }
 }

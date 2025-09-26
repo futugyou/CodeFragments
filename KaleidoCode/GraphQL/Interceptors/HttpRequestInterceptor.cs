@@ -2,7 +2,7 @@ using System.Security.Claims;
 using HotChocolate.AspNetCore;
 using HotChocolate.Execution;
 
-namespace KaleidoCode.GraphQL;
+namespace KaleidoCode.GraphQL.Interceptors;
 
 public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
 {
