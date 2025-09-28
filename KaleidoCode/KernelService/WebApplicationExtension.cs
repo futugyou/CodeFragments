@@ -20,9 +20,12 @@ public static class WebApplicationExtension
                     """
                     You specialize in handling requests related to store inventory management.
                     """);
+        var taskManager = shopHostAgent.TaskManager!;
 
-        app.MapA2A(shopHostAgent.TaskManager!, "/a2a/shop");
-
+        app.MapA2A(taskManager, "/a2a/shop");
+        // this need `A2A.AspNetCore` 0.3.1-preview
+        // app.MapWellKnownAgentCard(taskManager, "/a2a/shop");
+        app.MapHttpA2A(taskManager, "/a2a/shop");
         return app;
     }
 

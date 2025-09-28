@@ -118,8 +118,10 @@ app.UseHealthCheckExtensions();
 app.RoutePatternFactoryExtension();
 
 await app.InitAIData();
+
+app.MapMcp();
+app.MapA2AExtensions();
+
 // this will win
 // app.Run("http://localhost:5004/");
-app.MapMcp();
-
 app.Run();
