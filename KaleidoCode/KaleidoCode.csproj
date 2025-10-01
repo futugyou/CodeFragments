@@ -21,8 +21,8 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
-		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.2" />
-		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.4.1" />
+		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.3" />
+		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.4.2" />
 		<PackageReference Include="FaissMask" Version="0.4.2" />
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.1" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
@@ -92,9 +92,9 @@
 		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="NEST.JsonNetSerializer" Version="7.17.5" />
 		<PackageReference Include="OpenAI" Version="2.4.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.13.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.13.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
