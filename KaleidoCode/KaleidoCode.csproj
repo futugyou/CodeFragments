@@ -26,26 +26,26 @@
 		<PackageReference Include="FaissMask" Version="0.4.2" />
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.1" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
-		<PackageReference Include="HotChocolate.AspNetCore" Version="16.0.0-p.8.7" />
+		<PackageReference Include="HotChocolate.AspNetCore" Version="16.0.0-p.8.9" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Data" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Data.MongoDb" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Data.Spatial" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Diagnostics" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Execution" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Subscriptions.InMemory" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="16.0.0-p.8.7" />
-		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.8.7">
+		<PackageReference Include="HotChocolate.Data" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Data.MongoDb" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Data.Spatial" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Diagnostics" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Execution" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Subscriptions.InMemory" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="16.0.0-p.8.9" />
+		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.8.9">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.8.7" />
+		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.8.9" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
 		<PackageReference Include="HtmlTags" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
@@ -56,7 +56,7 @@
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
-		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.0" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.1" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.12.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
 		<PackageReference Include="Microsoft.KernelMemory.AI.OpenAI" Version="0.98.250508.3" />
