@@ -21,31 +21,31 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
-		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.5" />
-		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.4.4" />
+		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.6" />
+		<PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.4.5" />
 		<PackageReference Include="FaissMask" Version="0.4.2" />
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.1" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
-		<PackageReference Include="HotChocolate.AspNetCore" Version="16.0.0-p.8.12" />
+		<PackageReference Include="HotChocolate.AspNetCore" Version="16.0.0-p.8.14" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.0.0-p.8.9" />
-		<PackageReference Include="HotChocolate.Data" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Data.MongoDb" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Data.Spatial" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Diagnostics" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Execution" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Subscriptions.InMemory" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="16.0.0-p.8.12" />
-		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.8.12">
+		<PackageReference Include="HotChocolate.Data" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Data.MongoDb" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Data.Spatial" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Diagnostics" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Execution" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Subscriptions.InMemory" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="16.0.0-p.8.14" />
+		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.8.14">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.8.12" />
+		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.8.14" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
 		<PackageReference Include="HtmlTags" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
