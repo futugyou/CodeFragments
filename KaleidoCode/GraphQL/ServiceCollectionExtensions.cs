@@ -141,9 +141,7 @@ public static class GraphQLExtensions
             hotChocolateBuilder.AddSocketSessionInterceptor<SocketSessionInterceptor>();
         }
 
-        hotChocolateBuilder
-            .InitializeOnStartup()
-            .UseAutomaticPersistedOperationPipeline();
+        hotChocolateBuilder.UseAutomaticPersistedOperationPipeline();
 
         switch (config.PersistedOperations)
         {
