@@ -1,4 +1,5 @@
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 
 namespace KaleidoCode.KernelService.Archived;
 
@@ -14,7 +15,7 @@ public static class ModelContextProtocolExtensions
     /// <param name="mcpClient">The <see cref="IMcpClient"/>.</param>
     /// <param name="cancellationToken">The optional <see cref="CancellationToken"/>.</param>
     /// </summary>
-    public static async Task<IReadOnlyList<KernelFunction>> MapToFunctionsAsync(this IMcpClient mcpClient, CancellationToken cancellationToken = default)
+    public static async Task<IReadOnlyList<KernelFunction>> MapToFunctionsAsync(this McpClient mcpClient, CancellationToken cancellationToken = default)
     {
         var functions = new List<KernelFunction>();
         foreach (var tool in await mcpClient.ListToolsAsync(null, cancellationToken).ConfigureAwait(false))
@@ -25,7 +26,7 @@ public static class ModelContextProtocolExtensions
         return functions;
     }
 
-    private static KernelFunction ToKernelFunction(this McpClientTool tool, IMcpClient mcpClient, CancellationToken cancellationToken)
+    private static KernelFunction ToKernelFunction(this McpClientTool tool, McpClient mcpClient, CancellationToken cancellationToken)
     {
         async Task<string> InvokeToolAsync(Kernel kernel, KernelFunction function, KernelArguments arguments, CancellationToken ct)
         {
@@ -51,7 +52,7 @@ public static class ModelContextProtocolExtensions
                 // Extract the text content from the result
                 return string.Join("\n", result.Content
                     .Where(c => c.Type == "text")
-                    .Select(c => c.Text));
+                    .Select(c => ((TextContentBlock)c).Text));
             }
             catch (Exception ex)
             {

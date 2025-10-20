@@ -1,5 +1,6 @@
 using ModelContextProtocol.Client;
 using KaleidoCode.KernelService;
+using ModelContextProtocol.Protocol;
 
 namespace KaleidoCode.Controllers;
 
@@ -16,14 +17,14 @@ public class McpClientController : ControllerBase
     private readonly IOptionsMonitor<SemanticKernelOptions> _optionsMonitor;
     private readonly ILogger<McpClientController> _logger;
 
-    private async Task<IMcpClient> GetMcpClient(string serverType)
+    private async Task<McpClient> GetMcpClient(string serverType)
     {
         IClientTransport clientTransport;
         var mcpServer = _optionsMonitor.CurrentValue.McpServers[serverType] ?? throw new ArgumentException($"Server {serverType} not found");
 
         if (!string.IsNullOrEmpty(mcpServer.Url))
         {
-            clientTransport = new SseClientTransport(new()
+            clientTransport = new HttpClientTransport(new()
             {
                 Name = serverType,
                 Endpoint = new Uri(mcpServer.Url),
@@ -41,7 +42,7 @@ public class McpClientController : ControllerBase
             });
         }
 
-        var client = await McpClientFactory.CreateAsync(clientTransport);
+        var client = await McpClient.CreateAsync(clientTransport);
         return client;
     }
 
@@ -61,7 +62,7 @@ public class McpClientController : ControllerBase
     {
         var client = await GetMcpClient("everything");
         var result = await client.CallToolAsync("add", new Dictionary<string, object?>() { ["a"] = 10, ["b"] = 20 });
-        return result.Content.First().Text!;
+        return ((TextContentBlock)result.Content[0]).Text;
     }
 
     [Route("github/tools")]
@@ -79,6 +80,6 @@ public class McpClientController : ControllerBase
     {
         var client = await GetMcpClient("github");
         var result = await client.CallToolAsync("search_code", new Dictionary<string, object?>() { ["q"] = "modelcontextprotocol" });
-        return result.Content.First().Text!;
+        return ((TextContentBlock)result.Content[0]).Text;
     }
 }

@@ -10,7 +10,7 @@ public class SemanticKernelOptions
     public WebSearchConfig WebSearch { get; set; } = new();
     public string VectorStore { get; set; } = "memory";
     // for mcp server
-    public Dictionary<string, McpServer> McpServers { get; set; } = [];
+    public Dictionary<string, McpServerConfig> McpServers { get; set; } = new();
 }
 
 public class WebSearchConfig
@@ -43,7 +43,7 @@ public class KernelMemoryConfig
     public string VectorStoreName { get; set; } = "default-vector-store";
 }
 
-public class McpServer
+public class McpServerConfig
 {
     public string Command { get; set; }
     public string Url { get; set; }

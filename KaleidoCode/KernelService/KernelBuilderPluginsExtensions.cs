@@ -20,7 +20,7 @@ public static class KernelBuilderPluginsExtensions
     /// <param name="plugins"></param>
     /// <returns>A <see cref="KernelPlugin"/> containing the functions.</returns>
     public static async Task<IKernelBuilderPlugins> AddMcpFunctionsFromSseServerAsync(this IKernelBuilderPlugins plugins,
-        string name, McpServer server, CancellationToken cancellationToken = default)
+        string name, McpServerConfig server, CancellationToken cancellationToken = default)
     {
         var key = PluginNameSanitizer.ToSafePluginName(name);
 
@@ -38,12 +38,12 @@ public static class KernelBuilderPluginsExtensions
         return SseMap[key] = sseKernelPlugin;
     }
 
-    private static async Task<IMcpClient> GetClientAsync(string name, McpServer mcpServer, CancellationToken cancellationToken)
+    private static async Task<McpClient> GetClientAsync(string name, McpServerConfig mcpServer, CancellationToken cancellationToken)
     {
         IClientTransport clientTransport;
         if (!string.IsNullOrEmpty(mcpServer.Url))
         {
-            clientTransport = new SseClientTransport(new()
+            clientTransport = new HttpClientTransport(new()
             {
                 Name = name,
                 Endpoint = new Uri(mcpServer.Url),
@@ -71,6 +71,6 @@ public static class KernelBuilderPluginsExtensions
             }
         };
 
-        return await McpClientFactory.CreateAsync(clientTransport, options, NullLoggerFactory.Instance, cancellationToken);
+        return await McpClient.CreateAsync(clientTransport, options, NullLoggerFactory.Instance, cancellationToken);
     }
 }

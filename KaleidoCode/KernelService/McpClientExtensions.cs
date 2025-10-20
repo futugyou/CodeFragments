@@ -13,7 +13,7 @@ public static class McpClientExtensions
     /// <param name="mcpClient">The <see cref="IMcpClient"/>.</param>
     /// <param name="cancellationToken">The optional <see cref="CancellationToken"/>.</param>
     /// </summary>
-    public static async Task<IReadOnlyList<KernelFunction>> MapToFunctionsAsync(this IMcpClient mcpClient, CancellationToken cancellationToken = default)
+    public static async Task<IReadOnlyList<KernelFunction>> MapToFunctionsAsync(this McpClient mcpClient, CancellationToken cancellationToken = default)
     {
         var functions = new List<KernelFunction>();
         foreach (var tool in await mcpClient.ListToolsAsync(null, cancellationToken).ConfigureAwait(false))

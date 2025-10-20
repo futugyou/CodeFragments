@@ -17,12 +17,12 @@ public static class EchoTool
 
     [McpServerTool(Name = "SummarizeContentFromUrl"), Description("Summarizes content downloaded from a specific URI")]
     public static async Task<string> SummarizeDownloadedContent(
-        IMcpServer thisServer,
+        McpServer thisServer,
         HttpClient httpClient,
         [Description("The url from which to download the content to summarize")] string url,
         CancellationToken cancellationToken)
     {
-        string content = await httpClient.GetStringAsync(url);
+        string content = await httpClient.GetStringAsync(url, cancellationToken);
 
         ChatMessage[] messages =
         [
@@ -36,7 +36,9 @@ public static class EchoTool
             Temperature = 0.3f,
         };
 
-        return $"Summary: {await thisServer.AsSamplingChatClient().GetResponseAsync(messages, options, cancellationToken)}";
+        var client = thisServer.AsSamplingChatClient();
+
+        return $"Summary: {await client.GetResponseAsync(messages, options, cancellationToken)}";
     }
 }
 
