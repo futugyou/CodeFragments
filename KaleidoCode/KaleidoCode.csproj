@@ -50,7 +50,7 @@
 		<PackageReference Include="HtmlTags" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="9.0.10" />
-		<PackageReference Include="Microsoft.Extensions.AI" Version="9.10.0" />
+		<PackageReference Include="Microsoft.Extensions.AI" Version="9.10.1" />
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.9.0-preview.1.25458.4" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.10" />
@@ -93,9 +93,9 @@
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.13.1" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.1" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.13.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.13.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.13.0" />
 		<PackageReference Include="PdfPig" Version="0.1.10" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.8.3" />
