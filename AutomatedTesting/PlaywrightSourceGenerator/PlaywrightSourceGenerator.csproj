@@ -16,6 +16,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Playwright" Version="1.52.0" GeneratePathProperty="true" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.Playwright" Version="1.55.0" GeneratePathProperty="true" PrivateAssets="all" />
 	</ItemGroup>
 </Project>
