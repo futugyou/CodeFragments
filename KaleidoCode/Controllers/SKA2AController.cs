@@ -36,7 +36,7 @@ public class SKA2AController : ControllerBase
         var client = new A2AClient(new Uri(agentCard.Url));
         var a2aResponse = await client.SendMessageAsync(new MessageSendParams
         {
-            Message = new Message
+            Message = new AgentMessage
             {
                 Role = MessageRole.User,
                 Parts = [new TextPart { Text = text }]

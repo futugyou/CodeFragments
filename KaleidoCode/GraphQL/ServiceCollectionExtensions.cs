@@ -30,27 +30,6 @@ public static class GraphQLExtensions
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
 
-        var hashFormat = HashFormat.Base64;
-        if (config.HashFormat == "Hex")
-        {
-            hashFormat = HashFormat.Hex;
-        }
-
-        switch (config.HashProvider)
-        {
-            case "Sha256":
-                services.AddSha256DocumentHashProvider(hashFormat);
-                break;
-
-            case "Sha1":
-                services.AddSha1DocumentHashProvider(hashFormat);
-                break;
-
-            default:
-                services.AddMD5DocumentHashProvider(hashFormat);
-                break;
-        }
-
         var hotChocolateBuilder = services
             .AddGraphQLServer()
             .AddInstrumentation()
@@ -142,6 +121,27 @@ public static class GraphQLExtensions
         }
 
         hotChocolateBuilder.UseAutomaticPersistedOperationPipeline();
+
+        var hashFormat = HashFormat.Base64;
+        if (config.HashFormat == "Hex")
+        {
+            hashFormat = HashFormat.Hex;
+        }
+
+        switch (config.HashProvider)
+        {
+            case "Sha256":
+                hotChocolateBuilder.AddSha256DocumentHashProvider(hashFormat);
+                break;
+
+            case "Sha1":
+                hotChocolateBuilder.AddSha1DocumentHashProvider(hashFormat);
+                break;
+
+            default:
+                hotChocolateBuilder.AddMD5DocumentHashProvider(hashFormat);
+                break;
+        }
 
         switch (config.PersistedOperations)
         {
