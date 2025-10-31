@@ -1,4 +1,4 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 public class Person

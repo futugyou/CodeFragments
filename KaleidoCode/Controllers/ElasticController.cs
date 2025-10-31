@@ -22,16 +22,18 @@ public class ElasticController : ControllerBase
 
     [Route("insert")]
     [HttpPost]
-    public void Insert()
+    public async Task<string> Insert()
     {
-        esService.Mapping();
+        var response = await esService.Insert();
+
+        return response.DebugInformation;
     }
 
     [Route("insert_many")]
     [HttpPost]
     public void InsertMany()
     {
-        esService.Mapping();
+        esService.InsertMany();
     }
 
     [Route("get_all")]
@@ -79,7 +81,7 @@ public class ElasticController : ControllerBase
     [Route("reindex")]
     [HttpPost]
     public void Reindex()
-    { 
+    {
         esService.Reindex();
     }
 }

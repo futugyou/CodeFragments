@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using System.Text;
-using Elasticsearch.Net;
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
@@ -21,8 +19,8 @@ public static class ElasticClientExtensions
             throw new ArgumentNullException(nameof(configuration), "ElasticServer:Uris can not be null or empty");
         }
 
-        var connectionPool = new SniffingConnectionPool(elasticOptions.UriList);
-        var settings = new ConnectionSettings(connectionPool);
+        // var connectionPool = new SniffingConnectionPool(elasticOptions.UriList);
+        var settings = new ConnectionSettings(elasticOptions.UriList[0]);
         if (!string.IsNullOrEmpty(elasticOptions.DefaultIndex))
         {
             settings.DefaultIndex(elasticOptions.DefaultIndex);
@@ -35,10 +33,7 @@ public static class ElasticClientExtensions
         {
             settings.ApiKeyAuthentication(elasticOptions.ApiID, elasticOptions.ApiKey);
         }
-        if (!string.IsNullOrEmpty(elasticOptions.Base64EncodedApiKey))
-        {
-            settings.ApiKeyAuthentication(new ApiKeyAuthenticationCredentials(elasticOptions.Base64EncodedApiKey));
-        }
+
         if (!string.IsNullOrEmpty(elasticOptions.Username) && !string.IsNullOrEmpty(elasticOptions.Password))
         {
             settings.BasicAuthentication(elasticOptions.Username, elasticOptions.Password);
@@ -94,9 +89,11 @@ public static class ElasticClientExtensions
         {
             //requestData.RequestMetaData
         });
+        
+        settings.EnableHttpCompression();
         var listenerObserver = new ElasticListenerObserver();
         DiagnosticListener.AllListeners.Subscribe(listenerObserver);
-        services.AddSingleton<ElasticClient>(new ElasticClient(settings));
+        services.AddSingleton<OpenSearchClient>(new OpenSearchClient(settings));
         services.AddSingleton<IndexService>();
         services.AddSingleton<PipelineService>();
         services.AddSingleton<InsertService>();

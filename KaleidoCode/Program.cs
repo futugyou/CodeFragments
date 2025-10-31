@@ -49,6 +49,7 @@ builder.Services.AddScoped<ResponseCustomMiddleware>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    c.CustomSchemaIds(type => type.FullName);
     c.SwaggerDoc("v1", new() { Title = "ResponseBodyFeature", Version = "v1" });
 });
 

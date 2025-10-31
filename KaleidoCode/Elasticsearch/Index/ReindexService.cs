@@ -1,15 +1,15 @@
 using System.Runtime.ExceptionServices;
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 public class ReindexService
 {
-    public ReindexService(ILogger<ReindexService> log, ElasticClient client)
+    public ReindexService(ILogger<ReindexService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<ReindexService> log;
 
     public void CreateReindex()

@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Elasticsearch.Net.Diagnostics;
+using OpenSearch.Net.Diagnostics;
 
 namespace KaleidoCode.Elasticsearch;
 
@@ -20,7 +20,7 @@ public class ElasticListenerObserver : IObserver<DiagnosticListener>, IDisposabl
         Interlocked.Increment(ref _messagesWrittenToConsole);
     }
 
-    private List<IDisposable> Disposables { get; } = new List<IDisposable>();
+    private List<IDisposable> Disposables { get; } = [];
 
     public void OnNext(DiagnosticListener value)
     {

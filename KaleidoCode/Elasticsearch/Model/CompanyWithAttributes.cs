@@ -1,8 +1,8 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
-[ElasticsearchType(RelationName = "company_wWith_attr")]
+[OpenSearchType(RelationName = "company_wWith_attr")]
 public class CompanyWithAttributes
 {
     [Keyword(NullValue = "null", Similarity = "BM25")]
@@ -15,7 +15,7 @@ public class CompanyWithAttributes
     public List<EmployeeWithAttributes> Employees { get; set; }
 }
 
-[ElasticsearchType(RelationName = "employee")]
+[OpenSearchType(RelationName = "employee")]
 public class EmployeeWithAttributes
 {
     [Text(Name = "first_name")]

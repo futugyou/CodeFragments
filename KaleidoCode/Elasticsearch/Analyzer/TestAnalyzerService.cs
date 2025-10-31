@@ -1,16 +1,16 @@
-using Elasticsearch.Net;
-using Nest;
+using OpenSearch.Net;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
 public class TestAnalyzerService
 {
-    public TestAnalyzerService(ILogger<TestAnalyzerService> log, ElasticClient client)
+    public TestAnalyzerService(ILogger<TestAnalyzerService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<TestAnalyzerService> log;
 
     public void TestAnalyzer()

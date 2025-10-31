@@ -1,8 +1,8 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
-[ElasticsearchType(RelationName = "order")]
+[OpenSearchType(RelationName = "order")]
 public class OrderInfo
 {
     [Keyword(Name = "Id")]

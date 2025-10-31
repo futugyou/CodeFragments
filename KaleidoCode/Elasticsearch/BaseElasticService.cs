@@ -1,4 +1,4 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
@@ -6,7 +6,6 @@ public class BaseElasticService
 {
     public BaseElasticService(
         ILogger<BaseElasticService> log,
-        ElasticClient client,
         IndexService indexService,
         ReindexService reindexService,
         InsertService insertService,
@@ -16,7 +15,6 @@ public class BaseElasticService
     )
     {
         this.log = log;
-        this.client = client;
         this.indexService = indexService;
         this.reindexService = reindexService;
         this.insertService = insertService;
@@ -24,7 +22,6 @@ public class BaseElasticService
         this.searchService = searchService;
         this.aggregationSerice = aggregationSerice;
     }
-    private readonly ElasticClient client;
     private readonly IndexService indexService;
     private readonly ReindexService reindexService;
     private readonly InsertService insertService;
@@ -50,10 +47,9 @@ public class BaseElasticService
         reindexService.CreateReindex();
     }
 
-    internal void Insert()
+    internal async Task<IndexResponse> Insert()
     {
-        insertService.InsertData();
-        insertService.UpdateData();
+        return await insertService.InsertData();
     }
 
     internal void Mapping()

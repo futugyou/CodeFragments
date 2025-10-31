@@ -1,14 +1,14 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 public class AnalyzerService
 {
-    public AnalyzerService(ILogger<AnalyzerService> log, ElasticClient client)
+    public AnalyzerService(ILogger<AnalyzerService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<AnalyzerService> log;
 
     public void CreateBaseAnalyzer()

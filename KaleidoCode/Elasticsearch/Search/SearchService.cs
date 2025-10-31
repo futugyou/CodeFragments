@@ -1,17 +1,17 @@
 
 using System.Linq.Expressions;
 using System.Runtime.ExceptionServices;
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 public class SearchService
 {
-    public SearchService(ILogger<SearchService> log, ElasticClient client)
+    public SearchService(ILogger<SearchService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<SearchService> log;
 
     public void MatchAll()
@@ -32,6 +32,7 @@ public class SearchService
             Query = new MatchAllQuery()
         };
         searchResponse = client.Search<Person>(searchRequest);
+        Console.WriteLine(searchResponse.DebugInformation);
         //4 
         var query = new MatchAllQuery();
         var response = client.Search<OrderInfo>(s => s.Index("order").Query(p => query));
@@ -462,19 +463,23 @@ public class SearchService
         );
     }
 
-    public void CombinedFields()
+    public void MultiMatchCrossFields()
     {
         var searchResponse = client.Search<Person>(s => s
             .Query(q => q
-                .CombinedFields(c => c
-                    .Fields(f => f.Field(p => p.FirstName).Field("lastName"))
+                .MultiMatch(m => m
+                    .Fields(f => f
+                        .Field(p => p.FirstName)
+                        .Field("lastName")
+                    )
                     .Query("tom")
                     .Boost(1.1)
                     .Operator(Operator.Or)
                     .MinimumShouldMatch("2")
                     .ZeroTermsQuery(ZeroTermsQuery.All)
-                    .Name("combined_fields")
+                    .Name("multi_match_cross_fields")
                     .AutoGenerateSynonymsPhraseQuery(false)
+                    .Type(TextQueryType.CrossFields)
                 )
             )
         );

@@ -1,8 +1,8 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
-[ElasticsearchType(IdProperty = nameof(Name))]
+[OpenSearchType(IdProperty = nameof(Name))]
 public class Company
 {
     public string Name { get; set; }

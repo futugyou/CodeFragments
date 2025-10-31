@@ -1,15 +1,15 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
 public class PipelineService
 {
-    public PipelineService(ILogger<PipelineService> log, ElasticClient client)
+    public PipelineService(ILogger<PipelineService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<PipelineService> log;
 
     public void CreatePipeline()

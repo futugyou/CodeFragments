@@ -1,15 +1,15 @@
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
 public class IndexService
 {
-    public IndexService(ILogger<IndexService> log, ElasticClient client)
+    public IndexService(ILogger<IndexService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<IndexService> log;
 
     public void CreteElasticIndex()

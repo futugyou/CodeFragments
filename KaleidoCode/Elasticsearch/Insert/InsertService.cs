@@ -1,15 +1,15 @@
 using System.Runtime.ExceptionServices;
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 public class InsertService
 {
-    public InsertService(ILogger<InsertService> log, ElasticClient client)
+    public InsertService(ILogger<InsertService> log, OpenSearchClient client)
     {
         this.log = log;
         this.client = client;
     }
-    private readonly ElasticClient client;
+    private readonly OpenSearchClient client;
     private readonly ILogger<InsertService> log;
     private static List<OrderInfo> orders = new List<OrderInfo>{
         new OrderInfo{
@@ -22,7 +22,7 @@ public class InsertService
         }
     };
 
-    public void InsertData()
+    public async Task<IndexResponse> InsertData()
     {
         var order = new OrderInfo
         {
@@ -33,9 +33,9 @@ public class InsertService
             GoodsName = "phone",
             Price = 10,
         };
-        var responseSignal = client.Index(order, i => i.Index("order"));
-        // var responseSignal = client.Index(new IndexRequest<OrderInfo>(order, "order"));
-        responseSignal = client.IndexDocument(order);// it wil use default index. in this case is "demo"
+        // var responseSignal = await client.IndexAsync(order, i => i.Index("order"));
+        // var responseSignal = await client.IndexAsync(new IndexRequest<OrderInfo>(order, "order"));
+        return await client.IndexDocumentAsync(order);// it wil use default index. in this case is "demo"
     }
 
     public void UpdateData()

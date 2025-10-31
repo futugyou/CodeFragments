@@ -1,5 +1,5 @@
 using System.Reflection;
-using Nest;
+using OpenSearch.Client;
 
 namespace KaleidoCode.Elasticsearch;
 
