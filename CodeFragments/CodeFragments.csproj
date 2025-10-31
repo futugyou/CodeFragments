@@ -22,7 +22,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.15.5" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
 		<PackageReference Include="Microsoft.Data.Analysis" Version="0.22.3" />
 		<PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.652701" />
