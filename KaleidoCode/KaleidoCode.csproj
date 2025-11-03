@@ -27,7 +27,7 @@
 		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.2" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="HotChocolate.AspNetCore" Version="16.0.0-p.8.26" />
-		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.0.0-p.8.25" />
+		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.0.0-p.8.26" />
 		<PackageReference Include="HotChocolate.Data" Version="16.0.0-p.8.26" />
 		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.0.0-p.8.26" />
 		<PackageReference Include="HotChocolate.Data.MongoDb" Version="16.0.0-p.8.26" />
