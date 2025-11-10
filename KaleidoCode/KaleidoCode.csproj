@@ -62,9 +62,9 @@
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250508.3" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.98.250508.3" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.3" />
-		<PackageReference Include="Microsoft.SemanticKernel" Version="1.67.0" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="1.67.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Agents.A2A" Version="1.66.0-alpha" />
-		<PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.67.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.67.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Agents.Orchestration" Version="1.66.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Agents.Runtime.InProcess" Version="1.66.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Agents.Yaml" Version="1.66.0-beta" />
@@ -72,17 +72,17 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" Version="1.66.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.MongoDB" Version="1.66.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.66.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.67.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.67.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.66.0-preview" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.66.0-alpha" />
-		<PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi" Version="1.67.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Plugins.OpenApi" Version="1.67.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.66.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Process.Abstractions" Version="1.66.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Process.Core" Version="1.66.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.66.0-alpha" />
-		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" Version="1.67.0" />
-		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Liquid" Version="1.67.0" />
-		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.67.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" Version="1.67.1" />
+		<PackageReference Include="Microsoft.SemanticKernel.PromptTemplates.Liquid" Version="1.67.1" />
+		<PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.67.1" />
 		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.4.0-preview.3" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.3" />
 		<PackageReference Include="MQTTnet" Version="5.0.1.1416" />
