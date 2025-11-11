@@ -61,7 +61,7 @@
 		<PackageReference Include="Microsoft.KernelMemory.AI.OpenAI" Version="0.98.250508.3" />
 		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250508.3" />
 		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.98.250508.3" />
-		<PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.3" />
+		<PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
 		<PackageReference Include="Microsoft.SemanticKernel" Version="1.67.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Agents.A2A" Version="1.66.0-alpha" />
 		<PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.67.1" />
