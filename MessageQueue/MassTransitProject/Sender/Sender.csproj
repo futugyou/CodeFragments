@@ -12,7 +12,7 @@
 		<PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
 		<PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.5.5" />
 		<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.5" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
