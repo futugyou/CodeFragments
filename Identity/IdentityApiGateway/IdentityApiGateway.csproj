@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="Ocelot" Version="24.0.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
 	</ItemGroup>
 
 </Project>
