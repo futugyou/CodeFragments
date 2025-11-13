@@ -1,14 +1,19 @@
 {
-	"name": "C# (.NET)",
-	"image": "mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim",
+	"name": "C#",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/dapr/cli/dapr-cli:0": {}
+		"ghcr.io/devcontainers/features/dotnet:2": {
+			"workloads": "wasm-tools"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-dotnettools.csdevkit",
+				"EditorConfig.EditorConfig",
+				"k--kato.docomment",
+				"dbaeumer.vscode-eslint",
 				"ms-azuretools.vscode-docker",
 				"GitHub.copilot",
 				"GitHub.copilot-chat"
