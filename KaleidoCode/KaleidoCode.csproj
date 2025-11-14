@@ -86,7 +86,7 @@
 		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.3" />
 		<PackageReference Include="MQTTnet" Version="5.0.1.1416" />
 		<PackageReference Include="MQTTnet.AspNetCore" Version="5.0.1.1416" />
-		<PackageReference Include="OpenAI" Version="2.6.0" />
+		<PackageReference Include="OpenAI" Version="2.7.0" />
 		<PackageReference Include="OpenSearch.Client" Version="1.8.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.14.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
