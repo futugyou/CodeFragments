@@ -47,7 +47,7 @@
 		</PackageReference>
 		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.9.19" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-		<PackageReference Include="HtmlTags" Version="9.0.0" />
+		<PackageReference Include="HtmlTags" Version="10.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.AI" Version="10.0.1" />
