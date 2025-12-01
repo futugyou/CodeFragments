@@ -95,7 +95,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
 		<PackageReference Include="PdfPig" Version="0.1.12" />
-		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="9.0.2" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.11.0" />
 		<PackageReference Include="SharpToken" Version="2.0.4" />
 		<PackageReference Include="StackExchange.Redis" Version="2.10.1" />
