@@ -32,9 +32,18 @@ public class AgentController : ControllerBase
     public async Task<string> Joker(string message = "Tell me a joke about a pirate.")
     {
         AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-
         var response = await agent.RunAsync(message);
-
         return response.Text;
+    }
+
+    [Route("joker-stream")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> JokerStream(string message = "Tell me a joke about a pirate.")
+    {
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        await foreach (var update in agent.RunStreamingAsync(message))
+        {
+            yield return update.Text;
+        }
     }
 }
