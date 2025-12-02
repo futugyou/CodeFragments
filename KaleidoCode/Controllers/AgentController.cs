@@ -46,4 +46,26 @@ public class AgentController : ControllerBase
             yield return update.Text;
         }
     }
+    [Route("joker-message")]
+    [HttpPost]
+    public async Task<string> JokerMessage(
+        string message = "Tell me a joke about this image?",
+        string imageUrl = "https://upload.wikimedia.org/wikipedia/commons/1/11/Joseph_Grimaldi.jpg",
+        bool hasSystemMessage = false)
+    {
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: hasSystemMessage ? null : "You are good at telling jokes.");
+
+        List<ChatMessage> chatMessages = [new(ChatRole.User, [
+            new Microsoft.Extensions.AI.TextContent(message),
+            new UriContent(imageUrl, "image/jpeg")
+        ])];
+
+        if (hasSystemMessage)
+        {
+            chatMessages.Insert(0, new(ChatRole.System, "You are good at telling jokes."));
+        }
+
+        var response = await agent.RunAsync(chatMessages);
+        return response.Text;
+    }
 }
