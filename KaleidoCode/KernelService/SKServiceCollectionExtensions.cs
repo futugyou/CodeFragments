@@ -139,16 +139,19 @@ public static class SKServiceCollectionExtensions
         kernelBuilder.Plugins.AddFromType<EmailPlugin>();
         kernelBuilder.Plugins.AddFromType<MathExPlugin>();
         kernelBuilder.Plugins.AddFromType<WebSearch>("WebSearch");
-        KernelPlugin infrProplugin = await OpenApiKernelPluginFactory.CreateFromOpenApiAsync(
-          pluginName: "InfrastructureProject",
-          filePath: "Resources/infr-project.yaml",
-          executionParameters: new OpenApiFunctionExecutionParameters()
-          {
-              EnablePayloadNamespacing = true
-          }
-        );
 
-        kernelBuilder.Plugins.Add(infrProplugin);
+        // TODO
+        // Unhandled exception. System.TypeLoadException: Could not load type 'Microsoft.OpenApi.Interfaces.IOpenApiReferenceable' from assembly 'Microsoft.OpenApi, Version=2.3.0.0, Culture=neutral, PublicKeyToken=3f5743946376f042'.
+        // KernelPlugin infrProplugin = await OpenApiKernelPluginFactory.CreateFromOpenApiAsync(
+        //   pluginName: "InfrastructureProject",
+        //   filePath: "Resources/infr-project.yaml",
+        //   executionParameters: new OpenApiFunctionExecutionParameters()
+        //   {
+        //       EnablePayloadNamespacing = true
+        //   }
+        // );
+        // kernelBuilder.Plugins.Add(infrProplugin);
+
         kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
         #endregion
 
