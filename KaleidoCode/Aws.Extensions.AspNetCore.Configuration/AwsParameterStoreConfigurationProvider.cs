@@ -54,8 +54,17 @@ public class AwsParameterStoreConfigurationProvider : ConfigurationProvider, IDi
         var oldLoadedParameters = Interlocked.Exchange(ref _loadedParameters, null);
         var needReload = false;
 
-        var parameters = await _manager.ReadParameters(_awsmanager, _config);
-        foreach (var parameter in parameters)
+        IEnumerable<Parameter>? parameters = null;
+        try
+        {
+            parameters = await _manager.ReadParameters(_awsmanager, _config);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        foreach (var parameter in parameters ?? [])
         {
             newLoadedParameters.Add(parameter.Name, parameter);
             if (!needReload && oldLoadedParameters != null
