@@ -9,6 +9,7 @@ using System.Reflection;
 
 namespace KaleidoCode.Controllers;
 
+[Experimental("SKEXP0011")]
 [Route("api/af/agent")]
 [ApiController]
 public class AgentController : ControllerBase
@@ -103,9 +104,41 @@ public class AgentController : ControllerBase
         ];
 
         var message = "Can you tell me the status of all the lights?";
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.",tools: tools);
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
         AgentThread thread = agent.GetNewThread();
         var response = await agent.RunAsync(message, thread);
+        yield return response.Text;
+    }
+
+    [Route("approval")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Approval(bool allowChangeState = false)
+    {
+        var lightPlugin = new LightPlugin();
+        AITool[] tools = [
+            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
+            new ApprovalRequiredAIFunction(AIFunctionFactory.Create(lightPlugin.ChangeStateAsync))
+        ];
+
+        var message = "Could you please turn off all the lights?";
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
+        AgentThread thread = agent.GetNewThread();
+        var response = await agent.RunAsync(message, thread);
+        yield return response.Text;
+
+        var functionApprovalRequests = response.Messages
+            .SelectMany(x => x.Contents)
+            .OfType<FunctionApprovalRequestContent>()
+            .ToList();
+
+        if (functionApprovalRequests.Count == 0)
+        {
+            yield break;
+        }
+
+        FunctionApprovalRequestContent requestContent = functionApprovalRequests.First();
+        var approvalMessage = new ChatMessage(ChatRole.User, [requestContent.CreateResponse(allowChangeState)]);
+        response = await agent.RunAsync(approvalMessage, thread);
         yield return response.Text;
     }
 }
