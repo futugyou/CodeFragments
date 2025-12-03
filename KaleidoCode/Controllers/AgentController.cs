@@ -3,7 +3,9 @@ using KaleidoCode.KernelService;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
+using KaleidoCode.KernelService.Skills;
 using Microsoft.Agents.AI;
+using System.Reflection;
 
 namespace KaleidoCode.Controllers;
 
@@ -83,5 +85,27 @@ public class AgentController : ControllerBase
         }
 
         yield return thread.Serialize(JsonSerializerOptions.Web).GetRawText();
+    }
+
+    [Route("function")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Function()
+    {
+        var lightPlugin = new LightPlugin();
+        AITool[] tools =
+        [
+            .. typeof(LightPlugin)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .Select((m) => AIFunctionFactory.Create(m, target: null)), // Get from type static methods
+            .. lightPlugin.GetType()
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .Select((m) => AIFunctionFactory.Create(m, target: lightPlugin)) // Get from instance methods
+        ];
+
+        var message = "Can you tell me the status of all the lights?";
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.",tools: tools);
+        AgentThread thread = agent.GetNewThread();
+        var response = await agent.RunAsync(message, thread);
+        yield return response.Text;
     }
 }
