@@ -68,4 +68,20 @@ public class AgentController : ControllerBase
         var response = await agent.RunAsync(chatMessages);
         return response.Text;
     }
+
+    [Route("thread")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> Thread()
+    {
+        var messages = new string[] { "Tell me a joke about a pirate.", "Now add some emojis to the joke and tell it in the voice of a pirate's parrot." };
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        AgentThread thread = agent.GetNewThread();
+        foreach (var message in messages)
+        {
+            var response = await agent.RunAsync(message, thread);
+            yield return response.Text;
+        }
+
+        yield return thread.Serialize(JsonSerializerOptions.Web).GetRawText();
+    }
 }
