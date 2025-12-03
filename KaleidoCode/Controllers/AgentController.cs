@@ -141,4 +141,46 @@ public class AgentController : ControllerBase
         response = await agent.RunAsync(approvalMessage, thread);
         yield return response.Text;
     }
+
+    /// <summary>
+    /// This example will not run successfully, regardless of whether an object or a list is used in CreateJsonSchema. 
+    /// The reason is that the stupid OpenAI requires JsonSchema to be an object, meaning GetLightsAsync cannot directly return a list; 
+    /// it must be contained within an object.
+    /// 
+    /// The current code prints only one object in WriteLine. 
+    /// If it's changed to CreateJsonSchema(typeof(LightModel[])) or CreateJsonSchema(typeof(List<LightModel>)), 
+    /// an error will occur during RunAsync, indicating that it must be 'object'.
+    /// </summary>
+    /// <returns></returns>
+    [Route("structured")]
+    [HttpPost]
+    public async Task<List<LightModel>> Structured()
+    {
+        var lightPlugin = new LightPlugin();
+        AITool[] tools = [
+            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
+        ];
+
+        JsonElement schema = AIJsonUtilities.CreateJsonSchema(typeof(LightModel));
+        ChatOptions chatOptions = new()
+        {
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: schema,
+                schemaName: "LightModel",
+                schemaDescription: "Information about a Light list including their id, name, and is_on"),
+            Tools = tools
+        };
+
+        var message = "Can you tell me the status of all the lights?";
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions()
+        {
+            Name = "LightAssistant",
+            Instructions = "You are a helpful assistant.",
+            ChatOptions = chatOptions
+        });
+        AgentThread thread = agent.GetNewThread();
+        var response = await agent.RunAsync(message, thread);
+        Console.WriteLine(response.Text);
+        return response.Deserialize<List<LightModel>>(JsonSerializerOptions.Web);
+    }
 }
