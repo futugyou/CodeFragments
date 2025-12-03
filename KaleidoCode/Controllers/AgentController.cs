@@ -183,4 +183,27 @@ public class AgentController : ControllerBase
         Console.WriteLine(response.Text);
         return response.Deserialize<List<LightModel>>(JsonSerializerOptions.Web);
     }
+
+    [Route("agent-tool")]
+    [HttpPost]
+    public async IAsyncEnumerable<string> AgentToTool()
+    {
+        var lightPlugin = new LightPlugin();
+        AITool[] tools = [
+            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
+            AIFunctionFactory.Create(lightPlugin.ChangeStateAsync)
+        ];
+
+        var message = "Can you tell me the status of all the lights?";
+        AIAgent toolAgent = _chatClient.CreateAIAgent(
+            instructions: "You are a useful light assistant.",
+            name: "LightAgent",
+            description: "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off.",
+            tools: tools);
+
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a helpful assistant who responds in chinese.", tools: [toolAgent.AsAIFunction()]);
+        AgentThread thread = agent.GetNewThread();
+        var response = await agent.RunAsync(message, thread);
+        yield return response.Text;
+    }
 }
