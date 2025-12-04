@@ -6,6 +6,7 @@ using System.ClientModel;
 using KaleidoCode.KernelService.Skills;
 using Microsoft.Agents.AI;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace KaleidoCode.Controllers;
 
@@ -34,7 +35,12 @@ public class AgentController : ControllerBase
     [HttpPost]
     public async Task<string> Joker(string message = "Tell me a joke about a pirate.")
     {
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        var chatClient = _chatClient
+        .AsBuilder()
+        .Use(getResponseFunc: JokerChatClientMiddleware, getStreamingResponseFunc: null)
+        .Build();
+
+        AIAgent agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
         var response = await agent.RunAsync(message);
         return response.Text;
     }
@@ -44,6 +50,10 @@ public class AgentController : ControllerBase
     public async IAsyncEnumerable<string> JokerStream(string message = "Tell me a joke about a pirate.")
     {
         AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        agent = agent
+            .AsBuilder()
+            .Use(runFunc: null, runStreamingFunc: JokerSteamAgentRunMiddleware)
+            .Build();
         await foreach (var update in agent.RunStreamingAsync(message))
         {
             yield return update.Text;
@@ -105,6 +115,11 @@ public class AgentController : ControllerBase
 
         var message = "Can you tell me the status of all the lights?";
         AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
+        agent = agent
+            .AsBuilder()
+            .Use(runFunc: LightsAgentRunMiddleware, runStreamingFunc: null)
+            .Build();
+
         AgentThread thread = agent.GetNewThread();
         var response = await agent.RunAsync(message, thread);
         yield return response.Text;
@@ -122,6 +137,10 @@ public class AgentController : ControllerBase
 
         var message = "Could you please turn off all the lights?";
         AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
+        agent = agent
+            .AsBuilder()
+                .Use(LightsFunctionCallingMiddleware)
+            .Build();
         AgentThread thread = agent.GetNewThread();
         var response = await agent.RunAsync(message, thread);
         yield return response.Text;
@@ -209,5 +228,60 @@ public class AgentController : ControllerBase
         AgentThread thread = agent.GetNewThread();
         var response = await agent.RunAsync(message, thread);
         yield return response.Text;
+    }
+
+    async Task<AgentRunResponse> LightsAgentRunMiddleware(
+        IEnumerable<ChatMessage> messages,
+        AgentThread? thread,
+        AgentRunOptions? options,
+        AIAgent innerAgent,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Input: {messages.Count()}");
+        var response = await innerAgent.RunAsync(messages, thread, options, cancellationToken).ConfigureAwait(false);
+        Console.WriteLine($"Output: {response.Messages.Count}");
+        return response;
+    }
+
+    async IAsyncEnumerable<AgentRunResponseUpdate> JokerSteamAgentRunMiddleware(
+        IEnumerable<ChatMessage> messages,
+        AgentThread? thread,
+        AgentRunOptions? options,
+        AIAgent innerAgent,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Input: {messages.Count()}");
+
+        await foreach (var update in innerAgent.RunStreamingAsync(messages, thread, options, cancellationToken))
+        {
+            Console.WriteLine($"Output: {update.Text}");
+            yield return update;
+        }
+    }
+
+    async ValueTask<object?> LightsFunctionCallingMiddleware(
+        AIAgent agent,
+        Microsoft.Extensions.AI.FunctionInvocationContext context,
+        Func<Microsoft.Extensions.AI.FunctionInvocationContext, CancellationToken, ValueTask<object?>> next,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Function Name: {context!.Function.Name}");
+        var result = await next(context, cancellationToken);
+        Console.WriteLine($"Function Call Result: {result}");
+
+        return result;
+    }
+
+    async Task<ChatResponse> JokerChatClientMiddleware(
+        IEnumerable<ChatMessage> messages,
+        ChatOptions? options,
+        IChatClient innerChatClient,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Input: {messages.Count()}");
+        var response = await innerChatClient.GetResponseAsync(messages, options, cancellationToken);
+        Console.WriteLine($"Output: {response.Messages.Count}");
+
+        return response;
     }
 }
