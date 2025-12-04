@@ -202,6 +202,10 @@ public class AgentController : ControllerBase
             tools: tools);
 
         AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a helpful assistant who responds in chinese.", tools: [toolAgent.AsAIFunction()]);
+        agent = agent.AsBuilder()
+        .UseOpenTelemetry(sourceName: "agent-telemetry-source")
+        .Build();
+
         AgentThread thread = agent.GetNewThread();
         var response = await agent.RunAsync(message, thread);
         yield return response.Text;

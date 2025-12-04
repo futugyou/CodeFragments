@@ -29,12 +29,16 @@ public static class OpenTelemetryExtension
                 .AddHttpClientInstrumentation()
                 .AddHotChocolateInstrumentation()
                 .AddSource("Microsoft.SemanticKernel*")
+                .AddSource("agent-telemetry-source")
                 .AddConfiguredExporters(config.Exporters);
+                // Too much information will be generated
+                // .AddConsoleExporter();  
         })
         .WithMetrics(meterProviderBuilder =>
         {
             meterProviderBuilder
                 .AddMeter("Microsoft.SemanticKernel*")
+                .AddMeter("agent-telemetry-source")
                 .AddConfiguredExporters(config.Exporters);
         });
 
