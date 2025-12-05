@@ -1,7 +1,6 @@
-using System.Runtime.ExceptionServices;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Index;
+
 public class ReindexService
 {
     public ReindexService(ILogger<ReindexService> log, OpenSearchClient client)

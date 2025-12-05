@@ -1,4 +1,4 @@
-using KaleidoCode.Elasticsearch;
+using OpenSearchStack;
 
 namespace KaleidoCode.Controllers;
 

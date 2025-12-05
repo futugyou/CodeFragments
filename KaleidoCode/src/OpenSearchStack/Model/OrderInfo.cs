@@ -1,6 +1,5 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Model;
 
 [OpenSearchType(RelationName = "order")]
 public class OrderInfo

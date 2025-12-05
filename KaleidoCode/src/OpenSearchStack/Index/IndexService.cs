@@ -1,6 +1,5 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Index;
 
 public class IndexService
 {

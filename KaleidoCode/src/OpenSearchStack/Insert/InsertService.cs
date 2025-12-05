@@ -1,7 +1,6 @@
-using System.Runtime.ExceptionServices;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Insert;
+
 public class InsertService
 {
     public InsertService(ILogger<InsertService> log, OpenSearchClient client)

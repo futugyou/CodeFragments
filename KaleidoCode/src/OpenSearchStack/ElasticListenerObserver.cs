@@ -1,7 +1,5 @@
-using System.Diagnostics;
-using OpenSearch.Net.Diagnostics;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack;
 
 public class ElasticListenerObserver : IObserver<DiagnosticListener>, IDisposable
 {

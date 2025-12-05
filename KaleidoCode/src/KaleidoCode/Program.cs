@@ -1,6 +1,5 @@
 
 using KaleidoCode.Auth;
-using KaleidoCode.Elasticsearch;
 using KaleidoCode.Extensions;
 using KaleidoCode.GraphQL;
 using KaleidoCode.HealthCheck;
@@ -13,6 +12,7 @@ using KaleidoCode.Redis;
 using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
+using OpenSearchStack;
 
 var options = new WebApplicationOptions
 {

@@ -1,9 +1,9 @@
 
-using System.Linq.Expressions;
-using System.Runtime.ExceptionServices;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+using OpenSearchStack.Model;
+
+namespace OpenSearchStack.Search;
+
 public class SearchService
 {
     public SearchService(ILogger<SearchService> log, OpenSearchClient client)

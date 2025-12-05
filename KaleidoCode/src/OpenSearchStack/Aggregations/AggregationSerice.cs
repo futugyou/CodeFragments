@@ -1,5 +1,6 @@
-using OpenSearch.Client;
-namespace KaleidoCode.Elasticsearch;
+
+namespace OpenSearchStack.Aggregations;
+
 public class AggregationSerice
 {
     public AggregationSerice(ILogger<AggregationSerice> log, OpenSearchClient client)

@@ -1,6 +1,6 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Model;
+
 public class Person
 {
     public int Id { get; set; }

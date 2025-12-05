@@ -1,4 +1,5 @@
-namespace KaleidoCode.Elasticsearch;
+
+namespace OpenSearchStack;
 
 public class ElasticOptions
 {

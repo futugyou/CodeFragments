@@ -1,6 +1,5 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Pipeline;
 
 public class PipelineService
 {

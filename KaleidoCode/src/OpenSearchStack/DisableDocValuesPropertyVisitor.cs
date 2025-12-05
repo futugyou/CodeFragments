@@ -1,7 +1,5 @@
-using System.Reflection;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack;
 
 public class DisableDocValuesPropertyVisitor : NoopPropertyVisitor
 {

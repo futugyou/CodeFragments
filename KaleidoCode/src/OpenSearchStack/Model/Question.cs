@@ -1,4 +1,5 @@
-namespace KaleidoCode.Elasticsearch;
+
+namespace OpenSearchStack.Model;
 
 public class Question
 {

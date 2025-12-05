@@ -1,6 +1,5 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Model;
 
 [OpenSearchType(RelationName = "company_wWith_attr")]
 public class CompanyWithAttributes

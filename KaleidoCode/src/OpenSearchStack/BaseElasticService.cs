@@ -1,6 +1,5 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack;
 
 public class BaseElasticService
 {
@@ -30,29 +29,29 @@ public class BaseElasticService
     private readonly AggregationSerice aggregationSerice;
     private readonly ILogger<BaseElasticService> log;
 
-    internal void InsertMany()
+    public void InsertMany()
     {
         insertService.InsertManyData();
         insertService.InsertManyWithBulk();
     }
 
-    internal void Pipeline()
+    public void Pipeline()
     {
         pipelineService.CreatePipeline();
         pipelineService.InsertDataWithPipline();
     }
 
-    internal void Reindex()
+    public void Reindex()
     {
         reindexService.CreateReindex();
     }
 
-    internal async Task<IndexResponse> Insert()
+    public async Task<IndexResponse> Insert()
     {
         return await insertService.InsertData();
     }
 
-    internal void Mapping()
+    public void Mapping()
     {
         indexService.CreteElasticIndex();
     }

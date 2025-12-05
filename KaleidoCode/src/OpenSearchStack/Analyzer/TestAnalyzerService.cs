@@ -1,7 +1,5 @@
-using OpenSearch.Net;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Analyzer;
 
 public class TestAnalyzerService
 {

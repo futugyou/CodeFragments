@@ -1,6 +1,6 @@
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack.Analyzer;
+
 public class AnalyzerService
 {
     public AnalyzerService(ILogger<AnalyzerService> log, OpenSearchClient client)

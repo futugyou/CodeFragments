@@ -1,7 +1,5 @@
-using System.Diagnostics;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack;
 
 public static class ElasticClientExtensions
 {

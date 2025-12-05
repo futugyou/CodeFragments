@@ -1,8 +1,5 @@
-using System.Net.NetworkInformation;
-using OpenSearch.Net.Diagnostics;
-using OpenSearch.Client;
 
-namespace KaleidoCode.Elasticsearch;
+namespace OpenSearchStack;
 
 public class CommonTypeService
 {
@@ -11,7 +8,7 @@ public class CommonTypeService
         // time
         {
             var unitString = new Time("2d");
-            var unitComposed = new Time(2, TimeUnit.Day);
+            var unitComposed = new Time(2, OpenSearch.Client.TimeUnit.Day);
             var unitTimeSpan = new Time(TimeSpan.FromDays(2));
             var unitMilliseconds = new Time(1000 * 60 * 60 * 24 * 2);
             Console.WriteLine(unitComposed);// 2d
