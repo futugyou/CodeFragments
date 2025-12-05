@@ -1,7 +1,13 @@
 
+using CompanyReports.APIProcessor;
+using CompanyReports.Ingestor;
+using CompanyReports.PDFParser;
+using CompanyReports.Retrieval;
+using CompanyReports.Reranker;
+
 namespace CompanyReports;
 
-public static class CompanyReportExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddCompanyReportServices(this IServiceCollection services, IConfiguration configuration)
     {

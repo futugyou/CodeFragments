@@ -4,10 +4,10 @@ namespace CompanyReports.BM25;
 [JsonSerializable(typeof(BM25Plus))]
 [JsonSerializable(typeof(BM25Okapi))]
 [JsonSerializable(typeof(BM25L))]
-[JsonSerializable(typeof(BM25))]
+[JsonSerializable(typeof(BM25Abstract))]
 internal sealed partial class BM25JsonContext : JsonSerializerContext;
 
-public abstract class BM25
+public abstract class BM25Abstract
 {
     [JsonPropertyName("corpus")]
     public List<List<string>> Corpus { get; set; }
@@ -43,7 +43,7 @@ public abstract class BM25
     [JsonIgnore]
     protected Func<string, List<string>>? Tokenizer;
 
-    protected BM25(IEnumerable<string> rawCorpus, Func<string, List<string>>? tokenizer = null)
+    protected BM25Abstract(IEnumerable<string> rawCorpus, Func<string, List<string>>? tokenizer = null)
     {
         CorpusSize = 0;
         AverageDocumentLength = 0;

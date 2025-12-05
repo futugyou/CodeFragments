@@ -1,5 +1,5 @@
 
-namespace CompanyReports;
+namespace CompanyReports.Ingestor;
 
 public interface IIngestor
 {

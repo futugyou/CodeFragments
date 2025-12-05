@@ -1,7 +1,8 @@
 
 using Path = System.IO.Path;
+using CompanyReports.HtmlExporter;
 
-namespace CompanyReports;
+namespace CompanyReports.PDFParser;
 
 public class JsonReportProcessor
 {

@@ -1,4 +1,6 @@
 
+using CompanyReports.PDFParser;
+
 namespace CompanyReports;
 
 public static class PdfTextBlockExtractor

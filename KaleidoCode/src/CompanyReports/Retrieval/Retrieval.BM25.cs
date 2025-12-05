@@ -2,7 +2,7 @@
 using Path = System.IO.Path;
 using CompanyReports.BM25;
 
-namespace CompanyReports;
+namespace CompanyReports.Retrieval;
 
 public class BM25Retriever : IRetrieval
 {

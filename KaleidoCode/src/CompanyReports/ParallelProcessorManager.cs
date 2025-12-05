@@ -1,4 +1,6 @@
 
+using CompanyReports.TokenCounter;
+
 namespace CompanyReports;
 
 public class StatusTracker

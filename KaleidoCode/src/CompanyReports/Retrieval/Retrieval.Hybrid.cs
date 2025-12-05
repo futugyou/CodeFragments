@@ -1,5 +1,7 @@
 
-namespace CompanyReports;
+using CompanyReports.Reranker;
+
+namespace CompanyReports.Retrieval;
 
 public class HybridRetriever : IRetrieval
 {
@@ -43,7 +45,8 @@ public class HybridRetriever : IRetrieval
             companyName: companyName,
             query: query,
             topN: llmRerankingSampleSize,
-            returnParentPages: returnParentPages
+            returnParentPages: returnParentPages,
+            cancellationToken: cancellationToken
         );
 
         // Rerank results using LLM

@@ -1,7 +1,8 @@
 
-namespace CompanyReports;
-
 using Path = System.IO.Path;
+using CompanyReports.PDFParser;
+
+namespace CompanyReports;
 
 /// <summary>
 /// Clean and format structured reports (JSON files), combine their contents (such as tables, lists, paragraphs, headers, etc.) into Markdown text according to rules,

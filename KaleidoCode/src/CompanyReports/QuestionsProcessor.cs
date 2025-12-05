@@ -1,5 +1,8 @@
 
 using Path = System.IO.Path;
+using CompanyReports.APIProcessor;
+using CompanyReports.PDFParser;
+using CompanyReports.Retrieval;
 
 namespace CompanyReports;
 

@@ -1,5 +1,5 @@
 
-namespace CompanyReports;
+namespace CompanyReports.APIProcessor;
 
 public interface IAPIProcessor
 {

@@ -1,5 +1,7 @@
 
 using Path = System.IO.Path;
+using CompanyReports.Ingestor;
+using CompanyReports.PDFParser;
 
 namespace CompanyReports;
 

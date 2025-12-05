@@ -1,4 +1,5 @@
 
+using CompanyReports;
 using GraphQLStack;
 using KaleidoCode.Auth;
 using KaleidoCode.Extensions;
@@ -74,6 +75,7 @@ builder.Services.AddSingleton<IBackgroundTaskQueue>(_ =>
     var queueCapacity = 100;
     return new DefaultBackgroundTaskQueue(queueCapacity);
 });
+builder.Services.AddCompanyReportServices(configuration);
 
 var app = builder.Build();
 

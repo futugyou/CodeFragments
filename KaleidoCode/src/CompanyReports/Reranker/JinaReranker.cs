@@ -1,5 +1,5 @@
 
-namespace CompanyReports;
+namespace CompanyReports.Reranker;
 
 public class JinaReranker
 {

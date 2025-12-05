@@ -1,45 +1,9 @@
 
-namespace CompanyReports;
+namespace CompanyReports.TokenCounter;
 
 public interface ITokenCounter
 {
     int Count(string text, string encodingName = "cl100k_base");
-}
-
-public class SharpTokenCounter : ITokenCounter
-{
-    private readonly ConcurrentDictionary<string, SharpToken.GptEncoding> _encodingCache = new();
-
-    public SharpTokenCounter()
-    {
-        _encodingCache["cl100k_base"] = SharpToken.GptEncoding.GetEncoding("cl100k_base");
-    }
-
-    public int Count(string text, string encodingName = "cl100k_base")
-    {
-        if (string.IsNullOrEmpty(text)) return 0;
-
-        var encoding = _encodingCache.GetOrAdd(encodingName, SharpToken.GptEncoding.GetEncoding);
-        return encoding.Encode(text).Count;
-    }
-}
-
-public class TikTokenCounter : ITokenCounter
-{
-    private readonly ConcurrentDictionary<string, Tiktoken.Encoder> _encodingCache = new();
-
-    public TikTokenCounter()
-    {
-        _encodingCache["gpt-4o"] = ModelToEncoder.For("gpt-4o");
-    }
-
-    public int Count(string text, string encodingName = "gpt-4o")
-    {
-        if (string.IsNullOrEmpty(text)) return 0;
-
-        var encoding = _encodingCache.GetOrAdd(encodingName, ModelToEncoder.For);
-        return encoding.CountTokens(text);
-    }
 }
 
 public static class ITokenCounterExtensions

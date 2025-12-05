@@ -1,5 +1,7 @@
 
-namespace CompanyReports;
+using CompanyReports.Retrieval;
+
+namespace CompanyReports.Reranker;
 
 public class LLMReranker
 {

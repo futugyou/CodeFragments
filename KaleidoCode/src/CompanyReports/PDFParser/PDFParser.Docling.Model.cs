@@ -1,5 +1,5 @@
 
-namespace CompanyReports;
+namespace CompanyReports.PDFParser;
 
 public class DoclingRoot
 {

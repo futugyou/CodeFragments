@@ -1,6 +1,6 @@
 namespace CompanyReports.BM25;
 
-public class BM25Okapi : BM25
+public class BM25Okapi : BM25Abstract
 {
     public BM25Okapi(IEnumerable<string> corpus, Func<string, List<string>>? tokenizer = null, double k1 = 1.5, double b = 0.75, double epsilon = 0.25)
         : base(corpus, tokenizer)

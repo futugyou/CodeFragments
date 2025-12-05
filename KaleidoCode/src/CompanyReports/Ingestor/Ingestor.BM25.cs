@@ -2,7 +2,7 @@
 using CompanyReports.BM25;
 using Path = System.IO.Path;
 
-namespace CompanyReports;
+namespace CompanyReports.Ingestor;
 
 public class BM25Ingestor : IIngestor
 {

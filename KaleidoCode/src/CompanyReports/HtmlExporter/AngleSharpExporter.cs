@@ -1,7 +1,7 @@
 using AngleSharp;
 using AngleSharp.Dom;
 
-namespace CompanyReports;
+namespace CompanyReports.HtmlExporter;
 
 public class AngleSharpExporter
 {

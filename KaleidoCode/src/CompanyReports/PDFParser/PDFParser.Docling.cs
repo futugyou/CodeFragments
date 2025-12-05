@@ -1,7 +1,8 @@
 
 using Path = System.IO.Path;
+using CompanyReports.HtmlExporter;
 
-namespace CompanyReports;
+namespace CompanyReports.PDFParser;
 
 /// <summary>
 /// Used to process document structured data and generate JSON reports containing metainfo, content, tables, and pictures. Its main functions include:

@@ -1,5 +1,5 @@
 
-namespace CompanyReports;
+namespace CompanyReports.HtmlExporter;
 
 public class HtmlTagsExporter
 {

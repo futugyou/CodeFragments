@@ -1,5 +1,5 @@
 
-namespace CompanyReports;
+namespace CompanyReports.Retrieval;
 
 using Path = System.IO.Path;
 

@@ -1,3 +1,7 @@
+
+using CompanyReports.PDFParser;
+using CompanyReports.TokenCounter;
+
 namespace CompanyReports;
 
 public class TextSplitter

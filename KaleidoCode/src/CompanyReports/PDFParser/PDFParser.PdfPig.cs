@@ -1,7 +1,7 @@
 
 using Path = System.IO.Path;
 
-namespace CompanyReports;
+namespace CompanyReports.PDFParser;
 
 /// <summary>
 /// It is best to let Python handle it. 

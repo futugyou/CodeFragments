@@ -1,5 +1,6 @@
 
 using Path = System.IO.Path;
+using CompanyReports.PDFParser;
 
 namespace CompanyReports;
 
@@ -21,7 +22,7 @@ public class TableSerializer
         var jsonFiles = Directory.GetFiles(inputDir, "*.json");
         if (jsonFiles.Length == 0)
         {
-            logger.LogWarning("No JSON files found in {inputDir}", inputDir);
+            logger.LogWarning("No JSON files found in {0}", inputDir);
             return;
         }
 
