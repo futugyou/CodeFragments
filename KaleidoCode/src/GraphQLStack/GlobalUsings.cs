@@ -1,4 +1,7 @@
-﻿global using global::HotChocolate;
+﻿
+global using global::GreenDonut;
+global using global::HotChocolate;
+global using global::HotChocolate.Data;
 global using global::HotChocolate.Data.Filters;
 global using global::HotChocolate.Data.Sorting;
 global using global::HotChocolate.Resolvers;
@@ -8,6 +11,7 @@ global using global::HotChocolate.Language;
 global using global::HotChocolate.Execution;
 global using global::HotChocolate.AspNetCore.Subscriptions.Protocols;
 global using global::HotChocolate.Types;
+global using global::HotChocolate.Types.Relay;
 global using global::HotChocolate.Types.Descriptors;
 global using global::HotChocolate.Types.Pagination;
 global using global::HotChocolate.Subscriptions;
