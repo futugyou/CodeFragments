@@ -1,7 +1,7 @@
 
+using GraphQLStack;
 using KaleidoCode.Auth;
 using KaleidoCode.Extensions;
-using KaleidoCode.GraphQL;
 using KaleidoCode.HealthCheck;
 using KaleidoCode.HttpDiagnosticsExtensions;
 using KaleidoCode.HostedService;
