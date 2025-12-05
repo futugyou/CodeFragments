@@ -1,7 +1,6 @@
-using Amazon.Extensions.NETCore.Setup;
-using Aws.Extensions.AspNetCore.Configuration;
 
 namespace Microsoft.Extensions.Configuration;
+
 public static class AwsParameterStoreConfigurationExtensions
 {
     public const string DEFAULT_CONFIG_SECTION = "AWS";

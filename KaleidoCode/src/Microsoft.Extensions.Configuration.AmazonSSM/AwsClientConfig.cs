@@ -1,7 +1,6 @@
 
-using Amazon.SimpleSystemsManagement;
+namespace Microsoft.Extensions.Configuration;
 
-namespace Aws.Extensions.AspNetCore.Configuration;
 public class AwsClientConfig
 {
     public int ReloadInterval { get; set; }

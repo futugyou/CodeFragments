@@ -1,5 +1,6 @@
 using HotChocolate.AspNetCore;
 using HotChocolate.AspNetCore.Subscriptions;
+using Protocols = HotChocolate.AspNetCore.Subscriptions.Protocols;
 using HotChocolate.AspNetCore.Subscriptions.Protocols;
 using HotChocolate.Execution;
 
@@ -13,7 +14,7 @@ public class SocketSessionInterceptor : DefaultSocketSessionInterceptor
         this.logger = logger;
 
     }
-    public override ValueTask<ConnectionStatus> OnConnectAsync(ISocketSession session, IOperationMessagePayload connectionInitMessage, CancellationToken cancellationToken = default)
+    public override ValueTask<Protocols.ConnectionStatus> OnConnectAsync(ISocketSession session, IOperationMessagePayload connectionInitMessage, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("this log from SocketSessionInterceptor.OnConnectAsync, message is: {Message}", connectionInitMessage.Payload.ToString());
         return base.OnConnectAsync(session, connectionInitMessage, cancellationToken);

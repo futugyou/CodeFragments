@@ -1,10 +1,6 @@
-using Amazon.Extensions.NETCore.Setup;
-using Amazon.Runtime;
-using Amazon.Runtime.CredentialManagement;
-using Amazon.Runtime.Credentials;
-using Amazon.SimpleSystemsManagement;
 
-namespace Aws.Extensions.AspNetCore.Configuration;
+namespace Microsoft.Extensions.Configuration;
+
 public class AwsParameterStoreConfigurationSource(AWSOptions options, AwsClientConfig config) : IConfigurationSource
 {
     /// <inheritdoc />

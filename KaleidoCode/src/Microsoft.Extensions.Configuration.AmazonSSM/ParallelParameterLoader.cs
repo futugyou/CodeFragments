@@ -2,7 +2,7 @@
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 
-namespace Aws.Extensions.AspNetCore.Configuration;
+namespace Microsoft.Extensions.Configuration;
 
 class ParallelParameterLoader : IDisposable
 {

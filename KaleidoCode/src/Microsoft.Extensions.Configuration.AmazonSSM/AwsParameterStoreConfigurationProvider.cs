@@ -1,8 +1,5 @@
 
-using Amazon.SimpleSystemsManagement;
-using Amazon.SimpleSystemsManagement.Model;
-
-namespace Aws.Extensions.AspNetCore.Configuration;
+namespace Microsoft.Extensions.Configuration;
 
 public class AwsParameterStoreConfigurationProvider : ConfigurationProvider, IDisposable
 {

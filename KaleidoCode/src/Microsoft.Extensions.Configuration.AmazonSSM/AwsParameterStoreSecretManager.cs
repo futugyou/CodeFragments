@@ -1,9 +1,5 @@
-using System.Text.RegularExpressions;
-using Amazon.SimpleSystemsManagement;
-using Amazon.SimpleSystemsManagement.Model;
-using Newtonsoft.Json.Linq;
 
-namespace Aws.Extensions.AspNetCore.Configuration;
+namespace Microsoft.Extensions.Configuration;
 
 public partial class AwsParameterStoreManager
 {
@@ -57,7 +53,7 @@ public partial class AwsParameterStoreManager
         return [.. parametersWithOutPath.SelectMany(p => p.Parameters)];
     }
 
-    private async Task<GetParametersResponse[]> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
+    private static async Task<GetParametersResponse[]> GetParametersWithOutPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> names)
     {
         var namesList = names.Chunk(size: 10); //10 is max
         using var parameterLoader = new ParallelParameterLoader(awsmanager);
@@ -71,7 +67,7 @@ public partial class AwsParameterStoreManager
         return loadedParameter;
     }
 
-    private async Task<List<Parameter>> GetParametersWithPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> bypath)
+    private static async Task<List<Parameter>> GetParametersWithPath(IAmazonSimpleSystemsManagement awsmanager, IEnumerable<string> bypath)
     {
         var parameterlist = new List<Parameter>();
 
@@ -127,42 +123,29 @@ public partial class AwsParameterStoreManager
 
     private static bool ToDictionary(string parentKey, Parameter parameter, Dictionary<string, string?> dic)
     {
-        var result = false;
-        try
-        {
-            var jsonObject = JObject.Parse(parameter.Value);
-            var jTokens = jsonObject.DescendantsAndSelf().Where(p => !p.Any());
-            foreach (var jToken in jTokens)
-            {
-                var key = GetSubKey(parentKey, jToken.Path);
-                if (!dic.ContainsKey(key))
-                {
-                    dic.Add(key, jToken.ToString());
-                }
-            }
-
-            result = true;
-        }
-        catch
-        {
-        }
-
-        return result;
+        return ToDictionary(parentKey, parameter.Value, dic);
     }
 
-    private static bool ToDictionary(string parentKey, string value, Dictionary<string, string?> dic)
+    public static bool ToDictionary(string parentKey, string value, Dictionary<string, string?> dic)
     {
         var result = false;
         try
         {
-            var jsonObject = JObject.Parse(value);
-            var jTokens = jsonObject.DescendantsAndSelf().Where(p => !p.Any());
-            foreach (var jToken in jTokens)
+            JsonNode? jsonNode = JsonNode.Parse(value);
+            if (jsonNode == null)
             {
-                var key = GetSubKey(parentKey, jToken.Path);
-                if (!dic.ContainsKey(key))
+                return result;
+            }
+
+            foreach (var node in jsonNode.DescendantsAndSelf())
+            {
+                if (node != null && node is JsonValue _)
                 {
-                    dic.Add(key, jToken.ToString());
+                    var key = GetSubKey(parentKey, node.GetPropertyName());
+                    if (!dic.ContainsKey(key))
+                    {
+                        dic.Add(key, node.ToJsonString());
+                    }
                 }
             }
 
