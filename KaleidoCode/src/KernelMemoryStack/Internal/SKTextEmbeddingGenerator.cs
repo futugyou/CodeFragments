@@ -1,12 +1,11 @@
 
-using Microsoft.Extensions.AI;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.AI;
 using Microsoft.KernelMemory.Diagnostics;
 using Microsoft.KernelMemory.SemanticKernel;
 using Embedding = Microsoft.KernelMemory.Embedding;
 
-namespace SemanticKernelStack.Internal;
+namespace KernelMemoryStack.Internal;
 
 [Experimental("SKEXP0010")]
 internal sealed class SKTextEmbeddingGenerator : ITextEmbeddingGenerator

@@ -1,6 +1,5 @@
 
 using  SemanticKernelStack.Internal;
-using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Google;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -20,7 +19,6 @@ public static class KernelBuilderExtensions
         string? serviceId = null,
         HttpClient? httpClient = null)
     {
-
         OpenAIChatCompletionService Factory(IServiceProvider serviceProvider, object? _) =>
                     new(modelId: modelId,
                         apiKey: apiKey,

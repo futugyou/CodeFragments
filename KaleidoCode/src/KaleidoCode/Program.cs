@@ -14,6 +14,7 @@ using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
 using OpenSearchStack;
 using SemanticKernelStack;
+using KernelMemoryStack;
 
 var options = new WebApplicationOptions
 {

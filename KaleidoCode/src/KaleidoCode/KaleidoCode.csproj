@@ -13,7 +13,6 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
 		<PackageReference Include="KubernetesClient" Version="18.0.13" />
 		<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251125.1" />
 		<PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251125.1" />
@@ -68,5 +67,6 @@
 	  <ProjectReference Include="..\Microsoft.Extensions.Configuration.AmazonSSM\Microsoft.Extensions.Configuration.AmazonSSM.csproj" />
 	  <ProjectReference Include="..\OpenSearchStack\OpenSearchStack.csproj" />
 	  <ProjectReference Include="..\SemanticKernelStack\SemanticKernelStack.csproj" />
+	  <ProjectReference Include="..\KernelMemoryStack\KernelMemoryStack.csproj" />
 	</ItemGroup>
 </Project>

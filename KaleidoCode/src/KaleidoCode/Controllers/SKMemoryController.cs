@@ -1,5 +1,5 @@
 ﻿
-using  SemanticKernelStack;
+using KernelMemoryStack;
 using Microsoft.KernelMemory;
 namespace KaleidoCode.Controllers;
 
@@ -9,9 +9,9 @@ namespace KaleidoCode.Controllers;
 public class SKMemoryController : ControllerBase
 {
     private readonly IKernelMemory _kernelMemory;
-    private readonly SemanticKernelOptions _options;
+    private readonly KernelMemoryOptions _options;
 
-    public SKMemoryController(IKernelMemory kernelMemory, IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
+    public SKMemoryController(IKernelMemory kernelMemory, IOptionsMonitor<KernelMemoryOptions> optionsMonitor)
     {
         _kernelMemory = kernelMemory;
         _options = optionsMonitor.CurrentValue;

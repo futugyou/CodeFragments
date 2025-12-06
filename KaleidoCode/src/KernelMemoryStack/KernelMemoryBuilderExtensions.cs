@@ -1,11 +1,10 @@
 
-using  SemanticKernelStack.Internal;
-using Microsoft.Extensions.AI;
+using KernelMemoryStack.Internal;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.AI;
 using Microsoft.KernelMemory.SemanticKernel;
 
-namespace SemanticKernelStack;
+namespace KernelMemoryStack;
 
 [Experimental("SKEXP0010")]
 public static class KernelMemoryBuilderExtensions

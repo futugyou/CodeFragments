@@ -36,14 +36,14 @@ public static class SKServiceCollectionExtensions
         // mongo db, it will register `VectorStore` as singleton
         // TODO: Currently, Microsoft.SemanticKernel.Connectors.MongoDB can only use MongoDB.Driver 2.30.0, 3.X.X will report an error, 
         // but all my other libraries that depend on MongoDB are 3.3.0 and above.
-        switch (config.VectorStore)
+        switch (config.VectorStoreType)
         {
             case "memory":
                 services.AddInMemoryVectorStore();
                 services.AddInMemoryVectorStoreRecordCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
                 break;
             case "mongo":
-                services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
+                services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.VectorStoreName);
                 services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
                 break;
             case "postgres":
@@ -54,7 +54,7 @@ public static class SKServiceCollectionExtensions
                 throw new NotImplementedException();
         }
 
-        services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, config.KernelMemory.VectorStoreName);
+        services.AddMongoDB<IngestionCacheDbContext>(configuration.GetConnectionString("MongoDb")!, config.VectorStoreName);
 
         // mcp server
         // Here we use `mcpserver` alone. `SemanticKernel` has more comprehensive examples to explain how to use `SemanticKernel` with `mcpserver`
@@ -98,7 +98,6 @@ public static class SKServiceCollectionExtensions
             };
             if (config.TextCompletion.Provider == "google")
             {
-
                 kernelBuilder.AddGoogleAIGeminiChatCompletion(config.TextCompletion.ModelId, config.TextCompletion.ApiKey, new Uri(config.TextCompletion.Endpoint), httpClient: httpClient);
             }
             if (config.TextCompletion.Provider == "openai")

@@ -1,16 +1,14 @@
-﻿namespace SemanticKernelStack;
+﻿
+namespace KernelMemoryStack;
 
-public class SemanticKernelOptions
+public class KernelMemoryOptions
 {
     public ModelConfig TextCompletion { get; set; } = new();
     public ModelConfig Embedding { get; set; } = new();
     public ModelConfig Image { get; set; } = new();
-    public JiraConfig Jira { get; set; } = new();
+    public KernelMemoryConfig KernelMemory { get; set; } = new();
     public WebSearchConfig WebSearch { get; set; } = new();
-    public string VectorStoreType { get; set; } = "memory";
-    public string VectorStoreName { get; set; } = "default-vector-store";
-    // for mcp server
-    public Dictionary<string, McpServerConfig> McpServers { get; set; } = [];
+    public string VectorStore { get; set; } = "memory";
 }
 
 public class WebSearchConfig
@@ -29,17 +27,9 @@ public class ModelConfig
     public int Dimensions { get; set; } = 1536; // default for OpenAI
 }
 
-public class JiraConfig
+public class KernelMemoryConfig
 {
-    public string JiraAddress { get; set; }
-    public string JiraEmailAddress { get; set; }
-    public string JiraApiKey { get; set; }
-}
-
-public class McpServerConfig
-{
-    public string Command { get; set; }
-    public string Url { get; set; }
-    public string[] Args { get; set; } = [];
-    public Dictionary<string, string?> Env { get; set; } = new();
+    public string Endpoint { get; set; }
+    public string ApiKey { get; set; }
+    public string VectorStoreName { get; set; } = "default-vector-store";
 }
