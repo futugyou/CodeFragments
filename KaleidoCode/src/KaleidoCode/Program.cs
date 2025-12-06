@@ -6,7 +6,6 @@ using KaleidoCode.Extensions;
 using KaleidoCode.HealthCheck;
 using KaleidoCode.HttpDiagnosticsExtensions;
 using KaleidoCode.HostedService;
-using KaleidoCode.KernelService;
 using KaleidoCode.MQTT;
 using KaleidoCode.OpenTelemetry;
 using KaleidoCode.Redis;
@@ -14,6 +13,7 @@ using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
 using OpenSearchStack;
+using SemanticKernelStack;
 
 var options = new WebApplicationOptions
 {

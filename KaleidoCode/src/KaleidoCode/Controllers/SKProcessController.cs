@@ -1,11 +1,11 @@
 ﻿
-using KaleidoCode.KernelService;
+using SemanticKernelStack;
 using Microsoft.SemanticKernel;
-using KaleidoCode.KernelService.Skills;
+using SemanticKernelStack.Skills;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Process.Tools;
-using KaleidoCode.KernelService.Internal;
+using SemanticKernelStack.Internal;
 
 namespace KaleidoCode.Controllers;
 

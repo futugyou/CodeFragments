@@ -1,0 +1,29 @@
+﻿
+
+global using global::Microsoft.Extensions.AI;
+global using global::Microsoft.Extensions.Configuration;
+global using global::Microsoft.Extensions.DependencyInjection;
+global using global::Microsoft.Extensions.Logging;
+global using global::Microsoft.Extensions.VectorData;
+global using global::Microsoft.Extensions.Options;
+global using global::Microsoft.SemanticKernel;
+global using global::Microsoft.SemanticKernel.Text;
+global using global::System.Collections.Generic;
+global using global::System.Reflection;
+global using global::System.Diagnostics;
+global using global::System.Threading.Tasks;
+global using global::System.Linq.Expressions;
+global using global::System.Net.NetworkInformation;
+global using global::System.Runtime.ExceptionServices;
+global using global::System.Diagnostics.CodeAnalysis;
+global using global::System.ComponentModel;
+global using global::System.Text;
+global using global::System.Text.Json;
+global using global::System.Text.Json.Nodes;
+global using global::System.Text.Json.Schema;
+global using global::Microsoft.EntityFrameworkCore;
+global using global::UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
+global using global::UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
+global using global::UglyToad.PdfPig;
+global using global::UglyToad.PdfPig.Content;
+global using global::SemanticKernelStack.Tools;

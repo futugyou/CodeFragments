@@ -1,5 +1,5 @@
 ﻿
-using KaleidoCode.KernelService;
+using  SemanticKernelStack;
 using Microsoft.KernelMemory;
 namespace KaleidoCode.Controllers;
 

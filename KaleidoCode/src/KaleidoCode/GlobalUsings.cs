@@ -9,7 +9,6 @@ global using global::Microsoft.Extensions.DependencyInjection;
 global using global::Microsoft.Extensions.DependencyInjection.Extensions;
 global using global::Microsoft.Extensions.FileProviders;
 global using global::Microsoft.Extensions.Options;
-global using global::Microsoft.SemanticKernel;
 global using global::Polly;
 global using global::Polly.Extensions.Http;
 global using global::Polly.Timeout;

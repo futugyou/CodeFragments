@@ -1,8 +1,9 @@
 ﻿
-using KaleidoCode.KernelService;
+using SemanticKernelStack;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.KernelMemory;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace KaleidoCode.Controllers;

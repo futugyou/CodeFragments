@@ -1,6 +1,7 @@
 ﻿
 using A2A;
-using KaleidoCode.KernelService;
+using SemanticKernelStack;
+using Microsoft.SemanticKernel;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 

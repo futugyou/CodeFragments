@@ -1,5 +1,5 @@
 ﻿
-using KaleidoCode.KernelService;
+using  SemanticKernelStack;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;

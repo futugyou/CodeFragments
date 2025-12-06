@@ -1,7 +1,7 @@
 ﻿
-using KaleidoCode.KernelService;
-using KaleidoCode.KernelService.Internal;
-using KaleidoCode.KernelService.Skills;
+using SemanticKernelStack;
+using SemanticKernelStack.Internal;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
 using Microsoft.SemanticKernel.ChatCompletion;

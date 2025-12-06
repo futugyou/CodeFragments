@@ -1,7 +1,8 @@
 ﻿
-using KaleidoCode.KernelService;
-using KaleidoCode.KernelService.Duckduckgo;
-using KaleidoCode.KernelService.Skills;
+using SemanticKernelStack;
+using SemanticKernelStack.Duckduckgo;
+using SemanticKernelStack.Skills;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Data;
