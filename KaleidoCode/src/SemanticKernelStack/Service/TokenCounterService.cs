@@ -20,7 +20,7 @@ public class TokenCounterService
     }
 
 
-    public List<string> MlToken(string text,Stream vocabStream)
+    public List<string> MlToken(string text, Stream vocabStream)
     {
         var counter = MicrosoftMLTokenCounter(vocabStream);
         var lines = TextChunker.SplitPlainTextLines(text, 40, counter);

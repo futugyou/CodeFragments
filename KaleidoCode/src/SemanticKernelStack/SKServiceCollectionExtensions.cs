@@ -1,13 +1,10 @@
 
-using  SemanticKernelStack.Ingestion;
-using  SemanticKernelStack.Internal;
-using  SemanticKernelStack.Skills;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.VectorData;
+using SemanticKernelStack.Ingestion;
+using SemanticKernelStack.Internal;
+using SemanticKernelStack.Skills;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.Core;
-using Microsoft.SemanticKernel.Plugins.OpenApi;
 using OpenAI;
 using System.ClientModel;
 using System.ClientModel.Primitives;
@@ -153,7 +150,7 @@ public static class SKServiceCollectionExtensions
         // );
         // kernelBuilder.Plugins.Add(infrProplugin);
 
-        kernelBuilder.Plugins.AddFromPromptDirectory("./KernelService/Skills");
+        kernelBuilder.Plugins.AddFromPromptDirectory("../SemanticKernelStack/Skills");
         #endregion
 
         #region Agent

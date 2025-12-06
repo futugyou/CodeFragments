@@ -87,7 +87,7 @@ public static class ElasticClientExtensions
         {
             //requestData.RequestMetaData
         });
-        
+
         settings.EnableHttpCompression();
         var listenerObserver = new ElasticListenerObserver();
         DiagnosticListener.AllListeners.Subscribe(listenerObserver);

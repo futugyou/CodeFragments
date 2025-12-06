@@ -1,5 +1,4 @@
 
-using A2A;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
 using Microsoft.SemanticKernel.Agents.Orchestration.Concurrent;
@@ -504,7 +503,7 @@ public class AgentService
 public sealed class OrderStatusPlugin
 {
     [KernelFunction]
-    public static  string CheckOrderStatus(string orderId) => $"Order {orderId} is shipped and will arrive in 2-3 days.";
+    public static string CheckOrderStatus(string orderId) => $"Order {orderId} is shipped and will arrive in 2-3 days.";
 }
 
 public sealed class OrderReturnPlugin
@@ -516,7 +515,7 @@ public sealed class OrderReturnPlugin
 public sealed class OrderRefundPlugin
 {
     [KernelFunction]
-    public static  string ProcessReturn(string orderId, string reason) => $"Refund for order {orderId} has been processed successfully.";
+    public static string ProcessReturn(string orderId, string reason) => $"Refund for order {orderId} has been processed successfully.";
 }
 
 [Experimental("SKEXP0011")]

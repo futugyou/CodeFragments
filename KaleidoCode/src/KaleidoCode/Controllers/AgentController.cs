@@ -1,9 +1,9 @@
 ﻿
-using  SemanticKernelStack;
+using SemanticKernelStack;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
-using  SemanticKernelStack.Skills;
+using SemanticKernelStack.Skills;
 using Microsoft.Agents.AI;
 using System.Reflection;
 using System.Runtime.CompilerServices;

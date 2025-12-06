@@ -1,5 +1,5 @@
 using ModelContextProtocol.Client;
-using  SemanticKernelStack;
+using SemanticKernelStack;
 using ModelContextProtocol.Protocol;
 
 namespace KaleidoCode.Controllers;

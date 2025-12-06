@@ -25,7 +25,7 @@ public static class KestrelExtensions
     public static WebApplicationBuilder AddKestrelExtensions(this WebApplicationBuilder builder, IConfiguration configuration)
     {
         builder.Services.Configure<KestrelOptions>(configuration.GetSection("KestrelOptions"));
-        var config = configuration.GetSection("KestrelOptions").Get<KestrelOptions>() ?? new ();
+        var config = configuration.GetSection("KestrelOptions").Get<KestrelOptions>() ?? new();
 
         if (config.AllowKestrelConfig)
         {

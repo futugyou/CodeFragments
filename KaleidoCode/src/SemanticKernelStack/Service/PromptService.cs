@@ -218,7 +218,7 @@ public class PromptService
 
     public async Task<string[]> PromptYAML()
     {
-        using StreamReader reader = new(Assembly.GetExecutingAssembly().GetManifestResourceStream("KaleidoCode.KernelService.Skills.getIntent.prompt.yaml")!);
+        using StreamReader reader = new(Assembly.GetExecutingAssembly().GetManifestResourceStream("SemanticKernelStack.Skills.getIntent.prompt.yaml")!);
         List<string> choices = ["ContinueConversation", "EndConversation"];
         ChatHistory history = [];
         history.AddUserMessage("Hello");
@@ -252,6 +252,7 @@ public class PromptService
             Template = reader.ReadToEnd(),
             TemplateFormat = "handlebars",
             Name = "ContosoChatPrompt",
+            AllowDangerouslySetContent = true,
         };
         var promptTemplate = templateFactory.Create(promptTemplateConfig);
         var renderedPrompt = await promptTemplate.RenderAsync(_kernel, arguments);

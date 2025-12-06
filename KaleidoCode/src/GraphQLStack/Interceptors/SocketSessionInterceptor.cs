@@ -1,5 +1,5 @@
- 
-using Protocols = HotChocolate.AspNetCore.Subscriptions.Protocols; 
+
+using Protocols = HotChocolate.AspNetCore.Subscriptions.Protocols;
 
 namespace GraphQLStack.Interceptors;
 

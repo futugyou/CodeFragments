@@ -1,5 +1,5 @@
 
-using  SemanticKernelStack.Internal;
+using SemanticKernelStack.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.SemanticKernel.Data;
 

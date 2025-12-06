@@ -25,4 +25,3 @@ public class UserExtension
         return repository.GetUserById(1)!;
     }
 }
- 

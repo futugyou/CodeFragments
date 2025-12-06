@@ -1,6 +1,6 @@
 
 using System.Collections.Concurrent;
-using  SemanticKernelStack.Internal;
+using SemanticKernelStack.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Client;
 

@@ -1,12 +1,9 @@
 ﻿
-using  SemanticKernelStack;
+using SemanticKernelStack;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
 using Microsoft.Agents.AI;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Agents.AI.Workflows;
 
 namespace KaleidoCode.Controllers;

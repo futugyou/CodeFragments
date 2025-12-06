@@ -1,7 +1,6 @@
 
-using System.ComponentModel;
-
 namespace SemanticKernelStack.Planners;
+
 public class AuthorEmailPlanner
 {
     [KernelFunction]

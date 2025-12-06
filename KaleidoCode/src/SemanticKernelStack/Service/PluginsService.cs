@@ -234,7 +234,7 @@ public class PluginsService
         history.AddUserMessage("Recently, the marketing team has made considerable progress.");
         history.AddAssistantMessage("Yes, I already understand this situation. How can I help you with it?");
 
-        var prompts = _kernel.CreatePluginFromPromptDirectory("KernelService/Skills");
+        var prompts = _kernel.CreatePluginFromPromptDirectory("Skills");
         string request = "I want to send an email to the marketing team celebrating their recent milestone.";
 
         var chatResult = _kernel.InvokeStreamingAsync<StreamingChatMessageContent>(

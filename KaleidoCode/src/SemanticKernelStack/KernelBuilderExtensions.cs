@@ -1,5 +1,5 @@
 
-using  SemanticKernelStack.Internal;
+using SemanticKernelStack.Internal;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Google;
 using Microsoft.SemanticKernel.Connectors.OpenAI;

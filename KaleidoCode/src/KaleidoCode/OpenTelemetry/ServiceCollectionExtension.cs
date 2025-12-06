@@ -1,5 +1,4 @@
 
-
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -31,8 +30,8 @@ public static class OpenTelemetryExtension
                 .AddSource("Microsoft.SemanticKernel*")
                 .AddSource("agent-telemetry-source")
                 .AddConfiguredExporters(config.Exporters);
-                // Too much information will be generated
-                // .AddConsoleExporter();  
+            // Too much information will be generated
+            // .AddConsoleExporter();  
         })
         .WithMetrics(meterProviderBuilder =>
         {
@@ -58,7 +57,7 @@ public static class OpenTelemetryExtension
 
         return services;
     }
-    
+
     public static IServiceCollection AddCustomMetricsSimulation(this IServiceCollection services, IConfiguration configuration)
     {
         var counter = new MetricsCollector();

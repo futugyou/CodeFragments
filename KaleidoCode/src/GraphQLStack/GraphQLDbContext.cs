@@ -1,6 +1,6 @@
 
-
 namespace GraphQLStack;
+
 public class GraphQLDbContext : DbContext
 {
     public GraphQLDbContext(DbContextOptions<GraphQLDbContext> options) : base(options)

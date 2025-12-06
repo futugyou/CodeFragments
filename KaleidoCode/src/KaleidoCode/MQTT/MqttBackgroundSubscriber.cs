@@ -27,7 +27,7 @@ public class MqttBackgroundSubscriber : BackgroundService
                     await Task.Delay(10000, stoppingToken);
                     continue;
                 }
-                
+
                 var factory = new MqttClientFactory();
                 var client = factory.CreateMqttClient();
                 var clientOptions = new MqttClientOptionsBuilder()
