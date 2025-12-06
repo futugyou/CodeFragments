@@ -11,6 +11,7 @@ public class SemanticKernelOptions
     public string VectorStoreName { get; set; } = "default-vector-store";
     // for mcp server
     public Dictionary<string, McpServerConfig> McpServers { get; set; } = [];
+    public string A2AEndpoint { get; set; } = "http://localhost:5000";
 }
 
 public class WebSearchConfig

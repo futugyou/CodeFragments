@@ -12,6 +12,7 @@ using OpenAI;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using Microsoft.AspNetCore.Builder;
+using SemanticKernelStack.Services;
 
 namespace SemanticKernelStack;
 
@@ -174,6 +175,15 @@ public static class SKServiceCollectionExtensions
                 return factory.Create();
             });
         #endregion
+
+        services.AddScoped<A2AService>();
+        services.AddScoped<AgentService>();
+        services.AddScoped<DeclarativeService>();
+        services.AddScoped<EmbeddingService>();
+        services.AddScoped<PluginsService>();
+        services.AddScoped<ProcessService>();
+        services.AddScoped<PromptService>();
+        services.AddScoped<TokenCounterService>();
 
         return services;
     }
