@@ -1,24 +1,20 @@
-﻿
-using KernelMemoryStack;
-using Microsoft.KernelMemory;
-namespace KaleidoCode.Controllers;
 
-[Experimental("SKEXP0011")]
-[Route("api/sk/memory")]
-[ApiController]
-public class SKMemoryController : ControllerBase
+using Microsoft.Extensions.Options;
+using Microsoft.KernelMemory;
+
+namespace KernelMemoryStack.Services;
+
+public class WebImportService
 {
     private readonly IKernelMemory _kernelMemory;
     private readonly KernelMemoryOptions _options;
 
-    public SKMemoryController(IKernelMemory kernelMemory, IOptionsMonitor<KernelMemoryOptions> optionsMonitor)
+    public WebImportService(IKernelMemory kernelMemory, IOptionsMonitor<KernelMemoryOptions> optionsMonitor)
     {
         _kernelMemory = kernelMemory;
         _options = optionsMonitor.CurrentValue;
     }
 
-    [Route("memclientweb")]
-    [HttpPost]
     public async Task<string> ClientImportWeb(string url, string documentId, string question)
     {
         var memory = new MemoryWebClient(endpoint: _options.KernelMemory.Endpoint, apiKey: _options.KernelMemory.ApiKey);
@@ -34,8 +30,6 @@ public class SKMemoryController : ControllerBase
         return answer.Result;
     }
 
-    [Route("memweb")]
-    [HttpPost]
     public async Task<string> ImportWeb(string url, string documentId, string question)
     {
         await _kernelMemory.ImportWebPageAsync(url);

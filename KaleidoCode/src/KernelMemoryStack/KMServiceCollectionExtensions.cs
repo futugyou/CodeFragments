@@ -1,4 +1,5 @@
 
+using KernelMemoryStack.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.KernelMemory;
 using Microsoft.KernelMemory.SemanticKernel;
@@ -44,6 +45,9 @@ public static class ServiceCollectionExtensions
             var kernelMemory = memoryBuilder.Build(null);
             return kernelMemory;
         });
+
+        services.AddScoped<WebImportService>();
+
         return services;
     }
 }
