@@ -4,7 +4,6 @@ using SemanticKernelStack.Services;
 
 namespace KaleidoCode.Controllers;
 
-[Experimental("SKEXP0011")]
 [Route("api/sk/token")]
 [ApiController]
 public class SKTokenCounterController : ControllerBase

@@ -518,7 +518,6 @@ public sealed class OrderRefundPlugin
     public static string ProcessReturn(string orderId, string reason) => $"Refund for order {orderId} has been processed successfully.";
 }
 
-[Experimental("SKEXP0011")]
 sealed class ApprovalTerminationStrategy : TerminationStrategy
 {
     // Terminate when the final message contains the term "approve"

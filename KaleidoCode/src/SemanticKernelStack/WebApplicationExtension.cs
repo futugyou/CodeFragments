@@ -8,7 +8,6 @@ using SemanticKernelStack.Skills;
 
 namespace SemanticKernelStack;
 
-[Experimental("SKEXP0011")]
 
 public static class WebApplicationExtension
 {

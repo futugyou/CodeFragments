@@ -3,7 +3,6 @@ using KernelMemoryStack.Services;
 
 namespace KaleidoCode.Controllers;
 
-[Experimental("SKEXP0011")]
 [Route("api/km/memory")]
 [ApiController]
 public class KernelMemoryController : ControllerBase

@@ -3,7 +3,6 @@ using SemanticKernelStack.Services;
 
 namespace KaleidoCode.Controllers;
 
-[Experimental("SKEXP0011")]
 [Route("api/sk/prompt")]
 [ApiController]
 public class SKPromptController : ControllerBase

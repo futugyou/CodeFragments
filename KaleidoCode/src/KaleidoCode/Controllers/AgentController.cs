@@ -1,64 +1,33 @@
 ﻿
-using SemanticKernelStack;
-using Microsoft.Extensions.AI;
-using OpenAI;
-using System.ClientModel;
-using SemanticKernelStack.Skills;
-using Microsoft.Agents.AI;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+using AgentStack.Skills;
+using AgentStack.Services;
 
 namespace KaleidoCode.Controllers;
 
-[Experimental("SKEXP0011")]
 [Route("api/af/agent")]
 [ApiController]
 public class AgentController : ControllerBase
 {
-    private readonly SemanticKernelOptions _options;
-    private readonly IChatClient _chatClient;
-    public AgentController(IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
+    private readonly AgentService _agentService;
+    public AgentController(AgentService agentService)
     {
-        _options = optionsMonitor.CurrentValue;
-        var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
-        OpenAIClientOptions openAIOptions = new();
-        if (!string.IsNullOrEmpty(_options.TextCompletion.Endpoint))
-        {
-            openAIOptions.Endpoint = new Uri(_options.TextCompletion.Endpoint);
-        }
-
-        var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-        _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
+        _agentService = agentService;
     }
 
     [Route("joker")]
     [HttpPost]
     public async Task<string> Joker(string message = "Tell me a joke about a pirate.")
     {
-        var chatClient = _chatClient
-        .AsBuilder()
-        .Use(getResponseFunc: JokerChatClientMiddleware, getStreamingResponseFunc: null)
-        .Build();
-
-        AIAgent agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        var response = await agent.RunAsync(message);
-        return response.Text;
+        return await _agentService.Joker(message);
     }
 
     [Route("joker-stream")]
     [HttpPost]
-    public async IAsyncEnumerable<string> JokerStream(string message = "Tell me a joke about a pirate.")
+    public IAsyncEnumerable<string> JokerStream(string message = "Tell me a joke about a pirate.")
     {
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        agent = agent
-            .AsBuilder()
-            .Use(runFunc: null, runStreamingFunc: JokerSteamAgentRunMiddleware)
-            .Build();
-        await foreach (var update in agent.RunStreamingAsync(message))
-        {
-            yield return update.Text;
-        }
+        return _agentService.JokerStream(message);
     }
+
     [Route("joker-message")]
     [HttpPost]
     public async Task<string> JokerMessage(
@@ -66,99 +35,28 @@ public class AgentController : ControllerBase
         string imageUrl = "https://upload.wikimedia.org/wikipedia/commons/1/11/Joseph_Grimaldi.jpg",
         bool hasSystemMessage = false)
     {
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: hasSystemMessage ? null : "You are good at telling jokes.");
-
-        List<ChatMessage> chatMessages = [new(ChatRole.User, [
-            new Microsoft.Extensions.AI.TextContent(message),
-            new UriContent(imageUrl, "image/jpeg")
-        ])];
-
-        if (hasSystemMessage)
-        {
-            chatMessages.Insert(0, new(ChatRole.System, "You are good at telling jokes."));
-        }
-
-        var response = await agent.RunAsync(chatMessages);
-        return response.Text;
+        return await _agentService.JokerMessage(message, imageUrl, hasSystemMessage);
     }
 
     [Route("thread")]
     [HttpPost]
-    public async IAsyncEnumerable<string> Thread()
+    public IAsyncEnumerable<string> Thread()
     {
-        var messages = new string[] { "Tell me a joke about a pirate.", "Now add some emojis to the joke and tell it in the voice of a pirate's parrot." };
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        AgentThread thread = agent.GetNewThread();
-        foreach (var message in messages)
-        {
-            var response = await agent.RunAsync(message, thread);
-            yield return response.Text;
-        }
-
-        yield return thread.Serialize(JsonSerializerOptions.Web).GetRawText();
+        return _agentService.Thread();
     }
 
     [Route("function")]
     [HttpPost]
-    public async IAsyncEnumerable<string> Function()
+    public IAsyncEnumerable<string> Function()
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools =
-        [
-            .. typeof(LightPlugin)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .Select((m) => AIFunctionFactory.Create(m, target: null)), // Get from type static methods
-            .. lightPlugin.GetType()
-                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                .Select((m) => AIFunctionFactory.Create(m, target: lightPlugin)) // Get from instance methods
-        ];
-
-        var message = "Can you tell me the status of all the lights?";
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
-        agent = agent
-            .AsBuilder()
-            .Use(runFunc: LightsAgentRunMiddleware, runStreamingFunc: null)
-            .Build();
-
-        AgentThread thread = agent.GetNewThread();
-        var response = await agent.RunAsync(message, thread);
-        yield return response.Text;
+        return _agentService.Function();
     }
 
     [Route("approval")]
     [HttpPost]
-    public async IAsyncEnumerable<string> Approval(bool allowChangeState = false)
+    public IAsyncEnumerable<string> Approval(bool allowChangeState = false)
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools = [
-            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
-            new ApprovalRequiredAIFunction(AIFunctionFactory.Create(lightPlugin.ChangeStateAsync))
-        ];
-
-        var message = "Could you please turn off all the lights?";
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
-        agent = agent
-            .AsBuilder()
-                .Use(LightsFunctionCallingMiddleware)
-            .Build();
-        AgentThread thread = agent.GetNewThread();
-        var response = await agent.RunAsync(message, thread);
-        yield return response.Text;
-
-        var functionApprovalRequests = response.Messages
-            .SelectMany(x => x.Contents)
-            .OfType<FunctionApprovalRequestContent>()
-            .ToList();
-
-        if (functionApprovalRequests.Count == 0)
-        {
-            yield break;
-        }
-
-        FunctionApprovalRequestContent requestContent = functionApprovalRequests.First();
-        var approvalMessage = new ChatMessage(ChatRole.User, [requestContent.CreateResponse(allowChangeState)]);
-        response = await agent.RunAsync(approvalMessage, thread);
-        yield return response.Text;
+        return _agentService.Approval(allowChangeState);
     }
 
     /// <summary>
@@ -175,113 +73,14 @@ public class AgentController : ControllerBase
     [HttpPost]
     public async Task<List<LightModel>> Structured()
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools = [
-            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
-        ];
-
-        JsonElement schema = AIJsonUtilities.CreateJsonSchema(typeof(LightModel));
-        ChatOptions chatOptions = new()
-        {
-            ResponseFormat = ChatResponseFormat.ForJsonSchema(
-                schema: schema,
-                schemaName: "LightModel",
-                schemaDescription: "Information about a Light list including their id, name, and is_on"),
-            Tools = tools
-        };
-
-        var message = "Can you tell me the status of all the lights?";
-        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions()
-        {
-            Name = "LightAssistant",
-            Instructions = "You are a helpful assistant.",
-            ChatOptions = chatOptions
-        });
-        AgentThread thread = agent.GetNewThread();
-        var response = await agent.RunAsync(message, thread);
-        Console.WriteLine(response.Text);
-        return response.Deserialize<List<LightModel>>(JsonSerializerOptions.Web);
+        return await _agentService.Structured();
     }
 
     [Route("agent-tool")]
     [HttpPost]
-    public async IAsyncEnumerable<string> AgentToTool()
+    public IAsyncEnumerable<string> AgentToTool()
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools = [
-            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
-            AIFunctionFactory.Create(lightPlugin.ChangeStateAsync)
-        ];
-
-        var message = "Can you tell me the status of all the lights?";
-        AIAgent toolAgent = _chatClient.CreateAIAgent(
-            instructions: "You are a useful light assistant.",
-            name: "LightAgent",
-            description: "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off.",
-            tools: tools);
-
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a helpful assistant who responds in chinese.", tools: [toolAgent.AsAIFunction()]);
-        agent = agent.AsBuilder()
-        .UseOpenTelemetry(sourceName: "agent-telemetry-source")
-        .Build();
-
-        AgentThread thread = agent.GetNewThread();
-        var response = await agent.RunAsync(message, thread);
-        yield return response.Text;
+        return _agentService.AgentToTool();
     }
 
-    async Task<AgentRunResponse> LightsAgentRunMiddleware(
-        IEnumerable<ChatMessage> messages,
-        AgentThread? thread,
-        AgentRunOptions? options,
-        AIAgent innerAgent,
-        CancellationToken cancellationToken)
-    {
-        Console.WriteLine($"Input: {messages.Count()}");
-        var response = await innerAgent.RunAsync(messages, thread, options, cancellationToken).ConfigureAwait(false);
-        Console.WriteLine($"Output: {response.Messages.Count}");
-        return response;
-    }
-
-    async IAsyncEnumerable<AgentRunResponseUpdate> JokerSteamAgentRunMiddleware(
-        IEnumerable<ChatMessage> messages,
-        AgentThread? thread,
-        AgentRunOptions? options,
-        AIAgent innerAgent,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        Console.WriteLine($"Input: {messages.Count()}");
-
-        await foreach (var update in innerAgent.RunStreamingAsync(messages, thread, options, cancellationToken))
-        {
-            Console.WriteLine($"Output: {update.Text}");
-            yield return update;
-        }
-    }
-
-    async ValueTask<object?> LightsFunctionCallingMiddleware(
-        AIAgent agent,
-        Microsoft.Extensions.AI.FunctionInvocationContext context,
-        Func<Microsoft.Extensions.AI.FunctionInvocationContext, CancellationToken, ValueTask<object?>> next,
-        CancellationToken cancellationToken)
-    {
-        Console.WriteLine($"Function Name: {context!.Function.Name}");
-        var result = await next(context, cancellationToken);
-        Console.WriteLine($"Function Call Result: {result}");
-
-        return result;
-    }
-
-    async Task<ChatResponse> JokerChatClientMiddleware(
-        IEnumerable<ChatMessage> messages,
-        ChatOptions? options,
-        IChatClient innerChatClient,
-        CancellationToken cancellationToken)
-    {
-        Console.WriteLine($"Input: {messages.Count()}");
-        var response = await innerChatClient.GetResponseAsync(messages, options, cancellationToken);
-        Console.WriteLine($"Output: {response.Messages.Count}");
-
-        return response;
-    }
 }

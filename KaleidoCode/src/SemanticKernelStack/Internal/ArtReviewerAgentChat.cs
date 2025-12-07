@@ -6,7 +6,6 @@ using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace SemanticKernelStack.Internal;
 
-[Experimental("SKEXP0011")]
 public class ArtReviewerAgentChat(Kernel kernel, [FromKeyedServices("CopyWriter")] ChatCompletionAgent copyWriterAgent, [FromKeyedServices("ArtDirector")] ChatCompletionAgent artDirectorAgent)
 {
     public readonly AgentGroupChat Chat =

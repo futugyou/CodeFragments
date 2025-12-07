@@ -4,7 +4,6 @@ using SharpToken;
 
 namespace SemanticKernelStack.Services;
 
-[Experimental("SKEXP0011")]
 public class TokenCounterService
 {
     public List<string> NoToken(string text)

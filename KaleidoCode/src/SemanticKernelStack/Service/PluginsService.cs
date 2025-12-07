@@ -12,7 +12,6 @@ using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 
 namespace SemanticKernelStack.Services;
 
-[Experimental("SKEXP0011")]
 public class PluginsService
 {
     private readonly Kernel _kernel;

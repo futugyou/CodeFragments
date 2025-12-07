@@ -13,7 +13,6 @@ using SemanticKernelStack.Services;
 
 namespace SemanticKernelStack;
 
-[Experimental("SKEXP0011")]
 public static class SKServiceCollectionExtensions
 {
     public static async Task InitAIData(this WebApplication app)

@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-		<PackageReference Include="Microsoft.KernelMemory.AI.OpenAI" Version="0.98.250508.3" />
-		<PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250508.3" />
-		<PackageReference Include="Microsoft.KernelMemory.WebClient" Version="0.98.250508.3" />
+		<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251204.1" />
+		<PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251204.1" />
+		<PackageReference Include="OpenAI" Version="2.7.0" />
   </ItemGroup>
 
   <ItemGroup>

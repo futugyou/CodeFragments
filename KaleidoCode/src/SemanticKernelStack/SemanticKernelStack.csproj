@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<NoWarn>IDE0130, AD0001, NU1701, CS8321, CS1998, CS0169, VSTHRD100, VSTHRD002, VSTHRD103, VSTHRD200, VSTHRD003, SKEXP0080, SKEXP0011, SKEXP0110</NoWarn>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="A2A.AspNetCore" Version="0.3.3-preview" />
 		<PackageReference Include="AngleSharp" Version="1.4.0" />

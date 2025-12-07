@@ -6,7 +6,6 @@ using Microsoft.SemanticKernel.Plugins.Web.Google;
 
 namespace SemanticKernelStack.Skills;
 
-[Experimental("SKEXP0011")]
 public class WebSearch(IOptionsMonitor<SemanticKernelOptions> optionsMonitor)
 {
     private readonly IOptionsMonitor<SemanticKernelOptions> _options = optionsMonitor;
