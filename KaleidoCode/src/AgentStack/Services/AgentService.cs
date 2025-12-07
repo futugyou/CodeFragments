@@ -1,6 +1,8 @@
 
 using AgentStack.Skills;
 using AgentStack.Middleware;
+using AgentStack.MessageStore;
+using Microsoft.SemanticKernel.Connectors.InMemory;
 
 namespace AgentStack.Services;
 
@@ -164,14 +166,14 @@ public class AgentService
                 schema: schema,
                 schemaName: "LightModel",
                 schemaDescription: "Information about a Light list including their id, name, and is_on"),
-            Tools = tools
+            Tools = tools,
+            Instructions = "You are good at telling jokes.",
         };
 
         var message = "Can you tell me the status of all the lights?";
         AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions()
         {
             Name = "LightAssistant",
-            Description = "You are a helpful assistant.",
             ChatOptions = chatOptions
         });
         AgentThread thread = agent.GetNewThread();
@@ -205,5 +207,54 @@ public class AgentService
         yield return response.Text;
     }
 
-    
+
+    public async IAsyncEnumerable<string> HistoryStorage()
+    {
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Name = "Joker",
+            ChatOptions = new() { Instructions = "You are good at telling jokes." },
+            ChatMessageStoreFactory = ctx =>
+            {
+                // Create a new chat message store for this agent that stores the messages in a vector store.
+                return new VectorChatMessageStore(
+                   new InMemoryVectorStore(),
+                   ctx.SerializedState,
+                   ctx.JsonSerializerOptions);
+            }
+        });
+
+        AgentThread thread = agent.GetNewThread();
+
+        var response = await agent.RunAsync("Tell me a joke about a pirate.", thread);
+        yield return response.Text;
+
+        var messageStore = thread.GetService<VectorChatMessageStore>()!;
+        yield return $"\nThread is stored in vector store under key: {messageStore.ThreadDbKey}";
+
+        var history = await messageStore.GetMessagesAsync(CancellationToken.None);
+        Console.WriteLine(history.Count());
+        foreach (var item in history)
+        {
+            yield return item.Text;
+        }
+
+        JsonElement serializedThread = thread.Serialize();
+        yield return JsonSerializer.Serialize(serializedThread, new JsonSerializerOptions { WriteIndented = true });
+
+        AgentThread resumedThread = agent.DeserializeThread(serializedThread);
+
+        response = await agent.RunAsync("Now tell the same joke in the voice of a pirate, and add some emojis to the joke.", resumedThread);
+        yield return response.Text;
+
+        messageStore = resumedThread.GetService<VectorChatMessageStore>()!;
+        yield return $"\nThread is stored in vector store under key: {messageStore.ThreadDbKey}";
+
+        history = await messageStore.GetMessagesAsync(CancellationToken.None);
+        Console.WriteLine(history.Count());
+        foreach (var item in history)
+        {
+            yield return item.Text;
+        }
+    }
 }

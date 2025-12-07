@@ -83,4 +83,11 @@ public class AgentController : ControllerBase
         return _agentService.AgentToTool();
     }
 
+    [Route("history-storage")]
+    [HttpPost]
+    public IAsyncEnumerable<string> HistoryStorage()
+    {
+        return _agentService.HistoryStorage();
+    }
+
 }
