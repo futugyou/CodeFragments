@@ -90,4 +90,11 @@ public class AgentController : ControllerBase
         return _agentService.HistoryStorage();
     }
 
+    [Route("history-memory")]
+    [HttpPost]
+    public IAsyncEnumerable<string> HistoryMemory(string useid)
+    {
+        return _agentService.HistoryMemory(useid);
+    }
+
 }

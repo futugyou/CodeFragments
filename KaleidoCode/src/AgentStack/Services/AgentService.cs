@@ -24,6 +24,7 @@ public class AgentService
         }
 
         var ghModelsClient = new OpenAIClient(credential, openAIOptions);
+
         _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
     }
 
@@ -255,5 +256,34 @@ public class AgentService
         {
             yield return item.Text;
         }
+    }
+
+    public async IAsyncEnumerable<string> HistoryMemory(string userId)
+    {
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Name = "Joker",
+            ChatOptions = new() { Instructions = "You are good at telling jokes." },
+            AIContextProviderFactory = (ctx) => new ChatHistoryMemoryProvider(
+                _vectorStore,
+                collectionName: "chathistory_memory",
+                vectorDimensions: 1536,
+                // Configure the scope values under which chat messages will be stored.
+                // In this case, we are using a fixed user ID and a unique thread ID for each new thread.
+                storageScope: new() { UserId = userId, ThreadId = Guid.NewGuid().ToString("N") },
+                // Configure the scope which would be used to search for relevant prior messages.
+                // In this case, we are searching for any messages for the user across all threads.
+                searchScope: new() { UserId = userId })
+        });
+
+        AgentThread thread = agent.GetNewThread();
+
+        var response = await agent.RunAsync("I like jokes about Pirates. Tell me a joke about a pirate.", thread);
+        yield return response.Text;
+
+        AgentThread thread2 = agent.GetNewThread();
+
+        response = await agent.RunAsync("Tell me a joke that I might like.", thread2);
+        yield return response.Text;
     }
 }
