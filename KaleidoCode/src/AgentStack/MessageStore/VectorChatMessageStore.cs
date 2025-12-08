@@ -12,6 +12,7 @@ public sealed class VectorChatMessageStore : ChatMessageStore
         JsonElement serializedStoreState,
         JsonSerializerOptions? jsonSerializerOptions = null)
     {
+        Console.WriteLine($"VectorStore: {vectorStore.GetType()}");
         _vectorStore = vectorStore ?? throw new ArgumentNullException(nameof(vectorStore));
         if (serializedStoreState.ValueKind is JsonValueKind.String)
         {
@@ -26,13 +27,12 @@ public sealed class VectorChatMessageStore : ChatMessageStore
         IEnumerable<ChatMessage> messages,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine($"AddMessagesAsync: {messages.Count()}");
         ThreadDbKey ??= Guid.NewGuid().ToString("N");
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
         await collection.UpsertAsync(messages.Select(x => new ChatHistoryItem()
         {
-            Key = ThreadDbKey + x.MessageId,
+            Key = ThreadDbKey + (x.MessageId ?? Guid.NewGuid().ToString("N")),
             Timestamp = DateTimeOffset.UtcNow,
             ThreadId = ThreadDbKey,
             SerializedMessage = JsonSerializer.Serialize(x),
@@ -43,7 +43,6 @@ public sealed class VectorChatMessageStore : ChatMessageStore
     public override async Task<IEnumerable<ChatMessage>> GetMessagesAsync(
         CancellationToken cancellationToken)
     {
-        Console.WriteLine($"GetMessagesAsync: {ThreadDbKey}");
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
         var records = collection
