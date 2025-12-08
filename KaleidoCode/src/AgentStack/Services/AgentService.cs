@@ -3,6 +3,7 @@ using AgentStack.Skills;
 using AgentStack.Middleware;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
+using Microsoft.Agents.AI.Data;
 
 namespace AgentStack.Services;
 
@@ -285,5 +286,101 @@ public class AgentService
 
         response = await agent.RunAsync("Tell me a joke that I might like.", thread2);
         yield return response.Text;
+    }
+
+    public async IAsyncEnumerable<string> RAG()
+    {
+
+        var vectorCollection = _vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+        async Task<IEnumerable<TextSearchProvider.TextSearchResult>> SearchAdapter(string text, CancellationToken ct)
+        {
+            List<TextSearchProvider.TextSearchResult> results = [];
+            await foreach (var result in vectorCollection.SearchAsync(text, 5, cancellationToken: ct))
+            {
+                results.Add(new TextSearchProvider.TextSearchResult
+                {
+                    SourceName = result.Record.FileName,
+                    SourceLink = "",
+                    Text = result.Record.Text ?? string.Empty,
+                    RawRepresentation = result
+                });
+            }
+            return results;
+        }
+
+        TextSearchProviderOptions textSearchOptions = new()
+        {
+            SearchTime = TextSearchProviderOptions.TextSearchBehavior.BeforeAIInvoke,
+            RecentMessageMemoryLimit = 5
+        };
+
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Name = "RAG",
+            ChatOptions = new() { Instructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief." },
+            AIContextProviderFactory = ctx => new TextSearchProvider(SearchAdapter, ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions)
+        });
+
+        AgentThread thread = agent.GetNewThread();
+
+        var response = await agent.RunAsync("what is RAG?", thread);
+        yield return response.Text;
+
+        AgentThread thread2 = agent.GetNewThread();
+
+        response = await agent.RunAsync("what is API?", thread2);
+        yield return response.Text;
+    }
+}
+
+
+
+public class SemanticSearchRecord
+{
+    [VectorStoreKey]
+    public required string Key { get; set; }
+
+    [VectorStoreData]
+    public required string FileName { get; set; }
+
+    [VectorStoreData]
+    public int PageNumber { get; set; }
+
+    [VectorStoreData]
+    public required string Text { get; set; }
+
+    [VectorStoreVector(Dimensions: 1536, DistanceFunction = DistanceFunction.CosineSimilarity)] // 1536 is the default vector size for the OpenAI text-embedding-3-small model
+    public ReadOnlyMemory<float> Vector { get; set; }
+
+    public static IEnumerable<SemanticSearchRecord> CreateDemoDatas()
+    {
+        yield return new SemanticSearchRecord
+        {
+            Key = "1",
+            FileName = "1.txt",
+            PageNumber = 1,
+            Text = "Application Programming Interface. A set of rules and specifications that allow software components to communicate and exchange data."
+        };
+
+        yield return new SemanticSearchRecord
+        {
+            Key = "2",
+            FileName = "2.md",
+            PageNumber = 2,
+            Text = "Connectors allow you to integrate with various services provide AI capabilities, including LLM, AudioToText, TextToAudio, Embedding generation, etc."
+        };
+
+        yield return new SemanticSearchRecord
+        {
+            Key = "3",
+            FileName = "3.pdf",
+            PageNumber = 3,
+            Text = "Retrieval Augmented Generation - a term that refers to the process of retrieving additional data to provide as context to an LLM to use when generating a response (completion) to a user’s question (prompt)."
+        };
+    }
+
+    public static string GetCollectionName()
+    {
+        return "semantic_search";
     }
 }

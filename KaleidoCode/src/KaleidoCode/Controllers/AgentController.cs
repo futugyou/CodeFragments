@@ -97,4 +97,11 @@ public class AgentController : ControllerBase
         return _agentService.HistoryMemory(useid);
     }
 
+    [Route("rag")]
+    [HttpPost]
+    public IAsyncEnumerable<string> RAG()
+    {
+        return _agentService.RAG();
+    }
+
 }
