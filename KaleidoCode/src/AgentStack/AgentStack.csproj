@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+		<PackageReference Include="Microsoft.Agents.AI.Declarative" Version="1.0.0-preview.251204.1" />
 		<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251204.1" />
 		<PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251204.1" />
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.68.0-preview" />

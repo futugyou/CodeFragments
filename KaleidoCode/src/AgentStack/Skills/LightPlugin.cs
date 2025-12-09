@@ -17,6 +17,7 @@ public class LightPlugin
     [Description("Gets a list of lights and their current state")]
     public Task<List<LightModel>> GetLightsAsync()
     {
+        Console.WriteLine($"GetLightsAsync was called");
         return Task.FromResult(lights);
     }
 

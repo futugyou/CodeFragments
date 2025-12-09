@@ -360,7 +360,7 @@ public class AgentService
 
         var response = await agent.RunAsync("Tell me a joke about a pirate.", thread);
         yield return response.Text;
-         var messageStore = thread.GetService<VectorChatMessageStore>()!;
+        var messageStore = thread.GetService<VectorChatMessageStore>()!;
         var chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
@@ -378,6 +378,37 @@ public class AgentService
         yield return response.Text;
         chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
+    }
+
+    public async IAsyncEnumerable<string> Declarative()
+    {
+        var text =
+    """
+    kind: Prompt
+    name: Assistant
+    description: Light assistant
+    instructions: You are a useful light assistant. can tall user the status of the lights and can help user control the lights on and off .
+    model:
+        options:
+            temperature: 0.9
+            topP: 0.95
+            allowMultipleToolCalls: true
+            chatToolMode: auto
+    tools:
+      - kind: function
+        name: GetLightsAsync
+        description: Gets a list of lights and their current state.
+    """;
+
+        var lightPlugin = new LightPlugin();
+
+        var message = "Can you tell me the status of all the lights?";
+        var agentFactory = new ChatClientPromptAgentFactory(_chatClient, [AIFunctionFactory.Create(lightPlugin.GetLightsAsync, "GetLightsAsync")]);
+        var agent = await agentFactory.CreateFromYamlAsync(text);
+
+        AgentThread thread = agent.GetNewThread();
+        var response = await agent.RunAsync(message, thread);
+        yield return response.Text;
     }
 }
 

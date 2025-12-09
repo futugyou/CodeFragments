@@ -111,4 +111,11 @@ public class AgentController : ControllerBase
         return _agentService.ChatReducer(reducerType, triggerEvent);
     }
 
+    [Route("declarative")]
+    [HttpPost]
+    public IAsyncEnumerable<string> Declarative()
+    {
+        return _agentService.Declarative();
+    }
+
 }
