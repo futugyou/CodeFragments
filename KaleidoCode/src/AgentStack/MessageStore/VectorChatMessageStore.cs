@@ -5,15 +5,34 @@ namespace AgentStack.MessageStore;
 
 public sealed class VectorChatMessageStore : ChatMessageStore
 {
+    public enum ChatReducerTriggerEvent
+    {
+        BeforeMessageAdded, AfterMessagesRetrieval
+    }
     private readonly VectorStore _vectorStore;
+    private readonly IChatReducer? _chatReducer;
+    private readonly ChatReducerTriggerEvent _reducerTriggerEvent;
+
+    public VectorChatMessageStore(
+            VectorStore vectorStore,
+            JsonElement serializedStoreState,
+            JsonSerializerOptions? jsonSerializerOptions = null)
+            : this(vectorStore, serializedStoreState, jsonSerializerOptions, null, ChatReducerTriggerEvent.AfterMessagesRetrieval)
+    {
+
+    }
 
     public VectorChatMessageStore(
         VectorStore vectorStore,
         JsonElement serializedStoreState,
-        JsonSerializerOptions? jsonSerializerOptions = null)
+        JsonSerializerOptions? jsonSerializerOptions = null,
+        IChatReducer? chatReducer = null,
+        ChatReducerTriggerEvent reducerTriggerEvent = ChatReducerTriggerEvent.AfterMessagesRetrieval)
     {
         Console.WriteLine($"VectorStore: {vectorStore.GetType()}");
         _vectorStore = vectorStore ?? throw new ArgumentNullException(nameof(vectorStore));
+        _chatReducer = chatReducer;
+        _reducerTriggerEvent = reducerTriggerEvent;
         if (serializedStoreState.ValueKind is JsonValueKind.String)
         {
             ThreadDbKey = serializedStoreState.Deserialize<string>();
@@ -27,6 +46,11 @@ public sealed class VectorChatMessageStore : ChatMessageStore
         IEnumerable<ChatMessage> messages,
         CancellationToken cancellationToken)
     {
+        if (_reducerTriggerEvent is ChatReducerTriggerEvent.BeforeMessageAdded && _chatReducer is not null)
+        {
+            messages = await _chatReducer.ReduceAsync(messages, cancellationToken).ConfigureAwait(false);
+        }
+
         ThreadDbKey ??= Guid.NewGuid().ToString("N");
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
@@ -58,6 +82,11 @@ public sealed class VectorChatMessageStore : ChatMessageStore
         }
 
         messages.Reverse();
+        if (_reducerTriggerEvent is ChatReducerTriggerEvent.AfterMessagesRetrieval && _chatReducer is not null)
+        {
+            messages = [.. await _chatReducer.ReduceAsync(messages, cancellationToken).ConfigureAwait(false)];
+        }
+
         return messages;
     }
 
