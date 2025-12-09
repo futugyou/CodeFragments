@@ -104,4 +104,11 @@ public class AgentController : ControllerBase
         return _agentService.RAG();
     }
 
+    [Route("chat-reducer")]
+    [HttpPost]
+    public IAsyncEnumerable<string> ChatReducer(ChatReducerType reducerType, AgentStack.MessageStore.ChatReducerTriggerEvent triggerEvent)
+    {
+        return _agentService.ChatReducer(reducerType, triggerEvent);
+    }
+
 }

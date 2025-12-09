@@ -331,9 +331,60 @@ public class AgentService
         response = await agent.RunAsync("what is API?", thread2);
         yield return response.Text;
     }
+
+    public async IAsyncEnumerable<string> ChatReducer(ChatReducerType reducerType = ChatReducerType.MessageCountingChatReducer, ChatReducerTriggerEvent triggerEvent = ChatReducerTriggerEvent.AfterMessagesRetrieval)
+    {
+        IChatReducer? chatReducer = new MessageCountingChatReducer(3);
+        if (reducerType == ChatReducerType.SummarizingChatReducer)
+        {
+            chatReducer = new SummarizingChatReducer(_chatClient, 3, null);
+        }
+
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Name = "Joker",
+            ChatOptions = new() { Instructions = "You are good at telling jokes." },
+            ChatMessageStoreFactory = ctx =>
+            {
+                // Create a new chat message store for this agent that stores the messages in a vector store.
+                return new VectorChatMessageStore(
+                   _vectorStore,
+                   ctx.SerializedState,
+                   ctx.JsonSerializerOptions,
+                   chatReducer,
+                   triggerEvent);
+            }
+        });
+
+        AgentThread thread = agent.GetNewThread();
+
+        var response = await agent.RunAsync("Tell me a joke about a pirate.", thread);
+        yield return response.Text;
+         var messageStore = thread.GetService<VectorChatMessageStore>()!;
+        var chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
+
+        response = await agent.RunAsync("Tell me a joke about a robot.", thread);
+        yield return response.Text;
+        chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
+
+        response = await agent.RunAsync("Tell me a joke about a lemur.", thread);
+        yield return response.Text;
+        chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
+
+        response = await agent.RunAsync("Tell me the joke about the pirate again, but add emojis and use the voice of a parrot.", thread);
+        yield return response.Text;
+        chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
+    }
 }
 
-
+public enum ChatReducerType
+{
+    SummarizingChatReducer, MessageCountingChatReducer
+}
 
 public class SemanticSearchRecord
 {

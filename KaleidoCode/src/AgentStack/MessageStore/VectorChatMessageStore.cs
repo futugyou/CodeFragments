@@ -3,12 +3,13 @@ using Microsoft.Extensions.VectorData;
 
 namespace AgentStack.MessageStore;
 
+public enum ChatReducerTriggerEvent
+{
+    BeforeMessageAdded, AfterMessagesRetrieval
+}
+
 public sealed class VectorChatMessageStore : ChatMessageStore
 {
-    public enum ChatReducerTriggerEvent
-    {
-        BeforeMessageAdded, AfterMessagesRetrieval
-    }
     private readonly VectorStore _vectorStore;
     private readonly IChatReducer? _chatReducer;
     private readonly ChatReducerTriggerEvent _reducerTriggerEvent;
