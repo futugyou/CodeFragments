@@ -165,6 +165,11 @@ public class WorkflowService
 
     public async IAsyncEnumerable<string> Groupchat(string input)
     {
+        static ChatClientAgent GetTranslationAgent(string targetLanguage, IChatClient chatClient) =>
+         new(chatClient,
+             $"You are a translation assistant who only responds in {targetLanguage}. Respond to any " +
+             $"input by outputting the name of the input language and then translating the input to {targetLanguage}.");
+
         List<ChatMessage> messages = [new(ChatRole.User, input)];
         var workflow = AgentWorkflowBuilder.CreateGroupChatBuilderWith(agents => new RoundRobinGroupChatManager(agents) { MaximumIterationCount = 3 })
                         .AddParticipants(from lang in (string[])["French", "Spanish", "English"] select GetTranslationAgent(lang, _chatClient))
@@ -211,8 +216,42 @@ public class WorkflowService
         }
     }
 
-    private static ChatClientAgent GetTranslationAgent(string targetLanguage, IChatClient chatClient) =>
-           new(chatClient,
-               $"You are a translation assistant who only responds in {targetLanguage}. Respond to any " +
-               $"input by outputting the name of the input language and then translating the input to {targetLanguage}.");
+    public async IAsyncEnumerable<string> SubWorkflow(string input)
+    {
+        UppercaseExecutor uppercase = new();
+        ReverseTextExecutor reverse = new();
+        AppendSuffixExecutor append = new(" [PROCESSED]");
+
+        var subWorkflow = new WorkflowBuilder(uppercase)
+            .AddEdge(uppercase, reverse)
+            .AddEdge(reverse, append)
+            .WithOutputFrom(append)
+            .Build();
+
+        ExecutorBinding subWorkflowExecutor = subWorkflow.BindAsExecutor("TextProcessingSubWorkflow");
+
+        PrefixExecutor prefix = new("INPUT: ");
+        PostProcessExecutor postProcess = new();
+
+        var mainWorkflow = new WorkflowBuilder(prefix)
+            .AddEdge(prefix, subWorkflowExecutor)
+            .AddEdge(subWorkflowExecutor, postProcess)
+            .WithOutputFrom(postProcess)
+            .Build();
+
+        await using Run run = await InProcessExecution.RunAsync(mainWorkflow, input);
+
+        foreach (WorkflowEvent evt in run.NewEvents)
+        {
+            if (evt is ExecutorCompletedEvent executorComplete && executorComplete.Data is not null)
+            {
+                yield return $"[{executorComplete.ExecutorId}] {executorComplete.Data}";
+            }
+            else if (evt is WorkflowOutputEvent output)
+            {
+                yield return $"Final Output: {output.Data}";
+            }
+        }
+    }
+
 }

@@ -40,4 +40,11 @@ public class AgentWorkflowController : ControllerBase
     {
         return _service.Groupchat(input);
     }
+
+    [Route("sub-workflow")]
+    [HttpPost]
+    public IAsyncEnumerable<string> SubWorkflow(string input = "directly communicates the key benefits")
+    {
+        return _service.SubWorkflow(input);
+    }
 }

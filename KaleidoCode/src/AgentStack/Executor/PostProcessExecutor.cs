@@ -1,12 +1,12 @@
 
 namespace AgentStack.Executor;
 
-public sealed class UppercaseExecutor() : Executor<string, string>("UppercaseExecutor")
+public sealed class PostProcessExecutor() : Executor<string, string>("PostProcessExecutor")
 {
     public override ValueTask<string> HandleAsync(string message, IWorkflowContext context, CancellationToken cancellationToken = default)
     {
-        string result = message.ToUpperInvariant();
-        Console.WriteLine($"[Uppercase] '{message}' → '{result}'");
+        string result = $"[FINAL] {message} [END]";
+        Console.WriteLine($"[PostProcess] '{message}' → '{result}'");
         return ValueTask.FromResult(result);
     }
 }
