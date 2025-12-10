@@ -15,9 +15,9 @@ public class AgentWorkflowController : ControllerBase
 
     [Route("sequential")]
     [HttpPost]
-    public IAsyncEnumerable<string> Sequential()
+    public IAsyncEnumerable<string> Sequential(bool streaming = false)
     {
-        return _service.Sequential();
+        return _service.Sequential(streaming);
     }
 
     [Route("concurrent")]

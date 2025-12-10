@@ -21,25 +21,41 @@ public class WorkflowService
         _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
     }
 
-    public async IAsyncEnumerable<string> Sequential()
+    public async IAsyncEnumerable<string> Sequential(bool streaming = false)
     {
         Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
         var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
+        // UppercaseExecutor uppercase = new(); 
         ReverseTextExecutor reverse = new();
         WorkflowBuilder builder = new(uppercase);
         builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
         var workflow = builder.Build();
-        await using Run run = await InProcessExecution.RunAsync(workflow, "Hello, World!");
-        foreach (WorkflowEvent evt in run.NewEvents)
+        if (streaming)
         {
-            switch (evt)
+            await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, input: "Hello, World!");
+            await foreach (WorkflowEvent evt in run.WatchStreamAsync())
             {
-                case ExecutorCompletedEvent executorComplete:
-                    yield return $"{executorComplete.ExecutorId}: {executorComplete.Data}";
-                    break;
+                if (evt is ExecutorCompletedEvent executorCompleted)
+                {
+                    yield return $"{executorCompleted.ExecutorId}: {executorCompleted.Data}";
+                }
+            }
+        }
+        else
+        {
+            await using Run run = await InProcessExecution.RunAsync(workflow, "Hello, World!");
+            foreach (WorkflowEvent evt in run.NewEvents)
+            {
+                switch (evt)
+                {
+                    case ExecutorCompletedEvent executorComplete:
+                        yield return $"{executorComplete.ExecutorId}: {executorComplete.Data}";
+                        break;
+                }
             }
         }
     }
+
     public async IAsyncEnumerable<string> Concurrent()
     {
         // Create the AI agents with specialized expertise
@@ -72,4 +88,5 @@ public class WorkflowService
             }
         }
     }
+    
 }
