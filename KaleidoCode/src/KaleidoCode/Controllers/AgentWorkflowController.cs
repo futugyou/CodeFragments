@@ -26,4 +26,11 @@ public class AgentWorkflowController : ControllerBase
     {
         return _service.Concurrent();
     }
+
+    [Route("handoffs")]
+    [HttpPost]
+    public IAsyncEnumerable<string> Handoffs(string question = "What is the square root of 2?")
+    {
+        return _service.Handoffs(question);
+    }
 }

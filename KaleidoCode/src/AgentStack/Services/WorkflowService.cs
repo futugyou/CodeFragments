@@ -1,4 +1,5 @@
 
+using System.Text;
 using AgentStack.Executor;
 
 namespace AgentStack.Services;
@@ -37,7 +38,12 @@ public class WorkflowService
             {
                 if (evt is ExecutorCompletedEvent executorCompleted)
                 {
-                    yield return $"{executorCompleted.ExecutorId}: {executorCompleted.Data}";
+                    yield return $"Completed: {executorCompleted.ExecutorId}: {executorCompleted.Data}";
+                }
+                // this work have no agent, so we can not use AgentRunUpdateEvent
+                if (evt is AgentRunUpdateEvent executorComplete)
+                {
+                    yield return $"RunUpdate: {executorComplete.ExecutorId}: {executorComplete.Data}";
                 }
             }
         }
@@ -81,12 +87,80 @@ public class WorkflowService
         await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, "What is temperature?");
         await foreach (WorkflowEvent evt in run.WatchStreamAsync())
         {
-            if (evt is WorkflowOutputEvent output)
+            switch (evt)
             {
-                yield return $"Workflow completed with results:\n{output.Data}";
-                break;
+                case AgentRunUpdateEvent output:
+                    yield return $"Workflow RunUpdate with results:\n{output.Data}";
+                    break;
+                case ExecutorCompletedEvent output:
+                    yield return $"Completed: {output.ExecutorId}: {output.Data}";
+                    break;
+                case WorkflowOutputEvent output:
+                    yield return $"Workflow Output:{output.SourceId}:  {output.Data}";
+                    break;
             }
         }
     }
-    
+
+    public async IAsyncEnumerable<string> Handoffs(string question)
+    {
+        List<ChatMessage> messages = [new(ChatRole.User, question)];
+        ChatClientAgent historyTutor = new(_chatClient,
+                   "You provide assistance with historical queries. Explain important events and context clearly. Only respond about history.",
+                   "history_tutor",
+                   "Specialist agent for historical questions");
+        ChatClientAgent mathTutor = new(_chatClient,
+            "You provide help with math problems. Explain your reasoning at each step and include examples. Only respond about math.",
+            "math_tutor",
+            "Specialist agent for math questions");
+        ChatClientAgent triageAgent = new(_chatClient,
+            "You determine which agent to use based on the user's homework question. ALWAYS handoff to another agent.",
+            "triage_agent",
+            "Routes messages to the appropriate specialist agent");
+        var workflow = AgentWorkflowBuilder.CreateHandoffBuilderWith(triageAgent)
+            .WithHandoffs(triageAgent, [mathTutor, historyTutor])
+            .WithHandoffs([mathTutor, historyTutor], triageAgent)
+            .Build();
+        await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, messages);
+        await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
+        string? lastExecutorId = null;
+        StringBuilder sb = new();
+        await foreach (WorkflowEvent evt in run.WatchStreamAsync())
+        {
+            switch (evt)
+            {
+                case AgentRunUpdateEvent output:
+                    if (output.ExecutorId != lastExecutorId)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            yield return sb.ToString();
+                        }
+                        sb = new();
+                        lastExecutorId = output.ExecutorId;
+                        sb.Append($"Workflow RunUpdate: {output.ExecutorId} ");
+                    }
+
+                    sb.Append($"{output.Update.Text}");
+                    break;
+                case ExecutorCompletedEvent output:
+                    yield return $"Completed: {output.ExecutorId}: {output.Data}";
+                    break;
+                // WorkflowOutputEvent is enough，no need to use AgentRunUpdateEvent/ExecutorCompletedEvent
+                case WorkflowOutputEvent output:
+                    var msgs = (List<ChatMessage>)output.Data!;
+                    foreach (var msg in msgs)
+                    {
+                        yield return $"Workflow Output: {output.SourceId} {msg.AuthorName}:  {msg.Text}";
+                    }
+                    break;
+            }
+        }
+
+        if (sb.Length > 0)
+        {
+            yield return sb.ToString();
+        }
+    }
+
 }
