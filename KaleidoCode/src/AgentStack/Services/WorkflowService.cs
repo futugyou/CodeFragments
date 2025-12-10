@@ -163,4 +163,56 @@ public class WorkflowService
         }
     }
 
+    public async IAsyncEnumerable<string> Groupchat(string input)
+    {
+        List<ChatMessage> messages = [new(ChatRole.User, input)];
+        var workflow = AgentWorkflowBuilder.CreateGroupChatBuilderWith(agents => new RoundRobinGroupChatManager(agents) { MaximumIterationCount = 3 })
+                        .AddParticipants(from lang in (string[])["French", "Spanish", "English"] select GetTranslationAgent(lang, _chatClient))
+                        .Build();
+        await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, messages);
+        await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
+        string? lastExecutorId = null;
+        StringBuilder sb = new();
+        await foreach (WorkflowEvent evt in run.WatchStreamAsync())
+        {
+            switch (evt)
+            {
+                case AgentRunUpdateEvent output:
+                    if (output.ExecutorId != lastExecutorId)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            yield return sb.ToString();
+                        }
+                        sb = new();
+                        lastExecutorId = output.ExecutorId;
+                        sb.Append($"Workflow RunUpdate! ExecutorId: {output.ExecutorId}, Text: ");
+                    }
+
+                    sb.Append($"{output.Update.Text}");
+                    break;
+                case ExecutorCompletedEvent output:
+                    yield return $"Completed! ExecutorId: {output.ExecutorId}, Data: {output.Data}";
+                    break;
+                // WorkflowOutputEvent is enough，no need to use AgentRunUpdateEvent/ExecutorCompletedEvent
+                case WorkflowOutputEvent output:
+                    var msgs = (List<ChatMessage>)output.Data!;
+                    foreach (var msg in msgs)
+                    {
+                        yield return $"Workflow Output! SourceId: {output.SourceId}, AuthorName: {msg.AuthorName}, Text: {msg.Text}";
+                    }
+                    break;
+            }
+        }
+
+        if (sb.Length > 0)
+        {
+            yield return sb.ToString();
+        }
+    }
+
+    private static ChatClientAgent GetTranslationAgent(string targetLanguage, IChatClient chatClient) =>
+           new(chatClient,
+               $"You are a translation assistant who only responds in {targetLanguage}. Respond to any " +
+               $"input by outputting the name of the input language and then translating the input to {targetLanguage}.");
 }

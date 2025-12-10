@@ -33,4 +33,11 @@ public class AgentWorkflowController : ControllerBase
     {
         return _service.Handoffs(question);
     }
+
+    [Route("groupchat")]
+    [HttpPost]
+    public IAsyncEnumerable<string> Groupchat(string input = "Excellent! This slogan is clear, impactful, and directly communicates the key benefits")
+    {
+        return _service.Groupchat(input);
+    }
 }
