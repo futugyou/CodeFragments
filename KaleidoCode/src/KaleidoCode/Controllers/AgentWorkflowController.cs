@@ -47,4 +47,11 @@ public class AgentWorkflowController : ControllerBase
     {
         return _service.SubWorkflow(input);
     }
+
+    [Route("switch-routes")]
+    [HttpPost]
+    public IAsyncEnumerable<string> SwitchRoutes(string input = "Write a 200-word blog post about AI ethics. Make it thoughtful and engaging.")
+    {
+        return _service.SwitchRoutes(input,3);
+    }
 }

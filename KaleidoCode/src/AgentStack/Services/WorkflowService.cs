@@ -254,4 +254,35 @@ public class WorkflowService
         }
     }
 
+    public async IAsyncEnumerable<string> SwitchRoutes(string input, int maxIterations = 3)
+    {
+        WriterExecutor writer = new(_chatClient);
+        CriticExecutor critic = new(_chatClient, maxIterations);
+        SummaryExecutor summary = new(_chatClient);
+
+        // Build the workflow with conditional routing based on critic's decision
+        WorkflowBuilder workflowBuilder = new WorkflowBuilder(writer)
+            .AddEdge(writer, critic)
+            .AddSwitch(critic, sw => sw
+                .AddCase<CriticDecision>(cd => cd?.Approved == true, summary)
+                .AddCase<CriticDecision>(cd => cd?.Approved == false, writer))
+            .WithOutputFrom(summary); 
+
+        Workflow workflow = workflowBuilder.Build();
+
+        await using Run run = await InProcessExecution.RunAsync(workflow, input);
+
+        foreach (WorkflowEvent evt in run.NewEvents)
+        {
+            if (evt is ExecutorCompletedEvent executorComplete && executorComplete.Data is not null)
+            {
+                yield return $"[{executorComplete.ExecutorId}] {executorComplete.Data}";
+            }
+            else if (evt is WorkflowOutputEvent output)
+            {
+                yield return $"Final Output: {output.Data}";
+            }
+        }
+    }
+
 }
