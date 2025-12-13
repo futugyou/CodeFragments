@@ -59,6 +59,14 @@ public class AgentController : ControllerBase
         return _agentService.Approval(allowChangeState);
     }
 
+
+    [Route("approval2")]
+    [HttpPost]
+    public IAsyncEnumerable<string> Approval2(string? conversation, bool allowChangeState = false)
+    {
+        return _agentService.Approval2(conversation, allowChangeState);
+    }
+
     /// <summary>
     /// This example will not run successfully, regardless of whether an object or a list is used in CreateJsonSchema. 
     /// The reason is that the stupid OpenAI requires JsonSchema to be an object, meaning GetLightsAsync cannot directly return a list; 

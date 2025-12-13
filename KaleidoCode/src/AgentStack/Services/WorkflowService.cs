@@ -269,7 +269,6 @@ public class WorkflowService
             .WithOutputFrom(summary); 
 
         Workflow workflow = workflowBuilder.Build();
-
         await using Run run = await InProcessExecution.RunAsync(workflow, input);
 
         foreach (WorkflowEvent evt in run.NewEvents)

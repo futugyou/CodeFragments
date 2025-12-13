@@ -12,6 +12,7 @@ public class AgentService
     private readonly AgentOptions _options;
     private readonly IChatClient _chatClient;
     private readonly VectorStore _vectorStore;
+    private static readonly Dictionary<string, string> _threadStore = [];
 
     public AgentService(IOptionsMonitor<AgentOptions> optionsMonitor, [FromKeyedServices("AgentVectorStore")] VectorStore vectorStore)
     {
@@ -410,6 +411,150 @@ public class AgentService
         var response = await agent.RunAsync(message, thread);
         yield return response.Text;
     }
+
+    public async IAsyncEnumerable<string> Approval2(string? conversation = null, bool allowChangeState = false)
+    {
+        var lightPlugin = new LightPlugin();
+        AITool[] tools = [
+            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
+            new ApprovalRequiredAIFunction(AIFunctionFactory.Create(lightPlugin.ChangeStateAsync))
+        ];
+
+        conversation ??= Guid.NewGuid().ToString("N");
+        _threadStore.TryGetValue(conversation, out var threadString);
+
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Name = "Joker",
+            ChatOptions = new()
+            {
+                Instructions = "You are a useful assistant",
+                Tools = tools,
+                ConversationId = conversation,
+            },
+
+            ChatMessageStoreFactory = ctx =>
+            {
+                return new InMemoryChatMessageStore(ctx.SerializedState, ctx.JsonSerializerOptions);
+            }
+        });
+        agent = agent
+            .AsBuilder()
+                .Use(AgentMiddleware.FunctionCallingMiddleware)
+            .Build();
+
+        AgentThread thread = threadString == null ? agent.GetNewThread() : agent.DeserializeThread(JsonSerializer.Deserialize<JsonElement>(threadString));
+        List<ChatMessage> userMessage = [new ChatMessage(ChatRole.User, "Could you please turn off all the lights?")];
+
+        if (thread is ChatClientAgentThread typedThread)
+        {
+            if (typedThread.MessageStore != null)
+            {
+                var messages = (await typedThread.MessageStore.GetMessagesAsync().ConfigureAwait(false)).ToList() ?? [];
+                var requestContent = messages.SelectMany(x => x.Contents).OfType<FunctionApprovalRequestContent>().FirstOrDefault();
+                var allreadyApproved = messages.SelectMany(x => x.Contents)
+                                                .OfType<FunctionApprovalResponseContent>()
+                                                .Any() == true && messages.SelectMany(x => x.Contents)
+                                                          .OfType<FunctionApprovalResponseContent>()
+                                                          .All(p => p.Approved);
+
+                if (requestContent != null && !allreadyApproved)
+                {
+                    userMessage = ProcessFunctionApprovals(messages, allowChangeState);
+                }
+            }
+        }
+
+        try
+        {
+            var response = await agent.RunAsync(userMessage, thread);
+
+            _threadStore[conversation] = thread.Serialize().GetRawText();
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+
+        yield return _threadStore[conversation];
+    }
+
+    private static List<ChatMessage> ProcessFunctionApprovals(List<ChatMessage> messages, bool approved = false)
+    {
+        List<ChatMessage>? result = null;
+
+        for (var messageIndex = 0; messageIndex < messages.Count; messageIndex++)
+        {
+            var message = messages[messageIndex];
+
+            bool hasApprovalRequest = false;
+            int approvalRequestIndex = -1;
+            bool hasApprovalResponse = false;
+            FunctionApprovalResponseContent? approvalResponseContent = null;
+            for (var contentIndex = 0; contentIndex < message.Contents.Count; contentIndex++)
+            {
+                var content = message.Contents[contentIndex];
+                if (content is FunctionApprovalRequestContent approvalRequest)
+                {
+                    hasApprovalRequest = true;
+                    approvalRequestIndex = contentIndex;
+                    approvalResponseContent = approvalRequest.CreateResponse(approved);
+                }
+                else if (content is FunctionApprovalResponseContent _)
+                {
+                    hasApprovalResponse = true;
+                }
+            }
+
+            if (hasApprovalRequest && !hasApprovalResponse && approvalResponseContent != null)
+            {
+                var transformedContents = CopyContentsUpToIndex(message.Contents, approvalRequestIndex);
+                transformedContents.Add(approvalResponseContent);
+                var newMessage = new ChatMessage(message.Role, transformedContents)
+                {
+                    AuthorName = message.AuthorName,
+                    MessageId = message.MessageId,
+                    CreatedAt = message.CreatedAt,
+                    RawRepresentation = message.RawRepresentation,
+                    AdditionalProperties = message.AdditionalProperties
+                };
+                result ??= CopyMessagesUpToIndex(messages, messageIndex);
+                result.Add(newMessage);
+            }
+        }
+
+        return result ?? messages;
+    }
+
+    private static List<ChatMessage> CopyMessagesUpToIndex(List<ChatMessage> messages, int index)
+    {
+        var result = new List<ChatMessage>(index);
+        for (int i = 0; i < index; i++)
+        {
+            result.Add(messages[i]);
+        }
+        return result;
+    }
+
+    private static List<AIContent> CopyContentsUpToIndex(IList<AIContent> contents, int index)
+    {
+        var result = new List<AIContent>(index);
+        for (int i = 0; i < index; i++)
+        {
+            result.Add(contents[i]);
+        }
+        return result;
+    }
+}
+
+public sealed class ApprovalResponse
+{
+    [JsonPropertyName("approval_id")]
+    public required string ApprovalId { get; init; }
+
+    [JsonPropertyName("approved")]
+    public required bool Approved { get; init; }
 }
 
 public enum ChatReducerType
