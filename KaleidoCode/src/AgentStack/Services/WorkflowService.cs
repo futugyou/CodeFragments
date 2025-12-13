@@ -266,7 +266,7 @@ public class WorkflowService
             .AddSwitch(critic, sw => sw
                 .AddCase<CriticDecision>(cd => cd?.Approved == true, summary)
                 .AddCase<CriticDecision>(cd => cd?.Approved == false, writer))
-            .WithOutputFrom(summary); 
+            .WithOutputFrom(summary);
 
         Workflow workflow = workflowBuilder.Build();
         await using Run run = await InProcessExecution.RunAsync(workflow, input);
@@ -281,6 +281,43 @@ public class WorkflowService
             {
                 yield return $"Final Output: {output.Data}";
             }
+        }
+    }
+
+    public async IAsyncEnumerable<string> Checkpoint()
+    {
+        var checkpointManager = CheckpointManager.Default;
+        var checkpoints = new List<CheckpointInfo>();
+
+        UppercaseExecutor uppercase = new();
+        ReverseTextExecutor reverse = new();
+        WorkflowBuilder builder = new(uppercase);
+        builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
+        var workflow = builder.Build();
+        await using var run = await InProcessExecution.StreamAsync(workflow, input: "Hello, World!", checkpointManager);
+        await foreach (WorkflowEvent evt in run.Run.WatchStreamAsync())
+        {
+            if (evt is ExecutorCompletedEvent executorCompleted)
+            {
+                yield return $"Completed: {executorCompleted.ExecutorId}: {executorCompleted.Data}";
+            }
+
+            // this work have no agent, so we can not use AgentRunUpdateEvent
+            if (evt is AgentRunUpdateEvent executorComplete)
+            {
+                yield return $"RunUpdate: {executorComplete.ExecutorId}: {executorComplete.Data}";
+            }
+
+            if (evt is SuperStepCompletedEvent superStepCompletedEvt)
+            {
+                CheckpointInfo? checkpoint = superStepCompletedEvt.CompletionInfo!.Checkpoint;
+                if (checkpoint is not null)
+                {
+                    yield return $"CheckpointInfo: {checkpoint.CheckpointId}: {checkpoint.RunId}";
+                    checkpoints.Add(checkpoint);
+                }
+            }
+
         }
     }
 

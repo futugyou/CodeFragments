@@ -52,6 +52,13 @@ public class AgentWorkflowController : ControllerBase
     [HttpPost]
     public IAsyncEnumerable<string> SwitchRoutes(string input = "Write a 200-word blog post about AI ethics. Make it thoughtful and engaging.")
     {
-        return _service.SwitchRoutes(input,3);
+        return _service.SwitchRoutes(input, 3);
+    }
+
+    [Route("checkpoint")]
+    [HttpPost]
+    public IAsyncEnumerable<string> Checkpoint()
+    {
+        return _service.Checkpoint();
     }
 }
