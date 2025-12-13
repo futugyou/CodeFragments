@@ -446,22 +446,13 @@ public class AgentService
         AgentThread thread = threadString == null ? agent.GetNewThread() : agent.DeserializeThread(JsonSerializer.Deserialize<JsonElement>(threadString));
         List<ChatMessage> userMessage = [new ChatMessage(ChatRole.User, "Could you please turn off all the lights?")];
 
-        if (thread is ChatClientAgentThread typedThread)
+        if (thread is ChatClientAgentThread typedThread && typedThread.MessageStore != null)
         {
-            if (typedThread.MessageStore != null)
+            var messages = (await typedThread.MessageStore.GetMessagesAsync().ConfigureAwait(false)).ToList() ?? [];
+            var approvalMessage = ProcessFunctionApprovals(messages, allowChangeState);
+            if (approvalMessage?.Count > 0)
             {
-                var messages = (await typedThread.MessageStore.GetMessagesAsync().ConfigureAwait(false)).ToList() ?? [];
-                var requestContent = messages.SelectMany(x => x.Contents).OfType<FunctionApprovalRequestContent>().FirstOrDefault();
-                var allreadyApproved = messages.SelectMany(x => x.Contents)
-                                                .OfType<FunctionApprovalResponseContent>()
-                                                .Any() == true && messages.SelectMany(x => x.Contents)
-                                                          .OfType<FunctionApprovalResponseContent>()
-                                                          .All(p => p.Approved);
-
-                if (requestContent != null && !allreadyApproved)
-                {
-                    userMessage = ProcessFunctionApprovals(messages, allowChangeState);
-                }
+                userMessage = approvalMessage;
             }
         }
 
@@ -471,7 +462,7 @@ public class AgentService
 
             _threadStore[conversation] = thread.Serialize().GetRawText();
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
@@ -486,7 +477,7 @@ public class AgentService
         for (var messageIndex = 0; messageIndex < messages.Count; messageIndex++)
         {
             var message = messages[messageIndex];
- 
+
             bool hasApprovalResponse = false;
             FunctionApprovalRequestContent? approvalRequestContent = null;
             for (var contentIndex = 0; contentIndex < message.Contents.Count; contentIndex++)
@@ -494,7 +485,7 @@ public class AgentService
                 var content = message.Contents[contentIndex];
                 if (content is FunctionApprovalRequestContent approvalRequest)
                 {
-                    approvalRequestContent = approvalRequest; 
+                    approvalRequestContent = approvalRequest;
                 }
                 else if (content is FunctionApprovalResponseContent _)
                 {
@@ -503,7 +494,7 @@ public class AgentService
             }
 
             if (!hasApprovalResponse && approvalRequestContent != null)
-            { 
+            {
                 result.Add(new ChatMessage(ChatRole.User, [approvalRequestContent.CreateResponse(approved)]));
 
                 // If don't add the following code, it will get an error `messages with role 'tool' must be a response to a preceeding message with 'tool_calls'`.
@@ -515,13 +506,13 @@ public class AgentService
                     MessageId = "chatcmpl-" + Guid.NewGuid().ToString("N"),
                 };
                 result.Add(callMessage);
-            } 
+            }
         }
 
         return result;
-    } 
+    }
 }
- 
+
 public enum ChatReducerType
 {
     SummarizingChatReducer, MessageCountingChatReducer
