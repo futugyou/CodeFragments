@@ -291,10 +291,13 @@ public class WorkflowService
 
         UppercaseExecutor uppercase = new();
         ReverseTextExecutor reverse = new();
+
         WorkflowBuilder builder = new(uppercase);
         builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
         var workflow = builder.Build();
+
         await using var run = await InProcessExecution.StreamAsync(workflow, input: "Hello, World!", checkpointManager);
+
         await foreach (WorkflowEvent evt in run.Run.WatchStreamAsync())
         {
             if (evt is ExecutorCompletedEvent executorCompleted)
@@ -317,7 +320,26 @@ public class WorkflowService
                     checkpoints.Add(checkpoint);
                 }
             }
+        }
 
+        yield return "";
+
+        CheckpointInfo savedCheckpoint = checkpoints[0];
+        await run.RestoreCheckpointAsync(savedCheckpoint, CancellationToken.None);
+        await foreach (WorkflowEvent evt in run.Run.WatchStreamAsync())
+        {
+            switch (evt)
+            {
+                case RequestInfoEvent requestInputEvt:
+                    yield return $"RequestInfoEvent: {requestInputEvt.Request.Data}";
+                    break;
+                case ExecutorCompletedEvent executorCompletedEvt:
+                    yield return $"Completed: {executorCompletedEvt.ExecutorId}: {executorCompletedEvt.Data}";
+                    break;
+                case WorkflowOutputEvent workflowOutputEvt:
+                    yield return $"Workflow completed with result: {workflowOutputEvt.Data}";
+                    break;
+            }
         }
     }
 
