@@ -482,24 +482,19 @@ public class AgentService
 
     private static List<ChatMessage> ProcessFunctionApprovals(List<ChatMessage> messages, bool approved = false)
     {
-        List<ChatMessage>? result = null;
-
+        List<ChatMessage> result = [];
         for (var messageIndex = 0; messageIndex < messages.Count; messageIndex++)
         {
             var message = messages[messageIndex];
-
-            bool hasApprovalRequest = false;
-            int approvalRequestIndex = -1;
+ 
             bool hasApprovalResponse = false;
-            FunctionApprovalResponseContent? approvalResponseContent = null;
+            FunctionApprovalRequestContent? approvalRequestContent = null;
             for (var contentIndex = 0; contentIndex < message.Contents.Count; contentIndex++)
             {
                 var content = message.Contents[contentIndex];
                 if (content is FunctionApprovalRequestContent approvalRequest)
                 {
-                    hasApprovalRequest = true;
-                    approvalRequestIndex = contentIndex;
-                    approvalResponseContent = approvalRequest.CreateResponse(approved);
+                    approvalRequestContent = approvalRequest; 
                 }
                 else if (content is FunctionApprovalResponseContent _)
                 {
@@ -507,56 +502,26 @@ public class AgentService
                 }
             }
 
-            if (hasApprovalRequest && !hasApprovalResponse && approvalResponseContent != null)
-            {
-                var transformedContents = CopyContentsUpToIndex(message.Contents, approvalRequestIndex);
-                transformedContents.Add(approvalResponseContent);
-                var newMessage = new ChatMessage(message.Role, transformedContents)
+            if (!hasApprovalResponse && approvalRequestContent != null)
+            { 
+                result.Add(new ChatMessage(ChatRole.User, [approvalRequestContent.CreateResponse(approved)]));
+
+                // If don't add the following code, it will get an error `messages with role 'tool' must be a response to a preceeding message with 'tool_calls'`.
+                // If add the following code, `thread.Serialize().GetRawText()` will contain a duplicate `"$type": "functionCall"` entry.
+                var callMessage = new ChatMessage(ChatRole.Assistant, [approvalRequestContent.FunctionCall])
                 {
                     AuthorName = message.AuthorName,
-                    MessageId = message.MessageId,
-                    CreatedAt = message.CreatedAt,
-                    RawRepresentation = message.RawRepresentation,
-                    AdditionalProperties = message.AdditionalProperties
+                    CreatedAt = DateTime.UtcNow,
+                    MessageId = "chatcmpl-" + Guid.NewGuid().ToString("N"),
                 };
-                result ??= CopyMessagesUpToIndex(messages, messageIndex);
-                result.Add(newMessage);
-            }
+                result.Add(callMessage);
+            } 
         }
 
-        return result ?? messages;
-    }
-
-    private static List<ChatMessage> CopyMessagesUpToIndex(List<ChatMessage> messages, int index)
-    {
-        var result = new List<ChatMessage>(index);
-        for (int i = 0; i < index; i++)
-        {
-            result.Add(messages[i]);
-        }
         return result;
-    }
-
-    private static List<AIContent> CopyContentsUpToIndex(IList<AIContent> contents, int index)
-    {
-        var result = new List<AIContent>(index);
-        for (int i = 0; i < index; i++)
-        {
-            result.Add(contents[i]);
-        }
-        return result;
-    }
+    } 
 }
-
-public sealed class ApprovalResponse
-{
-    [JsonPropertyName("approval_id")]
-    public required string ApprovalId { get; init; }
-
-    [JsonPropertyName("approved")]
-    public required bool Approved { get; init; }
-}
-
+ 
 public enum ChatReducerType
 {
     SummarizingChatReducer, MessageCountingChatReducer
