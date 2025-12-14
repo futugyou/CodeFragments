@@ -3,7 +3,6 @@ using AgentStack;
 using CompanyReports;
 using GraphQLStack;
 using KaleidoCode.Extensions;
-using KaleidoCode.HealthCheck;
 using KaleidoCode.HttpDiagnosticsExtensions;
 using KaleidoCode.HostedService;
 using KaleidoCode.MQTT;
@@ -46,6 +45,7 @@ builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();
+// Enabling endpoint discovery allows ASP.NET Core to automatically identify Minimal API endpoints and add them to the API explorer.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -57,7 +57,6 @@ builder.Services.AddRefitClientExtension(configuration);
 
 builder.Services.AddGraphQL(configuration, builder.Environment);
 
-builder.Services.AddHealthCheckExtensions(configuration);
 builder.Services.AddDIExtension();
 // The path must be absolute
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
@@ -115,7 +114,7 @@ app.UseWebSockets();
 app.UseGraphQLCustom();
 
 app.MapControllers();
-app.UseHealthCheckExtensions();
+app.MapDefaultEndpoints();
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
 app.RoutePatternFactoryExtension();

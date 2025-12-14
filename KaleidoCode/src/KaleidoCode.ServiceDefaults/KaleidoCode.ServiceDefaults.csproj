@@ -10,6 +10,10 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
 
+		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
+		<PackageReference Include="KubernetesClient" Version="18.0.13" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />

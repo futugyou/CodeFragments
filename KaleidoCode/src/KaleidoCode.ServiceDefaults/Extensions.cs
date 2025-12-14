@@ -16,9 +16,6 @@ namespace Microsoft.Extensions.Hosting;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
-    private const string HealthEndpointPath = "/health";
-    private const string AlivenessEndpointPath = "/alive";
-
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         var configuration = builder.Configuration;
@@ -26,7 +23,7 @@ public static class Extensions
 
         builder.AddOpenTelemetryExtension();
 
-        builder.AddDefaultHealthChecks();
+        builder.AddHealthCheckExtensions();
 
         builder.AddAuthorizationExtension();
 
@@ -56,14 +53,6 @@ public static class Extensions
         builder.Configuration.AddAwsParameterStore();
         return builder;
     }
-    public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        builder.Services.AddHealthChecks()
-            // Add a default liveness check to ensure app is responsive
-            .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
-
-        return builder;
-    }
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
@@ -71,14 +60,7 @@ public static class Extensions
         // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
         if (app.Environment.IsDevelopment())
         {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks(HealthEndpointPath);
-
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
+            app.UseHealthCheckExtensions();
         }
 
         return app;

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace KaleidoCode.HealthCheck;
+namespace Microsoft.Extensions.DependencyInjection;
 
-public class DemoHealthCheck : IHealthCheck
+public class DefaultHealthCheck : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
