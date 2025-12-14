@@ -20,7 +20,7 @@ using KernelMemoryStack;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ApplicationName = "KaleidoCode",
+    ApplicationName = "Webhost",
     // System.IO.DirectoryNotFoundException: /workspaces/CodeFragments/KaleidoCode/wwwroot/
     ContentRootPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), ""),
     EnvironmentName = "Development"

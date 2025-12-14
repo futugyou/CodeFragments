@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/KaleidoCode/KaleidoCode.csproj" />
+    <Project Path="src/KaleidoCode/Webhost/Webhost.csproj" />
+    <Project Path="src/KaleidoCode.AppHost/KaleidoCode.AppHost.csproj" />
+    <Project Path="src/KaleidoCode.ServiceDefaults/KaleidoCode.ServiceDefaults.csproj" />
   </Folder>
 </Solution>

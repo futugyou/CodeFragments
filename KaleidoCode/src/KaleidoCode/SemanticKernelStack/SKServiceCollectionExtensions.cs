@@ -80,7 +80,16 @@ public static class SKServiceCollectionExtensions
 
         foreach (var item in config.McpServers)
         {
-            await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
+            try
+            {
+                await kernelBuilder.Plugins.AddMcpFunctionsFromSseServerAsync(item.Key, item.Value);
+            }
+            catch (Exception ex)
+            {
+                // An error will occur if the Node.js environment is not installed.
+                // `An error occurred trying to start process 'npx'`
+                Console.WriteLine($"Error processing McpServer {item.Key}: {ex.Message}");
+            }
         }
 
         services.AddSingleton<IAutoFunctionInvocationFilter, ToolCallIdFilter>();
