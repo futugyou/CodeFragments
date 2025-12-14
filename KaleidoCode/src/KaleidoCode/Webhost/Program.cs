@@ -28,9 +28,9 @@ var options = new WebApplicationOptions
 
 var builder = WebApplication.CreateBuilder(options);
 
+builder.AddServiceDefaults();
+
 var configuration = builder.Configuration;
-configuration.AddJsonFileExtensions("ok.json", true, true);
-configuration.AddAwsParameterStore();
 
 builder.AddKestrelExtensions(configuration);
 

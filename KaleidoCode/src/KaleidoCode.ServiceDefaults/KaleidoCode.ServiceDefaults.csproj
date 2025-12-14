@@ -19,4 +19,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
   </ItemGroup>
 
+  <ItemGroup>  
+    <ProjectReference Include="..\Microsoft.Extensions.Configuration.AmazonSSM\Microsoft.Extensions.Configuration.AmazonSSM.csproj" />
+  </ItemGroup>
 </Project>
