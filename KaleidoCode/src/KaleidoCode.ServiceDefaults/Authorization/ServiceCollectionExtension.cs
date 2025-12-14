@@ -1,4 +1,6 @@
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Protocols;
@@ -6,15 +8,12 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
-namespace KaleidoCode.Auth;
+namespace Microsoft.Extensions.DependencyInjection;
 
-public static class ServiceCollectionExtensions
+public static class AuthorizationServiceCollectionExtension
 {
-    public static IServiceCollection AddAuthExtension(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthorizationExtension(this IServiceCollection services, IConfiguration configuration)
     {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configuration);
-
         services.Configure<AuthOptions>(configuration.GetSection("AuthOptions"));
         var config = configuration.GetSection("AuthOptions").Get<AuthOptions>() ?? new();
 
@@ -41,11 +40,12 @@ public static class ServiceCollectionExtensions
 
         services
             .AddAuthorizationBuilder()
-            .AddPolicy("AtLeast21", policy => policy.Requirements.Add(new MinimumAgeRequirement(21)))
-            .AddPolicy("HasCountry", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == ClaimTypes.Country)));
+            .AddPolicy("AtLeast18", policy => policy.Requirements.Add(new MinimumAgeRequirement(18)))
+            .AddPolicy("HasEmail", policy => policy.RequireAssertion(context => context.User.HasClaim(c => c.Type == ClaimTypes.Email)));
 
         services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();
 
         return services;
     }
+
 }

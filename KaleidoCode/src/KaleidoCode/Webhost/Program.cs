@@ -2,7 +2,6 @@
 using AgentStack;
 using CompanyReports;
 using GraphQLStack;
-using KaleidoCode.Auth;
 using KaleidoCode.Extensions;
 using KaleidoCode.HealthCheck;
 using KaleidoCode.HttpDiagnosticsExtensions;
@@ -36,7 +35,6 @@ builder.AddKestrelExtensions(configuration);
 
 builder.Services.AddHttpDiagnosticsExtensions(configuration);
 builder.Services.AddCustomMetricsSimulation(configuration);
-builder.Services.AddAuthExtension(configuration);
 
 Console.WriteLine(builder.Environment.ApplicationName);
 Console.WriteLine(builder.Environment.ContentRootPath);

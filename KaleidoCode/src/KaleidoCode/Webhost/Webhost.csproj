@@ -10,13 +10,10 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="KubernetesClient" Version="18.0.13" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0" />
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
 		<PackageReference Include="MQTTnet" Version="5.0.1.1416" />
 		<PackageReference Include="MQTTnet.AspNetCore" Version="5.0.1.1416" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="9.0.2" />

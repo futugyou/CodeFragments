@@ -28,6 +28,8 @@ public static class Extensions
 
         builder.AddDefaultHealthChecks();
 
+        builder.AddAuthorizationExtension();
+
         builder.Services.AddServiceDiscovery();
 
         builder.Services.ConfigureHttpClientDefaults(http =>
@@ -54,7 +56,6 @@ public static class Extensions
         builder.Configuration.AddAwsParameterStore();
         return builder;
     }
-
     public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Services.AddHealthChecks()

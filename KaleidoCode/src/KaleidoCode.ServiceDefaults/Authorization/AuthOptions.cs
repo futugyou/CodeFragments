@@ -1,5 +1,5 @@
 
-namespace KaleidoCode.Auth;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public class AuthOptions
 {
