@@ -35,7 +35,6 @@ var configuration = builder.Configuration;
 builder.AddKestrelExtensions(configuration);
 
 builder.Services.AddHttpDiagnosticsExtensions(configuration);
-builder.Services.AddOpenTelemetryExtension(configuration);
 builder.Services.AddCustomMetricsSimulation(configuration);
 builder.Services.AddAuthExtension(configuration);
 

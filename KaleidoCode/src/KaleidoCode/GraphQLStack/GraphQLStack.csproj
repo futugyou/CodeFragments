@@ -25,12 +25,6 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.10.8" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.14.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.10.1" />
 	</ItemGroup>
 </Project>
