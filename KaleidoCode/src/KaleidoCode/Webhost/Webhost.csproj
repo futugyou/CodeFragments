@@ -44,7 +44,6 @@
 	  <ProjectReference Include="..\OpenSearchStack\OpenSearchStack.csproj" />
 	  <ProjectReference Include="..\SemanticKernelStack\SemanticKernelStack.csproj" />
 	  <ProjectReference Include="..\KernelMemoryStack\KernelMemoryStack.csproj" />
-	  <ProjectReference Include="..\AgentStack\AgentStack.csproj" />
 	  <ProjectReference Include="..\..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
 
-using AgentStack;
 using CompanyReports;
 using GraphQLStack;
 using KaleidoCode.Extensions;
@@ -62,7 +61,6 @@ builder.Services.AddDIExtension();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 
-builder.Services.AddAgentServices(configuration);
 await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);
 
@@ -123,7 +121,6 @@ await app.InitAIData();
 
 app.MapMcp();
 app.MapA2AExtensions();
-app.MapAguiExtensions();
 
 // this will win
 // app.Run("http://localhost:5004/");
