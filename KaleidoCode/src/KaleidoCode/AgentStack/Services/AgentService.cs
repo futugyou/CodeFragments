@@ -3,7 +3,6 @@ using AgentStack.Skills;
 using AgentStack.Middleware;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
-using Microsoft.Agents.AI.Data;
 
 namespace AgentStack.Services;
 

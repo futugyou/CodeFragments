@@ -123,6 +123,7 @@ await app.InitAIData();
 
 app.MapMcp();
 app.MapA2AExtensions();
+app.MapAguiExtensions();
 
 // this will win
 // app.Run("http://localhost:5004/");
