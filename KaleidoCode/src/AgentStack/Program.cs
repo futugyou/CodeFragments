@@ -29,6 +29,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAgentEndpoints();
-
+app.UseWorkflowEndpoints();
 app.MapAguiExtensions();
+
 app.Run();
