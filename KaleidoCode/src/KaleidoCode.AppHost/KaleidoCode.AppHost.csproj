@@ -2,14 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KaleidoCode\Webhost\Webhost.csproj" />
+    <ProjectReference Include="..\AgentStack\AgentStack.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <UserSecretsId>8e529c23-9b63-48a0-af73-db71fddf18b1</UserSecretsId>
   </PropertyGroup>
 
 </Project>
