@@ -33,6 +33,27 @@ public static class ServiceCollectionExtensions
             return client.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
         });
 
+        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(sp =>
+        {
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+            var _options = sp.GetRequiredService<IOptionsMonitor<AgentOptions>>().CurrentValue;
+            var clientOption = new OpenAIClientOptions();
+            clientOption.Endpoint = new Uri(_options.Embedding.Endpoint);
+            var builder = new OpenAIClient(
+                   credential: new ApiKeyCredential(_options.Embedding.ApiKey),
+                   options: clientOption)
+               .GetEmbeddingClient(_options.Embedding.ModelId)
+               .AsIEmbeddingGenerator(_options.Embedding.Dimensions)
+               .AsBuilder();
+
+            if (loggerFactory is not null)
+            {
+                builder.UseLogging(loggerFactory);
+            }
+
+            return builder.Build();
+        });
+
         services.AddKeyedPostgresVectorStore("AgentVectorStore",
             connectionStringProvider: _ => connectionString,
             optionsProvider: sp =>
