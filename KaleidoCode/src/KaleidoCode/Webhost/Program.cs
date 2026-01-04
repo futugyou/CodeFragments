@@ -1,5 +1,4 @@
 
-using GraphQLStack;
 using KaleidoCode.Extensions;
 using KaleidoCode.HttpDiagnosticsExtensions;
 using KaleidoCode.HostedService;
@@ -53,8 +52,6 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddRefitClientExtension(configuration);
 
-builder.Services.AddGraphQL(configuration, builder.Environment);
-
 builder.Services.AddDIExtension();
 // The path must be absolute
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
@@ -107,7 +104,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseWebSockets();
-app.UseGraphQLCustom();
 
 app.MapControllers();
 app.MapDefaultEndpoints();

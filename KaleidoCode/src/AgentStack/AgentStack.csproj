@@ -12,7 +12,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
   </ItemGroup>
-	<ItemGroup>
+
+  <ItemGroup>
 	  <ProjectReference Include="..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

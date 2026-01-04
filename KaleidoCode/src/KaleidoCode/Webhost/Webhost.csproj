@@ -39,7 +39,6 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\GraphQLStack\GraphQLStack.csproj" />
 	  <ProjectReference Include="..\OpenSearchStack\OpenSearchStack.csproj" />
 	  <ProjectReference Include="..\SemanticKernelStack\SemanticKernelStack.csproj" />
 	  <ProjectReference Include="..\KernelMemoryStack\KernelMemoryStack.csproj" />
