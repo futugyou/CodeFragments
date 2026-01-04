@@ -4,6 +4,7 @@
     <Project Path="src/AgentStack/AgentStack.csproj" />
     <Project Path="src/CompanyReports/CompanyReports.csproj" />
     <Project Path="src/GraphQLStack/GraphQLStack.csproj" />
+    <Project Path="src/OpenSearchStack/OpenSearchStack.csproj" />
     <Project Path="src/KaleidoCode.AppHost/KaleidoCode.AppHost.csproj" />
     <Project Path="src/KaleidoCode.ServiceDefaults/KaleidoCode.ServiceDefaults.csproj" />
   </Folder>

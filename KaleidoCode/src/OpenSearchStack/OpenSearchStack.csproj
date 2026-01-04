@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+	  <PackageReference Include="OpenSearch.Client" Version="1.8.0" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <ProjectReference Include="..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

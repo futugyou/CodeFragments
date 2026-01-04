@@ -8,7 +8,6 @@ using KaleidoCode.Redis;
 using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
-using OpenSearchStack;
 using SemanticKernelStack;
 using KernelMemoryStack;
 
@@ -38,7 +37,6 @@ Console.WriteLine(builder.Environment.WebRootPath);
 Console.WriteLine(builder.Environment.EnvironmentName);
 
 builder.Services.AddRouteExtension();
-builder.Services.AddElasticClientExtension(configuration);
 builder.Services.AddRedisExtension(configuration);
 builder.Services.AddControllers();
 builder.Services.AddScoped<ResponseCustomMiddleware>();

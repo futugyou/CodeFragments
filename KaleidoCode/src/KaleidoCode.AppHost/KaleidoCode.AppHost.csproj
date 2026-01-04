@@ -4,6 +4,7 @@
     <ProjectReference Include="..\KaleidoCode\Webhost\Webhost.csproj" />
     <ProjectReference Include="..\AgentStack\AgentStack.csproj" />
     <ProjectReference Include="..\GraphQLStack\GraphQLStack.csproj" />
+    <ProjectReference Include="..\OpenSearchStack\OpenSearchStack.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
