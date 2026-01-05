@@ -11,84 +11,84 @@ public class IndexService
     private readonly OpenSearchClient client;
     private readonly ILogger<IndexService> log;
 
-    public void CreteElasticIndex()
+    public async Task CreteElasticIndex()
     {
-        client.Indices.Create("order", c => c.Map<OrderInfo>(m => m.AutoMap()));
-        client.Indices.Create("order_propert_visitor", c => c.
-            Map<OrderInfo>(m => m.AutoMap(new DisableDocValuesPropertyVisitor()))
-        );
+        await client.Indices.CreateAsync("order", c => c.Map<OrderInfo>(m => m.AutoMap()));
+        await client.Indices.CreateAsync("order_propert_visitor", c => c.
+             Map<OrderInfo>(m => m.AutoMap(new DisableDocValuesPropertyVisitor()))
+         );
 
-        client.Indices.Create("company", c => c
-            .Map<Company>(m => m
-                .Properties(ps => ps
-                    .Text(s => s
-                        .Name(n => n.Name)
-                    )
-                    .Object<Employee>(o => o
-                        .Name(n => n.Employees)
-                        .Properties(eps => eps
-                            .Text(s => s
-                                .Name(e => e.FirstName)
-                            )
-                            .Text(s => s
-                                .Name(e => e.LastName)
-                            )
-                            .Number(n => n
-                                .Name(e => e.Salary)
-                                .Type(NumberType.Integer)
-                            )
-                        )
-                    )
-                )
-            )
-        );
-        client.Indices.Create("company1", c => c
-            .Map<Company>(m => m
-                .AutoMap()
-                .Properties(ps => ps
-                    .Nested<Employee>(n => n
-                        .Name(nn => nn.Employees)
-                    )
-                )
-            )
-        );
+        await client.Indices.CreateAsync("company", c => c
+             .Map<Company>(m => m
+                 .Properties(ps => ps
+                     .Text(s => s
+                         .Name(n => n.Name)
+                     )
+                     .Object<Employee>(o => o
+                         .Name(n => n.Employees)
+                         .Properties(eps => eps
+                             .Text(s => s
+                                 .Name(e => e.FirstName)
+                             )
+                             .Text(s => s
+                                 .Name(e => e.LastName)
+                             )
+                             .Number(n => n
+                                 .Name(e => e.Salary)
+                                 .Type(NumberType.Integer)
+                             )
+                         )
+                     )
+                 )
+             )
+         );
+        await client.Indices.CreateAsync("company1", c => c
+             .Map<Company>(m => m
+                 .AutoMap()
+                 .Properties(ps => ps
+                     .Nested<Employee>(n => n
+                         .Name(nn => nn.Employees)
+                     )
+                 )
+             )
+         );
 
-        client.Indices.Create("company2", c => c
-            .Map<CompanyWithAttributes>(m => m
-                .AutoMap()
-                .Properties(ps => ps
-                    .Nested<EmployeeWithAttributes>(n => n
-                        .Name(nn => nn.Employees)
-                        .AutoMap()
-                        .Properties(pps => pps
-                            .Text(s => s
-                                .Name(e => e.FirstName)
-                                .Fields(fs => fs
-                                    .Keyword(ss => ss
-                                        .Name("firstNameRaw")
-                                    )
-                                    .TokenCount(t => t
-                                        .Name("length")
-                                        .Analyzer("standard")
-                                    )
-                                )
-                            )
-                            .Number(nu => nu
-                                .Name(e => e.Salary)
-                                .Type(NumberType.Double)
-                                .IgnoreMalformed(false)
-                            )
-                            .Date(d => d
-                                .Name(e => e.Birthday)
-                                .Format("MM-dd-yy")
-                            )
-                        )
-                    )
-                )
-            )
-        );
+        await client.Indices.CreateAsync("company2", c => c
+               .Map<CompanyWithAttributes>(m => m
+                   .AutoMap()
+                   .Properties(ps => ps
+                       .Nested<EmployeeWithAttributes>(n => n
+                           .Name(nn => nn.Employees)
+                           .AutoMap()
+                           .Properties(pps => pps
+                               .Text(s => s
+                                   .Name(e => e.FirstName)
+                                   .Fields(fs => fs
+                                       .Keyword(ss => ss
+                                           .Name("firstNameRaw")
+                                       )
+                                       .TokenCount(t => t
+                                           .Name("length")
+                                           .Analyzer("standard")
+                                       )
+                                   )
+                               )
+                               .Number(nu => nu
+                                   .Name(e => e.Salary)
+                                   .Type(NumberType.Double)
+                                   .IgnoreMalformed(false)
+                               )
+                               .Date(d => d
+                                   .Name(e => e.Birthday)
+                                   .Format("MM-dd-yy")
+                               )
+                           )
+                       )
+                   )
+               )
+           );
 
-        client.Indices.Create("people", c => c
+        await client.Indices.CreateAsync("people", c => c
             .Map<Person>(p => p
                 .AutoMap() // automatically create the mapping from the type
                 .Properties(props => props

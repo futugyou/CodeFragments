@@ -11,10 +11,10 @@ public class ReindexService
     private readonly OpenSearchClient client;
     private readonly ILogger<ReindexService> log;
 
-    public void CreateReindex()
+    public async Task CreateReindex()
     {
         // 1. base reindex(use reindexOnServer)
-        var reindexResponse = client.ReindexOnServer(r => r
+        var reindexResponse = await client.ReindexOnServerAsync(r => r
             .Source(s => s
                 .Index("source_index")
             )
@@ -42,10 +42,9 @@ public class ReindexService
         {
             // do something with each bulk response e.g. accumulate number of indexed documents
         });
-
         // 3. using Reindex create index
         // Get the settings for the source index
-        var getIndexResponse = client.Indices.Get("source_index");
+        var getIndexResponse = await client.Indices.GetAsync("source_index");
         var indexSettings = getIndexResponse.Indices["source_index"];
         // Get the mapping for the lastName property
         var lastNameProperty = indexSettings.Mappings.Properties["lastName"];
@@ -89,25 +88,6 @@ public class ReindexService
                 .Index("destination_index")
             )
         );
-        var waitHandle = new ManualResetEvent(false);
-        ExceptionDispatchInfo? exceptionDispatchInfo = null;
-        var observer = new ReindexObserver(
-            onNext: response =>
-            {
-                // do something e.g. write number of pages to console
-            },
-            onError: exception =>
-            {
-                exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
-                waitHandle.Set();
-            },
-            onCompleted: () => waitHandle.Set());
-        // Subscribe to the observable, which will initiate the reindex process
-        reindexObservable.Subscribe(observer);
-        // Block the current thread until a signal is received
-        waitHandle.WaitOne();
-        // If an exception was captured during the reindex process, throw it
-        exceptionDispatchInfo?.Throw();
     }
 
 }

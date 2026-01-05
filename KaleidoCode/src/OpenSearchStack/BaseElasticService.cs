@@ -47,9 +47,9 @@ public class BaseElasticService
         pipelineService.InsertDataWithPipline();
     }
 
-    public void Reindex()
+    public Task Reindex()
     {
-        reindexService.CreateReindex();
+        return reindexService.CreateReindex();
     }
 
     public async Task<IndexResponse> Insert()
@@ -57,9 +57,9 @@ public class BaseElasticService
         return await insertService.InsertData();
     }
 
-    public void Mapping()
+    public Task Mapping()
     {
-        indexService.CreteElasticIndex();
+        return indexService.CreteElasticIndex();
     }
 
     public void Aggs()

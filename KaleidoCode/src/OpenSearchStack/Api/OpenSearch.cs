@@ -23,9 +23,9 @@ public static class OpenSearchEndpoints
         agentGroup.MapPost("/reindex", Reindex).WithName("reindex");
     }
 
-    static void Mapping([FromServices] BaseElasticService esService)
+    static Task Mapping([FromServices] BaseElasticService esService)
     {
-        esService.Mapping();
+        return esService.Mapping();
     }
 
     static async Task<string> Insert([FromServices] BaseElasticService esService)
@@ -70,8 +70,8 @@ public static class OpenSearchEndpoints
         esService.Pipeline();
     }
 
-    static void Reindex([FromServices] BaseElasticService esService)
+    static Task Reindex([FromServices] BaseElasticService esService)
     {
-        esService.Reindex();
+        return esService.Reindex();
     }
 }
