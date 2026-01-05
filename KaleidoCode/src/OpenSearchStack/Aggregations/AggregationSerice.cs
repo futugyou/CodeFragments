@@ -11,9 +11,9 @@ public class AggregationSerice
     private readonly OpenSearchClient client;
     private readonly ILogger<AggregationSerice> log;
 
-    public void FluentDsl()
+    public async Task FluentDsl()
     {
-        var response = client.Search<object>(s => s
+        var response = await client.SearchAsync<object>(s => s
             .Index("order")
             .Size(0)
             .Aggregations(a => a
@@ -24,7 +24,7 @@ public class AggregationSerice
         var list = response.Aggregations;
         log.LogInformation("list count " + list.Count);
 
-        response = client.Search<object>(s => s
+        response = await client.SearchAsync<object>(s => s
             .Index("order")
             .Size(0)
             .Aggregations(a => a

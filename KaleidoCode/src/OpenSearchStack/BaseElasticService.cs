@@ -62,28 +62,28 @@ public class BaseElasticService
         return indexService.CreteElasticIndex();
     }
 
-    public void Aggs()
+    public Task Aggs()
     {
-        aggregationSerice.FluentDsl();
+        return aggregationSerice.FluentDsl();
     }
 
-    public void GetAll()
+    public Task GetAll()
     {
-        searchService.MatchAll();
+        return searchService.MatchAll();
     }
 
-    public void GetPage()
+    public Task GetPage()
     {
-        searchService.PageSearch();
+        return searchService.PageSearch();
     }
 
-    public void ScrollGet()
+    public Task ScrollGet()
     {
-        searchService.ScrollingSearch();
+        return searchService.ScrollingSearch();
     }
 
-    public void Search()
+    public Task Search()
     {
-        searchService.PageSearch();
+        return searchService.PageSearch();
     }
 }

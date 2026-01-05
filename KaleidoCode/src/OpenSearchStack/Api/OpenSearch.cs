@@ -1,5 +1,4 @@
 
-using OpenSearchStack;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OpenSearchStack.Api;
@@ -40,29 +39,29 @@ public static class OpenSearchEndpoints
         return esService.InsertMany();
     }
 
-    static void GetAll([FromServices] BaseElasticService esService)
+    static Task GetAll([FromServices] BaseElasticService esService)
     {
-        esService.GetAll();
+        return esService.GetAll();
     }
 
-    static void GetPage([FromServices] BaseElasticService esService)
+    static Task GetPage([FromServices] BaseElasticService esService)
     {
-        esService.GetPage();
+        return esService.GetPage();
     }
 
-    static void Search([FromServices] BaseElasticService esService)
+    static Task Search([FromServices] BaseElasticService esService)
     {
-        esService.Search();
+        return esService.Search();
     }
 
-    static void ScrollGet([FromServices] BaseElasticService esService)
+    static Task ScrollGet([FromServices] BaseElasticService esService)
     {
-        esService.ScrollGet();
+        return esService.ScrollGet();
     }
 
-    static void Aggregations([FromServices] BaseElasticService esService)
+    static Task Aggregations([FromServices] BaseElasticService esService)
     {
-        esService.Aggs();
+        return esService.Aggs();
     }
 
     static Task Pipeline([FromServices] BaseElasticService esService)

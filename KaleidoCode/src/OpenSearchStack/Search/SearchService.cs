@@ -14,16 +14,16 @@ public class SearchService
     private readonly OpenSearchClient client;
     private readonly ILogger<SearchService> log;
 
-    public void MatchAll()
+    public async Task MatchAll()
     {
         // 1
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .MatchAll()
             )
         );
         // 2
-        searchResponse = client.Search<Person>(s => s
+        searchResponse = await client.SearchAsync<Person>(s => s
             .MatchAll()
         );
         //3 
@@ -31,20 +31,20 @@ public class SearchService
         {
             Query = new MatchAllQuery()
         };
-        searchResponse = client.Search<Person>(searchRequest);
+        searchResponse = await client.SearchAsync<Person>(searchRequest);
         Console.WriteLine(searchResponse.DebugInformation);
         //4 
         var query = new MatchAllQuery();
-        var response = client.Search<OrderInfo>(s => s.Index("order").Query(p => query));
+        var response = await client.SearchAsync<OrderInfo>(s => s.Index("order").Query(p => query));
         var list = response.Documents.ToList();
         log.LogInformation("list count " + list.Count);
     }
 
-    public void PageSearch()
+    public async Task PageSearch()
     {
         //1
         var query = new MatchAllQuery();
-        var response = client.Search<OrderInfo>(p => p
+        var response = await client.SearchAsync<OrderInfo>(p => p
             .Index("order")
             .Query(_ => query)
             .From(1)
@@ -54,7 +54,7 @@ public class SearchService
         log.LogInformation("list count " + list.Count);
 
         //2
-        response = client.Search<OrderInfo>(p => p
+        response = await client.SearchAsync<OrderInfo>(p => p
             .Index("order")
             .Query(p =>
                 (p.Term(o => o.Name, "tom")
@@ -64,7 +64,7 @@ public class SearchService
         );
         list = [.. response.Documents];
         log.LogInformation("list count " + list.Count);
-        response = client.Search<OrderInfo>(p => p
+        response = await client.SearchAsync<OrderInfo>(p => p
         //.AllIndices()
             .From(0)
             .Size(10)
@@ -79,9 +79,9 @@ public class SearchService
         log.LogInformation("list count " + list.Count);
     }
 
-    public void StructuredSearch()
+    public async Task StructuredSearch()
     {
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
            .Query(q => q
                .DateRange(r => r
                    .Field(f => f.BrithDay)
@@ -91,7 +91,7 @@ public class SearchService
            )
         );
 
-        searchResponse = client.Search<Person>(s => s
+        searchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .Bool(b => b
                     .Filter(bf => bf
@@ -105,10 +105,10 @@ public class SearchService
             )
         );
     }
-    public void UnstructuredSearch()
+    public async Task UnstructuredSearch()
     {
         // full text queries 
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .Match(m => m
                     .Field(f => f.FirstName)
@@ -118,9 +118,9 @@ public class SearchService
         );
     }
 
-    public void CombiningSearch()
+    public async Task CombiningSearch()
     {
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
            .Query(q => q
                .Bool(b => b
                    // running in a query context, have score 
@@ -146,7 +146,7 @@ public class SearchService
            )
         );
 
-        searchResponse = client.Search<Person>(s => s
+        searchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .Match(m => m
                     .Field(f => f.FirstName)
@@ -165,24 +165,24 @@ public class SearchService
         );
     }
 
-    public void BinaryOperator()
+    public async Task BinaryOperator()
     {
         // 1. OR Fluent API == should
-        var firstOrSearchResponse = client.Search<Person>(s => s
+        var firstOrSearchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .Term(p => p.LastName, "x") || q
                 .Term(p => p.LastName, "y")
             )
         );
         // 2. OR Object Initializer syntax == should
-        var secondOrSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        var secondOrSearchResponse = await client.SearchAsync<Person>(new SearchRequest<Person>
         {
             Query = new TermQuery { Field = Infer.Field<Person>(p => p.LastName), Value = "x" } ||
             new TermQuery { Field = Infer.Field<Person>(p => p.LastName), Value = "y" }
         });
 
         // 3. AND Fluent API == must
-        var firstAndSearchResponse = client.Search<Person>(s => s
+        var firstAndSearchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .Term(p => p.LastName, "x") && q
                 .Term(p => p.LastName, "y")
@@ -191,17 +191,17 @@ public class SearchService
         // 4. AND Object Initializer syntax == must
         var fieldString = new Field("lastName");
         var fieldProperty = new Field(typeof(Person).GetProperty(nameof(Person.LastName)));
-        var secondSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        var secondSearchResponse = await client.SearchAsync<Person>(new SearchRequest<Person>
         {
             Query = new TermQuery { Field = fieldString, Value = "x" } &&
             new TermQuery { Field = fieldProperty, Value = "y" }
         });
     }
 
-    public void UnaryOperator()
+    public async Task UnaryOperator()
     {
         // 1. NOT Fluent API == must_not 
-        var firstNotSearchResponse = client.Search<Person>(s => s
+        var firstNotSearchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => !q
                 .Term(p => p.LastName, "x")
             )
@@ -209,29 +209,29 @@ public class SearchService
 
         // 2. NOT Object Initializer syntax == must_not 
         Expression<Func<Person, object>> expression = p => p.LastName;
-        var secondNotSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        var secondNotSearchResponse = await client.SearchAsync<Person>(new SearchRequest<Person>
         {
             Query = !new TermQuery { Field = new Field(expression), Value = "x" }
         });
 
         // 3. + Fluent API == filter
-        var firstEqSearchResponse = client.Search<Person>(s => s
+        var firstEqSearchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => +q
                 .Term(p => p.LastName, "x")
             )
         );
 
         // 4. + Object Initializer syntax == filter
-        var secondEqSearchResponse = client.Search<Person>(new SearchRequest<Person>
+        var secondEqSearchResponse = await client.SearchAsync<Person>(new SearchRequest<Person>
         {
             Query = +new TermQuery { Field = Infer.Field<Person>(p => p.LastName), Value = "x" }
         });
 
     }
 
-    public void StoredField()
+    public async Task StoredField()
     {
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
             .StoredFields(sf => sf
                 .Fields(
                     f => f.LastName,
@@ -254,9 +254,9 @@ public class SearchService
         }
     }
 
-    public void SourceFilter()
+    public async Task SourceFilter()
     {
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
             .Source(sf => sf
                 // Include the following fields
                 .Includes(i => i
@@ -277,7 +277,7 @@ public class SearchService
         );
 
         // exclude _source
-        searchResponse = client.Search<Person>(s => s
+        searchResponse = await client.SearchAsync<Person>(s => s
            .Source(false)
            .Query(q => q
                .MatchAll()
@@ -285,11 +285,11 @@ public class SearchService
         );
     }
 
-    public void ScrollingSearch()
+    public async Task ScrollingSearch()
     {
         // 1
         var query = new MatchAllQuery();
-        var response = client.Search<OrderInfo>(p => p
+        var response = await client.SearchAsync<OrderInfo>(p => p
             .Index("order")
             .Query(_ => query)
             .Size(2)
@@ -298,12 +298,12 @@ public class SearchService
         var list = response.Documents.ToList();
         log.LogInformation("list count " + list.Count);
         var scrollid = response.ScrollId;
-        response = client.Scroll<OrderInfo>("10s", scrollid);
+        response = await client.ScrollAsync<OrderInfo>("10s", scrollid);
         list = [.. response.Documents];
         log.LogInformation("list count " + list.Count);
 
         // 2
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .Term(f => f.FirstName, "Russ")
             )
@@ -314,11 +314,11 @@ public class SearchService
         // make subsequent requests to the scroll API to keep fetching documents, whilst documents are returned
         while (searchResponse.Documents.Count != 0)
         {
-            searchResponse = client.Scroll<Person>("10s", searchResponse.ScrollId);
+            searchResponse = await client.ScrollAsync<Person>("10s", searchResponse.ScrollId);
         }
     }
 
-    public void ScrollAllObservableSearch()
+    public async Task ScrollAllObservableSearch()
     {
         int numberOfSlices = Environment.ProcessorCount;
 
@@ -355,9 +355,9 @@ public class SearchService
 
     }
 
-    public void Highlight()
+    public async Task Highlight()
     {
-        var searchResponse = client.Search<Company>(s => s
+        var searchResponse = await client.SearchAsync<Company>(s => s
             .IndicesBoost(b => b
                 .Add("company_index_1", 2.0)
                 .Add("company_index_2", 1.0)
@@ -392,9 +392,9 @@ public class SearchService
         );
     }
 
-    public void ScriptFields()
+    public async Task ScriptFields()
     {
-        var searchResponse = client.Search<Company>(s => s
+        var searchResponse = await client.SearchAsync<Company>(s => s
            .ScriptFields(sf => sf
                .ScriptField("test1", sc => sc
                    .Source("doc['assets'].value * 2")
@@ -415,9 +415,9 @@ public class SearchService
         }
     }
 
-    public void Sorting()
+    public async Task Sorting()
     {
-        var searchResponse = client.Search<Company>(s => s
+        var searchResponse = await client.SearchAsync<Company>(s => s
             .Sort(ss => ss
                 .Ascending(p => p.CreateAt)
                 .Descending(p => p.Name)
@@ -463,9 +463,9 @@ public class SearchService
         );
     }
 
-    public void MultiMatchCrossFields()
+    public async Task MultiMatchCrossFields()
     {
-        var searchResponse = client.Search<Person>(s => s
+        var searchResponse = await client.SearchAsync<Person>(s => s
             .Query(q => q
                 .MultiMatch(m => m
                     .Fields(f => f
