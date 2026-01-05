@@ -1,4 +1,6 @@
 
+using System.Threading.Tasks;
+
 namespace OpenSearchStack.Insert;
 
 public class InsertService
@@ -37,7 +39,7 @@ public class InsertService
         return await client.IndexDocumentAsync(order);// it wil use default index. in this case is "demo"
     }
 
-    public void UpdateData()
+    public async Task<OrderInfo> UpdateData()
     {
         var order = new OrderInfo
         {
@@ -49,33 +51,40 @@ public class InsertService
             Price = 10,
         };
 
-        var result = client.UpdateAsync<OrderInfo>(order.Id,
+        var result = await client.UpdateAsync<OrderInfo>(order.Id,
                 u =>
                     u.Index("order")
                         .Doc(order)
                         .DocAsUpsert());
 
         // i do not want to change all method async
-        result.GetAwaiter().GetResult();
+        return result.Get.Source;
     }
 
-    public void InsertManyData()
+    public async IAsyncEnumerable<string> InsertManyData()
     {
-        var response = client.IndexMany(orders);
+        var response = await client.IndexManyAsync(orders);
         if (response.Errors)
         {
             foreach (var itemWithError in response.ItemsWithErrors)
             {
-                Console.WriteLine($"Failed to index document {itemWithError.Id}: {itemWithError.Error}");
+                yield return $"Failed to index document {itemWithError.Id}: {itemWithError.Error}";
             }
         }
+
+        yield return "finish";
     }
 
-    public void InsertManyWithBulk()
+    public async IAsyncEnumerable<string> InsertManyWithBulk()
     {
         // 1. Bulk
-        var responseBulk = client.Bulk(b => b.Index("order").IndexMany(orders));
+        var responseBulk = await client.BulkAsync(b => b.Index("order").IndexMany(orders));
+        foreach (var item in responseBulk.Items)
+        {
+            yield return item.Id;
+        }
 
+        List<string> ids = [];
         // 2. BulkAll
         var bulkAllObservable1 = client.BulkAll(orders, b => b
             .Index("order")
@@ -89,6 +98,10 @@ public class InsertService
         // whilst the BulkAll calls are asynchronous this is a blocking operation
         .Wait(TimeSpan.FromMinutes(15), next =>
         {
+            foreach (var item in next.Items)
+            {
+                ids.Add(item.Id);
+            }
             Console.WriteLine($"next.Page: {next.Page}");
             // do something e.g. write number of pages to console
         });
@@ -111,31 +124,13 @@ public class InsertService
         })
         .DroppedDocumentCallback((bulkResponseItem, order) => // If a document cannot be indexed this delegate is called
         {
+            ids.Add(bulkResponseItem.Id);
             Console.WriteLine($"Unable to index: {bulkResponseItem} {order}");
         }));
 
-        var waitHandle = new ManualResetEvent(false);
-        ExceptionDispatchInfo? exceptionDispatchInfo = null;
-
-        var observer = new BulkAllObserver(
-            onNext: response =>
-            {
-                // do something e.g. write number of pages to console
-            },
-            onError: exception =>
-            {
-                exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
-                waitHandle.Set();
-            },
-            onCompleted: () => waitHandle.Set());
-
-        // Subscribe to the observable, which will initiate the bulk indexing process
-        bulkAllObservable2.Subscribe(observer);
-
-        // Block the current thread until a signal is received
-        waitHandle.WaitOne();
-
-        // If an exception was captured during the bulk indexing process, throw it
-        exceptionDispatchInfo?.Throw();
+        foreach (var id in ids)
+        {
+            yield return id;
+        }
     }
 }

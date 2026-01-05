@@ -35,9 +35,9 @@ public static class OpenSearchEndpoints
         return response.DebugInformation;
     }
 
-    static void InsertMany([FromServices] BaseElasticService esService)
+    static IAsyncEnumerable<string> InsertMany([FromServices] BaseElasticService esService)
     {
-        esService.InsertMany();
+        return esService.InsertMany();
     }
 
     static void GetAll([FromServices] BaseElasticService esService)

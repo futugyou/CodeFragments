@@ -29,10 +29,16 @@ public class BaseElasticService
     private readonly AggregationSerice aggregationSerice;
     private readonly ILogger<BaseElasticService> log;
 
-    public void InsertMany()
+    public async IAsyncEnumerable<string> InsertMany()
     {
-        insertService.InsertManyData();
-        insertService.InsertManyWithBulk();
+        await foreach (var item in insertService.InsertManyData())
+        {
+            yield return item;
+        }
+        await foreach (var item in insertService.InsertManyWithBulk())
+        {
+            yield return item;
+        }
     }
 
     public void Pipeline()
