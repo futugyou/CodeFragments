@@ -65,9 +65,9 @@ public static class OpenSearchEndpoints
         esService.Aggs();
     }
 
-    static void Pipeline([FromServices] BaseElasticService esService)
+    static Task Pipeline([FromServices] BaseElasticService esService)
     {
-        esService.Pipeline();
+        return esService.Pipeline();
     }
 
     static Task Reindex([FromServices] BaseElasticService esService)

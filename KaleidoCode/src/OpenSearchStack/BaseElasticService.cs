@@ -41,10 +41,10 @@ public class BaseElasticService
         }
     }
 
-    public void Pipeline()
+    public async Task Pipeline()
     {
-        pipelineService.CreatePipeline();
-        pipelineService.InsertDataWithPipline();
+        await pipelineService.CreatePipeline();
+        await pipelineService.InsertDataWithPipline();
     }
 
     public Task Reindex()

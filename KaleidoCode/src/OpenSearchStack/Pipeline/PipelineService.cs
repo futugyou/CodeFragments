@@ -1,4 +1,6 @@
 
+using System.Threading.Tasks;
+
 namespace OpenSearchStack.Pipeline;
 
 public class PipelineService
@@ -11,9 +13,9 @@ public class PipelineService
     private readonly OpenSearchClient client;
     private readonly ILogger<PipelineService> log;
 
-    public void CreatePipeline()
+    public async Task<bool> CreatePipeline()
     {
-        client.Ingest.PutPipeline("person-pipeline", p => p
+        var result = await client.Ingest.PutPipelineAsync("person-pipeline", p => p
             .Processors(ps => ps
                 .Uppercase<Person>(s => s
                     .Field(t => t.LastName) // uppercase the lastname
@@ -28,9 +30,11 @@ public class PipelineService
                 )
             )
         );
+
+        return result.Acknowledged;
     }
 
-    public void InsertDataWithPipline()
+    public async Task<IndexResponse> InsertDataWithPipline()
     {
         var person = new Person
         {
@@ -40,6 +44,6 @@ public class PipelineService
             IpAddress = "139.130.4.5"
         };
         // index the document using the created pipeline
-        var indexResponse = client.Index(person, p => p.Index("people").Pipeline("person-pipeline"));
+        return await client.IndexAsync(person, p => p.Index("people").Pipeline("person-pipeline"));
     }
 }
