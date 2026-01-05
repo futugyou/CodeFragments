@@ -1,4 +1,6 @@
 
+using System.Threading.Tasks;
+
 namespace OpenSearchStack.Analyzer;
 
 public class AnalyzerService
@@ -11,9 +13,9 @@ public class AnalyzerService
     private readonly OpenSearchClient client;
     private readonly ILogger<AnalyzerService> log;
 
-    public void CreateBaseAnalyzer()
+    public async Task<CreateIndexResponse> CreateBaseAnalyzer()
     {
-        var createIndexResponse = client.Indices.Create("person-index-with-analyzer", c => c
+        var createIndexResponse = await client.Indices.CreateAsync("person-index-with-analyzer", c => c
             .Map<Person>(mm => mm
                 .Properties(p => p
                     .Text(t => t
@@ -23,22 +25,20 @@ public class AnalyzerService
                 )
             )
         );
+
+        return createIndexResponse;
     }
 
-    public void CreateCustomAnalyzer()
+    public async Task<CreateIndexResponse> CreateCustomAnalyzer()
     {
-        var createIndexResponse = client.Indices.Create("questions", c => c
+        var createIndexResponse = await client.Indices.CreateAsync("questions", c => c
             .Settings(s => s
                 .Analysis(a => a
                     .CharFilters(cf => cf
                         // map both C# and c# to "CSharp" and "csharp", respectively 
                         // (so the # is not stripped by the tokenizer)
                         .Mapping("programming_language", mca => mca
-                            .Mappings(new[]
-                            {
-                                "c# => csharp",
-                                "C# => Csharp"
-                            })
+                            .Mappings(["c# => csharp", "C# => Csharp"])
                         )
                     )
                     .Analyzers(an => an
@@ -71,5 +71,7 @@ public class AnalyzerService
                 )
             )
         );
+        
+        return createIndexResponse;
     }
 }

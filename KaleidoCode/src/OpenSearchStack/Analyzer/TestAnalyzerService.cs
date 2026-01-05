@@ -1,4 +1,6 @@
 
+using System.Threading.Tasks;
+
 namespace OpenSearchStack.Analyzer;
 
 public class TestAnalyzerService
@@ -11,59 +13,64 @@ public class TestAnalyzerService
     private readonly OpenSearchClient client;
     private readonly ILogger<TestAnalyzerService> log;
 
-    public void TestAnalyzer()
+    public async IAsyncEnumerable<string> TestAnalyzer()
     {
-        var analyzeResponse = client.Indices.Analyze(a => a
+        var analyzeResponse = await client.Indices.AnalyzeAsync(a => a
             .Tokenizer("standard")
             .Filter("lowercase", "stop")
             .Text("F# is THE SUPERIOR language :)")
         );
         foreach (var analyzeToken in analyzeResponse.Tokens)
         {
-            Console.WriteLine($"{analyzeToken.Token}");
+            yield return $"{analyzeToken.Token}";
         }
-        client.Indices.Close("analysis-index");
+        //    await client.Indices.CloseAsync("analysis-index");
 
-        client.Indices.UpdateSettings("analysis-index", i => i
-            .IndexSettings(s => s
-                .Analysis(a => a
-                    .CharFilters(cf => cf
-                        .Mapping("my_char_filter", m => m
-                            .Mappings("F# => FSharp")
-                        )
-                    )
-                    .TokenFilters(tf => tf
-                        .Synonym("my_synonym", sf => sf
-                            .Synonyms("superior, great")
+        var updateIndexSettingsResponse = await client.Indices.UpdateSettingsAsync("analysis-index", i => i
+              .IndexSettings(s => s
+                  .Analysis(a => a
+                      .CharFilters(cf => cf
+                          .Mapping("my_char_filter", m => m
+                              .Mappings("F# => FSharp")
+                          )
+                      )
+                      .TokenFilters(tf => tf
+                          .Synonym("my_synonym", sf => sf
+                              .Synonyms("superior, great")
 
-                        )
-                    )
-                    .Analyzers(an => an
-                        .Custom("my_analyzer", ca => ca
-                            .Tokenizer("standard")
-                            .CharFilters("my_char_filter")
-                            .Filters("lowercase", "stop", "my_synonym")
-                        )
-                    )
+                          )
+                      )
+                      .Analyzers(an => an
+                          .Custom("my_analyzer", ca => ca
+                              .Tokenizer("standard")
+                              .CharFilters("my_char_filter")
+                              .Filters("lowercase", "stop", "my_synonym")
+                          )
+                      )
 
-                )
-            )
-        );
+                  )
+              )
+          );
 
-        client.Indices.Open("analysis-index");
-        client.Cluster.Health("analysis-index", h => h
-             .WaitForStatus(WaitForStatus.Green)
-             .Timeout(TimeSpan.FromSeconds(5))
-        );
+        yield return updateIndexSettingsResponse.Acknowledged.ToString();
 
-        analyzeResponse = client.Indices.Analyze(a => a
+        var openIndexResponse = await client.Indices.OpenAsync("analysis-index");
+        yield return openIndexResponse.Acknowledged.ToString();
+
+        var clusterHealthResponse = await client.Cluster.HealthAsync("analysis-index", h => h
+                .WaitForStatus(WaitForStatus.Green)
+                .Timeout(TimeSpan.FromSeconds(5))
+           );
+        yield return clusterHealthResponse.Status.ToString();
+
+        analyzeResponse = await client.Indices.AnalyzeAsync(a => a
             .Index("analysis-index")
             .Analyzer("my_analyzer")
             .Text("F# is THE SUPERIOR language :)")
         );
         foreach (var analyzeToken in analyzeResponse.Tokens)
         {
-            Console.WriteLine($"{analyzeToken.Token}");
+            yield return $"{analyzeToken.Token}";
         }
     }
 
