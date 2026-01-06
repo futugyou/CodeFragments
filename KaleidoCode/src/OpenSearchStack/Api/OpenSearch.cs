@@ -13,6 +13,9 @@ public static class OpenSearchEndpoints
         agentGroup.MapPost("/terms", Terms).WithName("terms");
         agentGroup.MapPost("/averageMax", AverageMax).WithName("averageMax");
 
+        agentGroup.MapPost("/analyzer", Analyzer).WithName("analyzer");
+        agentGroup.MapPost("/analyzer_testing", AnalyzerTesting).WithName("analyzer_testing");
+
         agentGroup.MapPost("/mapping", Mapping).WithName("mapping");
         agentGroup.MapPost("/insert", Insert).WithName("insert");
         agentGroup.MapPost("/insert_many", InsertMany).WithName("insert_many");
@@ -22,6 +25,26 @@ public static class OpenSearchEndpoints
         agentGroup.MapPost("/search", Search).WithName("search");
         agentGroup.MapPost("/pipeline", Pipeline).WithName("pipeline");
         agentGroup.MapPost("/reindex", Reindex).WithName("reindex");
+    }
+
+    static Task<AggregateDictionary> Terms([FromServices] AggregationSerice esService)
+    {
+        return esService.Terms();
+    }
+
+    static Task<AggregateDictionary> AverageMax([FromServices] AggregationSerice esService)
+    {
+        return esService.AverageMax();
+    }
+
+    static Task<CreateIndexResponse> Analyzer([FromServices] AnalyzerService esService, string type = "base")
+    {
+        return type == "base" ? esService.CreateBaseAnalyzer() : esService.CreateCustomAnalyzer();
+    }
+
+    static IAsyncEnumerable<string> AnalyzerTesting([FromServices] TestAnalyzerService esService)
+    {
+        return esService.TestAnalyzer();
     }
 
     static Task Mapping([FromServices] BaseElasticService esService)
@@ -59,16 +82,6 @@ public static class OpenSearchEndpoints
     static Task ScrollGet([FromServices] BaseElasticService esService)
     {
         return esService.ScrollGet();
-    }
-
-    static Task<AggregateDictionary> Terms([FromServices] AggregationSerice esService)
-    {
-        return esService.Terms();
-    }
-
-    static Task<AggregateDictionary> AverageMax([FromServices] AggregationSerice esService)
-    {
-        return esService.AverageMax();
     }
 
     static Task Pipeline([FromServices] BaseElasticService esService)
