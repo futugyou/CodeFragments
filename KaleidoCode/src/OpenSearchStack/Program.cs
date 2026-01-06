@@ -27,6 +27,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseOpenSearchEndpoints();
+app.UseOpenSearchBaseEndpoints();
+app.UseOpenSearchAggregationEndpoints();
+app.UseOpenSearchIndexEndpoints();
 
 app.Run();

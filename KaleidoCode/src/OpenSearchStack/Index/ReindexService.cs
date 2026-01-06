@@ -11,10 +11,10 @@ public class ReindexService
     private readonly OpenSearchClient client;
     private readonly ILogger<ReindexService> log;
 
-    public async Task CreateReindex()
+    public async Task<ReindexOnServerResponse> ReindexOnServer()
     {
         // 1. base reindex(use reindexOnServer)
-        var reindexResponse = await client.ReindexOnServerAsync(r => r
+        return await client.ReindexOnServerAsync(r => r
             .Source(s => s
                 .Index("source_index")
             )
@@ -23,9 +23,11 @@ public class ReindexService
             )
             .WaitForCompletion()
         );
+    }
 
-        // 2. use redinx
-        // Number of slices to split each scroll into
+
+    public async Task Reindex()
+    {
         var slices = Environment.ProcessorCount;
         var reindexObserver = client.Reindex<Person>(r => r
             .ScrollAll("5s", slices, s => s // How to fetch documents to be reindexed
@@ -42,6 +44,11 @@ public class ReindexService
         {
             // do something with each bulk response e.g. accumulate number of indexed documents
         });
+
+    }
+
+    public async Task CreateIndexWithReindex()
+    {
         // 3. using Reindex create index
         // Get the settings for the source index
         var getIndexResponse = await client.Indices.GetAsync("source_index");
@@ -55,7 +62,8 @@ public class ReindexService
                 textProperty.Fields = new Properties();
             textProperty.Fields.Add("keyword", new KeywordProperty());
         }
-        var reindexObserver2 = client.Reindex<Person>(r => r
+
+        client.Reindex<Person>(r => r
             .CreateIndex(c => c
                 // Use the index settings to create the destination index
                 .InitializeUsing(indexSettings)
@@ -74,6 +82,10 @@ public class ReindexService
             // do something with each bulk response e.g. accumulate number of indexed documents
         });
 
+    }
+
+    public async Task MappingReindex()
+    {
         // 4. use ReindexObserver directly.
         var reindexObservable = client.Reindex<Person, Person>(
             // a function to define how source documents are mapped to destination documents

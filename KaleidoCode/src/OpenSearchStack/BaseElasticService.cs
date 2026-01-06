@@ -45,23 +45,12 @@ public class BaseElasticService
     {
         await pipelineService.CreatePipeline();
         await pipelineService.InsertDataWithPipline();
-    }
-
-    public Task Reindex()
-    {
-        return reindexService.CreateReindex();
-    }
-
+    } 
     public async Task<IndexResponse> Insert()
     {
         return await insertService.InsertData();
     }
-
-    public Task Mapping()
-    {
-        return indexService.CreteElasticIndex();
-    }
-
+ 
     public Task GetAll()
     {
         return searchService.MatchAll();

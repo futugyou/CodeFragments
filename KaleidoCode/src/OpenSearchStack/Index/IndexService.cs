@@ -11,14 +11,38 @@ public class IndexService
     private readonly OpenSearchClient client;
     private readonly ILogger<IndexService> log;
 
-    public async Task CreteElasticIndex()
+    public async Task<bool> OrderIndex()
     {
-        await client.Indices.CreateAsync("order", c => c.Map<OrderInfo>(m => m.AutoMap()));
-        await client.Indices.CreateAsync("order_propert_visitor", c => c.
-             Map<OrderInfo>(m => m.AutoMap(new DisableDocValuesPropertyVisitor()))
-         );
+        var createIndexResponse = await client.Indices.CreateAsync("order", c => c.Map<OrderInfo>(m => m.AutoMap()));
+        return createIndexResponse.Acknowledged;
+    }
 
-        await client.Indices.CreateAsync("company", c => c
+    public async Task<bool> OrderPropertyVisitorIndex()
+    {
+        var createIndexResponse = await client.Indices.CreateAsync("order_propert_visitor", c => c.
+             Map<OrderInfo>(m => m.AutoMap(new DisableDocValuesPropertyVisitor()))
+        );
+
+        return createIndexResponse.Acknowledged;
+    }
+
+    // company
+    //   ├── Name
+    //   ├── Employees.FirstName
+    //   ├── Employees.LastName
+    //   ├── Employees.Salary
+    // var response = await client.SearchAsync<Company>(s => s
+    //     .Index("company")
+    //     .Query(q => q
+    //         .Match(m => m
+    //             .Field(f => f.Employees.FirstName)
+    //             .Query("John")
+    //         )
+    //     )
+    // );
+    public async Task<bool> CompanyIndex()
+    {
+        var createIndexResponse = await client.Indices.CreateAsync("company", c => c
              .Map<Company>(m => m
                  .Properties(ps => ps
                      .Text(s => s
@@ -42,18 +66,33 @@ public class IndexService
                  )
              )
          );
-        await client.Indices.CreateAsync("company1", c => c
-             .Map<Company>(m => m
-                 .AutoMap()
-                 .Properties(ps => ps
-                     .Nested<Employee>(n => n
-                         .Name(nn => nn.Employees)
-                     )
-                 )
-             )
-         );
 
-        await client.Indices.CreateAsync("company2", c => c
+        return createIndexResponse.Acknowledged;
+    }
+
+    // company-nested
+    //   ├── Name
+    //   ├── Employees (nested type)
+    //     ├── Employees.FirstName
+    //     ├── Employees.LastName
+    //     ├── Employees.Salary
+    // var response = await client.SearchAsync<Company>(s => s
+    //     .Index("company-nested")
+    //     .Query(q => q
+    //         .Nested(n => n
+    //             .Path(p => p.Employees)
+    //             .Query(nq => nq
+    //                 .Match(m => m
+    //                     .Field(f => f.Employees.FirstName)
+    //                     .Query("John")
+    //                 )
+    //             )
+    //         )
+    //     )
+    // );
+    public async Task<bool> CompanyNestedIndex()
+    {
+        var createIndexResponse = await client.Indices.CreateAsync("company-nested", c => c
                .Map<CompanyWithAttributes>(m => m
                    .AutoMap()
                    .Properties(ps => ps
@@ -88,7 +127,12 @@ public class IndexService
                )
            );
 
-        await client.Indices.CreateAsync("people", c => c
+        return createIndexResponse.Acknowledged;
+    }
+
+    public async Task<bool> PeopleIndex()
+    {
+        var createIndexResponse = await client.Indices.CreateAsync("people", c => c
             .Map<Person>(p => p
                 .AutoMap() // automatically create the mapping from the type
                 .Properties(props => props
@@ -98,6 +142,8 @@ public class IndexService
                 )
             )
         );
+        
+        return createIndexResponse.Acknowledged;
     }
 
 }
