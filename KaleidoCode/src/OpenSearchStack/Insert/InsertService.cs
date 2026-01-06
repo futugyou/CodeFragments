@@ -75,7 +75,7 @@ public class InsertService
         yield return "finish";
     }
 
-    public async IAsyncEnumerable<string> InsertManyWithBulk()
+    public async IAsyncEnumerable<string> Bulk()
     {
         // 1. Bulk
         var responseBulk = await client.BulkAsync(b => b.Index("order").IndexMany(orders));
@@ -83,7 +83,10 @@ public class InsertService
         {
             yield return item.Id;
         }
+    }
 
+    public async IAsyncEnumerable<string> SimpleBulk()
+    {
         List<string> ids = [];
         // 2. BulkAll
         var bulkAllObservable1 = client.BulkAll(orders, b => b
@@ -102,10 +105,17 @@ public class InsertService
             {
                 ids.Add(item.Id);
             }
-            Console.WriteLine($"next.Page: {next.Page}");
-            // do something e.g. write number of pages to console
         });
 
+        foreach (var id in ids)
+        {
+            yield return id;
+        }
+    }
+
+    public async IAsyncEnumerable<string> ComplexBulk()
+    {
+        List<string> ids = [];
         // 3. BulkAll with more option
         var bulkAllObservable2 = client.BulkAll(orders, b => b
         .BufferToBulk((descriptor, buffer) => // Customise each bulk operation before it is dispatched

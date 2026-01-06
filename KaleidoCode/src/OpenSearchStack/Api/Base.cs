@@ -13,8 +13,6 @@ public static class OpenSearchBaseEndpoints
         agentGroup.MapPost("/analyzer", Analyzer).WithName("analyzer");
         agentGroup.MapPost("/analyzer_testing", AnalyzerTesting).WithName("analyzer_testing");
 
-        agentGroup.MapPost("/insert", Insert).WithName("insert");
-        agentGroup.MapPost("/insert_many", InsertMany).WithName("insert_many");
         agentGroup.MapPost("/get_all", GetAll).WithName("get_all");
         agentGroup.MapPost("/get_page", GetPage).WithName("get_page");
         agentGroup.MapPost("/scroll_get", ScrollGet).WithName("scroll_get");
@@ -32,18 +30,6 @@ public static class OpenSearchBaseEndpoints
         return esService.TestAnalyzer();
     }
  
-    static async Task<string> Insert([FromServices] BaseElasticService esService)
-    {
-        var response = await esService.Insert();
-
-        return response.DebugInformation;
-    }
-
-    static IAsyncEnumerable<string> InsertMany([FromServices] BaseElasticService esService)
-    {
-        return esService.InsertMany();
-    }
-
     static Task GetAll([FromServices] BaseElasticService esService)
     {
         return esService.GetAll();
