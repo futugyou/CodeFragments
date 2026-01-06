@@ -24,7 +24,7 @@ public class TestAnalyzerService
         {
             yield return $"{analyzeToken.Token}";
         }
-        
+
         await client.Indices.CloseAsync("analysis-index");
 
         var updateIndexSettingsResponse = await client.Indices.UpdateSettingsAsync("analysis-index", i => i

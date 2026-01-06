@@ -142,7 +142,7 @@ public class IndexService
                 )
             )
         );
-        
+
         return createIndexResponse.Acknowledged;
     }
 

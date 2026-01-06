@@ -11,7 +11,7 @@ public static class OpenSearchAggregationEndpoints
                 .WithName("Elastic Aggregation");
 
         agentGroup.MapPost("/terms", Terms).WithName("terms");
-        agentGroup.MapPost("/averageMax", AverageMax).WithName("averageMax"); 
+        agentGroup.MapPost("/averageMax", AverageMax).WithName("averageMax");
     }
 
     static Task<AggregateDictionary> Terms([FromServices] AggregationSerice esService)
@@ -23,5 +23,5 @@ public static class OpenSearchAggregationEndpoints
     {
         return esService.AverageMax();
     }
- 
+
 }

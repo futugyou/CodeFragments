@@ -15,7 +15,7 @@ public static class OpenSearchIndexEndpoints
         agentGroup.MapPost("/company", CompanyIndex).WithName("company");
         agentGroup.MapPost("/company_nested", CompanyNestedIndex).WithName("company_nested");
         agentGroup.MapPost("/people", PeopleIndex).WithName("people");
-        
+
         agentGroup.MapPost("/reindex_on_server", ReindexOnServer).WithName("reindex_on_server");
         agentGroup.MapPost("/reindex", Reindex).WithName("reindex");
         agentGroup.MapPost("/create_index_reindex", CreateIndexWithReindex).WithName("create_index_reindex");
@@ -52,17 +52,17 @@ public static class OpenSearchIndexEndpoints
         return esService.ReindexOnServer();
     }
 
-    static Task  Reindex([FromServices] ReindexService esService)
+    static Task Reindex([FromServices] ReindexService esService)
     {
         return esService.Reindex();
     }
 
-    static Task  CreateIndexWithReindex([FromServices] ReindexService esService)
+    static Task CreateIndexWithReindex([FromServices] ReindexService esService)
     {
         return esService.CreateIndexWithReindex();
     }
 
-    static Task  MappingReindex([FromServices] ReindexService esService)
+    static Task MappingReindex([FromServices] ReindexService esService)
     {
         return esService.MappingReindex();
     }

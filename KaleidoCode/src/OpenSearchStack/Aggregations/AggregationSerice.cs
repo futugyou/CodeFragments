@@ -21,7 +21,7 @@ public class AggregationSerice
                 .Max("maxprice", m => m.Field("price"))
             )
         );
-        
+
         return response.Aggregations;
     }
 

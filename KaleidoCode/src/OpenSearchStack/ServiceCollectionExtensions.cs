@@ -91,7 +91,7 @@ public static class ElasticClientExtensions
         settings.EnableHttpCompression();
         var listenerObserver = new ElasticListenerObserver();
         DiagnosticListener.AllListeners.Subscribe(listenerObserver);
-        services.AddSingleton<OpenSearchClient>(new OpenSearchClient(settings));
+        services.AddSingleton(new OpenSearchClient(settings));
         services.AddSingleton<IndexService>();
         services.AddSingleton<PipelineService>();
         services.AddSingleton<InsertService>();
@@ -100,7 +100,6 @@ public static class ElasticClientExtensions
         services.AddSingleton<TestAnalyzerService>();
         services.AddSingleton<SearchService>();
         services.AddSingleton<AggregationSerice>();
-        services.AddSingleton<BaseElasticService>();
         return services;
     }
 }
