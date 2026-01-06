@@ -11,7 +11,7 @@ public class AggregationSerice
     private readonly OpenSearchClient client;
     private readonly ILogger<AggregationSerice> log;
 
-    public async Task FluentDsl()
+    public async Task<AggregateDictionary> AverageMax()
     {
         var response = await client.SearchAsync<object>(s => s
             .Index("order")
@@ -21,17 +21,19 @@ public class AggregationSerice
                 .Max("maxprice", m => m.Field("price"))
             )
         );
-        var list = response.Aggregations;
-        log.LogInformation("list count " + list.Count);
+        
+        return response.Aggregations;
+    }
 
-        response = await client.SearchAsync<object>(s => s
+    public async Task<AggregateDictionary> Terms()
+    {
+        var response = await client.SearchAsync<object>(s => s
             .Index("order")
             .Size(0)
             .Aggregations(a => a
                 .Terms("goodsgroup", group => group.Field("goodsName"))
             )
         );
-        list = response.Aggregations;
-        log.LogInformation("list count " + list.Count);
+        return response.Aggregations;
     }
 }

@@ -10,6 +10,9 @@ public static class OpenSearchEndpoints
         var agentGroup = app.MapGroup("/api/es")
                 .WithName("Elastic");
 
+        agentGroup.MapPost("/terms", Terms).WithName("terms");
+        agentGroup.MapPost("/averageMax", AverageMax).WithName("averageMax");
+
         agentGroup.MapPost("/mapping", Mapping).WithName("mapping");
         agentGroup.MapPost("/insert", Insert).WithName("insert");
         agentGroup.MapPost("/insert_many", InsertMany).WithName("insert_many");
@@ -17,7 +20,6 @@ public static class OpenSearchEndpoints
         agentGroup.MapPost("/get_page", GetPage).WithName("get_page");
         agentGroup.MapPost("/scroll_get", ScrollGet).WithName("scroll_get");
         agentGroup.MapPost("/search", Search).WithName("search");
-        agentGroup.MapPost("/aggregations", Aggregations).WithName("aggregations");
         agentGroup.MapPost("/pipeline", Pipeline).WithName("pipeline");
         agentGroup.MapPost("/reindex", Reindex).WithName("reindex");
     }
@@ -59,9 +61,14 @@ public static class OpenSearchEndpoints
         return esService.ScrollGet();
     }
 
-    static Task Aggregations([FromServices] BaseElasticService esService)
+    static Task<AggregateDictionary> Terms([FromServices] AggregationSerice esService)
     {
-        return esService.Aggs();
+        return esService.Terms();
+    }
+
+    static Task<AggregateDictionary> AverageMax([FromServices] AggregationSerice esService)
+    {
+        return esService.AverageMax();
     }
 
     static Task Pipeline([FromServices] BaseElasticService esService)

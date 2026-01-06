@@ -62,11 +62,6 @@ public class BaseElasticService
         return indexService.CreteElasticIndex();
     }
 
-    public Task Aggs()
-    {
-        return aggregationSerice.FluentDsl();
-    }
-
     public Task GetAll()
     {
         return searchService.MatchAll();
