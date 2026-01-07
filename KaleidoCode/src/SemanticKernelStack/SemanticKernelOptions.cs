@@ -5,7 +5,6 @@ public class SemanticKernelOptions
     public ModelConfig TextCompletion { get; set; } = new();
     public ModelConfig Embedding { get; set; } = new();
     public ModelConfig Image { get; set; } = new();
-    public JiraConfig Jira { get; set; } = new();
     public WebSearchConfig WebSearch { get; set; } = new();
     public string VectorStoreType { get; set; } = "memory";
     public string VectorStoreName { get; set; } = "default-vector-store";
@@ -28,13 +27,6 @@ public class ModelConfig
     public string ApiKey { get; set; } = "";
     public string Endpoint { get; set; } = "https://api.openai.com";// e.g. https://api.openai.com, https://models.github.ai/inference, https://generativelanguage.googleapis.com/v1beta/openai, 
     public int Dimensions { get; set; } = 1536; // default for OpenAI
-}
-
-public class JiraConfig
-{
-    public string JiraAddress { get; set; }
-    public string JiraEmailAddress { get; set; }
-    public string JiraApiKey { get; set; }
 }
 
 public class McpServerConfig
