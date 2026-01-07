@@ -1,8 +1,10 @@
 <Project Sdk="Aspire.AppHost.Sdk/13.2.0-preview.1.25611.1">
 
   <ItemGroup>
-    <ProjectReference Include="..\KaleidoCode\Webhost\Webhost.csproj" />
+    <ProjectReference Include="..\KaleidoCode\KaleidoCode.csproj" />
     <ProjectReference Include="..\AgentStack\AgentStack.csproj" />
+    <ProjectReference Include="..\KernelMemoryStack\KernelMemoryStack.csproj" />
+    <ProjectReference Include="..\SemanticKernelStack\SemanticKernelStack.csproj" />
     <ProjectReference Include="..\GraphQLStack\GraphQLStack.csproj" />
     <ProjectReference Include="..\OpenSearchStack\OpenSearchStack.csproj" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/KaleidoCode/Webhost/Webhost.csproj" />
+    <Project Path="src/KaleidoCode/KaleidoCode.csproj" />
     <Project Path="src/SemanticKernelStack/SemanticKernelStack.csproj" />
     <Project Path="src/KernelMemoryStack/KernelMemoryStack.csproj" />
     <Project Path="src/AgentStack/AgentStack.csproj" />

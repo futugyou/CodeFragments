@@ -19,6 +19,6 @@
 		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
+	  <ProjectReference Include="..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
 	</ItemGroup>
 </Project>
