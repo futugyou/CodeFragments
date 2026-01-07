@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/KaleidoCode/Webhost/Webhost.csproj" />
+    <Project Path="src/SemanticKernelStack/SemanticKernelStack.csproj" />
     <Project Path="src/AgentStack/AgentStack.csproj" />
     <Project Path="src/CompanyReports/CompanyReports.csproj" />
     <Project Path="src/GraphQLStack/GraphQLStack.csproj" />

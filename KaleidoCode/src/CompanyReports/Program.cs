@@ -1,4 +1,4 @@
-﻿using CompanyReports; 
+﻿using CompanyReports;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -14,9 +14,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi(); 
+    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
- 
+
 app.Run();

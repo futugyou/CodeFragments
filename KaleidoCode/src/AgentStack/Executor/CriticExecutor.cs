@@ -7,7 +7,7 @@ public sealed class CriticExecutor : Executor<ChatMessage, CriticDecision>
 
     private readonly int _maxIterations;
 
-    public CriticExecutor(IChatClient chatClient,int  maxIterations) : base("Critic")
+    public CriticExecutor(IChatClient chatClient, int maxIterations) : base("Critic")
     {
         _maxIterations = maxIterations;
         _agent = new ChatClientAgent(chatClient, new ChatClientAgentOptions

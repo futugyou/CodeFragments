@@ -39,7 +39,6 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\SemanticKernelStack\SemanticKernelStack.csproj" />
 	  <ProjectReference Include="..\KernelMemoryStack\KernelMemoryStack.csproj" />
 	  <ProjectReference Include="..\..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
 	</ItemGroup>

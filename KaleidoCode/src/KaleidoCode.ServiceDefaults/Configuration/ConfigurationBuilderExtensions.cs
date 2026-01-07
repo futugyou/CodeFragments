@@ -13,7 +13,7 @@ public static class OpenTelemetryConfigurationBuilderExtensions
     /// <param name="optional"></param>
     /// <param name="reloadOnChange"></param>
     /// <returns></returns>
-    public static IConfigurationBuilder AddJsonConfigurationExtensions (this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange) 
+    public static IConfigurationBuilder AddJsonConfigurationExtensions(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
     {
         ArgumentNullException.ThrowIfNull(builder);
         if (string.IsNullOrEmpty(path))

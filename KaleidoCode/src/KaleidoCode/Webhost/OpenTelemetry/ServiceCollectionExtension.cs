@@ -14,4 +14,4 @@ public static class OpenTelemetryExtension
 
         return services;
     }
- }
+}

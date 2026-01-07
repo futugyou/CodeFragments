@@ -8,7 +8,7 @@ public static class HealthCheckWebApplicationExtension
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
-    
+
     public static WebApplication UseHealthCheckExtensions(this WebApplication app)
     {
         app.MapHealthChecks(HealthEndpointPath);

@@ -8,7 +8,6 @@ using KaleidoCode.Redis;
 using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
-using SemanticKernelStack;
 using KernelMemoryStack;
 
 var options = new WebApplicationOptions
@@ -55,7 +54,6 @@ builder.Services.AddDIExtension();
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
 
-await builder.Services.AddKernelServiceServices(configuration);
 builder.Services.AddKernelMemoryServices(configuration);
 
 builder.Services.AddMQTTExtension(configuration);
@@ -108,11 +106,6 @@ app.MapDefaultEndpoints();
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
 app.RoutePatternFactoryExtension();
-
-await app.InitAIData();
-
-app.MapMcp();
-app.MapA2AExtensions();
 
 // this will win
 // app.Run("http://localhost:5004/");
