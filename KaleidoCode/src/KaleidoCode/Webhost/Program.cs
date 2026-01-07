@@ -8,7 +8,6 @@ using KaleidoCode.Redis;
 using KaleidoCode.RefitClient;
 using KaleidoCode.RouteEx;
 using KaleidoCode.StaticFileEx;
-using KernelMemoryStack;
 
 var options = new WebApplicationOptions
 {
@@ -53,8 +52,6 @@ builder.Services.AddDIExtension();
 // The path must be absolute
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider("/"));
 builder.Services.AddSingleton<IFileSystem, FileSystem>();
-
-builder.Services.AddKernelMemoryServices(configuration);
 
 builder.Services.AddMQTTExtension(configuration);
 
