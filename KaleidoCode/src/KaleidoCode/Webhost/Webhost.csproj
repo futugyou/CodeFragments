@@ -18,26 +18,6 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
 		<PackageReference Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
 	</ItemGroup>
-	
-	<ItemGroup>
-		<EmbeddedResource Include="Resources\30-user-prompt.txt" />
-		<EmbeddedResource Include="Resources\30-system-prompt.txt" />
-		<EmbeddedResource Include="Resources\30-user-context.txt" />
-		<EmbeddedResource Include="Resources\infr-project.yaml" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<EmbeddedResource Include="Resources\dict.txt">
-			<LogicalName>dict.txt</LogicalName>
-		</EmbeddedResource>    
-		<EmbeddedResource Include="Resources\encoder.json">
-			<LogicalName>encoder.json</LogicalName>
-		</EmbeddedResource>    
-		<EmbeddedResource Include="Resources\vocab.bpe">
-			<LogicalName>vocab.bpe</LogicalName>
-		</EmbeddedResource>    
-	</ItemGroup>
-	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
 	</ItemGroup>

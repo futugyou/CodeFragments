@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace KaleidoCode.Resources;
+namespace SemanticKernelStack.Resources;
 
 internal static class EmbeddedResource
 {
