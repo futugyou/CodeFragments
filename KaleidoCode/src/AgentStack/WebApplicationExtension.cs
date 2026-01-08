@@ -1,5 +1,5 @@
 
-using Microsoft.AspNetCore.Builder;
+
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 
 namespace AgentStack;
@@ -9,26 +9,21 @@ public static class WebApplicationExtension
 {
     public static WebApplication MapAguiExtensions(this WebApplication app)
     {
-        var _options = app.Services.GetRequiredService<IOptionsMonitor<AgentOptions>>()!.CurrentValue;
-
-        var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
-        OpenAIClientOptions openAIOptions = new();
-        if (!string.IsNullOrEmpty(_options.TextCompletion.Endpoint))
+        app.MapAGUI("joker", sp =>
         {
-            openAIOptions.Endpoint = new Uri(_options.TextCompletion.Endpoint);
-        }
-
-        var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-
-        var _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
-
-        var chatClient = _chatClient
-        .AsBuilder()
-        .Build();
-
-        var agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        app.MapAGUI("/agui", agent);
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            return chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        });
 
         return app;
+    }
+
+    public static IEndpointConventionBuilder MapAGUI(
+        this IEndpointRouteBuilder endpoints,
+        [StringSyntax("route")] string pattern,
+        Func<IServiceProvider, AIAgent> factory)
+    {
+        var agent = factory(endpoints.ServiceProvider);
+        return endpoints.MapAGUI(pattern, agent); ;
     }
 }
