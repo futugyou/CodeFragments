@@ -37,8 +37,8 @@ public static class ServiceCollectionExtensions
         {
             var loggerFactory = sp.GetService<ILoggerFactory>();
             var _options = sp.GetRequiredService<IOptionsMonitor<AgentOptions>>().CurrentValue;
-            var clientOption = new OpenAIClientOptions();
-            clientOption.Endpoint = new Uri(_options.Embedding.Endpoint);
+            OpenAIClientOptions clientOption = new() { Endpoint = new Uri(_options.Embedding.Endpoint) };
+            
             var builder = new OpenAIClient(
                    credential: new ApiKeyCredential(_options.Embedding.ApiKey),
                    options: clientOption)
