@@ -234,7 +234,8 @@ public class AgentService
         await agent.RunAsync("Tell me a joke about a pirate.", thread);
 
         var messageStore = thread.GetService<VectorChatMessageStore>()!;
-        var history = await messageStore.GetMessagesAsync(CancellationToken.None);
+        var invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a pirate.")]);
+        var history = await messageStore.InvokingAsync(invokingContext);
         foreach (var item in history)
         {
             yield return item.Text;
@@ -251,8 +252,8 @@ public class AgentService
 
         messageStore = resumedThread.GetService<VectorChatMessageStore>()!;
         yield return $"\nThread is stored in vector store under key: {messageStore.ThreadDbKey}";
-
-        history = await messageStore.GetMessagesAsync(CancellationToken.None);
+        invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Now tell the same joke in the voice of a pirate, and add some emojis to the joke.")]);
+        history = await messageStore.InvokingAsync(invokingContext);
         foreach (var item in history)
         {
             yield return item.Text;
@@ -361,22 +362,26 @@ public class AgentService
         var response = await agent.RunAsync("Tell me a joke about a pirate.", thread);
         yield return response.Text;
         var messageStore = thread.GetService<VectorChatMessageStore>()!;
-        var chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        var invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a pirate.")]);
+        var chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
         response = await agent.RunAsync("Tell me a joke about a robot.", thread);
         yield return response.Text;
-        chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a robot.")]);
+        chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
         response = await agent.RunAsync("Tell me a joke about a lemur.", thread);
         yield return response.Text;
-        chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a lemur.")]);
+        chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
         response = await agent.RunAsync("Tell me the joke about the pirate again, but add emojis and use the voice of a parrot.", thread);
         yield return response.Text;
-        chatHistory = await messageStore.GetMessagesAsync(CancellationToken.None);
+        invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Tell me the joke about the pirate again, but add emojis and use the voice of a parrot.")]);
+        chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
     }
 
@@ -447,7 +452,8 @@ public class AgentService
 
         if (thread is ChatClientAgentThread typedThread && typedThread.MessageStore != null)
         {
-            var messages = (await typedThread.MessageStore.GetMessagesAsync().ConfigureAwait(false)).ToList() ?? [];
+            var invokingContext = new ChatMessageStore.InvokingContext(userMessage);
+            var messages = (await typedThread.MessageStore.InvokingAsync(invokingContext).ConfigureAwait(false)).ToList() ?? [];
             var approvalMessage = ProcessFunctionApprovals(messages, allowChangeState);
             if (approvalMessage?.Count > 0)
             {

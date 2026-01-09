@@ -11,7 +11,6 @@ public static class ServiceCollectionExtensions
         services.Configure<AgentOptions>(configuration.GetSection("Agent"));
         var connectionString = configuration.GetConnectionString("Postgres")!;
 
-        // TODO: Although DI has been added, it is not currently in use.
         services.AddKeyedSingleton<OpenAIClient>("AgentOpenAIClient", (sp, _) =>
         {
             var _options = sp.GetRequiredService<IOptionsMonitor<AgentOptions>>().CurrentValue;
@@ -25,7 +24,6 @@ public static class ServiceCollectionExtensions
             return new OpenAIClient(credential, openAIOptions);
         });
 
-        // TODO: Although DI has been added, it is not currently in use.
         services.AddKeyedChatClient("AgentChatClient", (sp) =>
         {
             var client = sp.GetRequiredKeyedService<OpenAIClient>("AgentOpenAIClient");
@@ -58,7 +56,6 @@ public static class ServiceCollectionExtensions
             connectionStringProvider: _ => connectionString,
             optionsProvider: sp =>
             {
-                //TODO: The IEmbeddingGenerator is registered in the sk service; we don't want to extract the common logic for now.
                 var embeddingGenerator = sp.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
                 return new PostgresVectorStoreOptions()
                 {

@@ -43,10 +43,14 @@ public sealed class VectorChatMessageStore : ChatMessageStore
 
     public string? ThreadDbKey { get; private set; }
 
-    public override async Task AddMessagesAsync(
-        IEnumerable<ChatMessage> messages,
-        CancellationToken cancellationToken)
+    public override async ValueTask InvokedAsync(InvokedContext context, CancellationToken cancellationToken = default)
     {
+        if (context.InvokeException is not null)
+        {
+            return;
+        }
+
+        var messages = context.RequestMessages.Concat(context.AIContextProviderMessages ?? []).Concat(context.ResponseMessages ?? []);
         if (_reducerTriggerEvent is ChatReducerTriggerEvent.BeforeMessageAdded && _chatReducer is not null)
         {
             messages = await _chatReducer.ReduceAsync(messages, cancellationToken).ConfigureAwait(false);
@@ -65,8 +69,7 @@ public sealed class VectorChatMessageStore : ChatMessageStore
         }), cancellationToken);
     }
 
-    public override async Task<IEnumerable<ChatMessage>> GetMessagesAsync(
-        CancellationToken cancellationToken)
+    public override async ValueTask<IEnumerable<ChatMessage>> InvokingAsync(InvokingContext context, CancellationToken cancellationToken = default)
     {
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
