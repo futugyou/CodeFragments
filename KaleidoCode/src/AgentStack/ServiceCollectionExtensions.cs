@@ -1,6 +1,7 @@
 
 using AgentStack.Services;
 using Microsoft.SemanticKernel.Connectors.PgVector;
+using Microsoft.Agents.AI.Hosting;
 
 namespace AgentStack;
 
@@ -36,7 +37,7 @@ public static class ServiceCollectionExtensions
             var loggerFactory = sp.GetService<ILoggerFactory>();
             var _options = sp.GetRequiredService<IOptionsMonitor<AgentOptions>>().CurrentValue;
             OpenAIClientOptions clientOption = new() { Endpoint = new Uri(_options.Embedding.Endpoint) };
-            
+
             var builder = new OpenAIClient(
                    credential: new ApiKeyCredential(_options.Embedding.ApiKey),
                    options: clientOption)
@@ -65,6 +66,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<AgentService>();
         services.AddScoped<WorkflowService>();
+
+
+        services.AddAIAgent("poet", "You are a creative poet. Respond to all requests with beautiful poetry.", chatClientServiceKey: "AgentChatClient");
+
+        services.AddOpenAIResponses();
+        services.AddOpenAIConversations();
+
 
         return services;
     }

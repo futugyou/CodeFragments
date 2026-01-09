@@ -88,6 +88,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseAgentEndpoints();
 app.UseWorkflowEndpoints();
-app.MapAguiExtensions();
+app.MapAguiExtensions(app.Environment);
 
 app.Run();
