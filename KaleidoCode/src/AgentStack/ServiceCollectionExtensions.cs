@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.Connectors.PgVector;
 using Microsoft.Agents.AI.Hosting;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
+using Npgsql;
 
 namespace AgentStack;
 
@@ -56,6 +57,13 @@ public static class ServiceCollectionExtensions
             return builder.Build();
         });
 
+        services.AddScoped(sp =>
+        {
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            dataSourceBuilder.UseVector();
+            return dataSourceBuilder.Build();
+        });
+        
         services.AddKeyedPostgresVectorStore("AgentVectorStore",
             connectionStringProvider: _ => connectionString,
             optionsProvider: sp =>
