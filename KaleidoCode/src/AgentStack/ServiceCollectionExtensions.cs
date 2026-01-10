@@ -1,7 +1,10 @@
 
 using AgentStack.Services;
+using AgentStack.Middleware;
 using Microsoft.SemanticKernel.Connectors.PgVector;
 using Microsoft.Agents.AI.Hosting;
+using AgentStack.MessageStore;
+using Microsoft.Extensions.VectorData;
 
 namespace AgentStack;
 
@@ -67,8 +70,29 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AgentService>();
         services.AddScoped<WorkflowService>();
 
+        // AddAIAgent will use AddSingleton
+        services.AddAIAgent("joker", (sp, name) =>
+        {
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
+            chatClient = chatClient
+                .AsBuilder()
+                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: null)
+                .Build();
 
-        services.AddAIAgent("poet", "You are a creative poet. Respond to all requests with beautiful poetry.", chatClientServiceKey: "AgentChatClient");
+            return chatClient.CreateAIAgent(new ChatClientAgentOptions
+            {
+                Name = "Joker",
+                ChatOptions = new() { Instructions = "You are good at telling jokes." },
+                ChatMessageStoreFactory = ctx =>
+                {
+                    return new VectorChatMessageStore(
+                       vectorStore,
+                       ctx.SerializedState,
+                       ctx.JsonSerializerOptions);
+                }
+            });
+        });
 
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
