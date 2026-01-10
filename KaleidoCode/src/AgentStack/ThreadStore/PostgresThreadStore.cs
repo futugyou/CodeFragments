@@ -31,6 +31,7 @@ public sealed class PostgresAgentThreadStore : AgentThreadStore
     public override async ValueTask SaveThreadAsync(AIAgent agent, string conversationId, AgentThread thread, CancellationToken cancellationToken = default)
     {
         var key = GetKey(conversationId, agent.Id);
+        Console.WriteLine($"Saving thread: {key}");
         var jsonString = JsonSerializer.Serialize(thread.Serialize());
 
         const string sql = $@"
@@ -50,6 +51,7 @@ public sealed class PostgresAgentThreadStore : AgentThreadStore
     public override async ValueTask<AgentThread> GetThreadAsync(AIAgent agent, string conversationId, CancellationToken cancellationToken = default)
     {
         var key = GetKey(conversationId, agent.Id);
+        Console.WriteLine($"Getting thread: {key}");
 
         const string sql = $"SELECT thread_data FROM {TableName} WHERE key = @key";
 

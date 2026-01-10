@@ -1,5 +1,6 @@
 
 using AgentStack.Services;
+using AgentStack.Skills;
 using AgentStack.ThreadStore;
 using AgentStack.Middleware;
 using Microsoft.SemanticKernel.Connectors.PgVector;
@@ -65,7 +66,8 @@ public static class ServiceCollectionExtensions
             return dataSourceBuilder.Build();
         });
 
-        services.AddSingleton<AgentThreadStore, PostgresAgentThreadStore>();
+        services.AddSingleton<PostgresAgentThreadStore>();
+        services.AddSingleton<AgentThreadStore>(sp => sp.GetRequiredService<PostgresAgentThreadStore>());
 
         services.AddKeyedPostgresVectorStore("AgentVectorStore",
             connectionStringProvider: _ => connectionString,
@@ -93,7 +95,7 @@ public static class ServiceCollectionExtensions
 
             return chatClient.CreateAIAgent(new ChatClientAgentOptions
             {
-                Name = "Joker",
+                Name = "joker",
                 ChatOptions = new() { Instructions = "You are good at telling jokes." },
                 ChatMessageStoreFactory = ctx =>
                 {
@@ -104,6 +106,39 @@ public static class ServiceCollectionExtensions
                 }
             });
         });
+
+        var lightPlugin = new LightPlugin();
+        AITool[] tools = [
+            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
+            AIFunctionFactory.Create(lightPlugin.ChangeStateAsync)
+        ];
+
+        services.AddAIAgent("light", (sp, name) =>
+        {
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            chatClient = chatClient
+                .AsBuilder()
+                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: null)
+                .Build();
+
+            return chatClient.CreateAIAgent(
+                instructions: "You are a useful light assistant.",
+                name: "light",
+                description: "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off.",
+                tools: tools
+            );
+        });
+
+        // The overload of AddAIAgent that includes `sp` is ineffective with WithAITools because the `GetRegisteredToolsForAgent(sp, name)` method is not called. 
+        // .WithAITools(tools)
+
+        // `WithThreadStore` doesn't work either. 
+        // The current source code only uses `AgentThreadStore` indirectly within Hosting.A2A, and it's not yet implemented in DevUI/Hosting.OpenAI. 
+        // .WithThreadStore((sp, name) =>
+        // {
+        //     var store = sp.GetRequiredService<AgentThreadStore>();
+        //     return store;
+        // });
 
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
