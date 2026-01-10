@@ -1,5 +1,6 @@
 using AgentStack;
 using AgentStack.Api;
+using AgentStack.ThreadStore;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi;
 
@@ -80,6 +81,12 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/openapi/v1.json", "v1");
     });
+}
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var store = scope.ServiceProvider.GetRequiredService<PostgresAgentThreadStore>();
+    await store.InitializeAsync();
 }
 
 app.UseAgentEndpoints();
