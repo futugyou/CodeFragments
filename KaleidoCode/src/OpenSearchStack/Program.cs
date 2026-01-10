@@ -1,5 +1,6 @@
 using OpenSearchStack;
 using OpenSearchStack.Api;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -8,9 +9,15 @@ builder.AddServiceDefaults();
 
 builder.Services.AddElasticClientExtension(configuration);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Servers = [new OpenApiServer { Url = "/" }];
+
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 

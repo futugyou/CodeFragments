@@ -1,4 +1,5 @@
 using GraphQLStack;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -6,9 +7,15 @@ var configuration = builder.Configuration;
 builder.AddServiceDefaults();
 builder.Services.AddGraphQL(configuration, builder.Environment);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Servers = [new OpenApiServer { Url = "/" }];
+
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 
