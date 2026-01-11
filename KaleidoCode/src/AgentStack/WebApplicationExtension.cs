@@ -17,11 +17,19 @@ public static class WebApplicationExtension
             app.MapDevUI();
         }
 
-        app.MapAGUI("/joker", sp =>
-        {
-            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            return chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        });
+        // app.MapAGUI("/joker", sp =>
+        // {
+        //     var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+        //     return chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        // });
+
+        // // it also works
+        // app.MapAGUI("/light", sp =>
+        // {
+        //     return sp.GetRequiredKeyedService<AIAgent>("light");
+        // });
+
+        app.MapAGUI();
 
         return app;
     }
@@ -32,6 +40,34 @@ public static class WebApplicationExtension
         Func<IServiceProvider, AIAgent> factory)
     {
         var agent = factory(endpoints.ServiceProvider);
-        return endpoints.MapAGUI(pattern, agent); ;
+        return endpoints.MapAGUI(pattern, agent);
+    }
+
+    public static IEndpointRouteBuilder MapAGUI(this IEndpointRouteBuilder endpoints)
+    {
+        var registeredAIAgents = GetRegisteredEntities<AIAgent>(endpoints.ServiceProvider);
+        var registeredWorkflows = GetRegisteredEntities<Workflow>(endpoints.ServiceProvider);
+
+        foreach (var agent in registeredAIAgents)
+        {
+            endpoints.MapAGUI(agent.Name!, agent);
+        }
+
+        foreach (var workflow in registeredWorkflows)
+        {
+            endpoints.MapAGUI(workflow.Name!, workflow.AsAgent());
+        }
+
+        return endpoints;
+    }
+
+    private static IEnumerable<T> GetRegisteredEntities<T>(IServiceProvider serviceProvider)
+    {
+        var keyedEntities = serviceProvider.GetKeyedServices<T>(KeyedService.AnyKey);
+        var defaultEntities = serviceProvider.GetServices<T>() ?? [];
+
+        return keyedEntities
+            .Concat(defaultEntities)
+            .Where(entity => entity is not null);
     }
 }
