@@ -166,6 +166,20 @@ public static class ServiceCollectionExtensions
         //     return store;
         // });
 
+        services.AddAIAgent("jokerwithprovier", (sp, name) =>
+        {
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
+            AIAgent agent = chatClient.CreateAIAgent(new ChatClientAgentOptions
+            {
+                Name = "jokerwithprovier",
+                ChatOptions = new() { Instructions = "You are good at telling jokes." },
+                AIContextProviderFactory = providerFactory.Create
+            });
+
+            return agent;
+        });
+
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
 

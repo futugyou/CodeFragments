@@ -12,19 +12,19 @@ public class AgentService
     private readonly AgentOptions _options;
     private readonly IChatClient _chatClient;
     private readonly VectorStore _vectorStore;
-    private readonly AIContextProvider _aiContextProvider;
+    private readonly AIAgent _jokerAgent;
     private readonly AIContextProviderFactory _aiContextProviderFactory;
     private static readonly Dictionary<string, string> _threadStore = [];
 
     public AgentService(
         IOptionsMonitor<AgentOptions> optionsMonitor,
         [FromKeyedServices("AgentVectorStore")] VectorStore vectorStore,
-        [FromKeyedServices("AgentContextProvider")] AIContextProvider aiContextProvider,
+        [FromKeyedServices("jokerwithprovier")] AIAgent jokerAgent,
         AIContextProviderFactory aiContextProviderFactory
     )
     {
         _aiContextProviderFactory = aiContextProviderFactory;
-        _aiContextProvider = aiContextProvider;
+        _jokerAgent = jokerAgent;
         _vectorStore = vectorStore;
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
@@ -39,7 +39,7 @@ public class AgentService
         _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
     }
 
-    public async Task<string> JokerDI(string message)
+    public async Task<string> JokerDIProvider(string message)
     {
         AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
         {
@@ -50,7 +50,13 @@ public class AgentService
         var response = await agent.RunAsync(message);
         return response.Text;
     }
-    
+
+    public async Task<string> JokerDIAgentAndProvider(string message)
+    {
+        var response = await _jokerAgent.RunAsync(message);
+        return response.Text;
+    }
+
     public async Task<string> Joker(string message)
     {
         var chatClient = _chatClient

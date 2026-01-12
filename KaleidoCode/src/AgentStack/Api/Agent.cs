@@ -13,7 +13,8 @@ public static class AgentEndpoints
                 .WithName("maf agent");
 
         agentGroup.MapPost("/joker", Joker).WithName("joker");
-        agentGroup.MapPost("/provider-test", ProviderTest).WithName("provider-test");
+        agentGroup.MapPost("/di-provider", DIProvider ).WithName("di-provider");
+        agentGroup.MapPost("/di-agent-and-provider", DIAgentAndProvider).WithName("di-agent-and-provider");
         agentGroup.MapPost("/joker-stream", JokerStream).WithName("joker-stream");
         agentGroup.MapPost("/joker-message", JokerMessage).WithName("joker-message");
         agentGroup.MapPost("/thread", Thread).WithName("thread");
@@ -30,9 +31,14 @@ public static class AgentEndpoints
     }
 
     // FromHeader is in order to add header in swagger
-    static async Task<string> ProviderTest([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string ThreadId, string message = "Tell me a joke about a pirate.")
+    static async Task<string> DIProvider([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string ThreadId, string message = "Tell me a joke about a pirate.")
     {
-        return await agentService.JokerDI(message);
+        return await agentService.JokerDIProvider(message);
+    }
+
+    static async Task<string> DIAgentAndProvider([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string ThreadId, string message = "Tell me a joke about a pirate.")
+    {
+        return await agentService.JokerDIAgentAndProvider(message);
     }
     static async Task<string> Joker([FromServices] AgentService agentService, string message = "Tell me a joke about a pirate.")
     {
