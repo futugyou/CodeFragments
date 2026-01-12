@@ -99,16 +99,7 @@ public class AgentService
 
     public async IAsyncEnumerable<string> Function()
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools =
-        [
-            .. typeof(LightPlugin)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .Select((m) => AIFunctionFactory.Create(m, target: null)), // Get from type static methods
-            .. lightPlugin.GetType()
-                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-                .Select((m) => AIFunctionFactory.Create(m, target: lightPlugin)) // Get from instance methods
-        ];
+        AITool[] tools = ToolsExtensions.GetAIToolsFromType<LightPlugin>();
 
         var message = "Can you tell me the status of all the lights?";
         AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
@@ -198,11 +189,7 @@ public class AgentService
 
     public async IAsyncEnumerable<string> AgentToTool()
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools = [
-            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
-            AIFunctionFactory.Create(lightPlugin.ChangeStateAsync)
-        ];
+        AITool[] tools = ToolsExtensions.GetAIToolsFromType<LightPlugin>();
 
         var message = "Can you tell me the status of all the lights?";
         AIAgent toolAgent = _chatClient.CreateAIAgent(
