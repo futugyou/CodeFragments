@@ -10,9 +10,9 @@ public static class AgentMiddleware
          AIAgent innerAgent,
          CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Input: {messages.Count()}");
+        Console.WriteLine($"agent middleware, input count: {messages.Count()}");
         var response = await innerAgent.RunAsync(messages, thread, options, cancellationToken).ConfigureAwait(false);
-        Console.WriteLine($"Output: {response.Messages.Count}");
+        Console.WriteLine($"agent middleware, output: {response.Messages.Count}");
         return response;
     }
 
@@ -23,11 +23,11 @@ public static class AgentMiddleware
           AIAgent innerAgent,
           [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Input: {messages.Count()}");
+        Console.WriteLine($"agent middleware, input count: {messages.Count()}");
 
         await foreach (var update in innerAgent.RunStreamingAsync(messages, thread, options, cancellationToken))
         {
-            Console.WriteLine($"Output: {update.Text}");
+            Console.WriteLine($"agent middleware, output text: {update.Text}");
             yield return update;
         }
     }
@@ -38,9 +38,9 @@ public static class AgentMiddleware
            Func<FunctionInvocationContext, CancellationToken, ValueTask<object?>> next,
            CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Function Name: {context!.Function.Name}");
+        Console.WriteLine($"function middleware, name: {context!.Function.Name}");
         var result = await next(context, cancellationToken);
-        Console.WriteLine($"Function Call Result: {result}");
+        Console.WriteLine($"function middleware, result: {result}");
 
         return result;
     }
@@ -51,10 +51,20 @@ public static class AgentMiddleware
           IChatClient innerChatClient,
           CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Input: {messages.Count()}");
+        Console.WriteLine($"chat middleware, input count: {messages.Count()}");
         var response = await innerChatClient.GetResponseAsync(messages, options, cancellationToken);
-        Console.WriteLine($"Output: {response.Messages.Count}");
+        Console.WriteLine($"chat middleware, output count: {response.Messages.Count}");
 
         return response;
+    }
+
+    public static async IAsyncEnumerable<ChatResponseUpdate> ChatClientStreamMiddleware(IEnumerable<ChatMessage> messages, ChatOptions? options, IChatClient innerChatClient, [EnumeratorCancellation]CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"chat middleware, input count: {messages.Count()}");
+        await foreach (var update in innerChatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
+        {
+            Console.WriteLine($"chat middleware, onput text: {update.Text}");
+            yield return update;
+        }
     }
 }

@@ -118,7 +118,7 @@ public static class ServiceCollectionExtensions
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
             chatClient = chatClient
                 .AsBuilder()
-                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: null)
+                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
                 .Build();
 
             return chatClient.CreateAIAgent(

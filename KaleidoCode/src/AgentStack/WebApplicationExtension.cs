@@ -50,12 +50,18 @@ public static class WebApplicationExtension
 
         foreach (var agent in registeredAIAgents)
         {
-            endpoints.MapAGUI(agent.Name!, agent);
+            if (agent.Name != null)
+            {
+                endpoints.MapAGUI(agent.Name, agent);
+            }
         }
 
         foreach (var workflow in registeredWorkflows)
         {
-            endpoints.MapAGUI(workflow.Name!, workflow.AsAgent());
+            if (workflow.Name != null)
+            {
+                endpoints.MapAGUI(workflow.Name!, workflow.AsAgent());
+            }
         }
 
         return endpoints;

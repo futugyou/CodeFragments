@@ -33,7 +33,11 @@ public class AgentService
     {
         var chatClient = _chatClient
         .AsBuilder()
-        .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: null)
+        // If both are added, only the non-streaming version will be displayed when using `RunAsync`, 
+        // and only the streaming version will be displayed when using `RunStreamingAsync`.
+        // If only streaming is added, the log will also be displayed when using `RunAsync`.
+        // RunAsync call RunStreamingAsync internal so the console will show the logs 'chat middleware....'
+        .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
         .Build();
 
         AIAgent agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
@@ -43,7 +47,12 @@ public class AgentService
 
     public async IAsyncEnumerable<string> JokerStream(string message)
     {
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        var chatClient = _chatClient
+        .AsBuilder()
+        .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
+        .Build();
+
+        AIAgent agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
         agent = agent
             .AsBuilder()
             .Use(runFunc: null, runStreamingFunc: AgentMiddleware.AgentRunStreamMiddleware)
