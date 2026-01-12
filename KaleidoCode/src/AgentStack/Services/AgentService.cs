@@ -1,5 +1,6 @@
 
 using AgentStack.Skills;
+using AgentStack.ContextProvider;
 using AgentStack.Middleware;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
@@ -11,10 +12,19 @@ public class AgentService
     private readonly AgentOptions _options;
     private readonly IChatClient _chatClient;
     private readonly VectorStore _vectorStore;
+    private readonly AIContextProvider _aiContextProvider;
+    private readonly AIContextProviderFactory _aiContextProviderFactory;
     private static readonly Dictionary<string, string> _threadStore = [];
 
-    public AgentService(IOptionsMonitor<AgentOptions> optionsMonitor, [FromKeyedServices("AgentVectorStore")] VectorStore vectorStore)
+    public AgentService(
+        IOptionsMonitor<AgentOptions> optionsMonitor,
+        [FromKeyedServices("AgentVectorStore")] VectorStore vectorStore,
+        [FromKeyedServices("AgentContextProvider")] AIContextProvider aiContextProvider,
+        AIContextProviderFactory aiContextProviderFactory
+    )
     {
+        _aiContextProviderFactory = aiContextProviderFactory;
+        _aiContextProvider = aiContextProvider;
         _vectorStore = vectorStore;
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
@@ -29,6 +39,18 @@ public class AgentService
         _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
     }
 
+    public async Task<string> JokerDI(string message)
+    {
+        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Name = "Joker",
+            ChatOptions = new() { Instructions = "You are good at telling jokes." },
+            AIContextProviderFactory = _aiContextProviderFactory.Create
+        });
+        var response = await agent.RunAsync(message);
+        return response.Text;
+    }
+    
     public async Task<string> Joker(string message)
     {
         var chatClient = _chatClient

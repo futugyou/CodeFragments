@@ -13,6 +13,7 @@ public static class AgentEndpoints
                 .WithName("maf agent");
 
         agentGroup.MapPost("/joker", Joker).WithName("joker");
+        agentGroup.MapPost("/provider-test", ProviderTest).WithName("provider-test");
         agentGroup.MapPost("/joker-stream", JokerStream).WithName("joker-stream");
         agentGroup.MapPost("/joker-message", JokerMessage).WithName("joker-message");
         agentGroup.MapPost("/thread", Thread).WithName("thread");
@@ -28,6 +29,11 @@ public static class AgentEndpoints
         agentGroup.MapPost("/declarative", Declarative).WithName("declarative");
     }
 
+    // FromHeader is in order to add header in swagger
+    static async Task<string> ProviderTest([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string ThreadId, string message = "Tell me a joke about a pirate.")
+    {
+        return await agentService.JokerDI(message);
+    }
     static async Task<string> Joker([FromServices] AgentService agentService, string message = "Tell me a joke about a pirate.")
     {
         return await agentService.Joker(message);

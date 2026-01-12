@@ -1,9 +1,11 @@
 
 using AgentStack.Services;
+using AgentStack.ContextProvider;
 using AgentStack.Skills;
 using AgentStack.ThreadStore;
 using AgentStack.Middleware;
 using Microsoft.SemanticKernel.Connectors.PgVector;
+using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
@@ -79,6 +81,30 @@ public static class ServiceCollectionExtensions
                     EmbeddingGenerator = embeddingGenerator,
                 };
             });
+
+        services.AddSingleton<AIContextProviderFactory>();
+
+        // it is not ok, beacuse it is Singleton, but can not change to scope, AddAIAgent is Singleton
+        // services.AddKeyedSingleton<AIContextProvider>("AgentContextProvider", (sp, _) =>
+        // {
+        //     var store = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
+        //     var httpContext = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
+        //     var request = httpContext?.Request;
+        //     foreach (var item in request?.Headers)
+        //     {
+        //         Console.WriteLine($"{item.Key}: {item.Value}");
+        //     }
+        //     var threadId = request?.Headers != null ? request?.Headers["ThreadId"].FirstOrDefault() : "";
+        //     var userId = request?.Headers != null ? request?.Headers["UserId"].FirstOrDefault() : "";
+
+        //     Console.WriteLine($"!!!!{threadId}: {userId}");
+        //     return new ChatHistoryMemoryProvider(
+        //         store,
+        //         collectionName: "chathistory_memory",
+        //         vectorDimensions: 1536,
+        //         storageScope: new() { UserId = userId, ThreadId = threadId },
+        //         searchScope: new() { UserId = userId });
+        // });
 
         services.AddScoped<AgentService>();
         services.AddScoped<WorkflowService>();
