@@ -229,19 +229,18 @@ public static class ServiceCollectionExtensions
             );
         });
 
-        // Two errors:
+        // One errors:
         // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
-        // 2. /v1/responses will get `Workflow does not support ChatProtocol: At least List<ChatMessage> and TurnToken must be supported as input.`
+        // The Executor used in devui must implement `ChatProtocolExecutor` or accept a `List<ChatMessage>`.
         services.AddKeyedSingleton("sequential", (sp, key) =>
         {
             if (key is not string keyString)
             {
                 throw new InvalidOperationException("The expected name is null.");
             }
-            Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
-            var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
-            // UppercaseExecutor uppercase = new(); 
-            ReverseTextExecutor reverse = new();
+
+            UppercaseChatProtocolExecutor uppercase = new();
+            ReverseChatProtocolExecutor reverse = new();
             WorkflowBuilder builder = new(uppercase);
             builder.WithName(keyString);
             builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
@@ -252,11 +251,37 @@ public static class ServiceCollectionExtensions
         // message": "    Agent 'sequential' not found.\n    
         // Ensure the agent is registered with 'sequential' name in the dependency injection container.\n
         // We recommend using 'builder.AddAIAgent()' for simplicity.
-
-        // used different names so that they would be displayed in both the agent and the workflow.
-        services.AddAIAgent("sequential-agent", (sp, name) =>
+        services.AddAIAgent("sequential", (sp, name) =>
         {
-            var workflow = sp.GetRequiredKeyedService<Workflow>("sequential");
+            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
+            return workflow.AsAgent(id: name, name: name);
+        });
+
+        // One errors:
+        // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
+        // 
+        services.AddKeyedSingleton("concurrent", (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            AIAgent physicist = chatClient.CreateAIAgent(
+                name: "Physicist",
+                instructions: "You are an expert in physics. You answer questions from a physics perspective."
+            );
+
+            AIAgent chemist = chatClient.CreateAIAgent(
+                name: "Chemist",
+                instructions: "You are an expert in chemistry. You answer questions from a chemistry perspective."
+            );
+            return AgentWorkflowBuilder.BuildConcurrent(workflowName: keyString, agents: [physicist, chemist]);
+        });
+        services.AddAIAgent("concurrent", (sp, name) =>
+        {
+            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
             return workflow.AsAgent(id: name, name: name);
         });
 
