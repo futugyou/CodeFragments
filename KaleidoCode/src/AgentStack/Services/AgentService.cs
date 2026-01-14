@@ -19,7 +19,7 @@ public class AgentService
     public AgentService(
         IOptionsMonitor<AgentOptions> optionsMonitor,
         [FromKeyedServices("AgentVectorStore")] VectorStore vectorStore,
-        [FromKeyedServices("jokerwithprovier")] AIAgent jokerAgent,
+        [FromKeyedServices("joker")] AIAgent jokerAgent,
         AIContextProviderFactory aiContextProviderFactory
     )
     {

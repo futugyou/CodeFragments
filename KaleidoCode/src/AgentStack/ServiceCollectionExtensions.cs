@@ -113,12 +113,13 @@ public static class ServiceCollectionExtensions
         services.AddAIAgent("joker", (sp, name) =>
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
             chatClient = chatClient
                 .AsBuilder()
-                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: null)
+                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
                 .Build();
 
+            var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
+            var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
             return chatClient.CreateAIAgent(new ChatClientAgentOptions
             {
                 Name = "joker",
@@ -129,29 +130,27 @@ public static class ServiceCollectionExtensions
                        vectorStore,
                        ctx.SerializedState,
                        ctx.JsonSerializerOptions);
-                }
+                },
+                AIContextProviderFactory = providerFactory.Create
             });
         });
 
-        var lightPlugin = new LightPlugin();
-        AITool[] tools = [
-            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
-            AIFunctionFactory.Create(lightPlugin.ChangeStateAsync)
-        ];
+        AITool[] lightTools = ToolsExtensions.GetAIToolsFromType<LightPlugin>();
 
         services.AddAIAgent("light", (sp, name) =>
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            chatClient = chatClient
-                .AsBuilder()
-                .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
-                .Build();
 
             return chatClient.CreateAIAgent(
-                instructions: "You are a useful light assistant.",
-                name: "light",
-                description: "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off.",
-                tools: tools
+                new ChatClientAgentOptions
+                {
+                    Name = "light",
+                    ChatOptions = new()
+                    {
+                        Instructions = "You are a useful light assistant. can tell user the status of the lights and can help user control the lights on and off .",
+                        Tools = lightTools,
+                    }
+                }
             );
         });
 
@@ -166,20 +165,29 @@ public static class ServiceCollectionExtensions
         //     return store;
         // });
 
-        services.AddAIAgent("jokerwithprovier", (sp, name) =>
+        var lightPlugin = new LightPlugin();
+        AITool[] lightToolsWithApproval = [
+            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
+            // Upon testing, devui failed to recognize ApprovalRequiredAIFunction and executed the command directly.
+            new ApprovalRequiredAIFunction(AIFunctionFactory.Create(lightPlugin.ChangeStateAsync))
+        ];
+        services.AddAIAgent("light-with-approval", (sp, name) =>
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
-            AIAgent agent = chatClient.CreateAIAgent(new ChatClientAgentOptions
-            {
-                Name = "jokerwithprovier",
-                ChatOptions = new() { Instructions = "You are good at telling jokes." },
-                AIContextProviderFactory = providerFactory.Create
-            });
 
-            return agent;
+            return chatClient.CreateAIAgent(
+                new ChatClientAgentOptions
+                {
+                    Name = "light-with-approval",
+                    ChatOptions = new()
+                    {
+                        Instructions = "You are a useful light assistant. can tell user the status of the lights and can help user control the lights on and off .",
+                        Tools = lightTools,
+                    }
+                }
+            );
         });
-
+        
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
 

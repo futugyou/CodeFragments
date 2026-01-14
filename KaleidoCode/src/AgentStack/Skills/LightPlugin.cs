@@ -24,6 +24,7 @@ public class LightPlugin
     [Description("Changes the state of the light")]
     public Task<LightModel?> ChangeStateAsync(int id, bool isOn)
     {
+        Console.WriteLine($"ChangeStateAsync was called");
         var light = lights.FirstOrDefault(light => light.Id == id);
 
         if (light == null)
