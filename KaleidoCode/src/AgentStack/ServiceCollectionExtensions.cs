@@ -1,5 +1,6 @@
 
 using AgentStack.Services;
+using AgentStack.Executor;
 using AgentStack.ContextProvider;
 using AgentStack.Skills;
 using AgentStack.ThreadStore;
@@ -228,10 +229,42 @@ public static class ServiceCollectionExtensions
             );
         });
 
+        // Two errors:
+        // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
+        // 2. /v1/responses will get `Workflow does not support ChatProtocol: At least List<ChatMessage> and TurnToken must be supported as input.`
+        services.AddKeyedSingleton("sequential", (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+            Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
+            var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
+            // UppercaseExecutor uppercase = new(); 
+            ReverseTextExecutor reverse = new();
+            WorkflowBuilder builder = new(uppercase);
+            builder.WithName(keyString);
+            builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
+            return builder.Build();
+        });
+
+        // An error will occur without the following code.
+        // message": "    Agent 'sequential' not found.\n    
+        // Ensure the agent is registered with 'sequential' name in the dependency injection container.\n
+        // We recommend using 'builder.AddAIAgent()' for simplicity.
+
+        // used different names so that they would be displayed in both the agent and the workflow.
+        services.AddAIAgent("sequential-agent", (sp, name) =>
+        {
+            var workflow = sp.GetRequiredKeyedService<Workflow>("sequential");
+            return workflow.AsAgent(id: name, name: name);
+        });
+
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
 
 
         return services;
     }
+
 }
