@@ -4,8 +4,8 @@ using AgentStack.ContextProvider;
 using AgentStack.Skills;
 using AgentStack.ThreadStore;
 using AgentStack.Middleware;
+using AgentStack.Model;
 using Microsoft.SemanticKernel.Connectors.PgVector;
-using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
@@ -187,7 +187,47 @@ public static class ServiceCollectionExtensions
                 }
             );
         });
-        
+
+        services.AddAIAgent("rag", (sp, name) =>
+        {
+            var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
+            var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
+            async Task<IEnumerable<TextSearchProvider.TextSearchResult>> SearchAdapter(string text, CancellationToken ct)
+            {
+                List<TextSearchProvider.TextSearchResult> results = [];
+                await foreach (var result in vectorCollection.SearchAsync(text, 5, cancellationToken: ct))
+                {
+                    results.Add(new TextSearchProvider.TextSearchResult
+                    {
+                        SourceName = result.Record.FileName,
+                        SourceLink = "",
+                        Text = result.Record.Text ?? string.Empty,
+                        RawRepresentation = result
+                    });
+                }
+                return results;
+            }
+
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            TextSearchProviderOptions textSearchOptions = new()
+            {
+                SearchTime = TextSearchProviderOptions.TextSearchBehavior.BeforeAIInvoke,
+                RecentMessageMemoryLimit = 5
+            };
+
+            return chatClient.CreateAIAgent(
+                new ChatClientAgentOptions
+                {
+                    Name = "rag",
+                    ChatOptions = new()
+                    {
+                        Instructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief.",
+                    },
+                    AIContextProviderFactory = ctx => new TextSearchProvider(SearchAdapter, ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions)
+                }
+            );
+        });
+
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
 
