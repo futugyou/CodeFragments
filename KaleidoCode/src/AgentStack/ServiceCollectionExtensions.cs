@@ -11,7 +11,6 @@ using Microsoft.Agents.AI.Hosting;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
 using Npgsql;
-using Microsoft.Agents.AI.Workflows;
 
 namespace AgentStack;
 
@@ -270,8 +269,7 @@ public static class ServiceCollectionExtensions
             return AgentWorkflowBuilder.BuildConcurrent(workflowName: keyString, agents: [physicist, chemist]);
         });
 
-        // The HandoffsWorkflowBuilder lacks a method to set the name, resulting in the agent/workflow name being fixed as `HandoffStart`.
-        services.AddAIWorkflow("HandoffStart", (sp, key) =>
+        services.AddAIWorkflow("handoff", (sp, key) =>
         {
             if (key is not string keyString)
             {
@@ -295,6 +293,8 @@ public static class ServiceCollectionExtensions
             .WithHandoffs(triageAgent, [mathTutor, historyTutor])
             .WithHandoffs([mathTutor, historyTutor], triageAgent)
             .Build();
+            // The workflow class does not have a `setName` method, so reflection is used. 
+            workflow.WithName(keyString);
             return workflow;
         });
 
