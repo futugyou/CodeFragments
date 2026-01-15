@@ -11,6 +11,7 @@ using Microsoft.Agents.AI.Hosting;
 using AgentStack.MessageStore;
 using Microsoft.Extensions.VectorData;
 using Npgsql;
+using Microsoft.Agents.AI.Workflows;
 
 namespace AgentStack;
 
@@ -280,6 +281,39 @@ public static class ServiceCollectionExtensions
             return AgentWorkflowBuilder.BuildConcurrent(workflowName: keyString, agents: [physicist, chemist]);
         });
         services.AddAIAgent("concurrent", (sp, name) =>
+        {
+            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
+            return workflow.AsAgent(id: name, name: name);
+        });
+
+        // The HandoffsWorkflowBuilder lacks a method to set the name, resulting in the agent/workflow name being fixed as `HandoffStart`.
+        services.AddKeyedSingleton("HandoffStart", (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            ChatClientAgent historyTutor = new(chatClient,
+                "You provide assistance with historical queries. Explain important events and context clearly. Only respond about history.",
+                "history_tutor",
+                "Specialist agent for historical questions");
+            ChatClientAgent mathTutor = new(chatClient,
+                "You provide help with math problems. Explain your reasoning at each step and include examples. Only respond about math.",
+                "math_tutor",
+                "Specialist agent for math questions");
+            ChatClientAgent triageAgent = new(chatClient,
+                "You determine which agent to use based on the user's homework question. ALWAYS handoff to another agent.",
+                "triage_agent",
+                "Routes messages to the appropriate specialist agent");
+            var workflow = AgentWorkflowBuilder.CreateHandoffBuilderWith(triageAgent)
+            .WithHandoffs(triageAgent, [mathTutor, historyTutor])
+            .WithHandoffs([mathTutor, historyTutor], triageAgent)
+            .Build();
+            return workflow;
+        });
+        services.AddAIAgent("HandoffStart", (sp, name) =>
         {
             var workflow = sp.GetRequiredKeyedService<Workflow>(name);
             return workflow.AsAgent(id: name, name: name);
