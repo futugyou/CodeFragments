@@ -298,6 +298,25 @@ public static class ServiceCollectionExtensions
             return workflow;
         });
 
+        services.AddAIWorkflow("groupChat", (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            static ChatClientAgent GetTranslationAgent(string targetLanguage, IChatClient chatClient) =>
+            new(chatClient, $"You are a translation assistant who only responds in {targetLanguage}. Respond to any " + $"input by outputting the name of the input language and then translating the input to {targetLanguage}.");
+
+            var workflow = AgentWorkflowBuilder.CreateGroupChatBuilderWith(agents => new RoundRobinGroupChatManager(agents) { MaximumIterationCount = 3 })
+            .AddParticipants(from lang in (string[])["French", "Spanish", "English"] select GetTranslationAgent(lang, chatClient))
+            .Build();
+
+            workflow.WithName(keyString);
+            return workflow;
+        });
+
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
 
