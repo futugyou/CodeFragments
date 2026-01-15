@@ -233,7 +233,7 @@ public static class ServiceCollectionExtensions
         // One errors:
         // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
         // The Executor used in devui must implement `ChatProtocolExecutor` or accept a `List<ChatMessage>`.
-        services.AddKeyedSingleton("sequential", (sp, key) =>
+        services.AddAIWorkflow("sequential", (sp, key) =>
         {
             if (key is not string keyString)
             {
@@ -248,20 +248,9 @@ public static class ServiceCollectionExtensions
             return builder.Build();
         });
 
-        // An error will occur without the following code.
-        // message": "    Agent 'sequential' not found.\n    
-        // Ensure the agent is registered with 'sequential' name in the dependency injection container.\n
-        // We recommend using 'builder.AddAIAgent()' for simplicity.
-        services.AddAIAgent("sequential", (sp, name) =>
-        {
-            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
-            return workflow.AsAgent(id: name, name: name);
-        });
-
         // One errors:
-        // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
-        // 
-        services.AddKeyedSingleton("concurrent", (sp, key) =>
+        // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.` 
+        services.AddAIWorkflow("concurrent", (sp, key) =>
         {
             if (key is not string keyString)
             {
@@ -280,14 +269,9 @@ public static class ServiceCollectionExtensions
             );
             return AgentWorkflowBuilder.BuildConcurrent(workflowName: keyString, agents: [physicist, chemist]);
         });
-        services.AddAIAgent("concurrent", (sp, name) =>
-        {
-            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
-            return workflow.AsAgent(id: name, name: name);
-        });
 
         // The HandoffsWorkflowBuilder lacks a method to set the name, resulting in the agent/workflow name being fixed as `HandoffStart`.
-        services.AddKeyedSingleton("HandoffStart", (sp, key) =>
+        services.AddAIWorkflow("HandoffStart", (sp, key) =>
         {
             if (key is not string keyString)
             {
@@ -313,11 +297,6 @@ public static class ServiceCollectionExtensions
             .Build();
             return workflow;
         });
-        services.AddAIAgent("HandoffStart", (sp, name) =>
-        {
-            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
-            return workflow.AsAgent(id: name, name: name);
-        });
 
         services.AddOpenAIResponses();
         services.AddOpenAIConversations();
@@ -326,4 +305,22 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddAIWorkflow(this IServiceCollection services, string name, Func<IServiceProvider, string, Workflow> createWorkflowDelegate)
+    {
+        services.AddKeyedSingleton(name, (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+            return createWorkflowDelegate(sp, keyString);
+        });
+        services.AddAIAgent(name, (sp, name) =>
+        {
+            var workflow = sp.GetRequiredKeyedService<Workflow>(name);
+            return workflow.AsAgent(id: name, name: name);
+        });
+
+        return services;
+    }
 }
