@@ -14,6 +14,9 @@ public class AgentService
     private readonly IChatClient _chatClient;
     private readonly VectorStore _vectorStore;
     private readonly AIAgent _jokerAgent;
+    private readonly AIAgent _lightAgent;
+    private readonly AIAgent _lightApprovalAgent;
+    private readonly AIAgent _ragAgent;
     private readonly AIContextProviderFactory _aiContextProviderFactory;
     private static readonly Dictionary<string, string> _threadStore = [];
 
@@ -21,11 +24,17 @@ public class AgentService
         IOptionsMonitor<AgentOptions> optionsMonitor,
         [FromKeyedServices("AgentVectorStore")] VectorStore vectorStore,
         [FromKeyedServices("joker")] AIAgent jokerAgent,
+        [FromKeyedServices("light")] AIAgent lightAgent,
+        [FromKeyedServices("light-with-approval")] AIAgent lightApprovalAgent,
+        [FromKeyedServices("rag")] AIAgent ragAgent,
         AIContextProviderFactory aiContextProviderFactory
     )
     {
         _aiContextProviderFactory = aiContextProviderFactory;
         _jokerAgent = jokerAgent;
+        _lightAgent = lightAgent;
+        _lightApprovalAgent = lightApprovalAgent;
+        _ragAgent = ragAgent;
         _vectorStore = vectorStore;
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
@@ -40,53 +49,15 @@ public class AgentService
         _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
     }
 
-    public async Task<string> JokerDIProvider(string message)
-    {
-        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
-        {
-            Name = "Joker",
-            ChatOptions = new() { Instructions = "You are good at telling jokes." },
-            AIContextProviderFactory = _aiContextProviderFactory.Create
-        });
-        var response = await agent.RunAsync(message);
-        return response.Text;
-    }
-
-    public async Task<string> JokerDIAgentAndProvider(string message)
+    public async Task<string> Joker(string message)
     {
         var response = await _jokerAgent.RunAsync(message);
         return response.Text;
     }
 
-    public async Task<string> Joker(string message)
-    {
-        var chatClient = _chatClient
-        .AsBuilder()
-        // If both are added, only the non-streaming version will be displayed when using `RunAsync`, 
-        // and only the streaming version will be displayed when using `RunStreamingAsync`.
-        // If only streaming is added, the log will also be displayed when using `RunAsync`.
-        // RunAsync call RunStreamingAsync internal so the console will show the logs 'chat middleware....'
-        .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
-        .Build();
-
-        AIAgent agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        var response = await agent.RunAsync(message);
-        return response.Text;
-    }
-
     public async IAsyncEnumerable<string> JokerStream(string message)
     {
-        var chatClient = _chatClient
-        .AsBuilder()
-        .Use(getResponseFunc: AgentMiddleware.ChatClientMiddleware, getStreamingResponseFunc: AgentMiddleware.ChatClientStreamMiddleware)
-        .Build();
-
-        AIAgent agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        agent = agent
-            .AsBuilder()
-            .Use(runFunc: null, runStreamingFunc: AgentMiddleware.AgentRunStreamMiddleware)
-            .Build();
-        await foreach (var update in agent.RunStreamingAsync(message))
+        await foreach (var update in _jokerAgent.RunStreamingAsync(message))
         {
             yield return update.Text;
         }
@@ -97,8 +68,6 @@ public class AgentService
         string imageUrl,
         bool hasSystemMessage = false)
     {
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: hasSystemMessage ? null : "You are good at telling jokes.");
-
         List<ChatMessage> chatMessages = [new(ChatRole.User, [
             new TextContent(message),
             new UriContent(imageUrl, "image/jpeg")
@@ -109,55 +78,34 @@ public class AgentService
             chatMessages.Insert(0, new(ChatRole.System, "You are good at telling jokes."));
         }
 
-        var response = await agent.RunAsync(chatMessages);
+        var response = await _jokerAgent.RunAsync(chatMessages);
         return response.Text;
     }
+
     public async IAsyncEnumerable<string> Thread()
     {
         var messages = new string[] { "Tell me a joke about a pirate.", "Now add some emojis to the joke and tell it in the voice of a pirate's parrot." };
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
-        AgentThread thread = agent.GetNewThread();
+        AgentThread thread = _jokerAgent.GetNewThread();
         foreach (var message in messages)
         {
-            var response = await agent.RunAsync(message, thread);
+            var response = await _jokerAgent.RunAsync(message, thread);
             yield return response.Text;
         }
 
         yield return thread.Serialize(JsonSerializerOptions.Web).GetRawText();
     }
 
-    public async IAsyncEnumerable<string> Function()
+    public async IAsyncEnumerable<string> Function(string message = "Can you tell me the status of all the lights?")
     {
-        AITool[] tools = ToolsExtensions.GetAIToolsFromType<LightPlugin>();
-
-        var message = "Can you tell me the status of all the lights?";
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
-        agent = agent
-            .AsBuilder()
-            .Use(runFunc: AgentMiddleware.AgentRunMiddleware, runStreamingFunc: null)
-            .Build();
-
-        AgentThread thread = agent.GetNewThread();
-        var response = await agent.RunAsync(message, thread);
+        AgentThread thread = _lightAgent.GetNewThread();
+        var response = await _lightAgent.RunAsync(message, thread);
         yield return response.Text;
     }
 
-    public async IAsyncEnumerable<string> Approval(bool allowChangeState = false)
+    public async IAsyncEnumerable<string> Approval(string message = "Could you please turn off all the lights?", bool allowChangeState = false)
     {
-        var lightPlugin = new LightPlugin();
-        AITool[] tools = [
-            AIFunctionFactory.Create(lightPlugin.GetLightsAsync),
-            new ApprovalRequiredAIFunction(AIFunctionFactory.Create(lightPlugin.ChangeStateAsync))
-        ];
-
-        var message = "Could you please turn off all the lights?";
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a useful assistant.", tools: tools);
-        agent = agent
-            .AsBuilder()
-                .Use(AgentMiddleware.FunctionCallingMiddleware)
-            .Build();
-        AgentThread thread = agent.GetNewThread();
-        var response = await agent.RunAsync(message, thread);
+        AgentThread thread = _lightApprovalAgent.GetNewThread();
+        var response = await _lightApprovalAgent.RunAsync(message, thread);
         yield return response.Text;
 
         var functionApprovalRequests = response.Messages
@@ -172,7 +120,7 @@ public class AgentService
 
         FunctionApprovalRequestContent requestContent = functionApprovalRequests.First();
         var approvalMessage = new ChatMessage(ChatRole.User, [requestContent.CreateResponse(allowChangeState)]);
-        response = await agent.RunAsync(approvalMessage, thread);
+        response = await _lightApprovalAgent.RunAsync(approvalMessage, thread);
         yield return response.Text;
     }
 
@@ -216,18 +164,9 @@ public class AgentService
         return response.Deserialize<List<LightModel>>(JsonSerializerOptions.Web);
     }
 
-    public async IAsyncEnumerable<string> AgentToTool()
+    public async IAsyncEnumerable<string> AgentToTool(string message = "Can you tell me the status of all the lights?")
     {
-        AITool[] tools = ToolsExtensions.GetAIToolsFromType<LightPlugin>();
-
-        var message = "Can you tell me the status of all the lights?";
-        AIAgent toolAgent = _chatClient.CreateAIAgent(
-            instructions: "You are a useful light assistant.",
-            name: "LightAgent",
-            description: "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off.",
-            tools: tools);
-
-        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a helpful assistant who responds in chinese.", tools: [toolAgent.AsAIFunction()]);
+        AIAgent agent = _chatClient.CreateAIAgent(instructions: "You are a helpful assistant who responds in chinese.", tools: [_lightAgent.AsAIFunction()]);
         agent = agent.AsBuilder()
         .UseOpenTelemetry(sourceName: "agent-telemetry-source")
         .Build();
@@ -240,23 +179,9 @@ public class AgentService
 
     public async IAsyncEnumerable<string> HistoryStorage()
     {
-        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
-        {
-            Name = "Joker",
-            ChatOptions = new() { Instructions = "You are good at telling jokes." },
-            ChatMessageStoreFactory = ctx =>
-            {
-                // Create a new chat message store for this agent that stores the messages in a vector store.
-                return new VectorChatMessageStore(
-                   _vectorStore,
-                   ctx.SerializedState,
-                   ctx.JsonSerializerOptions);
-            }
-        });
+        AgentThread thread = _jokerAgent.GetNewThread();
 
-        AgentThread thread = agent.GetNewThread();
-
-        await agent.RunAsync("Tell me a joke about a pirate.", thread);
+        await _jokerAgent.RunAsync("Tell me a joke about a pirate.", thread);
 
         var messageStore = thread.GetService<VectorChatMessageStore>()!;
         var invokingContext = new ChatMessageStore.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a pirate.")]);
@@ -271,9 +196,9 @@ public class AgentService
         JsonElement serializedThread = thread.Serialize();
         yield return JsonSerializer.Serialize(serializedThread, new JsonSerializerOptions { WriteIndented = true });
         yield return "-------------------";
-        AgentThread resumedThread = agent.DeserializeThread(serializedThread);
+        AgentThread resumedThread = _jokerAgent.DeserializeThread(serializedThread);
 
-        await agent.RunAsync("Now tell the same joke in the voice of a pirate, and add some emojis to the joke.", resumedThread);
+        await _jokerAgent.RunAsync("Now tell the same joke in the voice of a pirate, and add some emojis to the joke.", resumedThread);
 
         messageStore = resumedThread.GetService<VectorChatMessageStore>()!;
         yield return $"\nThread is stored in vector store under key: {messageStore.ThreadDbKey}";
@@ -287,74 +212,27 @@ public class AgentService
 
     public async IAsyncEnumerable<string> HistoryMemory(string userId)
     {
-        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
-        {
-            Name = "Joker",
-            ChatOptions = new() { Instructions = "You are good at telling jokes." },
-            AIContextProviderFactory = (ctx) => new ChatHistoryMemoryProvider(
-                _vectorStore,
-                collectionName: "chathistory_memory",
-                vectorDimensions: 1536,
-                // Configure the scope values under which chat messages will be stored.
-                // In this case, we are using a fixed user ID and a unique thread ID for each new thread.
-                storageScope: new() { UserId = userId, ThreadId = Guid.NewGuid().ToString("N") },
-                // Configure the scope which would be used to search for relevant prior messages.
-                // In this case, we are searching for any messages for the user across all threads.
-                searchScope: new() { UserId = userId })
-        });
+        AgentThread thread = _jokerAgent.GetNewThread();
 
-        AgentThread thread = agent.GetNewThread();
-
-        var response = await agent.RunAsync("I like jokes about Pirates. Tell me a joke about a pirate.", thread);
+        var response = await _jokerAgent.RunAsync("I like jokes about Pirates. Tell me a joke about a pirate.", thread);
         yield return response.Text;
 
-        AgentThread thread2 = agent.GetNewThread();
+        AgentThread thread2 = _jokerAgent.GetNewThread();
 
-        response = await agent.RunAsync("Tell me a joke that I might like.", thread2);
+        response = await _jokerAgent.RunAsync("Tell me a joke that I might like.", thread2);
         yield return response.Text;
     }
 
     public async IAsyncEnumerable<string> RAG()
     {
+        AgentThread thread = _ragAgent.GetNewThread();
 
-        var vectorCollection = _vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
-        async Task<IEnumerable<TextSearchProvider.TextSearchResult>> SearchAdapter(string text, CancellationToken ct)
-        {
-            List<TextSearchProvider.TextSearchResult> results = [];
-            await foreach (var result in vectorCollection.SearchAsync(text, 5, cancellationToken: ct))
-            {
-                results.Add(new TextSearchProvider.TextSearchResult
-                {
-                    SourceName = result.Record.FileName,
-                    SourceLink = "",
-                    Text = result.Record.Text ?? string.Empty,
-                    RawRepresentation = result
-                });
-            }
-            return results;
-        }
-
-        TextSearchProviderOptions textSearchOptions = new()
-        {
-            SearchTime = TextSearchProviderOptions.TextSearchBehavior.BeforeAIInvoke,
-            RecentMessageMemoryLimit = 5
-        };
-
-        AIAgent agent = _chatClient.CreateAIAgent(new ChatClientAgentOptions
-        {
-            Name = "RAG",
-            ChatOptions = new() { Instructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief." },
-            AIContextProviderFactory = ctx => new TextSearchProvider(SearchAdapter, ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions)
-        });
-
-        AgentThread thread = agent.GetNewThread();
-
-        var response = await agent.RunAsync("what is RAG?", thread);
+        var response = await _ragAgent.RunAsync("what is RAG?", thread);
         yield return response.Text;
 
-        AgentThread thread2 = agent.GetNewThread();
+        AgentThread thread2 = _ragAgent.GetNewThread();
 
-        response = await agent.RunAsync("what is API?", thread2);
+        response = await _ragAgent.RunAsync("what is API?", thread2);
         yield return response.Text;
     }
 

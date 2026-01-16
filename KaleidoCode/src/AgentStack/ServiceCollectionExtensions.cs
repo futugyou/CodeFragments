@@ -150,7 +150,8 @@ public static class ServiceCollectionExtensions
                     {
                         Instructions = "You are a useful light assistant. can tell user the status of the lights and can help user control the lights on and off .",
                         Tools = lightTools,
-                    }
+                    },
+                    Description = "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off."
                 }
             );
         });
