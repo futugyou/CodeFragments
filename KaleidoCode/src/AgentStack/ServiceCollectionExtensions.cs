@@ -241,9 +241,12 @@ public static class ServiceCollectionExtensions
 
             UppercaseChatProtocolExecutor uppercase = new();
             ReverseChatProtocolExecutor reverse = new();
+            AppendSuffixChatProtocolExecutor append = new(" [PROCESSED]");
             WorkflowBuilder builder = new(uppercase);
             builder.WithName(keyString);
-            builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
+            builder.AddEdge(uppercase, reverse);
+            builder.AddEdge(reverse, append);
+            builder.WithOutputFrom(append);
             return builder.Build();
         });
 
@@ -314,6 +317,43 @@ public static class ServiceCollectionExtensions
             .Build();
 
             workflow.WithName(keyString);
+            return workflow;
+        });
+
+        services.AddAIWorkflow("sub-workflow", (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+
+            // Using dependency injection (DI) can lead to ownership issues.
+            // var subWorkflow = sp.GetRequiredKeyedService<Workflow>("sequential");
+
+            UppercaseChatProtocolExecutor uppercase = new();
+            ReverseChatProtocolExecutor reverse = new();
+            AppendSuffixChatProtocolExecutor append = new(" [PROCESSED]");
+            WorkflowBuilder builder = new(uppercase);
+            builder.WithName(keyString);
+            builder.AddEdge(uppercase, reverse);
+            builder.AddEdge(reverse, append);
+            builder.WithOutputFrom(append);
+            var subWorkflow = builder.Build();
+
+            // Testing revealed that the subworkflow does not complete successfully; it gets stuck somewhere in the middle.
+            // BindAsExecutor is highly suspected to be the cause.
+            ExecutorBinding subWorkflowExecutor = subWorkflow.BindAsExecutor("TextProcessingSubWorkflow");
+
+            PrefixChatProtocolExecutor prefix = new("INPUT: ");
+            PostProcessProtocolExecutor postProcess = new();
+
+            var workflow = new WorkflowBuilder(prefix)
+                .WithName(keyString)
+                .AddEdge(prefix, subWorkflowExecutor)
+                .AddEdge(subWorkflowExecutor, postProcess)
+                .WithOutputFrom(postProcess)
+                .Build();
+
             return workflow;
         });
 

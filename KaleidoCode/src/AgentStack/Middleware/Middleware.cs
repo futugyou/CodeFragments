@@ -58,7 +58,7 @@ public static class AgentMiddleware
         return response;
     }
 
-    public static async IAsyncEnumerable<ChatResponseUpdate> ChatClientStreamMiddleware(IEnumerable<ChatMessage> messages, ChatOptions? options, IChatClient innerChatClient, [EnumeratorCancellation]CancellationToken cancellationToken)
+    public static async IAsyncEnumerable<ChatResponseUpdate> ChatClientStreamMiddleware(IEnumerable<ChatMessage> messages, ChatOptions? options, IChatClient innerChatClient, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         Console.WriteLine($"chat middleware, input count: {messages.Count()}");
         await foreach (var update in innerChatClient.GetStreamingResponseAsync(messages, options, cancellationToken))

@@ -13,7 +13,7 @@ public static class AgentEndpoints
                 .WithName("maf agent");
 
         agentGroup.MapPost("/joker", Joker).WithName("joker");
-        agentGroup.MapPost("/di-provider", DIProvider ).WithName("di-provider");
+        agentGroup.MapPost("/di-provider", DIProvider).WithName("di-provider");
         agentGroup.MapPost("/di-agent-and-provider", DIAgentAndProvider).WithName("di-agent-and-provider");
         agentGroup.MapPost("/joker-stream", JokerStream).WithName("joker-stream");
         agentGroup.MapPost("/joker-message", JokerMessage).WithName("joker-message");

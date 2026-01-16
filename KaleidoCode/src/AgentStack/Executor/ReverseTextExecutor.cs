@@ -1,5 +1,6 @@
 
 namespace AgentStack.Executor;
+
 public sealed class ReverseChatProtocolExecutor() : ChatProtocolExecutor("ReverseTextExecutor", DefaultOptions, declareCrossRunShareable: true)
 {
     private static ChatProtocolExecutorOptions DefaultOptions => new()
