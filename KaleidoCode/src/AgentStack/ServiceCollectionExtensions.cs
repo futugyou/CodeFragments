@@ -342,6 +342,8 @@ public static class ServiceCollectionExtensions
 
             // Testing revealed that the subworkflow does not complete successfully; it gets stuck somewhere in the middle.
             // BindAsExecutor is highly suspected to be the cause.
+            // TODO: https://github.com/microsoft/agent-framework/issues/2911
+            // There are also many other issues related to subworkflow.
             ExecutorBinding subWorkflowExecutor = subWorkflow.BindAsExecutor("TextProcessingSubWorkflow");
 
             PrefixChatProtocolExecutor prefix = new("INPUT: ");
@@ -355,6 +357,31 @@ public static class ServiceCollectionExtensions
                 .Build();
 
             return workflow;
+        });
+
+        services.AddAIWorkflow("route-switch", (sp, key) =>
+        {
+            if (key is not string keyString)
+            {
+                throw new InvalidOperationException("The expected name is null.");
+            }
+
+            PrefixChatProtocolExecutor prefix = new("INPUT: ");
+            UppercaseChatProtocolExecutor uppercase = new();
+            ReverseChatProtocolExecutor reverse = new();
+            PostProcessProtocolExecutor postProcess = new();
+
+            WorkflowBuilder builder = new(prefix);
+            builder.WithName(keyString);
+            builder.AddSwitch(prefix, sw => sw
+            // Do a simple test of the `Switch/Case` in DevUI.
+                 .AddCase<CriticDecision>(cd => false, uppercase)
+                 .AddCase<CriticDecision>(cd => true, reverse))
+             .AddEdge(uppercase, postProcess)
+             .AddEdge(reverse, postProcess)
+             .WithOutputFrom(postProcess);
+
+            return builder.Build();
         });
 
         services.AddOpenAIResponses();
