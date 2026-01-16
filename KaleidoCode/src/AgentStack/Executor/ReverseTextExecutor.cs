@@ -19,6 +19,7 @@ public sealed class ReverseChatProtocolExecutor() : ChatProtocolExecutor("Revers
                 var up = string.Concat(m.Reverse()); ;
                 Console.WriteLine($"[Reverse] '{m}' → '{up}'");
                 result.Add(new ChatMessage(msg.Role, up));
+                await context.AddEventAsync(new ExecutorEvent("ReverseTextExecutor", $"[Reverse] '{m}' → '{up}'"), cancellationToken);
             }
             else
             {

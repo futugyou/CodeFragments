@@ -19,6 +19,7 @@ public class UppercaseChatProtocolExecutor() : ChatProtocolExecutor("UppercaseEx
                 var up = m.ToUpperInvariant();
                 Console.WriteLine($"[Uppercase] '{m}' → '{up}'");
                 result.Add(new ChatMessage(msg.Role, up));
+                await context.AddEventAsync(new ExecutorEvent("UppercaseExecutor", $"[Uppercase] '{m}' → '{up}'"), cancellationToken);
             }
             else
             {

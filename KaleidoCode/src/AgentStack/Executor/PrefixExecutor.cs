@@ -19,6 +19,7 @@ public sealed class PrefixChatProtocolExecutor(string prefix) : ChatProtocolExec
                 var up = prefix + m;
                 Console.WriteLine($"[Prefix] '{m}' → '{up}'");
                 result.Add(new ChatMessage(msg.Role, up));
+                await context.AddEventAsync(new ExecutorEvent("PrefixExecutor", $"[Prefix] '{m}' → '{up}'"), cancellationToken);
             }
             else
             {

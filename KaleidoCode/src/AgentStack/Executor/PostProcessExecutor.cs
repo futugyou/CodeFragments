@@ -15,10 +15,11 @@ public sealed class PostProcessProtocolExecutor() : ChatProtocolExecutor("PostPr
         {
             if (msg.Role == ChatRole.User)
             {
-                var message = msg.Text;
-                string up = $"[FINAL] {message} [END]";
-                Console.WriteLine($"[PostProcess] '{message}' → '{up}'");
+                var m = msg.Text;
+                string up = $"[FINAL] {m} [END]";
+                Console.WriteLine($"[PostProcess] '{m}' → '{up}'");
                 result.Add(new ChatMessage(msg.Role, up));
+                await context.AddEventAsync(new ExecutorEvent("PostProcessExecutor", $"[PostProcess] '{m}' → '{up}'"), cancellationToken);
             }
             else
             {

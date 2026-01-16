@@ -19,6 +19,7 @@ public sealed class AppendSuffixChatProtocolExecutor(string suffix) : ChatProtoc
                 var up = m + suffix;
                 Console.WriteLine($"[AppendSuffix] '{m}' → '{up}'");
                 result.Add(new ChatMessage(msg.Role, up));
+                await context.AddEventAsync(new ExecutorEvent("AppendSuffixExecutor", $"[AppendSuffix] '{m}' → '{up}'"), cancellationToken);
             }
             else
             {
