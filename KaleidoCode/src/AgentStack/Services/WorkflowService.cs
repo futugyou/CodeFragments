@@ -8,7 +8,19 @@ public class WorkflowService
 {
     private readonly AgentOptions _options;
     private readonly IChatClient _chatClient;
-    public WorkflowService(IOptionsMonitor<AgentOptions> optionsMonitor)
+    private readonly Workflow _seqWorkflow;
+    private readonly Workflow _conWorkflow;
+    private readonly Workflow _handoffWorkflow;
+    private readonly Workflow _groupChatWorkflow;
+    private readonly Workflow _subWorkflow;
+
+    public WorkflowService(
+        IOptionsMonitor<AgentOptions> optionsMonitor,
+        [FromKeyedServices("sequential")] Workflow seqWorkflow,
+        [FromKeyedServices("concurrent")] Workflow conWorkflow,
+        [FromKeyedServices("handoff")] Workflow handoffWorkflow,
+        [FromKeyedServices("groupChat")] Workflow groupChatWorkflow,
+        [FromKeyedServices("sub-workflow")] Workflow subWorkflow)
     {
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
@@ -20,42 +32,94 @@ public class WorkflowService
 
         var ghModelsClient = new OpenAIClient(credential, openAIOptions);
         _chatClient = ghModelsClient.GetChatClient(_options.TextCompletion.ModelId).AsIChatClient();
+        _seqWorkflow = seqWorkflow;
+        _conWorkflow = conWorkflow;
+        _handoffWorkflow = handoffWorkflow;
+        _groupChatWorkflow = groupChatWorkflow;
+        _subWorkflow = subWorkflow;
+    }
+
+    static async IAsyncEnumerable<string> GetEventData(string type, string id, object? data)
+    {
+        var items = data switch
+        {
+            string str => [str],
+            ChatMessage msg => [msg.Text],
+            IEnumerable<ChatMessage> m => m.Select(x => x.Text),
+            _ => []
+        };
+
+        foreach (var item in items)
+        {
+            yield return type + ": " + id + ": " + item;
+        }
     }
 
     public async IAsyncEnumerable<string> Sequential(bool streaming = false)
     {
-        Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
-        var uppercase = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
-        // UppercaseExecutor uppercase = new(); 
-        ReverseTextExecutor reverse = new();
-        WorkflowBuilder builder = new(uppercase);
-        builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
-        var workflow = builder.Build();
+        var workflow = _seqWorkflow;
+        var msg = new ChatMessage(ChatRole.User, "Hello, World!");
         if (streaming)
         {
-            await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, input: "Hello, World!");
+            await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, msg);
             await foreach (WorkflowEvent evt in run.WatchStreamAsync())
             {
-                if (evt is ExecutorCompletedEvent executorCompleted)
+                // Why didn't streaming trigger an ExecutorEvent?
+                Console.WriteLine(evt.GetType().Name);
+                if (evt is SuperStepStartedEvent superStepStartedEvent)
                 {
-                    yield return $"Completed: {executorCompleted.ExecutorId}: {executorCompleted.Data}";
+                    yield return $"SuperStepStartedEvent: {superStepStartedEvent.StepNumber}: {superStepStartedEvent.Data}";
                 }
-                // this work have no agent, so we can not use AgentRunUpdateEvent
-                if (evt is AgentRunUpdateEvent executorComplete)
+                if (evt is ExecutorInvokedEvent executorInvokedEvent)
                 {
-                    yield return $"RunUpdate: {executorComplete.ExecutorId}: {executorComplete.Data}";
+                    yield return $"ExecutorInvokedEvent: {executorInvokedEvent.ExecutorId}: {executorInvokedEvent.Data}";
+                }
+                if (evt is ExecutorCompletedEvent executorCompletedEvent)
+                {
+                    yield return $"ExecutorCompletedEvent: {executorCompletedEvent.ExecutorId}: {executorCompletedEvent.Data}";
+                }
+                if (evt is SuperStepCompletedEvent superStepCompletedEvent)
+                {
+                    yield return $"SuperStepCompletedEvent: {superStepCompletedEvent.StepNumber}: {superStepCompletedEvent.Data}";
                 }
             }
         }
         else
         {
-            await using Run run = await InProcessExecution.RunAsync(workflow, "Hello, World!");
+            await using Run run = await InProcessExecution.RunAsync(workflow, msg);
             foreach (WorkflowEvent evt in run.NewEvents)
             {
                 switch (evt)
                 {
-                    case ExecutorCompletedEvent executorComplete:
-                        yield return $"{executorComplete.ExecutorId}: {executorComplete.Data}";
+                    case SuperStepStartedEvent superStepStartedEvent:
+                        await foreach (var item in GetEventData(evt.GetType().Name, superStepStartedEvent.StepNumber.ToString(), superStepStartedEvent.Data))
+                        {
+                            yield return item;
+                        }
+                        break;
+                    case ExecutorInvokedEvent executorInvokedEvent:
+                        await foreach (var item in GetEventData(evt.GetType().Name, executorInvokedEvent.ExecutorId, executorInvokedEvent.Data))
+                        {
+                            yield return item;
+                        }
+                        break;
+                    case ExecutorCompletedEvent executorCompletedEvent:
+                        await foreach (var item in GetEventData(evt.GetType().Name, executorCompletedEvent.ExecutorId, executorCompletedEvent.Data))
+                        {
+                            yield return item;
+                        }
+                        break;
+                    case SuperStepCompletedEvent superStepCompletedEvent:
+                        await foreach (var item in GetEventData(evt.GetType().Name, superStepCompletedEvent.StepNumber.ToString(), superStepCompletedEvent.Data))
+                        {
+                            yield return item;
+                        }
+                        break;
+                    case ExecutorEvent executorEvent:
+                        await foreach (var item in GetEventData(evt.GetType().Name, executorEvent.ExecutorId, executorEvent.Data))
+                        {
+                            yield return item;
+                        }
                         break;
                 }
             }
@@ -64,26 +128,7 @@ public class WorkflowService
 
     public async IAsyncEnumerable<string> Concurrent()
     {
-        // Create the AI agents with specialized expertise
-        AIAgent physicist = _chatClient.CreateAIAgent(
-            name: "Physicist",
-            instructions: "You are an expert in physics. You answer questions from a physics perspective."
-        );
-
-        AIAgent chemist = _chatClient.CreateAIAgent(
-            name: "Chemist",
-            instructions: "You are an expert in chemistry. You answer questions from a chemistry perspective."
-        );
-
-        var startExecutor = new ConcurrentStartExecutor();
-        var aggregationExecutor = new ConcurrentAggregationExecutor();
-
-        // Build the workflow by adding executors and connecting them
-        var workflow = new WorkflowBuilder(startExecutor)
-            .AddFanOutEdge(startExecutor, [physicist, chemist])
-            .AddFanInEdge([physicist, chemist], aggregationExecutor)
-            .WithOutputFrom(aggregationExecutor)
-            .Build();
+        var workflow = _conWorkflow;
         await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, "What is temperature?");
         await foreach (WorkflowEvent evt in run.WatchStreamAsync())
         {
@@ -105,22 +150,7 @@ public class WorkflowService
     public async IAsyncEnumerable<string> Handoffs(string question)
     {
         List<ChatMessage> messages = [new(ChatRole.User, question)];
-        ChatClientAgent historyTutor = new(_chatClient,
-                   "You provide assistance with historical queries. Explain important events and context clearly. Only respond about history.",
-                   "history_tutor",
-                   "Specialist agent for historical questions");
-        ChatClientAgent mathTutor = new(_chatClient,
-            "You provide help with math problems. Explain your reasoning at each step and include examples. Only respond about math.",
-            "math_tutor",
-            "Specialist agent for math questions");
-        ChatClientAgent triageAgent = new(_chatClient,
-            "You determine which agent to use based on the user's homework question. ALWAYS handoff to another agent.",
-            "triage_agent",
-            "Routes messages to the appropriate specialist agent");
-        var workflow = AgentWorkflowBuilder.CreateHandoffBuilderWith(triageAgent)
-            .WithHandoffs(triageAgent, [mathTutor, historyTutor])
-            .WithHandoffs([mathTutor, historyTutor], triageAgent)
-            .Build();
+        var workflow = _handoffWorkflow;
         await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, messages);
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
         string? lastExecutorId = null;
@@ -165,15 +195,8 @@ public class WorkflowService
 
     public async IAsyncEnumerable<string> Groupchat(string input)
     {
-        static ChatClientAgent GetTranslationAgent(string targetLanguage, IChatClient chatClient) =>
-         new(chatClient,
-             $"You are a translation assistant who only responds in {targetLanguage}. Respond to any " +
-             $"input by outputting the name of the input language and then translating the input to {targetLanguage}.");
-
         List<ChatMessage> messages = [new(ChatRole.User, input)];
-        var workflow = AgentWorkflowBuilder.CreateGroupChatBuilderWith(agents => new RoundRobinGroupChatManager(agents) { MaximumIterationCount = 3 })
-                        .AddParticipants(from lang in (string[])["French", "Spanish", "English"] select GetTranslationAgent(lang, _chatClient))
-                        .Build();
+        var workflow = _groupChatWorkflow;
         await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, messages);
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
         string? lastExecutorId = null;
@@ -218,28 +241,9 @@ public class WorkflowService
 
     public async IAsyncEnumerable<string> SubWorkflow(string input)
     {
-        UppercaseExecutor uppercase = new();
-        ReverseTextExecutor reverse = new();
-        AppendSuffixExecutor append = new(" [PROCESSED]");
-
-        var subWorkflow = new WorkflowBuilder(uppercase)
-            .AddEdge(uppercase, reverse)
-            .AddEdge(reverse, append)
-            .WithOutputFrom(append)
-            .Build();
-
-        ExecutorBinding subWorkflowExecutor = subWorkflow.BindAsExecutor("TextProcessingSubWorkflow");
-
-        PrefixExecutor prefix = new("INPUT: ");
-        PostProcessExecutor postProcess = new();
-
-        var mainWorkflow = new WorkflowBuilder(prefix)
-            .AddEdge(prefix, subWorkflowExecutor)
-            .AddEdge(subWorkflowExecutor, postProcess)
-            .WithOutputFrom(postProcess)
-            .Build();
-
-        await using Run run = await InProcessExecution.RunAsync(mainWorkflow, input);
+        var mainWorkflow = _subWorkflow;
+        List<ChatMessage> messages = [new(ChatRole.User, input)];
+        await using Run run = await InProcessExecution.RunAsync(mainWorkflow, messages);
 
         foreach (WorkflowEvent evt in run.NewEvents)
         {
