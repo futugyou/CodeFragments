@@ -3,6 +3,7 @@ using AgentStack.Services;
 using AgentStack.Executor;
 using AgentStack.ContextProvider;
 using AgentStack.Skills;
+using AgentStack.Agents;
 using AgentStack.ThreadStore;
 using AgentStack.Middleware;
 using AgentStack.Model;
@@ -228,6 +229,18 @@ public static class ServiceCollectionExtensions
                     AIContextProviderFactory = ctx => new TextSearchProvider(SearchAdapter, ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions)
                 }
             );
+        });
+
+        services.AddAIAgent("state", (sp, name) =>
+        {
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            AIAgent baseAgent = chatClient.CreateAIAgent(
+                name: "ResearchAssistant",
+                instructions: "You are a research assistant that tracks your progress.");
+
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();
+
+            return new StateStreamingAgent(baseAgent, jsonOptions.Value.SerializerOptions);
         });
 
         // One errors:
