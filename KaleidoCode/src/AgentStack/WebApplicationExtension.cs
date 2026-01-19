@@ -1,6 +1,7 @@
 
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 using Microsoft.Agents.AI.DevUI;
+using Microsoft.Agents.AI.Hosting;
 
 namespace AgentStack;
 
@@ -30,6 +31,7 @@ public static class WebApplicationExtension
         // });
 
         app.MapAGUI();
+        app.MapA2A();
 
         return app;
     }
@@ -41,6 +43,40 @@ public static class WebApplicationExtension
     {
         var agent = factory(endpoints.ServiceProvider);
         return endpoints.MapAGUI(pattern, agent);
+    }
+
+    public static IEndpointRouteBuilder MapA2A(this IEndpointRouteBuilder endpoints)
+    {
+        var registeredAIAgents = GetRegisteredEntities<AIAgent>(endpoints.ServiceProvider);
+        var registeredWorkflows = GetRegisteredEntities<Workflow>(endpoints.ServiceProvider);
+
+        foreach (var agent in registeredAIAgents)
+        {
+            if (agent.Name != null)
+            {
+                endpoints.MapA2A(agent, $"/a2a/{agent.Name}", agentCard: new()
+                {
+                    Name = agent.Name,
+                    Description = agent.Description ?? "",
+                    Version = "1.0"
+                });
+            }
+        }
+
+        foreach (var workflow in registeredWorkflows)
+        {
+            if (workflow.Name != null)
+            {
+                endpoints.MapA2A(workflow.AsAgent(name: workflow.Name), $"/a2a/{workflow.Name}", agentCard: new()
+                {
+                    Name = workflow.Name,
+                    Description = workflow.Description ?? "",
+                    Version = "1.0"
+                });
+            }
+        }
+
+        return endpoints;
     }
 
     public static IEndpointRouteBuilder MapAGUI(this IEndpointRouteBuilder endpoints)

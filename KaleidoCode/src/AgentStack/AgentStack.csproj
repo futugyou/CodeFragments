@@ -2,6 +2,7 @@
 
   <ItemGroup>
 		<PackageReference Include="Microsoft.Agents.AI.Declarative" Version="1.0.0-preview.260108.1" />
+		<PackageReference Include="Microsoft.Agents.AI.Hosting.A2A.AspNetCore" Version="1.0.0-preview.260108.1" />
 		<PackageReference Include="Microsoft.Agents.AI.Hosting.AGUI.AspNetCore" Version="1.0.0-preview.260108.1" />
     <PackageReference Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.0.0-alpha.260108.1" />
 		<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.260108.1" />
