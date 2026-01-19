@@ -17,6 +17,7 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Get current state from options if provided
+        // https://github.com/microsoft/agent-framework/blob/main/dotnet/src/Microsoft.Agents.AI.Hosting.AGUI.AspNetCore/AGUIEndpointRouteBuilderExtensions.cs#L57
         JsonElement currentState = default;
         if (options is ChatClientAgentRunOptions { ChatOptions.AdditionalProperties: { } properties } &&
             properties.TryGetValue("ag_ui_state", out object? stateObj) && stateObj is JsonElement state)

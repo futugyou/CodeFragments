@@ -60,6 +60,23 @@ public static class AgentMiddleware
 
     public static async IAsyncEnumerable<ChatResponseUpdate> ChatClientStreamMiddleware(IEnumerable<ChatMessage> messages, ChatOptions? options, IChatClient innerChatClient, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        // https://github.com/microsoft/agent-framework/blob/main/dotnet/src/Microsoft.Agents.AI.Hosting.AGUI.AspNetCore/AGUIEndpointRouteBuilderExtensions.cs#L58
+        if (options?.AdditionalProperties is { } properties &&
+            properties.TryGetValue("ag_ui_context", out KeyValuePair<string, string>[]? context) &&
+            context?.Length > 0)
+        {
+            var contextBuilder = new StringBuilder();
+            contextBuilder.AppendLine("The following context from the user's application is available:");
+            foreach (var item in context)
+            {
+                contextBuilder.AppendLine($"- {item.Key}: {item.Value}");
+            }
+            var contextMessage = new ChatMessage(
+                ChatRole.System,
+                [new TextContent(contextBuilder.ToString())]);
+            messages = messages.Append(contextMessage);
+        }
+
         Console.WriteLine($"chat middleware, input count: {messages.Count()}");
         await foreach (var update in innerChatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
