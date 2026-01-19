@@ -235,7 +235,7 @@ public static class ServiceCollectionExtensions
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
             AIAgent baseAgent = chatClient.CreateAIAgent(
-                name: "ResearchAssistant",
+                name: "state",
                 instructions: "You are a research assistant that tracks your progress.");
 
             var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();

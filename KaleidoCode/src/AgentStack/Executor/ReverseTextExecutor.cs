@@ -10,6 +10,8 @@ public sealed class ReverseChatProtocolExecutor() : ChatProtocolExecutor("Revers
 
     protected override async ValueTask TakeTurnAsync(List<ChatMessage> messages, IWorkflowContext context, bool? emitEvents, CancellationToken cancellationToken = default)
     {
+        var text = await context.ReadStateAsync<string>("Uppercase", scopeName: "TextExecutor", cancellationToken);
+        Console.WriteLine($"Get [Uppercase] text: {text}");
         var result = new List<ChatMessage>();
         foreach (var msg in messages)
         {
