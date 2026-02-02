@@ -2,7 +2,7 @@
 using Microsoft.Agents.AI.Hosting;
 using Npgsql;
 
-namespace AgentStack.ThreadStore;
+namespace AgentStack.SessionStore;
 
 public sealed class PostgresAgentSessionStore : AgentSessionStore
 {
@@ -19,26 +19,26 @@ public sealed class PostgresAgentSessionStore : AgentSessionStore
         const string sql = $@"
             CREATE TABLE IF NOT EXISTS {TableName} (
                 key TEXT PRIMARY KEY,
-                thread_data JSONB NOT NULL,
+                session_data JSONB NOT NULL,
                 updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
             );
-            CREATE INDEX IF NOT EXISTS idx_agent_threads_updated_at ON {TableName} (updated_at);";
+            CREATE INDEX IF NOT EXISTS idx_agent_sessions_updated_at ON {TableName} (updated_at);";
 
         await using var command = _dataSource.CreateCommand(sql);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public override async ValueTask SaveSessionAsync(AIAgent agent, string conversationId, AgentSession thread, CancellationToken cancellationToken = default)
+    public override async ValueTask SaveSessionAsync(AIAgent agent, string conversationId, AgentSession session, CancellationToken cancellationToken = default)
     {
         var key = GetKey(conversationId, agent.Id);
         Console.WriteLine($"Saving session: {key}");
-        var jsonString = JsonSerializer.Serialize(thread.Serialize());
+        var jsonString = JsonSerializer.Serialize(session.Serialize());
 
         const string sql = $@"
-            INSERT INTO {TableName} (key, thread_data)
+            INSERT INTO {TableName} (key, session_data)
             VALUES (@key, @data::jsonb)
             ON CONFLICT (key) DO UPDATE SET 
-                thread_data = EXCLUDED.thread_data,
+                session_data = EXCLUDED.session_data,
                 updated_at = CURRENT_TIMESTAMP;";
 
         await using var command = _dataSource.CreateCommand(sql);
@@ -51,9 +51,9 @@ public sealed class PostgresAgentSessionStore : AgentSessionStore
     public override async ValueTask<AgentSession> GetSessionAsync(AIAgent agent, string conversationId, CancellationToken cancellationToken = default)
     {
         var key = GetKey(conversationId, agent.Id);
-        Console.WriteLine($"Getting thread: {key}");
+        Console.WriteLine($"Getting session: {key}");
 
-        const string sql = $"SELECT thread_data FROM {TableName} WHERE key = @key";
+        const string sql = $"SELECT session_data FROM {TableName} WHERE key = @key";
 
         await using var command = _dataSource.CreateCommand(sql);
         command.Parameters.AddWithValue("key", key);

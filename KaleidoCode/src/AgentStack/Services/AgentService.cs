@@ -2,8 +2,7 @@
 using AgentStack.Skills;
 using AgentStack.ContextProvider;
 using AgentStack.Middleware;
-using AgentStack.MessageStore;
-using AgentStack.Model;
+using AgentStack.ChatHistory;
 using Microsoft.Extensions.VectorData;
 
 namespace AgentStack.Services;
@@ -18,7 +17,7 @@ public class AgentService
     private readonly AIAgent _lightApprovalAgent;
     private readonly AIAgent _ragAgent;
     private readonly AIContextProviderFactory _aiContextProviderFactory;
-    private static readonly Dictionary<string, string> _threadStore = [];
+    private static readonly Dictionary<string, string> _sessionStore = [];
 
     public AgentService(
         IOptionsMonitor<AgentOptions> optionsMonitor,
@@ -82,30 +81,30 @@ public class AgentService
         return response.Text;
     }
 
-    public async IAsyncEnumerable<string> Thread()
+    public async IAsyncEnumerable<string> Session()
     {
         var messages = new string[] { "Tell me a joke about a pirate.", "Now add some emojis to the joke and tell it in the voice of a pirate's parrot." };
-        AgentSession thread = await _jokerAgent.GetNewSessionAsync();
+        AgentSession session = await _jokerAgent.GetNewSessionAsync();
         foreach (var message in messages)
         {
-            var response = await _jokerAgent.RunAsync(message, thread);
+            var response = await _jokerAgent.RunAsync(message, session);
             yield return response.Text;
         }
 
-        yield return thread.Serialize(JsonSerializerOptions.Web).GetRawText();
+        yield return session.Serialize(JsonSerializerOptions.Web).GetRawText();
     }
 
     public async IAsyncEnumerable<string> Function(string message = "Can you tell me the status of all the lights?")
     {
-        AgentSession thread = await _lightAgent.GetNewSessionAsync();
-        var response = await _lightAgent.RunAsync(message, thread);
+        AgentSession session = await _lightAgent.GetNewSessionAsync();
+        var response = await _lightAgent.RunAsync(message, session);
         yield return response.Text;
     }
 
     public async IAsyncEnumerable<string> Approval(string message = "Could you please turn off all the lights?", bool allowChangeState = false)
     {
-        AgentSession thread = await _lightApprovalAgent.GetNewSessionAsync();
-        var response = await _lightApprovalAgent.RunAsync(message, thread);
+        AgentSession session = await _lightApprovalAgent.GetNewSessionAsync();
+        var response = await _lightApprovalAgent.RunAsync(message, session);
         yield return response.Text;
 
         var functionApprovalRequests = response.Messages
@@ -120,7 +119,7 @@ public class AgentService
 
         FunctionApprovalRequestContent requestContent = functionApprovalRequests.First();
         var approvalMessage = new ChatMessage(ChatRole.User, [requestContent.CreateResponse(allowChangeState)]);
-        response = await _lightApprovalAgent.RunAsync(approvalMessage, thread);
+        response = await _lightApprovalAgent.RunAsync(approvalMessage, session);
         yield return response.Text;
     }
 
@@ -158,8 +157,8 @@ public class AgentService
             Name = "LightAssistant",
             ChatOptions = chatOptions
         });
-        AgentSession thread = await agent.GetNewSessionAsync();
-        var response = await agent.RunAsync(message, thread);
+        AgentSession session = await agent.GetNewSessionAsync();
+        var response = await agent.RunAsync(message, session);
         Console.WriteLine(response.Text);
         return response.Deserialize<List<LightModel>>(JsonSerializerOptions.Web);
     }
@@ -171,19 +170,19 @@ public class AgentService
         .UseOpenTelemetry(sourceName: "agent-telemetry-source")
         .Build();
 
-        AgentSession thread = await agent.GetNewSessionAsync();
-        var response = await agent.RunAsync(message, thread);
+        AgentSession session = await agent.GetNewSessionAsync();
+        var response = await agent.RunAsync(message, session);
         yield return response.Text;
     }
 
 
     public async IAsyncEnumerable<string> HistoryStorage()
     {
-        AgentSession thread = await _jokerAgent.GetNewSessionAsync();
+        AgentSession session = await _jokerAgent.GetNewSessionAsync();
 
-        await _jokerAgent.RunAsync("Tell me a joke about a pirate.", thread);
+        await _jokerAgent.RunAsync("Tell me a joke about a pirate.", session);
 
-        var messageStore = thread.GetService<VectorChatMessageStore>()!;
+        var messageStore = session.GetService<VectorChatHistoryProvider>()!;
         var invokingContext = new ChatHistoryProvider.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a pirate.")]);
         var history = await messageStore.InvokingAsync(invokingContext);
         foreach (var item in history)
@@ -193,15 +192,15 @@ public class AgentService
 
         yield return "-------------------";
 
-        JsonElement serializedThread = thread.Serialize();
-        yield return JsonSerializer.Serialize(serializedThread, new JsonSerializerOptions { WriteIndented = true });
+        JsonElement serializedSession = session.Serialize();
+        yield return JsonSerializer.Serialize(serializedSession, new JsonSerializerOptions { WriteIndented = true });
         yield return "-------------------";
-        AgentSession resumedThread = await _jokerAgent.DeserializeSessionAsync(serializedThread);
+        AgentSession resumedSession = await _jokerAgent.DeserializeSessionAsync(serializedSession);
 
-        await _jokerAgent.RunAsync("Now tell the same joke in the voice of a pirate, and add some emojis to the joke.", resumedThread);
+        await _jokerAgent.RunAsync("Now tell the same joke in the voice of a pirate, and add some emojis to the joke.", resumedSession);
 
-        messageStore = resumedThread.GetService<VectorChatMessageStore>()!;
-        yield return $"\nThread is stored in vector store under key: {messageStore.ThreadDbKey}";
+        messageStore = resumedSession.GetService<VectorChatHistoryProvider>()!;
+        yield return $"\nSession is stored in vector store under key: {messageStore.SessionDbKey}";
         invokingContext = new ChatHistoryProvider.InvokingContext([new ChatMessage(ChatRole.User, "Now tell the same joke in the voice of a pirate, and add some emojis to the joke.")]);
         history = await messageStore.InvokingAsync(invokingContext);
         foreach (var item in history)
@@ -212,27 +211,27 @@ public class AgentService
 
     public async IAsyncEnumerable<string> HistoryMemory(string userId)
     {
-        AgentSession thread = await _jokerAgent.GetNewSessionAsync();
+        AgentSession session = await _jokerAgent.GetNewSessionAsync();
 
-        var response = await _jokerAgent.RunAsync("I like jokes about Pirates. Tell me a joke about a pirate.", thread);
+        var response = await _jokerAgent.RunAsync("I like jokes about Pirates. Tell me a joke about a pirate.", session);
         yield return response.Text;
 
-        AgentSession thread2 = await _jokerAgent.GetNewSessionAsync();
+        AgentSession session2 = await _jokerAgent.GetNewSessionAsync();
 
-        response = await _jokerAgent.RunAsync("Tell me a joke that I might like.", thread2);
+        response = await _jokerAgent.RunAsync("Tell me a joke that I might like.", session2);
         yield return response.Text;
     }
 
     public async IAsyncEnumerable<string> RAG()
     {
-        AgentSession thread = await _ragAgent.GetNewSessionAsync();
+        AgentSession session = await _ragAgent.GetNewSessionAsync();
 
-        var response = await _ragAgent.RunAsync("what is RAG?", thread);
+        var response = await _ragAgent.RunAsync("what is RAG?", session);
         yield return response.Text;
 
-        AgentSession thread2 = await _ragAgent.GetNewSessionAsync();
+        AgentSession session2 = await _ragAgent.GetNewSessionAsync();
 
-        response = await _ragAgent.RunAsync("what is API?", thread2);
+        response = await _ragAgent.RunAsync("what is API?", session2);
         yield return response.Text;
     }
 
@@ -251,7 +250,7 @@ public class AgentService
             ChatHistoryProviderFactory = (content, ctx) =>
             {
                 // Create a new chat message store for this agent that stores the messages in a vector store.
-                return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatMessageStore(
+                return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatHistoryProvider(
                    _vectorStore,
                    content.SerializedState,
                    content.JsonSerializerOptions,
@@ -260,28 +259,28 @@ public class AgentService
             }
         });
 
-        AgentSession thread = await agent.GetNewSessionAsync();
+        AgentSession session = await agent.GetNewSessionAsync();
 
-        var response = await agent.RunAsync("Tell me a joke about a pirate.", thread);
+        var response = await agent.RunAsync("Tell me a joke about a pirate.", session);
         yield return response.Text;
-        var messageStore = thread.GetService<VectorChatMessageStore>()!;
+        var messageStore = session.GetService<VectorChatHistoryProvider>()!;
         var invokingContext = new ChatHistoryProvider.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a pirate.")]);
         var chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
-        response = await agent.RunAsync("Tell me a joke about a robot.", thread);
+        response = await agent.RunAsync("Tell me a joke about a robot.", session);
         yield return response.Text;
         invokingContext = new ChatHistoryProvider.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a robot.")]);
         chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
-        response = await agent.RunAsync("Tell me a joke about a lemur.", thread);
+        response = await agent.RunAsync("Tell me a joke about a lemur.", session);
         yield return response.Text;
         invokingContext = new ChatHistoryProvider.InvokingContext([new ChatMessage(ChatRole.User, "Tell me a joke about a lemur.")]);
         chatHistory = await messageStore.InvokingAsync(invokingContext);
         yield return $"\nChat history has {chatHistory?.Count()} messages.\n";
 
-        response = await agent.RunAsync("Tell me the joke about the pirate again, but add emojis and use the voice of a parrot.", thread);
+        response = await agent.RunAsync("Tell me the joke about the pirate again, but add emojis and use the voice of a parrot.", session);
         yield return response.Text;
         invokingContext = new ChatHistoryProvider.InvokingContext([new ChatMessage(ChatRole.User, "Tell me the joke about the pirate again, but add emojis and use the voice of a parrot.")]);
         chatHistory = await messageStore.InvokingAsync(invokingContext);
@@ -314,8 +313,8 @@ public class AgentService
         var agentFactory = new ChatClientPromptAgentFactory(_chatClient, [AIFunctionFactory.Create(lightPlugin.GetLightsAsync, "GetLightsAsync")]);
         var agent = await agentFactory.CreateFromYamlAsync(text);
 
-        AgentSession thread = await agent.GetNewSessionAsync();
-        var response = await agent.RunAsync(message, thread);
+        AgentSession session = await agent.GetNewSessionAsync();
+        var response = await agent.RunAsync(message, session);
         yield return response.Text;
     }
 
@@ -328,7 +327,7 @@ public class AgentService
         ];
 
         conversation ??= Guid.NewGuid().ToString("N");
-        _threadStore.TryGetValue(conversation, out var threadString);
+        _sessionStore.TryGetValue(conversation, out var sessionString);
 
         AIAgent agent = _chatClient.AsAIAgent(new ChatClientAgentOptions
         {
@@ -350,13 +349,13 @@ public class AgentService
                 .Use(AgentMiddleware.FunctionCallingMiddleware)
             .Build();
 
-        AgentSession thread = threadString == null ? await agent.GetNewSessionAsync() : await agent.DeserializeSessionAsync(JsonSerializer.Deserialize<JsonElement>(threadString));
+        AgentSession session = sessionString == null ? await agent.GetNewSessionAsync() : await agent.DeserializeSessionAsync(JsonSerializer.Deserialize<JsonElement>(sessionString));
         List<ChatMessage> userMessage = [new ChatMessage(ChatRole.User, "Could you please turn off all the lights?")];
 
-        if (thread is ChatClientAgentSession typedThread && typedThread.ChatHistoryProvider != null)
+        if (session is ChatClientAgentSession typedSession && typedSession.ChatHistoryProvider != null)
         {
             var invokingContext = new ChatHistoryProvider.InvokingContext(userMessage);
-            var messages = (await typedThread.ChatHistoryProvider.InvokingAsync(invokingContext).ConfigureAwait(false)).ToList() ?? [];
+            var messages = (await typedSession.ChatHistoryProvider.InvokingAsync(invokingContext).ConfigureAwait(false)).ToList() ?? [];
             var approvalMessage = ProcessFunctionApprovals(messages, allowChangeState);
             if (approvalMessage?.Count > 0)
             {
@@ -366,9 +365,9 @@ public class AgentService
 
         try
         {
-            var response = await agent.RunAsync(userMessage, thread);
+            var response = await agent.RunAsync(userMessage, session);
 
-            _threadStore[conversation] = thread.Serialize().GetRawText();
+            _sessionStore[conversation] = session.Serialize().GetRawText();
         }
         catch (Exception ex)
         {
@@ -376,7 +375,7 @@ public class AgentService
         }
 
 
-        yield return _threadStore[conversation];
+        yield return _sessionStore[conversation];
     }
 
     private static List<ChatMessage> ProcessFunctionApprovals(List<ChatMessage> messages, bool approved = false)
@@ -406,7 +405,7 @@ public class AgentService
                 result.Add(new ChatMessage(ChatRole.User, [approvalRequestContent.CreateResponse(approved)]));
 
                 // If don't add the following code, it will get an error `messages with role 'tool' must be a response to a preceeding message with 'tool_calls'`.
-                // If add the following code, `thread.Serialize().GetRawText()` will contain a duplicate `"$type": "functionCall"` entry.
+                // If add the following code, `session.Serialize().GetRawText()` will contain a duplicate `"$type": "functionCall"` entry.
                 var callMessage = new ChatMessage(ChatRole.Assistant, [approvalRequestContent.FunctionCall])
                 {
                     AuthorName = message.AuthorName,

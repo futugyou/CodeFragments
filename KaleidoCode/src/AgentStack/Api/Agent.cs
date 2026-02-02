@@ -1,6 +1,7 @@
 
 using AgentStack.Skills;
 using AgentStack.Services;
+using AgentStack.ChatHistory;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgentStack.Api;
@@ -15,7 +16,7 @@ public static class AgentEndpoints
         agentGroup.MapPost("/joker", Joker).WithName("joker");
         agentGroup.MapPost("/joker-stream", JokerStream).WithName("joker-stream");
         agentGroup.MapPost("/joker-message", JokerMessage).WithName("joker-message");
-        agentGroup.MapPost("/thread", Thread).WithName("thread");
+        agentGroup.MapPost("/session", Session).WithName("session");
         agentGroup.MapPost("/function", Function).WithName("function");
         agentGroup.MapPost("/approval", Approval).WithName("approval");
         agentGroup.MapPost("/approval2", Approval2).WithName("approval2");
@@ -28,7 +29,7 @@ public static class AgentEndpoints
         agentGroup.MapPost("/declarative", Declarative).WithName("declarative");
     }
 
-    static async Task<string> Joker([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string ThreadId, string message = "Tell me a joke about a pirate.")
+    static async Task<string> Joker([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string SessionId, string message = "Tell me a joke about a pirate.")
     {
         return await agentService.Joker(message);
     }
@@ -46,9 +47,9 @@ public static class AgentEndpoints
         return await agentService.JokerMessage(message, imageUrl, hasSystemMessage);
     }
 
-    static IAsyncEnumerable<string> Thread([FromServices] AgentService agentService)
+    static IAsyncEnumerable<string> Session([FromServices] AgentService agentService)
     {
-        return agentService.Thread();
+        return agentService.Session();
     }
 
     static IAsyncEnumerable<string> Function([FromServices] AgentService agentService, string message = "Can you tell me the status of all the lights?")
@@ -101,7 +102,7 @@ public static class AgentEndpoints
         return agentService.RAG();
     }
 
-    static IAsyncEnumerable<string> ChatReducer([FromServices] AgentService agentService, ChatReducerType reducerType, AgentStack.MessageStore.ChatReducerTriggerEvent triggerEvent)
+    static IAsyncEnumerable<string> ChatReducer([FromServices] AgentService agentService, ChatReducerType reducerType, ChatReducerTriggerEvent triggerEvent)
     {
         return agentService.ChatReducer(reducerType, triggerEvent);
     }

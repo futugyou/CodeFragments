@@ -12,7 +12,7 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
 
     protected override async IAsyncEnumerable<AgentResponseUpdate> RunCoreStreamingAsync(
         IEnumerable<ChatMessage> messages,
-        AgentSession? thread = null,
+        AgentSession? session = null,
         AgentRunOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -40,7 +40,7 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         var messagesWithState = messages.Append(stateMessage);
         // Collect all updates
         var allUpdates = new List<AgentResponseUpdate>();
-        await foreach (var update in InnerAgent.RunStreamingAsync(messagesWithState, thread, stateOptions, cancellationToken))
+        await foreach (var update in InnerAgent.RunStreamingAsync(messagesWithState, session, stateOptions, cancellationToken))
         {
             allUpdates.Add(update);
             // Stream non-text updates immediately
@@ -65,7 +65,7 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         // Stream text summary
         var summaryMessage = new ChatMessage(ChatRole.System, "Provide a brief summary of your progress.");
         await foreach (var update in InnerAgent.RunStreamingAsync(
-            messages.Concat(response.Messages).Append(summaryMessage), thread, options, cancellationToken))
+            messages.Concat(response.Messages).Append(summaryMessage), session, options, cancellationToken))
         {
             yield return update;
         }

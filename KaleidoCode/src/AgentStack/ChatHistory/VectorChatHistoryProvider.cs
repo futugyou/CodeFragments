@@ -1,20 +1,20 @@
 
 using Microsoft.Extensions.VectorData;
 
-namespace AgentStack.MessageStore;
+namespace AgentStack.ChatHistory;
 
 public enum ChatReducerTriggerEvent
 {
     BeforeMessageAdded, AfterMessagesRetrieval
 }
 
-public sealed class VectorChatMessageStore : ChatHistoryProvider
+public sealed class VectorChatHistoryProvider : ChatHistoryProvider
 {
     private readonly VectorStore _vectorStore;
     private readonly IChatReducer? _chatReducer;
     private readonly ChatReducerTriggerEvent _reducerTriggerEvent;
 
-    public VectorChatMessageStore(
+    public VectorChatHistoryProvider(
             VectorStore vectorStore,
             JsonElement serializedStoreState,
             JsonSerializerOptions? jsonSerializerOptions = null)
@@ -23,7 +23,7 @@ public sealed class VectorChatMessageStore : ChatHistoryProvider
 
     }
 
-    public VectorChatMessageStore(
+    public VectorChatHistoryProvider(
         VectorStore vectorStore,
         JsonElement serializedStoreState,
         JsonSerializerOptions? jsonSerializerOptions = null,
@@ -36,12 +36,12 @@ public sealed class VectorChatMessageStore : ChatHistoryProvider
         _reducerTriggerEvent = reducerTriggerEvent;
         if (serializedStoreState.ValueKind is JsonValueKind.String)
         {
-            ThreadDbKey = serializedStoreState.Deserialize<string>();
-            Console.WriteLine($"ThreadDbKey: {ThreadDbKey}");
+            SessionDbKey = serializedStoreState.Deserialize<string>();
+            Console.WriteLine($"SessionDbKey: {SessionDbKey}");
         }
     }
 
-    public string? ThreadDbKey { get; private set; }
+    public string? SessionDbKey { get; private set; }
 
     public override async ValueTask InvokedAsync(InvokedContext context, CancellationToken cancellationToken = default)
     {
@@ -56,14 +56,14 @@ public sealed class VectorChatMessageStore : ChatHistoryProvider
             messages = await _chatReducer.ReduceAsync(messages, cancellationToken).ConfigureAwait(false);
         }
 
-        ThreadDbKey ??= Guid.NewGuid().ToString("N");
+        SessionDbKey ??= Guid.NewGuid().ToString("N");
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
         await collection.UpsertAsync(messages.Select(x => new ChatHistoryItem()
         {
-            Key = ThreadDbKey + (x.MessageId ?? Guid.NewGuid().ToString("N")),
+            Key = SessionDbKey + (x.MessageId ?? Guid.NewGuid().ToString("N")),
             Timestamp = DateTimeOffset.UtcNow,
-            ThreadId = ThreadDbKey,
+            SessionId = SessionDbKey,
             SerializedMessage = JsonSerializer.Serialize(x),
             MessageText = x.Text
         }), cancellationToken);
@@ -75,7 +75,7 @@ public sealed class VectorChatMessageStore : ChatHistoryProvider
         await collection.EnsureCollectionExistsAsync(cancellationToken);
         var records = collection
             .GetAsync(
-                x => x.ThreadId == ThreadDbKey, 10,
+                x => x.SessionId == SessionDbKey, 10,
                 new() { OrderBy = x => x.Descending(y => y.Timestamp) },
                 cancellationToken);
 
@@ -95,15 +95,15 @@ public sealed class VectorChatMessageStore : ChatHistoryProvider
     }
 
     public override JsonElement Serialize(JsonSerializerOptions? jsonSerializerOptions = null) =>
-        // We have to serialize the thread id, so that on deserialization you can retrieve the messages using the same thread id.
-        JsonSerializer.SerializeToElement(ThreadDbKey);
+        // We have to serialize the session id, so that on deserialization you can retrieve the messages using the same session id.
+        JsonSerializer.SerializeToElement(SessionDbKey);
 
     private sealed class ChatHistoryItem
     {
         [VectorStoreKey]
         public string? Key { get; set; }
         [VectorStoreData]
-        public string? ThreadId { get; set; }
+        public string? SessionId { get; set; }
         [VectorStoreData]
         public DateTimeOffset? Timestamp { get; set; }
         [VectorStoreData]

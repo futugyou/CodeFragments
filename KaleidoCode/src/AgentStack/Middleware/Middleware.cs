@@ -5,27 +5,27 @@ public static class AgentMiddleware
 {
     public static async Task<AgentResponse> AgentRunMiddleware(
          IEnumerable<ChatMessage> messages,
-         AgentSession? thread,
+         AgentSession? session,
          AgentRunOptions? options,
          AIAgent innerAgent,
          CancellationToken cancellationToken)
     {
         Console.WriteLine($"agent middleware, input count: {messages.Count()}");
-        var response = await innerAgent.RunAsync(messages, thread, options, cancellationToken).ConfigureAwait(false);
+        var response = await innerAgent.RunAsync(messages, session, options, cancellationToken).ConfigureAwait(false);
         Console.WriteLine($"agent middleware, output: {response.Messages.Count}");
         return response;
     }
 
     public static async IAsyncEnumerable<AgentResponseUpdate> AgentRunStreamMiddleware(
           IEnumerable<ChatMessage> messages,
-          AgentSession? thread,
+          AgentSession? session,
           AgentRunOptions? options,
           AIAgent innerAgent,
           [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         Console.WriteLine($"agent middleware, input count: {messages.Count()}");
 
-        await foreach (var update in innerAgent.RunStreamingAsync(messages, thread, options, cancellationToken))
+        await foreach (var update in innerAgent.RunStreamingAsync(messages, session, options, cancellationToken))
         {
             Console.WriteLine($"agent middleware, output text: {update.Text}");
             yield return update;

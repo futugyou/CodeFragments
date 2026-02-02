@@ -4,12 +4,12 @@ using AgentStack.Executor;
 using AgentStack.ContextProvider;
 using AgentStack.Skills;
 using AgentStack.Agents;
-using AgentStack.ThreadStore;
+using AgentStack.SessionStore;
 using AgentStack.Middleware;
 using AgentStack.Model;
 using Microsoft.SemanticKernel.Connectors.PgVector;
 using Microsoft.Agents.AI.Hosting;
-using AgentStack.MessageStore;
+using AgentStack.ChatHistory;
 using Microsoft.Extensions.VectorData;
 using Npgsql;
 
@@ -96,15 +96,15 @@ public static class ServiceCollectionExtensions
         //     {
         //         Console.WriteLine($"{item.Key}: {item.Value}");
         //     }
-        //     var threadId = request?.Headers != null ? request?.Headers["ThreadId"].FirstOrDefault() : "";
+        //     var sessionId = request?.Headers != null ? request?.Headers["SessionId"].FirstOrDefault() : "";
         //     var userId = request?.Headers != null ? request?.Headers["UserId"].FirstOrDefault() : "";
 
-        //     Console.WriteLine($"!!!!{threadId}: {userId}");
+        //     Console.WriteLine($"!!!!{sessionId}: {userId}");
         //     return new ChatHistoryMemoryProvider(
         //         store,
         //         collectionName: "chathistory_memory",
         //         vectorDimensions: 1536,
-        //         storageScope: new() { UserId = userId, ThreadId = threadId },
+        //         storageScope: new() { UserId = userId, SessionId = sessionId },
         //         searchScope: new() { UserId = userId });
         // });
 
@@ -128,7 +128,7 @@ public static class ServiceCollectionExtensions
                 ChatOptions = new() { Instructions = "You are good at telling jokes." },
                 ChatHistoryProviderFactory = (content, ctx) =>
                 {
-                    return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatMessageStore(
+                    return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatHistoryProvider(
                        vectorStore,
                        content.SerializedState,
                        content.JsonSerializerOptions));
@@ -160,11 +160,11 @@ public static class ServiceCollectionExtensions
         // The overload of AddAIAgent that includes `sp` is ineffective with WithAITools because the `GetRegisteredToolsForAgent(sp, name)` method is not called. 
         // .WithAITools(tools)
 
-        // `WithThreadStore` doesn't work either. 
-        // The current source code only uses `AgentThreadStore` indirectly within Hosting.A2A, and it's not yet implemented in DevUI/Hosting.OpenAI. 
-        // .WithThreadStore((sp, name) =>
+        // `WithSessionStore` doesn't work either. 
+        // The current source code only uses `AgentSessionStore` indirectly within Hosting.A2A, and it's not yet implemented in DevUI/Hosting.OpenAI. 
+        // .WithSessionStore((sp, name) =>
         // {
-        //     var store = sp.GetRequiredService<AgentThreadStore>();
+        //     var store = sp.GetRequiredService<AgentSessionStore>();
         //     return store;
         // });
 
@@ -226,7 +226,7 @@ public static class ServiceCollectionExtensions
                     {
                         Instructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief.",
                     },
-                    AIContextProviderFactory = (content,ctx) => ValueTask.FromResult<AIContextProvider>(new TextSearchProvider(SearchAdapter, content.SerializedState, content.JsonSerializerOptions, textSearchOptions))
+                    AIContextProviderFactory = (content, ctx) => ValueTask.FromResult<AIContextProvider>(new TextSearchProvider(SearchAdapter, content.SerializedState, content.JsonSerializerOptions, textSearchOptions))
                 }
             );
         });
