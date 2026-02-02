@@ -4,12 +4,12 @@ using Npgsql;
 
 namespace AgentStack.ThreadStore;
 
-public sealed class PostgresAgentThreadStore : AgentThreadStore
+public sealed class PostgresAgentSessionStore : AgentSessionStore
 {
     private readonly NpgsqlDataSource _dataSource;
-    private const string TableName = "agent_threads";
+    private const string TableName = "agent_sessions";
 
-    public PostgresAgentThreadStore(NpgsqlDataSource dataSource)
+    public PostgresAgentSessionStore(NpgsqlDataSource dataSource)
     {
         _dataSource = dataSource;
     }
@@ -28,10 +28,10 @@ public sealed class PostgresAgentThreadStore : AgentThreadStore
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public override async ValueTask SaveThreadAsync(AIAgent agent, string conversationId, AgentThread thread, CancellationToken cancellationToken = default)
+    public override async ValueTask SaveSessionAsync(AIAgent agent, string conversationId, AgentSession thread, CancellationToken cancellationToken = default)
     {
         var key = GetKey(conversationId, agent.Id);
-        Console.WriteLine($"Saving thread: {key}");
+        Console.WriteLine($"Saving session: {key}");
         var jsonString = JsonSerializer.Serialize(thread.Serialize());
 
         const string sql = $@"
@@ -48,7 +48,7 @@ public sealed class PostgresAgentThreadStore : AgentThreadStore
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public override async ValueTask<AgentThread> GetThreadAsync(AIAgent agent, string conversationId, CancellationToken cancellationToken = default)
+    public override async ValueTask<AgentSession> GetSessionAsync(AIAgent agent, string conversationId, CancellationToken cancellationToken = default)
     {
         var key = GetKey(conversationId, agent.Id);
         Console.WriteLine($"Getting thread: {key}");
@@ -64,10 +64,10 @@ public sealed class PostgresAgentThreadStore : AgentThreadStore
         {
             var jsonString = reader.GetString(0);
             using var doc = JsonDocument.Parse(jsonString);
-            return agent.DeserializeThread(doc.RootElement.Clone());
+            return await agent.DeserializeSessionAsync(doc.RootElement.Clone());
         }
 
-        return agent.GetNewThread();
+        return await agent.GetNewSessionAsync();
     }
 
     private static string GetKey(string conversationId, string agentId) => $"{agentId}:{conversationId}";

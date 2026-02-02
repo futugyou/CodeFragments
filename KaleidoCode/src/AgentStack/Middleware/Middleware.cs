@@ -3,9 +3,9 @@ namespace AgentStack.Middleware;
 
 public static class AgentMiddleware
 {
-    public static async Task<AgentRunResponse> AgentRunMiddleware(
+    public static async Task<AgentResponse> AgentRunMiddleware(
          IEnumerable<ChatMessage> messages,
-         AgentThread? thread,
+         AgentSession? thread,
          AgentRunOptions? options,
          AIAgent innerAgent,
          CancellationToken cancellationToken)
@@ -16,9 +16,9 @@ public static class AgentMiddleware
         return response;
     }
 
-    public static async IAsyncEnumerable<AgentRunResponseUpdate> AgentRunStreamMiddleware(
+    public static async IAsyncEnumerable<AgentResponseUpdate> AgentRunStreamMiddleware(
           IEnumerable<ChatMessage> messages,
-          AgentThread? thread,
+          AgentSession? thread,
           AgentRunOptions? options,
           AIAgent innerAgent,
           [EnumeratorCancellation] CancellationToken cancellationToken)

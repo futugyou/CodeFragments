@@ -39,10 +39,10 @@ public sealed class CriticExecutor : Executor<ChatMessage, CriticDecision>
         FlowState state = await FlowStateHelpers.ReadFlowStateAsync(context);
 
         // Use RunStreamingAsync to get streaming updates, then deserialize at the end
-        IAsyncEnumerable<AgentRunResponseUpdate> updates = _agent.RunStreamingAsync(message, cancellationToken: cancellationToken);
+        IAsyncEnumerable<AgentResponseUpdate> updates = _agent.RunStreamingAsync(message, cancellationToken: cancellationToken);
 
         // Convert the stream to a response and deserialize the structured output
-        AgentRunResponse response = await updates.ToAgentRunResponseAsync(cancellationToken);
+        AgentResponse response = await updates.ToAgentResponseAsync(cancellationToken);
         CriticDecision decision = response.Deserialize<CriticDecision>(JsonSerializerOptions.Web);
 
         // Safety: approve if max iterations reached

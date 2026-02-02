@@ -134,7 +134,7 @@ public class WorkflowService
         {
             switch (evt)
             {
-                case AgentRunUpdateEvent output:
+                case AgentResponseUpdateEvent output:
                     yield return $"Workflow RunUpdate with results:\n{output.Data}";
                     break;
                 case ExecutorCompletedEvent output:
@@ -159,7 +159,7 @@ public class WorkflowService
         {
             switch (evt)
             {
-                case AgentRunUpdateEvent output:
+                case AgentResponseUpdateEvent output:
                     if (output.ExecutorId != lastExecutorId)
                     {
                         if (sb.Length > 0)
@@ -176,7 +176,7 @@ public class WorkflowService
                 case ExecutorCompletedEvent output:
                     yield return $"Completed: {output.ExecutorId}: {output.Data}";
                     break;
-                // WorkflowOutputEvent is enough，no need to use AgentRunUpdateEvent/ExecutorCompletedEvent
+                // WorkflowOutputEvent is enough，no need to use AgentResponseUpdateEvent/ExecutorCompletedEvent
                 case WorkflowOutputEvent output:
                     var msgs = (List<ChatMessage>)output.Data!;
                     foreach (var msg in msgs)
@@ -205,7 +205,7 @@ public class WorkflowService
         {
             switch (evt)
             {
-                case AgentRunUpdateEvent output:
+                case AgentResponseUpdateEvent output:
                     if (output.ExecutorId != lastExecutorId)
                     {
                         if (sb.Length > 0)
@@ -222,7 +222,7 @@ public class WorkflowService
                 case ExecutorCompletedEvent output:
                     yield return $"Completed! ExecutorId: {output.ExecutorId}, Data: {output.Data}";
                     break;
-                // WorkflowOutputEvent is enough，no need to use AgentRunUpdateEvent/ExecutorCompletedEvent
+                // WorkflowOutputEvent is enough，no need to use AgentResponseUpdateEvent/ExecutorCompletedEvent
                 case WorkflowOutputEvent output:
                     var msgs = (List<ChatMessage>)output.Data!;
                     foreach (var msg in msgs)
@@ -309,8 +309,8 @@ public class WorkflowService
                 yield return $"Completed: {executorCompleted.ExecutorId}: {executorCompleted.Data}";
             }
 
-            // this work have no agent, so we can not use AgentRunUpdateEvent
-            if (evt is AgentRunUpdateEvent executorComplete)
+            // this work have no agent, so we can not use AgentResponseUpdateEvent
+            if (evt is AgentResponseUpdateEvent executorComplete)
             {
                 yield return $"RunUpdate: {executorComplete.ExecutorId}: {executorComplete.Data}";
             }

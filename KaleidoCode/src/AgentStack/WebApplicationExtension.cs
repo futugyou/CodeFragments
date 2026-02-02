@@ -21,7 +21,7 @@ public static class WebApplicationExtension
         // app.MapAGUI("/joker", sp =>
         // {
         //     var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-        //     return chatClient.CreateAIAgent(instructions: "You are good at telling jokes.");
+        //     return chatClient.AsAIAgent(instructions: "You are good at telling jokes.");
         // });
 
         // // it also works

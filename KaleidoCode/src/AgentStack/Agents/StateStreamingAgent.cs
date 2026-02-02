@@ -10,9 +10,9 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         _jsonSerializerOptions = jsonSerializerOptions;
     }
 
-    protected override async IAsyncEnumerable<AgentRunResponseUpdate> RunCoreStreamingAsync(
+    protected override async IAsyncEnumerable<AgentResponseUpdate> RunCoreStreamingAsync(
         IEnumerable<ChatMessage> messages,
-        AgentThread? thread = null,
+        AgentSession? thread = null,
         AgentRunOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -39,7 +39,7 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
             $"Current state: {(currentState.ValueKind != JsonValueKind.Undefined ? currentState.GetRawText() : "{}")}");
         var messagesWithState = messages.Append(stateMessage);
         // Collect all updates
-        var allUpdates = new List<AgentRunResponseUpdate>();
+        var allUpdates = new List<AgentResponseUpdate>();
         await foreach (var update in InnerAgent.RunStreamingAsync(messagesWithState, thread, stateOptions, cancellationToken))
         {
             allUpdates.Add(update);
@@ -50,14 +50,14 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
             }
         }
         // Deserialize state snapshot from response
-        var response = allUpdates.ToAgentRunResponse();
+        var response = allUpdates.ToAgentResponse();
         if (response.TryDeserialize(_jsonSerializerOptions, out JsonElement stateSnapshot))
         {
             byte[] stateBytes = JsonSerializer.SerializeToUtf8Bytes(
                 stateSnapshot,
                 _jsonSerializerOptions.GetTypeInfo(typeof(JsonElement)));
             // Emit state snapshot as DataContent
-            yield return new AgentRunResponseUpdate
+            yield return new AgentResponseUpdate
             {
                 Contents = [new DataContent(stateBytes, "application/json")]
             };

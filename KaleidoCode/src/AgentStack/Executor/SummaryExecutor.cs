@@ -25,7 +25,7 @@ public sealed class SummaryExecutor : Executor<CriticDecision, ChatMessage>
         string prompt = $"Present this approved content:\n\n{message.Content}";
 
         StringBuilder sb = new();
-        await foreach (AgentRunResponseUpdate update in _agent.RunStreamingAsync(new ChatMessage(ChatRole.User, prompt), cancellationToken: cancellationToken))
+        await foreach (AgentResponseUpdate update in _agent.RunStreamingAsync(new ChatMessage(ChatRole.User, prompt), cancellationToken: cancellationToken))
         {
             if (!string.IsNullOrEmpty(update.Text))
             {

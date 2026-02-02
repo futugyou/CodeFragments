@@ -85,7 +85,7 @@ if (app.Environment.IsDevelopment())
 
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var store = scope.ServiceProvider.GetRequiredService<PostgresAgentThreadStore>();
+    var store = scope.ServiceProvider.GetRequiredService<PostgresAgentSessionStore>();
     await store.InitializeAsync();
 }
 

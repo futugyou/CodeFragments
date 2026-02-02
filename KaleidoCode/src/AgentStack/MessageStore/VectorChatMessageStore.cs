@@ -8,7 +8,7 @@ public enum ChatReducerTriggerEvent
     BeforeMessageAdded, AfterMessagesRetrieval
 }
 
-public sealed class VectorChatMessageStore : ChatMessageStore
+public sealed class VectorChatMessageStore : ChatHistoryProvider
 {
     private readonly VectorStore _vectorStore;
     private readonly IChatReducer? _chatReducer;

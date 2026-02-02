@@ -62,7 +62,7 @@ public sealed class WriterExecutor : Workflows.Executor
         FlowState state = await FlowStateHelpers.ReadFlowStateAsync(context);
 
         StringBuilder sb = new();
-        await foreach (AgentRunResponseUpdate update in _agent.RunStreamingAsync(message, cancellationToken: cancellationToken))
+        await foreach (AgentResponseUpdate update in _agent.RunStreamingAsync(message, cancellationToken: cancellationToken))
         {
             if (!string.IsNullOrEmpty(update.Text))
             {

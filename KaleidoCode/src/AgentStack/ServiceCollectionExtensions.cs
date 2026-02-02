@@ -70,8 +70,8 @@ public static class ServiceCollectionExtensions
             return dataSourceBuilder.Build();
         });
 
-        services.AddSingleton<PostgresAgentThreadStore>();
-        services.AddSingleton<AgentThreadStore>(sp => sp.GetRequiredService<PostgresAgentThreadStore>());
+        services.AddSingleton<PostgresAgentSessionStore>();
+        services.AddSingleton<AgentSessionStore>(sp => sp.GetRequiredService<PostgresAgentSessionStore>());
 
         services.AddKeyedPostgresVectorStore("AgentVectorStore",
             connectionStringProvider: _ => connectionString,
@@ -122,16 +122,16 @@ public static class ServiceCollectionExtensions
 
             var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
             var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
-            return chatClient.CreateAIAgent(new ChatClientAgentOptions
+            return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                 Name = "joker",
                 ChatOptions = new() { Instructions = "You are good at telling jokes." },
-                ChatMessageStoreFactory = ctx =>
+                ChatHistoryProviderFactory = (content, ctx) =>
                 {
-                    return new VectorChatMessageStore(
+                    return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatMessageStore(
                        vectorStore,
-                       ctx.SerializedState,
-                       ctx.JsonSerializerOptions);
+                       content.SerializedState,
+                       content.JsonSerializerOptions));
                 },
                 AIContextProviderFactory = providerFactory.Create
             });
@@ -143,7 +143,7 @@ public static class ServiceCollectionExtensions
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
 
-            return chatClient.CreateAIAgent(
+            return chatClient.AsAIAgent(
                 new ChatClientAgentOptions
                 {
                     Name = "light",
@@ -178,7 +178,7 @@ public static class ServiceCollectionExtensions
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
 
-            return chatClient.CreateAIAgent(
+            return chatClient.AsAIAgent(
                 new ChatClientAgentOptions
                 {
                     Name = "light-with-approval",
@@ -218,7 +218,7 @@ public static class ServiceCollectionExtensions
                 RecentMessageMemoryLimit = 5
             };
 
-            return chatClient.CreateAIAgent(
+            return chatClient.AsAIAgent(
                 new ChatClientAgentOptions
                 {
                     Name = "rag",
@@ -226,7 +226,7 @@ public static class ServiceCollectionExtensions
                     {
                         Instructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief.",
                     },
-                    AIContextProviderFactory = ctx => new TextSearchProvider(SearchAdapter, ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions)
+                    AIContextProviderFactory = (content,ctx) => ValueTask.FromResult<AIContextProvider>(new TextSearchProvider(SearchAdapter, content.SerializedState, content.JsonSerializerOptions, textSearchOptions))
                 }
             );
         });
@@ -234,7 +234,7 @@ public static class ServiceCollectionExtensions
         services.AddAIAgent("state", (sp, name) =>
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            AIAgent baseAgent = chatClient.CreateAIAgent(
+            AIAgent baseAgent = chatClient.AsAIAgent(
                 name: "state",
                 instructions: "You are a research assistant that tracks your progress.");
 
@@ -274,12 +274,12 @@ public static class ServiceCollectionExtensions
             }
 
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            AIAgent physicist = chatClient.CreateAIAgent(
+            AIAgent physicist = chatClient.AsAIAgent(
                 name: "Physicist",
                 instructions: "You are an expert in physics. You answer questions from a physics perspective."
             );
 
-            AIAgent chemist = chatClient.CreateAIAgent(
+            AIAgent chemist = chatClient.AsAIAgent(
                 name: "Chemist",
                 instructions: "You are an expert in chemistry. You answer questions from a chemistry perspective."
             );
