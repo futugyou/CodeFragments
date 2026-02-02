@@ -15,7 +15,7 @@ public class AIContextProviderFactory
         _vectorStore = vectorStore;
     }
 
-    public ValueTask<AIContextProvider> Create(ChatClientAgentOptions.AIContextProviderFactoryContext context, CancellationToken ctx)
+    public ValueTask<AIContextProvider> Create(ChatClientAgentOptions.AIContextProviderFactoryContext ctx, CancellationToken ct)
     {
         var httpContext = _httpContextAccessor.HttpContext;
         var request = httpContext?.Request;

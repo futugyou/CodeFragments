@@ -24,6 +24,7 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         {
             currentState = state;
         }
+
         // Create options with JSON schema for structured state output
         ChatClientAgentRunOptions stateOptions = new ChatClientAgentRunOptions
         {
@@ -59,6 +60,9 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
             // Emit state snapshot as DataContent
             yield return new AgentResponseUpdate
             {
+                // https://github.com/microsoft/agent-framework/blob/98cd72839e4057d661a58092a3b013993264d834/dotnet/src/Microsoft.Agents.AI.AGUI/Shared/ChatResponseUpdateAGUIExtensions.cs#L419
+                // if "application/json", agui will send StateSnapshotEvent
+                // if "application/json-patch+json", agui will send StateDeltaEvent
                 Contents = [new DataContent(stateBytes, "application/json")]
             };
         }

@@ -126,12 +126,13 @@ public static class ServiceCollectionExtensions
             {
                 Name = "joker",
                 ChatOptions = new() { Instructions = "You are good at telling jokes." },
-                ChatHistoryProviderFactory = (content, ctx) =>
+                ChatHistoryProviderFactory = (ctx, ct) =>
                 {
-                    return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatHistoryProvider(
+                    return ValueTask.FromResult(new VectorChatHistoryProvider(
                        vectorStore,
-                       content.SerializedState,
-                       content.JsonSerializerOptions));
+                       ctx.SerializedState,
+                       ctx.JsonSerializerOptions)
+                       .WithAIContextProviderMessageRemoval());
                 },
                 AIContextProviderFactory = providerFactory.Create
             });
@@ -191,44 +192,72 @@ public static class ServiceCollectionExtensions
             );
         });
 
-        services.AddAIAgent("rag", (sp, name) =>
+        static async Task<IEnumerable<TextSearchProvider.TextSearchResult>> GetSearchAdapter(
+            IServiceProvider sp, string text, CancellationToken ct)
         {
             var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
             var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
-            async Task<IEnumerable<TextSearchProvider.TextSearchResult>> SearchAdapter(string text, CancellationToken ct)
+
+            List<TextSearchProvider.TextSearchResult> results = [];
+            await foreach (var result in vectorCollection.SearchAsync(text, 5, cancellationToken: ct))
             {
-                List<TextSearchProvider.TextSearchResult> results = [];
-                await foreach (var result in vectorCollection.SearchAsync(text, 5, cancellationToken: ct))
+                results.Add(new TextSearchProvider.TextSearchResult
                 {
-                    results.Add(new TextSearchProvider.TextSearchResult
-                    {
-                        SourceName = result.Record.FileName,
-                        SourceLink = "",
-                        Text = result.Record.Text ?? string.Empty,
-                        RawRepresentation = result
-                    });
-                }
-                return results;
+                    SourceName = result.Record.FileName,
+                    SourceLink = "",
+                    Text = result.Record.Text ?? string.Empty,
+                    RawRepresentation = result
+                });
             }
+            return results;
+        }
 
+        var textSearchOptions = new TextSearchProviderOptions
+        {
+            SearchTime = TextSearchProviderOptions.TextSearchBehavior.BeforeAIInvoke,
+            RecentMessageMemoryLimit = 5
+        };
+
+        const string CommonInstructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief.";
+
+        services.AddAIAgent("rag", (sp, name) =>
+        {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
-            TextSearchProviderOptions textSearchOptions = new()
-            {
-                SearchTime = TextSearchProviderOptions.TextSearchBehavior.BeforeAIInvoke,
-                RecentMessageMemoryLimit = 5
-            };
 
-            return chatClient.AsAIAgent(
-                new ChatClientAgentOptions
+            return chatClient.AsAIAgent(new ChatClientAgentOptions
+            {
+                Name = name,
+                ChatOptions = new() { Instructions = CommonInstructions },
+                AIContextProviderFactory = (ctx, ct) =>
+                    ValueTask.FromResult<AIContextProvider>(
+                        new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c), ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions))
+            });
+        });
+
+        services.AddAIAgent("agg_context_agent", (sp, name) =>
+        {
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
+
+            return chatClient.AsAIAgent(new ChatClientAgentOptions
+            {
+                Name = name,
+                ChatOptions = new() { Instructions = CommonInstructions },
+                AIContextProviderFactory = async (ctx, ct) =>
                 {
-                    Name = "rag",
-                    ChatOptions = new()
-                    {
-                        Instructions = "You are a helpful support specialist for the Microsoft Agent Framework. Answer questions using the provided context and cite the source document when available. Keep responses brief.",
-                    },
-                    AIContextProviderFactory = (content, ctx) => ValueTask.FromResult<AIContextProvider>(new TextSearchProvider(SearchAdapter, content.SerializedState, content.JsonSerializerOptions, textSearchOptions))
+                    var memoryProvider = await providerFactory.Create(ctx, ct);
+
+                    var textSearchProvider = new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c), ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions);
+
+                    return new AggregatingAIContextProvider(
+                        [
+                            AggregatingAIContextProvider.CreateFactory((_, _) => textSearchProvider),
+                            AggregatingAIContextProvider.CreateFactory((_, _) => memoryProvider)
+                        ],
+                        ctx.SerializedState,
+                        ctx.JsonSerializerOptions);
                 }
-            );
+            });
         });
 
         services.AddAIAgent("state", (sp, name) =>

@@ -247,13 +247,13 @@ public class AgentService
         {
             Name = "Joker",
             ChatOptions = new() { Instructions = "You are good at telling jokes." },
-            ChatHistoryProviderFactory = (content, ctx) =>
+            ChatHistoryProviderFactory = (ctx, ct) =>
             {
                 // Create a new chat message store for this agent that stores the messages in a vector store.
                 return ValueTask.FromResult<ChatHistoryProvider>(new VectorChatHistoryProvider(
                    _vectorStore,
-                   content.SerializedState,
-                   content.JsonSerializerOptions,
+                   ctx.SerializedState,
+                   ctx.JsonSerializerOptions,
                    chatReducer,
                    triggerEvent));
             }
@@ -339,9 +339,9 @@ public class AgentService
                 ConversationId = conversation,
             },
 
-            ChatHistoryProviderFactory = (content, ctx) =>
+            ChatHistoryProviderFactory = (ctx, ct) =>
             {
-                return ValueTask.FromResult<ChatHistoryProvider>(new InMemoryChatHistoryProvider(content.SerializedState, content.JsonSerializerOptions));
+                return ValueTask.FromResult<ChatHistoryProvider>(new InMemoryChatHistoryProvider(ctx.SerializedState, ctx.JsonSerializerOptions));
             }
         });
         agent = agent
