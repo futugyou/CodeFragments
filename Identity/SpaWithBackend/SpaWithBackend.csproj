@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Duende.BFF" Version="4.1.1" />
 		<PackageReference Include="Duende.BFF.Yarp" Version="4.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.13" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.14" />
 	</ItemGroup>
 
 </Project>
