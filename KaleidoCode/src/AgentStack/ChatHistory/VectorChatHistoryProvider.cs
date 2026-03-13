@@ -8,25 +8,37 @@ public enum ChatReducerTriggerEvent
     BeforeMessageAdded, AfterMessagesRetrieval
 }
 
+public sealed class State
+{
+    public State(string sessionDbKey)
+    {
+        this.SessionDbKey = sessionDbKey ?? throw new ArgumentNullException(nameof(sessionDbKey));
+    }
+
+    public string SessionDbKey { get; }
+}
+
 public sealed class VectorChatHistoryProvider : ChatHistoryProvider
 {
+    private readonly ProviderSessionState<State> _sessionState;
+    private IReadOnlyList<string>? _stateKeys;
     private readonly VectorStore _vectorStore;
     private readonly IChatReducer? _chatReducer;
     private readonly ChatReducerTriggerEvent _reducerTriggerEvent;
 
     public VectorChatHistoryProvider(
             VectorStore vectorStore,
-            JsonElement serializedStoreState,
-            JsonSerializerOptions? jsonSerializerOptions = null)
-            : this(vectorStore, serializedStoreState, jsonSerializerOptions, null, ChatReducerTriggerEvent.AfterMessagesRetrieval)
+            Func<AgentSession?, State>? stateInitializer = null,
+            string? stateKey = null)
+            : this(vectorStore, stateInitializer, stateKey, null, ChatReducerTriggerEvent.AfterMessagesRetrieval)
     {
 
     }
 
     public VectorChatHistoryProvider(
         VectorStore vectorStore,
-        JsonElement serializedStoreState,
-        JsonSerializerOptions? jsonSerializerOptions = null,
+        Func<AgentSession?, State>? stateInitializer = null,
+        string? stateKey = null,
         IChatReducer? chatReducer = null,
         ChatReducerTriggerEvent reducerTriggerEvent = ChatReducerTriggerEvent.AfterMessagesRetrieval)
     {
@@ -34,29 +46,27 @@ public sealed class VectorChatHistoryProvider : ChatHistoryProvider
         _vectorStore = vectorStore ?? throw new ArgumentNullException(nameof(vectorStore));
         _chatReducer = chatReducer;
         _reducerTriggerEvent = reducerTriggerEvent;
-        if (serializedStoreState.ValueKind is JsonValueKind.String)
-        {
-            SessionDbKey = serializedStoreState.Deserialize<string>();
-            Console.WriteLine($"SessionDbKey: {SessionDbKey}");
-        }
+        this._sessionState = new ProviderSessionState<State>(
+                stateInitializer ?? (_ => new State(Guid.NewGuid().ToString("N"))),
+                stateKey ?? this.GetType().Name);
     }
 
-    public string? SessionDbKey { get; private set; }
+    public string? SessionDbKey => _sessionState.StateKey;
 
-    public override async ValueTask InvokedAsync(InvokedContext context, CancellationToken cancellationToken = default)
+
+    protected override async ValueTask StoreChatHistoryAsync(InvokedContext context, CancellationToken cancellationToken = default)
     {
         if (context.InvokeException is not null)
         {
             return;
         }
 
-        var messages = context.RequestMessages.Concat(context.AIContextProviderMessages ?? []).Concat(context.ResponseMessages ?? []);
+        var messages = context.RequestMessages.Concat(context.RequestMessages ?? []).Concat(context.ResponseMessages ?? []);
         if (_reducerTriggerEvent is ChatReducerTriggerEvent.BeforeMessageAdded && _chatReducer is not null)
         {
             messages = await _chatReducer.ReduceAsync(messages, cancellationToken).ConfigureAwait(false);
         }
 
-        SessionDbKey ??= Guid.NewGuid().ToString("N");
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
         await collection.UpsertAsync(messages.Select(x => new ChatHistoryItem()
@@ -69,7 +79,7 @@ public sealed class VectorChatHistoryProvider : ChatHistoryProvider
         }), cancellationToken);
     }
 
-    public override async ValueTask<IEnumerable<ChatMessage>> InvokingAsync(InvokingContext context, CancellationToken cancellationToken = default)
+    protected override async ValueTask<IEnumerable<ChatMessage>> ProvideChatHistoryAsync(InvokingContext context, CancellationToken cancellationToken = default)
     {
         var collection = _vectorStore.GetCollection<string, ChatHistoryItem>("agent_chat_history");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
@@ -93,10 +103,6 @@ public sealed class VectorChatHistoryProvider : ChatHistoryProvider
 
         return messages;
     }
-
-    public override JsonElement Serialize(JsonSerializerOptions? jsonSerializerOptions = null) =>
-        // We have to serialize the session id, so that on deserialization you can retrieve the messages using the same session id.
-        JsonSerializer.SerializeToElement(SessionDbKey);
 
     private sealed class ChatHistoryItem
     {

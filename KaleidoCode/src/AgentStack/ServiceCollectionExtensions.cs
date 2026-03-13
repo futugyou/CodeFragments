@@ -12,6 +12,7 @@ using Microsoft.Agents.AI.Hosting;
 using AgentStack.ChatHistory;
 using Microsoft.Extensions.VectorData;
 using Npgsql;
+using Microsoft.Agents.AI.Workflows;
 
 namespace AgentStack;
 
@@ -112,7 +113,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<WorkflowService>();
 
         // AddAIAgent will use AddSingleton
-        services.AddAIAgent("joker", (sp, name) =>
+        _ = services.AddAIAgent("joker", (sp, name) =>
         {
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
             chatClient = chatClient
@@ -122,41 +123,35 @@ public static class ServiceCollectionExtensions
 
             var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
             var vectorStore = sp.GetRequiredKeyedService<VectorStore>("AgentVectorStore");
+            var provider = providerFactory.Create(CancellationToken.None);
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                 Name = "joker",
                 ChatOptions = new() { Instructions = "You are good at telling jokes." },
-                ChatHistoryProviderFactory = (ctx, ct) =>
-                {
-                    return ValueTask.FromResult(new VectorChatHistoryProvider(
-                       vectorStore,
-                       ctx.SerializedState,
-                       ctx.JsonSerializerOptions)
-                       .WithAIContextProviderMessageRemoval());
-                },
-                AIContextProviderFactory = providerFactory.Create
+                ChatHistoryProvider = new VectorChatHistoryProvider(vectorStore, null, null),
+                AIContextProviders = [provider],
             });
         });
 
         AITool[] lightTools = ToolsExtensions.GetAIToolsFromType<LightPlugin>();
 
         services.AddAIAgent("light", (sp, name) =>
-        {
-            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            {
+                var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
 
-            return chatClient.AsAIAgent(
-                new ChatClientAgentOptions
-                {
-                    Name = "light",
-                    ChatOptions = new()
+                return chatClient.AsAIAgent(
+                    new ChatClientAgentOptions
                     {
-                        Instructions = "You are a useful light assistant. can tell user the status of the lights and can help user control the lights on and off .",
-                        Tools = lightTools,
-                    },
-                    Description = "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off."
-                }
-            );
-        });
+                        Name = "light",
+                        ChatOptions = new()
+                        {
+                            Instructions = "You are a useful light assistant. can tell user the status of the lights and can help user control the lights on and off .",
+                            Tools = lightTools,
+                        },
+                        Description = "An agent is used to answer your questions about the status of the lights and can help you control the lights on and off."
+                    }
+                );
+            });
 
         // The overload of AddAIAgent that includes `sp` is ineffective with WithAITools because the `GetRegisteredToolsForAgent(sp, name)` method is not called. 
         // .WithAITools(tools)
@@ -228,9 +223,7 @@ public static class ServiceCollectionExtensions
             {
                 Name = name,
                 ChatOptions = new() { Instructions = CommonInstructions },
-                AIContextProviderFactory = (ctx, ct) =>
-                    ValueTask.FromResult<AIContextProvider>(
-                        new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c), ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions))
+                AIContextProviders = [new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c))],
             });
         });
 
@@ -239,24 +232,13 @@ public static class ServiceCollectionExtensions
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
             var providerFactory = sp.GetRequiredService<AIContextProviderFactory>();
 
+            var memoryProvider = providerFactory.Create(CancellationToken.None);
+            var textSearchProvider = new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c), textSearchOptions);
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                 Name = name,
                 ChatOptions = new() { Instructions = CommonInstructions },
-                AIContextProviderFactory = async (ctx, ct) =>
-                {
-                    var memoryProvider = await providerFactory.Create(ctx, ct);
-
-                    var textSearchProvider = new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c), ctx.SerializedState, ctx.JsonSerializerOptions, textSearchOptions);
-
-                    return new AggregatingAIContextProvider(
-                        [
-                            AggregatingAIContextProvider.CreateFactory((_, _) => textSearchProvider),
-                            AggregatingAIContextProvider.CreateFactory((_, _) => memoryProvider)
-                        ],
-                        ctx.SerializedState,
-                        ctx.JsonSerializerOptions);
-                }
+                AIContextProviders = [memoryProvider, textSearchProvider],
             });
         });
 
@@ -417,7 +399,7 @@ public static class ServiceCollectionExtensions
             WorkflowBuilder builder = new(prefix);
             builder.WithName(keyString);
             builder.AddSwitch(prefix, sw => sw
-            // Do a simple test of the `Switch/Case` in DevUI.
+                 // Do a simple test of the `Switch/Case` in DevUI.
                  .AddCase<CriticDecision>(cd => false, uppercase)
                  .AddCase<CriticDecision>(cd => true, reverse))
              .AddEdge(uppercase, postProcess)
@@ -447,7 +429,7 @@ public static class ServiceCollectionExtensions
         services.AddAIAgent(name, (sp, name) =>
         {
             var workflow = sp.GetRequiredKeyedService<Workflow>(name);
-            return workflow.AsAgent(id: name, name: name);
+            return workflow.AsAIAgent(id: name, name: name);
         });
 
         return services;

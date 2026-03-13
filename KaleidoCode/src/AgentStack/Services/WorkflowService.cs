@@ -60,7 +60,7 @@ public class WorkflowService
         var msg = new ChatMessage(ChatRole.User, "Hello, World!");
         if (streaming)
         {
-            await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, msg);
+            await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, msg);
             await foreach (WorkflowEvent evt in run.WatchStreamAsync())
             {
                 // Why didn't streaming trigger an ExecutorEvent?
@@ -128,7 +128,7 @@ public class WorkflowService
     public async IAsyncEnumerable<string> Concurrent()
     {
         var workflow = _conWorkflow;
-        await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, "What is temperature?");
+        await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, "What is temperature?");
         await foreach (WorkflowEvent evt in run.WatchStreamAsync())
         {
             switch (evt)
@@ -140,7 +140,7 @@ public class WorkflowService
                     yield return $"Completed: {output.ExecutorId}: {output.Data}";
                     break;
                 case WorkflowOutputEvent output:
-                    yield return $"Workflow Output:{output.SourceId}:  {output.Data}";
+                    yield return $"Workflow Output:{output.ExecutorId}:  {output.Data}";
                     break;
             }
         }
@@ -150,7 +150,7 @@ public class WorkflowService
     {
         List<ChatMessage> messages = [new(ChatRole.User, question)];
         var workflow = _handoffWorkflow;
-        await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, messages);
+        await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, messages);
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
         string? lastExecutorId = null;
         StringBuilder sb = new();
@@ -180,7 +180,7 @@ public class WorkflowService
                     var msgs = (List<ChatMessage>)output.Data!;
                     foreach (var msg in msgs)
                     {
-                        yield return $"Workflow Output: {output.SourceId} {msg.AuthorName}:  {msg.Text}";
+                        yield return $"Workflow Output: {output.ExecutorId} {msg.AuthorName}:  {msg.Text}";
                     }
                     break;
             }
@@ -196,7 +196,7 @@ public class WorkflowService
     {
         List<ChatMessage> messages = [new(ChatRole.User, input)];
         var workflow = _groupChatWorkflow;
-        await using StreamingRun run = await InProcessExecution.StreamAsync(workflow, messages);
+        await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, messages);
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
         string? lastExecutorId = null;
         StringBuilder sb = new();
@@ -226,7 +226,7 @@ public class WorkflowService
                     var msgs = (List<ChatMessage>)output.Data!;
                     foreach (var msg in msgs)
                     {
-                        yield return $"Workflow Output! SourceId: {output.SourceId}, AuthorName: {msg.AuthorName}, Text: {msg.Text}";
+                        yield return $"Workflow Output! SourceId: {output.ExecutorId}, AuthorName: {msg.AuthorName}, Text: {msg.Text}";
                     }
                     break;
             }
@@ -299,9 +299,9 @@ public class WorkflowService
         builder.AddEdge(uppercase, reverse).WithOutputFrom(reverse);
         var workflow = builder.Build();
 
-        await using var run = await InProcessExecution.StreamAsync(workflow, input: "Hello, World!", checkpointManager);
+        await using var run = await InProcessExecution.RunStreamingAsync(workflow, input: "Hello, World!", checkpointManager);
 
-        await foreach (WorkflowEvent evt in run.Run.WatchStreamAsync())
+        await foreach (WorkflowEvent evt in run.WatchStreamAsync())
         {
             if (evt is ExecutorCompletedEvent executorCompleted)
             {
@@ -319,7 +319,7 @@ public class WorkflowService
                 CheckpointInfo? checkpoint = superStepCompletedEvt.CompletionInfo!.Checkpoint;
                 if (checkpoint is not null)
                 {
-                    yield return $"CheckpointInfo: {checkpoint.CheckpointId}: {checkpoint.RunId}";
+                    yield return $"CheckpointInfo: {checkpoint.CheckpointId} ";
                     checkpoints.Add(checkpoint);
                 }
             }
@@ -329,7 +329,7 @@ public class WorkflowService
 
         CheckpointInfo savedCheckpoint = checkpoints[0];
         await run.RestoreCheckpointAsync(savedCheckpoint, CancellationToken.None);
-        await foreach (WorkflowEvent evt in run.Run.WatchStreamAsync())
+        await foreach (WorkflowEvent evt in run.WatchStreamAsync())
         {
             switch (evt)
             {

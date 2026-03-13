@@ -40,7 +40,7 @@ public class AgentService
     }
     public async IAsyncEnumerable<string> Joker()
     {
-        AgentSession? thread = new ChatHistoryAgentThread(
+        var thread = new ChatHistoryAgentThread(
             [
                 new ChatMessageContent(AuthorRole.User, "Tell me a joke about a pirate."),
                 new ChatMessageContent(AuthorRole.Assistant, "Why did the pirate go to school? Because he wanted to improve his \"arrrrrrrrrticulation\""),
@@ -194,7 +194,7 @@ public class AgentService
                 "Can you tell me the status of all the lights?."
             ];
 
-        AgentSession? AgentSession = null;
+        AgentThread? AgentSession = null;
         foreach (var message in messages)
         {
             var input = new ChatMessageContent(AuthorRole.User, message);

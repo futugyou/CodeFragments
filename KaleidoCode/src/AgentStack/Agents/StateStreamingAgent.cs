@@ -52,7 +52,9 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         }
         // Deserialize state snapshot from response
         var response = allUpdates.ToAgentResponse();
-        if (response.TryDeserialize(_jsonSerializerOptions, out JsonElement stateSnapshot))
+        var stateSnapshot = JsonSerializer.Deserialize<JsonElement>(response.Text, JsonSerializerOptions.Web);
+
+        if (stateSnapshot.ValueKind != JsonValueKind.Undefined)
         {
             byte[] stateBytes = JsonSerializer.SerializeToUtf8Bytes(
                 stateSnapshot,

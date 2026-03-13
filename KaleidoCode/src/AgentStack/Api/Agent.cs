@@ -19,7 +19,6 @@ public static class AgentEndpoints
         agentGroup.MapPost("/session", Session).WithName("session");
         agentGroup.MapPost("/function", Function).WithName("function");
         agentGroup.MapPost("/approval", Approval).WithName("approval");
-        agentGroup.MapPost("/approval2", Approval2).WithName("approval2");
         agentGroup.MapPost("/structured", Structured).WithName("structured");
         agentGroup.MapPost("/agent-tool", AgentToTool).WithName("agent-tool");
         agentGroup.MapPost("/history-storage", HistoryStorage).WithName("history-storage");
@@ -60,11 +59,6 @@ public static class AgentEndpoints
     static IAsyncEnumerable<string> Approval([FromServices] AgentService agentService, string message = "Could you please turn off all the lights?", bool allowChangeState = false)
     {
         return agentService.Approval(message, allowChangeState);
-    }
-
-    static IAsyncEnumerable<string> Approval2([FromServices] AgentService agentService, string? conversation = null, bool allowChangeState = false)
-    {
-        return agentService.Approval2(conversation, allowChangeState);
     }
 
     /// <summary>

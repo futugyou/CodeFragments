@@ -15,7 +15,7 @@ public class AIContextProviderFactory
         _vectorStore = vectorStore;
     }
 
-    public ValueTask<AIContextProvider> Create(ChatClientAgentOptions.AIContextProviderFactoryContext ctx, CancellationToken ct)
+    public AIContextProvider Create(CancellationToken ct)
     {
         var httpContext = _httpContextAccessor.HttpContext;
         var request = httpContext?.Request;
@@ -23,11 +23,15 @@ public class AIContextProviderFactory
         var userId = request?.Headers != null ? request?.Headers["UserId"].FirstOrDefault() : "";
 
         Console.WriteLine($"userId: {userId}, sessionId: {SessionId}");
-        return ValueTask.FromResult<AIContextProvider>(new ChatHistoryMemoryProvider(
+
+        return new ChatHistoryMemoryProvider(
             _vectorStore,
             collectionName: "chathistory_memory",
             vectorDimensions: 1536,
-            storageScope: new() { UserId = userId, SessionId = SessionId },
-            searchScope: new() { UserId = userId }));
+            stateInitializer: (session) =>
+                new ChatHistoryMemoryProvider.State(
+                    storageScope: new() { UserId = userId, SessionId = SessionId },
+                    searchScope: new() { UserId = userId })
+        );
     }
 }

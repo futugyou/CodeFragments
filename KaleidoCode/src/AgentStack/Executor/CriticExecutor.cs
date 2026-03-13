@@ -43,7 +43,8 @@ public sealed class CriticExecutor : Executor<ChatMessage, CriticDecision>
 
         // Convert the stream to a response and deserialize the structured output
         AgentResponse response = await updates.ToAgentResponseAsync(cancellationToken);
-        CriticDecision decision = response.Deserialize<CriticDecision>(JsonSerializerOptions.Web);
+        CriticDecision decision = JsonSerializer.Deserialize<CriticDecision>(response.Text, JsonSerializerOptions.Web)
+            ?? throw new JsonException("Failed to deserialize CriticDecision from response text.");
 
         // Safety: approve if max iterations reached
         if (!decision.Approved && state.Iteration >= _maxIterations)

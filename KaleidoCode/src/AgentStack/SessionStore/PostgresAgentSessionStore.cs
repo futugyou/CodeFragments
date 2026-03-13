@@ -32,7 +32,8 @@ public sealed class PostgresAgentSessionStore : AgentSessionStore
     {
         var key = GetKey(conversationId, agent.Id);
         Console.WriteLine($"Saving session: {key}");
-        var jsonString = JsonSerializer.Serialize(session.Serialize());
+        JsonElement sessionElement = await agent.SerializeSessionAsync(session, cancellationToken: cancellationToken);
+        var jsonString = sessionElement.GetRawText();
 
         const string sql = $@"
             INSERT INTO {TableName} (key, session_data)
@@ -67,7 +68,7 @@ public sealed class PostgresAgentSessionStore : AgentSessionStore
             return await agent.DeserializeSessionAsync(doc.RootElement.Clone());
         }
 
-        return await agent.GetNewSessionAsync();
+        return await agent.CreateSessionAsync();
     }
 
     private static string GetKey(string conversationId, string agentId) => $"{agentId}:{conversationId}";

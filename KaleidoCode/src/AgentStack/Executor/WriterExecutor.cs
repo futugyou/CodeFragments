@@ -20,10 +20,6 @@ public sealed class WriterExecutor : Workflows.Executor
         );
     }
 
-    protected override Workflows.RouteBuilder ConfigureRoutes(Workflows.RouteBuilder routeBuilder) =>
-        routeBuilder
-            .AddHandler<string, ChatMessage>(HandleInitialRequestAsync)
-            .AddHandler<CriticDecision, ChatMessage>(HandleRevisionRequestAsync);
 
     /// <summary>
     /// Handles the initial writing request from the user.
@@ -75,6 +71,17 @@ public sealed class WriterExecutor : Workflows.Executor
         await FlowStateHelpers.SaveFlowStateAsync(context, state);
 
         return new ChatMessage(ChatRole.User, text);
+    }
+
+    protected override ProtocolBuilder ConfigureProtocol(ProtocolBuilder protocolBuilder)
+    {
+        return protocolBuilder.ConfigureRoutes(ConfigureRoutes);
+
+        void ConfigureRoutes(Workflows.RouteBuilder routeBuilder)
+        {
+            routeBuilder.AddHandler<string, ChatMessage>(HandleInitialRequestAsync)
+                        .AddHandler<CriticDecision, ChatMessage>(HandleRevisionRequestAsync);
+        }
     }
 }
 

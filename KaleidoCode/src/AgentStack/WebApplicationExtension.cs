@@ -2,6 +2,7 @@
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Agents.AI.Hosting;
+using Microsoft.Agents.AI.Workflows;
 
 namespace AgentStack;
 
@@ -67,7 +68,7 @@ public static class WebApplicationExtension
         {
             if (workflow.Name != null)
             {
-                endpoints.MapA2A(workflow.AsAgent(name: workflow.Name), $"/a2a/{workflow.Name}", agentCard: new()
+                endpoints.MapA2A(workflow.AsAIAgent(name: workflow.Name), $"/a2a/{workflow.Name}", agentCard: new()
                 {
                     Name = workflow.Name,
                     Description = workflow.Description ?? "",
@@ -96,7 +97,7 @@ public static class WebApplicationExtension
         {
             if (workflow.Name != null)
             {
-                endpoints.MapAGUI(workflow.Name!, workflow.AsAgent());
+                endpoints.MapAGUI(workflow.Name!, workflow.AsAIAgent());
             }
         }
 
