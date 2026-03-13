@@ -36,6 +36,10 @@ updates:
         - "Microsoft.SemanticKernel*"
         - "Microsoft.KernelMemory*"
         - "Microsoft.ML*"
+        - "OpenAI"
+      agent:
+        patterns:
+        - "Microsoft.Agents*"
       graphQL:
         patterns:
         - "HotChocolate*"
