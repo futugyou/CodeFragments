@@ -223,7 +223,7 @@ public static class ServiceCollectionExtensions
             {
                 Name = name,
                 ChatOptions = new() { Instructions = CommonInstructions },
-                AIContextProviders = [new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c))],
+                AIContextProviders = [new TextSearchProvider((t, c) => GetSearchAdapter(sp, t, c), textSearchOptions)],
             });
         });
 

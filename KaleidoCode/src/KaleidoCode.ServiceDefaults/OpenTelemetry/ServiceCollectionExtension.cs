@@ -37,6 +37,8 @@ public static class OpenTelemetryServiceCollectionExtension
                     .AddHttpClientInstrumentation()
                     .AddSource("HotChocolate.Diagnostics")
                     .AddSource("Microsoft.SemanticKernel*")
+                    .AddSource("*Microsoft.Extensions.AI")
+                    .AddSource("*Microsoft.Extensions.Agents*")
                     .AddSource("agent-telemetry-source")
                     .AddConfiguredExporters(config.Exporters);
             })
@@ -44,6 +46,7 @@ public static class OpenTelemetryServiceCollectionExtension
             {
                 metrics
                     .AddMeter("Microsoft.SemanticKernel*")
+                    .AddMeter("*Microsoft.Agents.AI")
                     .AddMeter("agent-telemetry-source");
 
                 metrics
