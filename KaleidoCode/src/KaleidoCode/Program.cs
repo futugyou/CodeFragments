@@ -12,7 +12,7 @@ using KaleidoCode.StaticFileEx;
 var options = new WebApplicationOptions
 {
     Args = args,
-    ApplicationName = "Webhost",
+    ApplicationName = "KaleidoCode",
     // System.IO.DirectoryNotFoundException: /workspaces/CodeFragments/KaleidoCode/wwwroot/
     ContentRootPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), ""),
     EnvironmentName = "Development"
@@ -103,6 +103,22 @@ app.MapDefaultEndpoints();
 // app.UseMiddleware<ResponseCustomMiddleware>();
 
 app.RoutePatternFactoryExtension();
+
+// It's strange that neither the command prompt nor VS Code displayed the startup address, 
+// so I'm printing the address using this method instead.
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var serverAddresses = app.Services.GetRequiredService<Microsoft.AspNetCore.Hosting.Server.IServer>()
+                        .Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>()!;
+    
+    Console.WriteLine("********************************");
+    foreach (var address in serverAddresses.Addresses)
+    {
+        Console.WriteLine($"✅ Service started. Access URL: {address}");
+    }
+    
+    Console.WriteLine("********************************");
+});
 
 // this will win
 // app.Run("http://localhost:5004/");
