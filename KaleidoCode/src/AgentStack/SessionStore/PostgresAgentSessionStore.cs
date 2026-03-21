@@ -65,10 +65,10 @@ public sealed class PostgresAgentSessionStore : AgentSessionStore
         {
             var jsonString = reader.GetString(0);
             using var doc = JsonDocument.Parse(jsonString);
-            return await agent.DeserializeSessionAsync(doc.RootElement.Clone());
+            return await agent.DeserializeSessionAsync(doc.RootElement.Clone(), cancellationToken: cancellationToken);
         }
 
-        return await agent.CreateSessionAsync();
+        return await agent.CreateSessionAsync(cancellationToken);
     }
 
     private static string GetKey(string conversationId, string agentId) => $"{agentId}:{conversationId}";
