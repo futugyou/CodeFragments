@@ -244,14 +244,26 @@ public static class ServiceCollectionExtensions
 
         services.AddAIAgent("state", (sp, name) =>
         {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+
             AIAgent baseAgent = chatClient.AsAIAgent(
                 name: "state",
                 instructions: "You are a research assistant that tracks your progress.");
 
-            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();
+            var agent = baseAgent
+                .AsBuilder()
+                .Use(runFunc: null, runStreamingFunc: (messages, session, options, innerAgent, cancellationToken) =>
+                    AgentMiddleware.HandleApprovalRequestsMiddleware(
+                        messages,
+                        session,
+                        options,
+                        innerAgent,
+                        jsonOptions.Value.SerializerOptions,
+                        cancellationToken))
+                .Build();
 
-            return new StateStreamingAgent(baseAgent, jsonOptions.Value.SerializerOptions);
+            return new StateStreamingAgent(agent, jsonOptions.Value.SerializerOptions);
         });
 
         // One errors:
