@@ -10,6 +10,7 @@
 		<PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.73.0-preview" />
 		<PackageReference Include="OpenAI" Version="2.9.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
   </ItemGroup>
 
   <ItemGroup>

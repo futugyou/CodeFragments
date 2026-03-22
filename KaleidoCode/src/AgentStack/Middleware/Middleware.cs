@@ -164,7 +164,7 @@ public static class AgentMiddleware
                 name: approvalRequest.FunctionName,
                 arguments: functionArguments);
 
-            var functionApprovalResponse = new FunctionApprovalResponseContent(
+            var functionApprovalResponse = new ToolApprovalResponseContent(
                 response.ApprovalId,
                 response.Approved,
                 originalFunctionCall);
@@ -209,16 +209,16 @@ public static class AgentMiddleware
             return newMessages;
         }
 
-        // Local function: Convert FunctionApprovalRequestContent to client tool calls
+        // Local function: Convert ToolApprovalRequestContent to client tool calls
         static async IAsyncEnumerable<AgentResponseUpdate> ConvertFunctionApprovalsToToolCalls(
             AgentResponseUpdate update,
             JsonSerializerOptions jsonSerializerOptions)
         {
-            // Check if this update contains a FunctionApprovalRequestContent
-            FunctionApprovalRequestContent? approvalRequestContent = null;
+            // Check if this update contains a ToolApprovalRequestContent
+            ToolApprovalRequestContent? approvalRequestContent = null;
             foreach (var content in update.Contents)
             {
-                if (content is FunctionApprovalRequestContent request)
+                if (content is ToolApprovalRequestContent request)
                 {
                     approvalRequestContent = request;
                     break;
@@ -226,15 +226,13 @@ public static class AgentMiddleware
             }
 
             // If no approval request, yield the update unchanged
-            if (approvalRequestContent == null)
+            if (approvalRequestContent == null || approvalRequestContent.ToolCall is not FunctionCallContent functionCall)
             {
                 yield return update;
                 yield break;
             }
 
-            // Convert the approval request to a "client tool call"
-            var functionCall = approvalRequestContent.FunctionCall;
-            var approvalId = approvalRequestContent.Id;
+            var approvalId = approvalRequestContent.RequestId;
 
             // Serialize the function arguments as JsonElement
             var argsElement = functionCall.Arguments?.Count > 0

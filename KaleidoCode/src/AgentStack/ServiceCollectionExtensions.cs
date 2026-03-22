@@ -266,6 +266,18 @@ public static class ServiceCollectionExtensions
             return new StateStreamingAgent(agent, jsonOptions.Value.SerializerOptions);
         });
 
+        services.AddAIAgent("agui_approval", (sp, name) =>
+        {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+
+            AIAgent baseAgent = chatClient.AsAIAgent(
+                name: "agui_approval",
+                instructions: "You are a research assistant that tracks your progress."); 
+
+            return new FunctionApprovalAgent(baseAgent, jsonOptions.Value.SerializerOptions);
+        });
+
         // One errors:
         // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
         // The Executor used in devui must implement `ChatProtocolExecutor` or accept a `List<ChatMessage>`.
