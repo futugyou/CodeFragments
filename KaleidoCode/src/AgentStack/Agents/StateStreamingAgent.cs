@@ -10,6 +10,16 @@ public sealed class StateStreamingAgent : DelegatingAIAgent
         _jsonSerializerOptions = jsonSerializerOptions;
     }
 
+    protected override Task<AgentResponse> RunCoreAsync(
+          IEnumerable<ChatMessage> messages,
+          AgentSession? session = null,
+          AgentRunOptions? options = null,
+          CancellationToken cancellationToken = default)
+    {
+        return this.RunCoreStreamingAsync(messages, session, options, cancellationToken)
+            .ToAgentResponseAsync(cancellationToken);
+    }
+
     protected override async IAsyncEnumerable<AgentResponseUpdate> RunCoreStreamingAsync(
         IEnumerable<ChatMessage> messages,
         AgentSession? session = null,
