@@ -303,6 +303,50 @@ public static class ServiceCollectionExtensions
             return new SharedStateAgent(baseAgent, jsonOptions.Value.SerializerOptions);
         });
 
+        services.AddAIAgent("agui_plan", (sp, name) =>
+        {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+
+            var baseAgent = chatClient.AsAIAgent(new ChatClientAgentOptions
+            {
+                Name = "agui_plan",
+                Description = "An agent that generates agentic user interfaces using LLM",
+                ChatOptions = new ChatOptions
+                {
+                    Instructions = """
+                    When planning use tools only, without any other messages.
+                    IMPORTANT:
+                    - Use the `create_plan` tool to set the initial state of the steps
+                    - Use the `update_plan_step` tool to update the status of each step
+                    - Do NOT repeat the plan or summarise it in a message
+                    - Do NOT confirm the creation or updates in a message
+                    - Do NOT ask the user for additional information or next steps
+                    - Do NOT leave a plan hanging, always complete the plan via `update_plan_step` if one is ongoing.
+                    - Continue calling update_plan_step until all steps are marked as completed.
+
+                    Only one plan can be active at a time, so do not call the `create_plan` tool
+                    again until all the steps in current plan are completed.
+                    """,
+                    Tools = [
+                    AIFunctionFactory.Create(
+                        AgenticPlanningTools.CreatePlan,
+                        name: "create_plan",
+                        description: "Create a plan with multiple steps.",
+                        AguiJsonSerializerContext.Default.Options),
+                    AIFunctionFactory.Create(
+                        AgenticPlanningTools.UpdatePlanStepAsync,
+                        name: "update_plan_step",
+                        description: "Update a step in the plan with new description or status.",
+                        AguiJsonSerializerContext.Default.Options)
+                ],
+                    AllowMultipleToolCalls = false
+                }
+            });
+
+            return new AgenticUIAgent(baseAgent, jsonOptions.SerializerOptions);
+        });
+
         // One errors:
         // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
         // The Executor used in devui must implement `ChatProtocolExecutor` or accept a `List<ChatMessage>`.
