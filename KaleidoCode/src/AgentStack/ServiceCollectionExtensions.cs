@@ -273,9 +273,34 @@ public static class ServiceCollectionExtensions
 
             AIAgent baseAgent = chatClient.AsAIAgent(
                 name: "agui_approval",
-                instructions: "You are a research assistant that tracks your progress."); 
+                instructions: "You are a research assistant that tracks your progress.");
 
             return new FunctionApprovalAgent(baseAgent, jsonOptions.Value.SerializerOptions);
+        });
+
+
+        services.AddAIAgent("agui_recipe", (sp, name) =>
+        {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>();
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+
+            AIAgent baseAgent = chatClient.AsAIAgent(
+                name: "agui_recipe",
+                instructions: """
+                    You are a helpful recipe assistant. When users ask you to create or suggest a recipe,
+                    respond with a complete AgentState JSON object that includes:
+                    - recipe.title: The recipe name
+                    - recipe.cuisine: Type of cuisine (e.g., Italian, Mexican, Japanese)
+                    - recipe.ingredients: Array of ingredient strings with quantities
+                    - recipe.steps: Array of cooking instruction strings
+                    - recipe.prep_time_minutes: Preparation time in minutes
+                    - recipe.cook_time_minutes: Cooking time in minutes
+                    - recipe.skill_level: One of "beginner", "intermediate", or "advanced"
+
+                    Always include all fields in the response. Be creative and helpful.
+                    """);
+
+            return new SharedStateAgent(baseAgent, jsonOptions.Value.SerializerOptions);
         });
 
         // One errors:
