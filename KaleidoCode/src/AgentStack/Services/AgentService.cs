@@ -110,7 +110,7 @@ public class AgentService
 
         var functionApprovalRequests = response.Messages
             .SelectMany(x => x.Contents)
-            .OfType<FunctionApprovalRequestContent>()
+            .OfType<ToolApprovalRequestContent>()
             .ToList();
 
         if (functionApprovalRequests.Count == 0)
@@ -118,7 +118,7 @@ public class AgentService
             yield break;
         }
 
-        FunctionApprovalRequestContent requestContent = functionApprovalRequests.First();
+        ToolApprovalRequestContent requestContent = functionApprovalRequests.First();
         var approvalMessage = new ChatMessage(ChatRole.User, [requestContent.CreateResponse(allowChangeState)]);
         response = await _lightApprovalAgent.RunAsync(approvalMessage, session);
         yield return response.Text;
@@ -318,15 +318,15 @@ public class AgentService
             var message = messages[messageIndex];
 
             bool hasApprovalResponse = false;
-            FunctionApprovalRequestContent? approvalRequestContent = null;
+           ToolApprovalRequestContent? approvalRequestContent = null;
             for (var contentIndex = 0; contentIndex < message.Contents.Count; contentIndex++)
             {
                 var content = message.Contents[contentIndex];
-                if (content is FunctionApprovalRequestContent approvalRequest)
+                if (content is ToolApprovalRequestContent approvalRequest)
                 {
                     approvalRequestContent = approvalRequest;
                 }
-                else if (content is FunctionApprovalResponseContent _)
+                else if (content is ToolApprovalResponseContent _)
                 {
                     hasApprovalResponse = true;
                 }
@@ -338,7 +338,7 @@ public class AgentService
 
                 // If don't add the following code, it will get an error `messages with role 'tool' must be a response to a preceeding message with 'tool_calls'`.
                 // If add the following code, `session.Serialize().GetRawText()` will contain a duplicate `"$type": "functionCall"` entry.
-                var callMessage = new ChatMessage(ChatRole.Assistant, [approvalRequestContent.FunctionCall])
+                var callMessage = new ChatMessage(ChatRole.Assistant, [approvalRequestContent.ToolCall])
                 {
                     AuthorName = message.AuthorName,
                     CreatedAt = DateTime.UtcNow,
