@@ -3,6 +3,7 @@ using AgentStack.Middleware;
 
 namespace AgentStack.Agents;
 
+// This agent primarily demonstrates how to implement HITL within AGUI.
 public sealed class FunctionApprovalAgent : DelegatingAIAgent
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions;

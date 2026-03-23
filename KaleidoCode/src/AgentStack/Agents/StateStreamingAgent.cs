@@ -1,6 +1,7 @@
 
 namespace AgentStack.Agents;
 
+// This agent primarily demonstrates how to use `agui state`.
 public sealed class StateStreamingAgent : DelegatingAIAgent
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions;
