@@ -1,5 +1,5 @@
 
-using AgentStack.Skills;
+using AgentStack.Tools;
 using AgentStack.ContextProvider;
 using AgentStack.Middleware;
 using AgentStack.ChatHistory;

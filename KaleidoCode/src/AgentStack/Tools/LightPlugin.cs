@@ -1,8 +1,8 @@
 ﻿
-namespace AgentStack.Skills;
-
 using System.ComponentModel;
 using System.Text.Json.Serialization;
+
+namespace AgentStack.Tools;
 
 public class LightPlugin
 {

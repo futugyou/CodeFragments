@@ -2,7 +2,7 @@
 using AgentStack.Services;
 using AgentStack.Executor;
 using AgentStack.ContextProvider;
-using AgentStack.Skills;
+using AgentStack.Tools;
 using AgentStack.Agents;
 using AgentStack.SessionStore;
 using AgentStack.Middleware;
