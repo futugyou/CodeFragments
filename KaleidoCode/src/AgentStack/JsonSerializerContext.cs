@@ -11,4 +11,7 @@ using AgentStack.Tools;
 [JsonSerializable(typeof(StepStatus))]
 [JsonSerializable(typeof(StepStatus?))] 
 [JsonSerializable(typeof(List<string>))]
+[JsonSerializable(typeof(System.Int32))]
+[JsonSerializable(typeof(JsonPatchOperation))]
+[JsonSerializable(typeof(List<JsonPatchOperation>))]
 public sealed partial class AguiJsonSerializerContext : JsonSerializerContext;
