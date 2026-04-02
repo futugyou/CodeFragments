@@ -1,16 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);MAAI001</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
-		<PackageReference Include="Microsoft.Agents.AI.Declarative" Version="1.0.0-rc4" />
-		<PackageReference Include="Microsoft.Agents.AI.Hosting.A2A.AspNetCore" Version="1.0.0-preview.260311.1" />
-		<PackageReference Include="Microsoft.Agents.AI.Hosting.AGUI.AspNetCore" Version="1.0.0-preview.260311.1" />
-    <PackageReference Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.0.0-alpha.260311.1" />
-		<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-rc4" />
-    <PackageReference Include="Microsoft.Agents.AI.DevUI" Version="1.0.0-preview.260311.1" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.73.0-preview" />
-		<PackageReference Include="OpenAI" Version="2.9.1" />
+		<PackageReference Include="Microsoft.Agents.AI.Declarative" Version="1.0.0-rc5" />
+		<PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-rc5" />
+		<PackageReference Include="Microsoft.Agents.AI.Hosting.A2A.AspNetCore" Version="1.0.0-preview.260330.1" />
+		<PackageReference Include="Microsoft.Agents.AI.Hosting.AGUI.AspNetCore" Version="1.0.0-preview.260330.1" />
+    <PackageReference Include="Microsoft.Agents.AI.DevUI" Version="1.0.0-preview.260330.1" />
+    <PackageReference Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.0.0-alpha.260330.1" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.74.0-preview" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.1" />
   </ItemGroup>
 
   <ItemGroup>
