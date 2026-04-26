@@ -347,6 +347,22 @@ public static class ServiceCollectionExtensions
             return new AgenticUIAgent(baseAgent, jsonOptions.SerializerOptions);
         });
 
+        // The current result is that the agent did not utilize any skills at all; instead, the answer was generated directly by the LLM.
+        services.AddAIAgent("file_skills", (sp, name) =>
+        {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+
+            var skillsProvider = new AgentSkillsProvider(Path.Combine(AppContext.BaseDirectory, "skills"), SubprocessScriptRunner.RunAsync);
+
+            return chatClient.AsAIAgent(new ChatClientAgentOptions
+            {
+                Name = name,
+                ChatOptions = new() { Instructions = "You are a helpful assistant that can convert units." },
+                AIContextProviders = [skillsProvider],
+            });
+        });
+
         // One errors:
         // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
         // The Executor used in devui must implement `ChatProtocolExecutor` or accept a `List<ChatMessage>`.

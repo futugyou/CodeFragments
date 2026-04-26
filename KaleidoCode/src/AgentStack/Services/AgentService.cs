@@ -16,6 +16,7 @@ public class AgentService
     private readonly AIAgent _lightAgent;
     private readonly AIAgent _lightApprovalAgent;
     private readonly AIAgent _ragAgent;
+    private readonly AIAgent _fileSkillsAgent;
     private readonly AIContextProviderFactory _aiContextProviderFactory;
     private static readonly Dictionary<string, string> _sessionStore = [];
 
@@ -26,6 +27,7 @@ public class AgentService
         [FromKeyedServices("light")] AIAgent lightAgent,
         [FromKeyedServices("light-with-approval")] AIAgent lightApprovalAgent,
         [FromKeyedServices("rag")] AIAgent ragAgent,
+        [FromKeyedServices("file_skills")] AIAgent fileSkillsAgent,
         AIContextProviderFactory aiContextProviderFactory
     )
     {
@@ -34,6 +36,7 @@ public class AgentService
         _lightAgent = lightAgent;
         _lightApprovalAgent = lightApprovalAgent;
         _ragAgent = ragAgent;
+        _fileSkillsAgent = fileSkillsAgent;
         _vectorStore = vectorStore;
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
@@ -349,6 +352,12 @@ public class AgentService
         }
 
         return result;
+    } 
+
+    public async IAsyncEnumerable<string> UnitConverter(string message)
+    {
+        var response = await _fileSkillsAgent.RunAsync(message);
+        yield return response.Text;
     }
 }
 

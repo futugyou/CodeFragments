@@ -26,6 +26,7 @@ public static class AgentEndpoints
         agentGroup.MapPost("/rag", RAG).WithName("rag");
         agentGroup.MapPost("/chat-reducer", ChatReducer).WithName("chat-reducer");
         agentGroup.MapPost("/declarative", Declarative).WithName("declarative");
+        agentGroup.MapPost("/file-skills", UnitConverter).WithName("file-skills");
     }
 
     static async Task<string> Joker([FromServices] AgentService agentService, [FromHeader] string UserId, [FromHeader] string SessionId, string message = "Tell me a joke about a pirate.")
@@ -104,5 +105,10 @@ public static class AgentEndpoints
     static IAsyncEnumerable<string> Declarative([FromServices] AgentService agentService)
     {
         return agentService.Declarative();
+    }
+
+    static IAsyncEnumerable<string> UnitConverter([FromServices] AgentService agentService,string message = "How many kilometers is a marathon (26.2 miles)? And how many pounds is 75 kilograms?")
+    {
+        return agentService.UnitConverter(message);
     }
 }

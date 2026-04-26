@@ -27,10 +27,13 @@ internal static class SubprocessScriptRunner
         AIFunctionArguments arguments,
         CancellationToken cancellationToken)
     {
+        Console.WriteLine($"Preparing to run script '{script.Name}' with arguments: {string.Join(", ", arguments.Select(kv => $"{kv.Key}={kv.Value}"))}");
         if (!File.Exists(script.FullPath))
         {
             return $"Error: Script file not found: {script.FullPath}";
         }
+
+        Console.WriteLine($"Executing script: {script.FullPath}");
 
         string extension = Path.GetExtension(script.FullPath);
         string? interpreter = extension switch
@@ -84,6 +87,7 @@ internal static class SubprocessScriptRunner
         try
         {
             process = Process.Start(startInfo);
+            Console.WriteLine($"Started process with ID {process?.Id} for script '{script.Name}'");
             if (process is null)
             {
                 return $"Error: Failed to start process for script '{script.Name}'.";
@@ -107,6 +111,7 @@ internal static class SubprocessScriptRunner
                 output += $"\nScript exited with code {process.ExitCode}";
             }
 
+            Console.WriteLine($"Process for script '{script.Name}' exited with code {process.ExitCode}");
             return string.IsNullOrEmpty(output) ? "(no output)" : output.Trim();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
