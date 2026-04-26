@@ -22,4 +22,10 @@
   <ItemGroup>
 	  <ProjectReference Include="..\KaleidoCode.ServiceDefaults\KaleidoCode.ServiceDefaults.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="skills\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
