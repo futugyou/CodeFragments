@@ -17,6 +17,7 @@ public class AgentService
     private readonly AIAgent _lightApprovalAgent;
     private readonly AIAgent _ragAgent;
     private readonly AIAgent _fileSkillsAgent;
+    private readonly AIAgent _codeSkillsAgent;
     private readonly AIContextProviderFactory _aiContextProviderFactory;
     private static readonly Dictionary<string, string> _sessionStore = [];
 
@@ -28,6 +29,7 @@ public class AgentService
         [FromKeyedServices("light-with-approval")] AIAgent lightApprovalAgent,
         [FromKeyedServices("rag")] AIAgent ragAgent,
         [FromKeyedServices("file_skills")] AIAgent fileSkillsAgent,
+        [FromKeyedServices("code_skills")] AIAgent codeSkillsAgent,
         AIContextProviderFactory aiContextProviderFactory
     )
     {
@@ -37,6 +39,7 @@ public class AgentService
         _lightApprovalAgent = lightApprovalAgent;
         _ragAgent = ragAgent;
         _fileSkillsAgent = fileSkillsAgent;
+        _codeSkillsAgent = codeSkillsAgent;
         _vectorStore = vectorStore;
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
@@ -321,7 +324,7 @@ public class AgentService
             var message = messages[messageIndex];
 
             bool hasApprovalResponse = false;
-           ToolApprovalRequestContent? approvalRequestContent = null;
+            ToolApprovalRequestContent? approvalRequestContent = null;
             for (var contentIndex = 0; contentIndex < message.Contents.Count; contentIndex++)
             {
                 var content = message.Contents[contentIndex];
@@ -352,11 +355,19 @@ public class AgentService
         }
 
         return result;
-    } 
+    }
 
     public async IAsyncEnumerable<string> UnitConverter(string message)
     {
+        Console.WriteLine("Using file base skills agent:");
         var response = await _fileSkillsAgent.RunAsync(message);
+        yield return response.Text;
+    }
+
+    public async IAsyncEnumerable<string> UnitConverter2(string message)
+    {
+        Console.WriteLine("Using code skills agent:");
+        var response = await _codeSkillsAgent.RunAsync(message);
         yield return response.Text;
     }
 }

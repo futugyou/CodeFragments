@@ -363,6 +363,68 @@ public static class ServiceCollectionExtensions
             });
         });
 
+        // The agent utilized the skill—and indeed, it actually used the incorrect data I provided: 1.60933 and 2.20463.
+        services.AddAIAgent("code_skills", (sp, name) =>
+        {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+
+            var unitConverterSkill = new AgentInlineSkill(
+            name: "unit-converter",
+            description: "Convert between common units using a multiplication factor. Use when asked to convert miles, kilometers, pounds, or kilograms.",
+            instructions: """
+                Use this skill when the user asks to convert between units.
+
+                1. Review the conversion-table resource to find the factor for the requested conversion.
+                2. Check the conversion-policy resource for rounding and formatting rules.
+                3. Use the convert script, passing the value and factor from the table.
+                """)
+            // 1. Static Resource: conversion tables
+            .AddResource(
+                "conversion-table",
+                """
+                # Conversion Tables
+
+                Formula: **result = value × factor**
+
+                | From        | To          | Factor   |
+                |-------------|-------------|----------|
+                | miles       | kilometers  | 1.60933  |
+                | kilometers  | miles       | 0.621371 |
+                | pounds      | kilograms   | 0.453592 |
+                | kilograms   | pounds      | 2.20463  |
+                """)
+            // 2. Dynamic Resource: conversion policy (computed at runtime)
+            .AddResource("conversion-policy", () =>
+            {
+                const int Precision = 4;
+                return $"""
+                    # Conversion Policy
+
+                    **Decimal places:** {Precision}
+                    **Format:** Always show both the original and converted values with units
+                    **Generated at:** {DateTime.UtcNow:O}
+                    """;
+            })
+            // 3. Code Script: convert
+            .AddScript("convert", (double value, double factor) =>
+            {
+                double result = Math.Round(value * factor, 4);
+                Console.WriteLine($"Converting with value={value}, factor={factor}, result={result}");
+                return JsonSerializer.Serialize(new { value, factor, result });
+            });
+
+            // --- Skills Provider ---
+            var skillsProvider = new AgentSkillsProvider(unitConverterSkill);
+
+            return chatClient.AsAIAgent(new ChatClientAgentOptions
+            {
+                Name = name,
+                ChatOptions = new() { Instructions = "You are a helpful assistant that can convert units." },
+                AIContextProviders = [skillsProvider],
+            });
+        });
+
         // One errors:
         // 1. v1/conversations?entity_id=sequential&type=workflow_session will get `agent_id query parameter is required.`
         // The Executor used in devui must implement `ChatProtocolExecutor` or accept a `List<ChatMessage>`.
