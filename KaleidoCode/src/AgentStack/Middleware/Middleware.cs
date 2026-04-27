@@ -46,14 +46,33 @@ public static class AgentMiddleware
     }
 
     public static async Task<ChatResponse> ChatClientMiddleware(
-          IEnumerable<ChatMessage> messages,
-          ChatOptions? options,
-          IChatClient innerChatClient,
-          CancellationToken cancellationToken)
+        IEnumerable<ChatMessage> messages,
+        ChatOptions? options,
+        IChatClient innerChatClient,
+        CancellationToken cancellationToken)
     {
         Console.WriteLine($"chat middleware, input count: {messages.Count()}");
-        var response = await innerChatClient.GetResponseAsync(messages, options, cancellationToken);
-        Console.WriteLine($"chat middleware, output count: {response.Messages.Count}");
+
+        // Due to proxy-related issues, the middleware frequently hangs, add a timeout.
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
+        ChatResponse response;
+        try
+        {
+            response = await innerChatClient.GetResponseAsync(messages, options, linkedCts.Token);
+            Console.WriteLine($"chat middleware, output count: {response.Messages.Count}");
+        }
+        catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+        {
+            Console.WriteLine("chat middleware: Request timed out.");
+            response = new ChatResponse(new ChatMessage(ChatRole.Assistant, "Request timed out. Please try again later."));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"chat middleware, exception: {ex}");
+            response = new ChatResponse(new ChatMessage(ChatRole.System, "An error occurred while processing the chat request."));
+        }
 
         return response;
     }
@@ -77,11 +96,56 @@ public static class AgentMiddleware
             messages = messages.Append(contextMessage);
         }
 
-        Console.WriteLine($"chat middleware, input count: {messages.Count()}");
-        await foreach (var update in innerChatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
+        Console.WriteLine($"chat stream middleware, input count: {messages.Count()}");
+
+        IAsyncEnumerator<ChatResponseUpdate> chatResponseUpdates;
+        try
         {
-            Console.WriteLine($"chat middleware, onput text: {update.Text}");
-            yield return update;
+            chatResponseUpdates = innerChatClient.GetStreamingResponseAsync(messages, options, cancellationToken).GetAsyncEnumerator(cancellationToken);
+        }
+        catch (OperationCanceledException ex)
+        {
+            Console.WriteLine($"chat stream middleware OperationCanceledException: {ex.Message}");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"chat stream middleware Exception: {ex.Message}");
+            throw;
+        }
+
+        try
+        {
+            ChatResponseUpdate? update = null;
+            while (true)
+            {
+                try
+                {
+                    if (!await chatResponseUpdates.MoveNextAsync().ConfigureAwait(false))
+                    {
+                        break;
+                    }
+
+                    update = chatResponseUpdates.Current;
+                }
+                catch (OperationCanceledException ex)
+                {
+                    Console.WriteLine($"chat stream middleware OperationCanceledException: {ex.Message}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"chat stream middleware Exception: {ex.Message}");
+                    throw;
+                }
+
+                yield return update;
+            }
+        }
+        finally
+        {
+            await chatResponseUpdates.DisposeAsync().ConfigureAwait(false);
+            Console.WriteLine("chat stream middleware, completed streaming response.");
         }
     }
 
