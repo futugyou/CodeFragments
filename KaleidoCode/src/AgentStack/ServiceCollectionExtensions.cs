@@ -355,10 +355,15 @@ public static class ServiceCollectionExtensions
             var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
 
-            var skillsProvider = new AgentSkillsProvider(Path.Combine(AppContext.BaseDirectory, "skills"), SubprocessScriptRunner.RunAsync, options: new AgentSkillsProviderOptions
-            {
-                DisableCaching = true
-            });
+            // var skillsProvider = new AgentSkillsProvider(Path.Combine(AppContext.BaseDirectory, "skills"), SubprocessScriptRunner.RunAsync, options: new AgentSkillsProviderOptions
+            // {
+            //     DisableCaching = true
+            // });
+            var skillsProvider = new AgentSkillsProviderBuilder()
+                .UseFileSkill(Path.Combine(AppContext.BaseDirectory, "skills"))
+                .UseFileScriptRunner(SubprocessScriptRunner.RunAsync)
+                .UseOptions(o => o.DisableCaching = true)
+                .Build();
 
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
@@ -385,20 +390,25 @@ public static class ServiceCollectionExtensions
                 3. Use the convert script, passing the value and factor from the table.
                 """)
             // 1. Static Resource: conversion tables
-            .AddResource(
-                "conversion-table",
-                """
-                # Conversion Tables
+            // .AddResource(
+            //     "conversion-table",
+            //     """
+            //     # Conversion Tables
 
-                Formula: **result = value × factor**
+            //     Formula: **result = value × factor**
 
-                | From        | To          | Factor   |
-                |-------------|-------------|----------|
-                | miles       | kilometers  | 1.60933  |
-                | kilometers  | miles       | 0.621371 |
-                | pounds      | kilograms   | 0.453592 |
-                | kilograms   | pounds      | 2.20463  |
-                """)
+            //     | From        | To          | Factor   |
+            //     |-------------|-------------|----------|
+            //     | miles       | kilometers  | 1.60933  |
+            //     | kilometers  | miles       | 0.621371 |
+            //     | pounds      | kilograms   | 0.453592 |
+            //     | kilograms   | pounds      | 2.20463  |
+            //     """)
+            .AddResource("distance-table", (IServiceProvider serviceProvider) =>
+            {
+                var service = serviceProvider.GetRequiredService<ConversionService>();
+                return service.GetDistanceTable();
+            })
             // 2. Dynamic Resource: conversion policy (computed at runtime)
             .AddResource("conversion-policy", () =>
             {
@@ -420,8 +430,10 @@ public static class ServiceCollectionExtensions
             });
 
             // --- Skills Provider ---
-            var skillsProvider = new AgentSkillsProvider(unitConverterSkill);
-
+            // var skillsProvider = new AgentSkillsProvider(unitConverterSkill);
+            var skillsProvider = new AgentSkillsProviderBuilder()
+                .UseSkill(unitConverterSkill)
+                .Build();
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                 Name = name,
@@ -430,13 +442,17 @@ public static class ServiceCollectionExtensions
             });
         });
 
+
+        services.AddSingleton<ConversionService>();
         services.AddAIAgent("class_skills", (sp, name) =>
         {
             var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
             var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
             var unitConverter = new UnitConverterSkill();
-            var skillsProvider = new AgentSkillsProvider(unitConverter);
-
+            // var skillsProvider = new AgentSkillsProvider(unitConverter);
+            var skillsProvider = new AgentSkillsProviderBuilder()
+                .UseSkill(unitConverter)
+                .Build();
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                 Name = name,
