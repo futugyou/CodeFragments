@@ -13,6 +13,7 @@ using AgentStack.ChatHistory;
 using Microsoft.Extensions.VectorData;
 using Npgsql;
 using Microsoft.Agents.AI.Workflows;
+using AgentStack.Skill;
 
 namespace AgentStack;
 
@@ -420,6 +421,21 @@ public static class ServiceCollectionExtensions
 
             // --- Skills Provider ---
             var skillsProvider = new AgentSkillsProvider(unitConverterSkill);
+
+            return chatClient.AsAIAgent(new ChatClientAgentOptions
+            {
+                Name = name,
+                ChatOptions = new() { Instructions = "You are a helpful assistant that can convert units." },
+                AIContextProviders = [skillsProvider],
+            });
+        });
+
+        services.AddAIAgent("class_skills", (sp, name) =>
+        {
+            var jsonOptions = sp.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
+            var chatClient = sp.GetRequiredKeyedService<IChatClient>("AgentChatClient");
+            var unitConverter = new UnitConverterSkill();
+            var skillsProvider = new AgentSkillsProvider(unitConverter);
 
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {

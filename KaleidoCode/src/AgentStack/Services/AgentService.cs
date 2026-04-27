@@ -18,6 +18,7 @@ public class AgentService
     private readonly AIAgent _ragAgent;
     private readonly AIAgent _fileSkillsAgent;
     private readonly AIAgent _codeSkillsAgent;
+    private readonly AIAgent _classSkillsAgent;
     private readonly AIContextProviderFactory _aiContextProviderFactory;
     private static readonly Dictionary<string, string> _sessionStore = [];
 
@@ -30,6 +31,7 @@ public class AgentService
         [FromKeyedServices("rag")] AIAgent ragAgent,
         [FromKeyedServices("file_skills")] AIAgent fileSkillsAgent,
         [FromKeyedServices("code_skills")] AIAgent codeSkillsAgent,
+        [FromKeyedServices("class_skills")] AIAgent classSkillsAgent,
         AIContextProviderFactory aiContextProviderFactory
     )
     {
@@ -41,6 +43,7 @@ public class AgentService
         _fileSkillsAgent = fileSkillsAgent;
         _codeSkillsAgent = codeSkillsAgent;
         _vectorStore = vectorStore;
+        _classSkillsAgent = classSkillsAgent;
         _options = optionsMonitor.CurrentValue;
         var credential = new ApiKeyCredential(_options.TextCompletion.ApiKey);
         OpenAIClientOptions openAIOptions = new();
@@ -368,6 +371,13 @@ public class AgentService
     {
         Console.WriteLine("Using code skills agent:");
         var response = await _codeSkillsAgent.RunAsync(message);
+        yield return response.Text;
+    }
+
+    public async IAsyncEnumerable<string> UnitConverter3(string message)
+    {
+        Console.WriteLine("Using class skills agent:");
+        var response = await _classSkillsAgent.RunAsync(message);
         yield return response.Text;
     }
 }
