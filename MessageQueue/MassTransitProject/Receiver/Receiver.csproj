@@ -12,7 +12,7 @@
 		<PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
 		<PackageReference Include="MassTransit.RabbitMQ" Version="9.1.2" />
 		<PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 	</ItemGroup>
 
 	<ItemGroup>
