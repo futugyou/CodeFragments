@@ -33,7 +33,7 @@
 		<PackageReference Include="ScottPlot" Version="5.1.59" />
 		<PackageReference Include="Sharprompt" Version="3.2.0" />
 		<PackageReference Include="StackExchange.Redis" Version="3.4.20" />
-		<PackageReference Include="System.IO.Pipelines" Version="10.0.13" />
+		<PackageReference Include="System.IO.Pipelines" Version="10.0.14" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.14" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.14" />
