@@ -107,10 +107,10 @@ public class JsonReportProcessor
                 }],
                 PageDimensions = new()
                 {
-                    B = picture.Bounds.Bottom,
-                    L = picture.Bounds.Left,
-                    R = picture.Bounds.Right,
-                    T = picture.Bounds.Top
+                    B = picture.BoundingBox.Bottom,
+                    L = picture.BoundingBox.Left,
+                    R = picture.BoundingBox.Right,
+                    T = picture.BoundingBox.Top
                 }
             };
             result.Add(con);
@@ -160,10 +160,10 @@ public class JsonReportProcessor
                 Page = page.Number,
                 Bbox = new ReportBbox
                 {
-                    B = picture.Bounds.Bottom,
-                    L = picture.Bounds.Left,
-                    R = picture.Bounds.Right,
-                    T = picture.Bounds.Top
+                    B = picture.BoundingBox.Bottom,
+                    L = picture.BoundingBox.Left,
+                    R = picture.BoundingBox.Right,
+                    T = picture.BoundingBox.Top
                 },
             };
             assembledPictures.Add(pictureObj);

@@ -47,7 +47,7 @@ public class MqttBackgroundSubscriber : BackgroundService
                 await client.ConnectAsync(clientOptions, stoppingToken);
 
                 var mqttSubscribeOptions = factory.CreateSubscribeOptionsBuilder()
-                .WithUserProperty("id", "2").Build();
+                .WithUserProperty("id", new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes("2"))).Build();
 
                 await client.SubscribeAsync(mqttSubscribeOptions, stoppingToken);
             }

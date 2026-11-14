@@ -8,10 +8,8 @@ public class CommonTypeService
         // time
         {
             var unitString = new Time("2d");
-            var unitComposed = new Time(2, OpenSearch.Client.TimeUnit.Day);
             var unitTimeSpan = new Time(TimeSpan.FromDays(2));
             var unitMilliseconds = new Time(1000 * 60 * 60 * 24 * 2);
-            Console.WriteLine(unitComposed);// 2d
 
             Time oneMinute = "1m";
             Time fourteenDays = TimeSpan.FromDays(14);

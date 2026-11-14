@@ -1,4 +1,6 @@
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace OpenSearchStack;
 
 public static class ElasticClientExtensions
@@ -38,7 +40,8 @@ public static class ElasticClientExtensions
         }
         if (!string.IsNullOrEmpty(elasticOptions.CertificatePath))
         {
-            settings.ClientCertificate(elasticOptions.CertificatePath);
+            var cert = X509CertificateLoader.LoadCertificateFromFile(elasticOptions.CertificatePath);
+            settings.ClientCertificate(cert);
         }
         settings.DefaultMappingFor<Company>(m => m
             .IdProperty(p => p.Name)

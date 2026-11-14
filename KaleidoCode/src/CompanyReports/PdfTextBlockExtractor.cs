@@ -10,7 +10,7 @@ public static class PdfTextBlockExtractor
         var allLetters = pages
             .SelectMany(p => p.Letters.Select(l => new LetterWithPage(l, p.Number)))
             .Where(x => !char.IsWhiteSpace(x.Letter.Value[0]))
-            .OrderByDescending(x => x.Letter.GlyphRectangle.Bottom)
+            .OrderByDescending(x => x.Letter.BoundingBox.Bottom)
             .ToList();
 
         var blocks = new List<TextBlock>();
@@ -65,7 +65,7 @@ public static class PdfTextBlockExtractor
         foreach (var letter in letters)
         {
             var matchedLine = lines.FirstOrDefault(line =>
-                Math.Abs(line[0].GlyphRectangle.Bottom - letter.GlyphRectangle.Bottom) < lineSpacingThreshold);
+                Math.Abs(line[0].BoundingBox.Bottom - letter.BoundingBox.Bottom) < lineSpacingThreshold);
 
             if (matchedLine != null)
                 matchedLine.Add(letter);
@@ -73,8 +73,8 @@ public static class PdfTextBlockExtractor
                 lines.Add([letter]);
         }
         foreach (var line in lines)
-            line.Sort((a, b) => a.GlyphRectangle.Left.CompareTo(b.GlyphRectangle.Left));
-        lines.Sort((a, b) => b[0].GlyphRectangle.Bottom.CompareTo(a[0].GlyphRectangle.Bottom));
+            line.Sort((a, b) => a.BoundingBox.Left.CompareTo(b.BoundingBox.Left));
+        lines.Sort((a, b) => b[0].BoundingBox.Bottom.CompareTo(a[0].BoundingBox.Bottom));
         return lines;
     }
 
@@ -92,7 +92,7 @@ public static class PdfTextBlockExtractor
                 continue;
             }
             var prevLine = currentBlock.Last();
-            var yGap = prevLine[0].GlyphRectangle.Bottom - thisLine[0].GlyphRectangle.Bottom;
+            var yGap = prevLine[0].BoundingBox.Bottom - thisLine[0].BoundingBox.Bottom;
             if (yGap > paragraphSpacingThreshold)
             {
                 blocks.Add(currentBlock);
@@ -109,10 +109,10 @@ public static class PdfTextBlockExtractor
     {
         return new ReportBbox
         {
-            L = letters.Min(l => l.GlyphRectangle.Left),
-            T = letters.Max(l => l.GlyphRectangle.Top),
-            R = letters.Max(l => l.GlyphRectangle.Right),
-            B = letters.Min(l => l.GlyphRectangle.Bottom)
+            L = letters.Min(l => l.BoundingBox.Left),
+            T = letters.Max(l => l.BoundingBox.Top),
+            R = letters.Max(l => l.BoundingBox.Right),
+            B = letters.Min(l => l.BoundingBox.Bottom)
         };
     }
 

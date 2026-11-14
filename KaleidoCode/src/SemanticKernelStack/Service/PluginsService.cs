@@ -83,7 +83,7 @@ public class PluginsService
     {
         // Cannot be used, will trigger duck's verification code
         var search = new DuckduckgoTextSearch();
-        var results = await search.SearchAsync(input);
+        var results = await search.SearchAsync(input, null);
         return results.Results;
     }
     public async Task<string[]> WebSearch(string input)

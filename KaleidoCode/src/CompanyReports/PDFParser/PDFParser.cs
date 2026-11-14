@@ -8,16 +8,8 @@ public interface IPDFParser
     static Dictionary<string, CsvMetadata> ParseCsvMetadata(string csvPath)
     {
         var lookup = new Dictionary<string, CsvMetadata>();
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = true,
-            MissingFieldFound = null,
-            HeaderValidated = null,
-            TrimOptions = TrimOptions.Trim,
-        };
-
         using var reader = new StreamReader(csvPath);
-        using var csv = new CsvReader(reader, config);
+        using var csv = CsvReader.Create(reader);
 
         foreach (var record in csv.GetRecords<CsvMetadata>())
         {
@@ -179,15 +171,16 @@ public class Metainfo
     public string CompanyName { get; set; }
 }
 
-public class CsvMetadata
+[CsvRecord]
+public partial class CsvMetadata
 {
-    [Name("sha1")]
+    [CsvColumn("sha1")]
     public string Sha1 { get; set; }
 
-    [Name("company_name")]
+    [CsvColumn("company_name")]
     public string CompanyName { get; set; }
 
-    [Name("name")]
+    [CsvColumn("name")]
     public string Name { get; set; }
 
     public string GetCompanyName()

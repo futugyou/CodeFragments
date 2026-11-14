@@ -42,10 +42,6 @@ public static class GraphQLExtensions
             .ModifyRequestOptions(option =>
             {
                 option.IncludeExceptionDetails = true;
-            })
-            .ModifyOptions(option =>
-            {
-                option.EnableOneOf = true;
             });
 
         // .AddSpatialTypes, Currently not used in the project.

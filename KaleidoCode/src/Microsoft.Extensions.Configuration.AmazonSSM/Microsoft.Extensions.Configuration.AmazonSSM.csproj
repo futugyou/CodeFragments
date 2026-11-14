@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.14" />
-        <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.6.4" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.1.0" />
+        <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0" />
     </ItemGroup>
 
 </Project>

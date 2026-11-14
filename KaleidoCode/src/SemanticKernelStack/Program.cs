@@ -36,9 +36,7 @@ app.UseHttpsRedirection();
 await app.InitAIData();
 
 app.MapMcp();
-app.MapA2AExtensions();
 
-app.UseA2AEndpoints();
 app.UseAgentEndpoints();
 app.UseDeclarativeEndpoints();
 app.UseEmbeddingEndpoints();

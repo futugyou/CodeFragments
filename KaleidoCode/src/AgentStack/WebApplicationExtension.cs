@@ -37,14 +37,13 @@ public static class WebApplicationExtension
         return app;
     }
 
-    public static IEndpointConventionBuilder MapAGUI(
-        this IEndpointRouteBuilder endpoints,
-        [StringSyntax("route")] string pattern,
-        Func<IServiceProvider, AIAgent> factory)
-    {
-        var agent = factory(endpoints.ServiceProvider);
-        return endpoints.MapAGUI(pattern, agent);
-    }
+    // public static IEndpointConventionBuilder MapAGUI(
+    //     this IEndpointRouteBuilder endpoints,
+    //     [StringSyntax("route")] string pattern,
+    //     Func<IServiceProvider, AIAgent> factory)
+    // {
+    //     return endpoints.MapAGUI(pattern, factory);
+    // }
 
     public static IEndpointRouteBuilder MapA2A(this IEndpointRouteBuilder endpoints)
     {
@@ -55,12 +54,7 @@ public static class WebApplicationExtension
         {
             if (agent.Name != null)
             {
-                endpoints.MapA2A(agent, $"/a2a/{agent.Name}", agentCard: new()
-                {
-                    Name = agent.Name,
-                    Description = agent.Description ?? "",
-                    Version = "1.0"
-                });
+                endpoints.MapA2AHttpJson(agent, $"/a2a/{agent.Name}" );
             }
         }
 
@@ -68,12 +62,7 @@ public static class WebApplicationExtension
         {
             if (workflow.Name != null)
             {
-                endpoints.MapA2A(workflow.AsAIAgent(name: workflow.Name), $"/a2a/{workflow.Name}", agentCard: new()
-                {
-                    Name = workflow.Name,
-                    Description = workflow.Description ?? "",
-                    Version = "1.0"
-                });
+                endpoints.MapA2AHttpJson(workflow.AsAIAgent(name: workflow.Name), $"/a2a/{workflow.Name}" );
             }
         }
 
@@ -89,7 +78,7 @@ public static class WebApplicationExtension
         {
             if (agent.Name != null)
             {
-                endpoints.MapAGUI(agent.Name, agent);
+                endpoints.MapAGUIServer(agent.Name, agent);
             }
         }
 
@@ -97,7 +86,7 @@ public static class WebApplicationExtension
         {
             if (workflow.Name != null)
             {
-                endpoints.MapAGUI(workflow.Name!, workflow.AsAIAgent());
+                endpoints.MapAGUIServer(workflow.Name!, workflow.AsAIAgent());
             }
         }
 

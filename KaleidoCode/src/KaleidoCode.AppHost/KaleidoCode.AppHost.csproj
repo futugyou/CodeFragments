@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.2.0-preview.1.25611.1">
+<Project Sdk="Aspire.AppHost.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\KaleidoCode\KaleidoCode.csproj" />
@@ -11,6 +11,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
   </PropertyGroup>
 
 </Project>

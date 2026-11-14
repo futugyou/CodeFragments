@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "src/KaleidoCode.AppHost/KaleidoCode.AppHost.csproj"
+  }
+}

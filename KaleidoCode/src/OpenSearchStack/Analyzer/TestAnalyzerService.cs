@@ -1,7 +1,8 @@
 
-using System.Threading.Tasks;
-
 namespace OpenSearchStack.Analyzer;
+
+using OpenSearch.Client;
+using OpenSearch.Net;
 
 public class TestAnalyzerService
 {
@@ -59,7 +60,7 @@ public class TestAnalyzerService
         yield return openIndexResponse.Acknowledged.ToString();
 
         var clusterHealthResponse = await client.Cluster.HealthAsync("analysis-index", h => h
-                .WaitForStatus(WaitForStatus.Green)
+                .WaitForStatus(HealthStatus.Green)
                 .Timeout(TimeSpan.FromSeconds(5))
            );
         yield return clusterHealthResponse.Status.ToString();

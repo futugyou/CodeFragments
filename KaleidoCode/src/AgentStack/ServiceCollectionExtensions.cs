@@ -7,7 +7,7 @@ using AgentStack.Agents;
 using AgentStack.SessionStore;
 using AgentStack.Middleware;
 using AgentStack.Model;
-using Microsoft.SemanticKernel.Connectors.PgVector;
+using CommunityToolkit.VectorData.PgVector;
 using Microsoft.Agents.AI.Hosting;
 using AgentStack.ChatHistory;
 using Microsoft.Extensions.VectorData;
@@ -359,17 +359,17 @@ public static class ServiceCollectionExtensions
             // {
             //     DisableCaching = true
             // });
-            var skillsProvider = new AgentSkillsProviderBuilder()
-                .UseFileSkill(Path.Combine(AppContext.BaseDirectory, "skills"))
-                .UseFileScriptRunner(SubprocessScriptRunner.RunAsync)
-                .UseOptions(o => o.DisableCaching = true)
-                .Build();
+            // var skillsProvider = new AgentSkillsProviderBuilder()
+            //     .UseFileSkill(Path.Combine(AppContext.BaseDirectory, "skills"))
+            //     .UseFileScriptRunner(SubprocessScriptRunner.RunAsync)
+            //     .UseOptions(o => o.DisableCaching = true)
+            //     .Build();
 
             return chatClient.AsAIAgent(new ChatClientAgentOptions
             {
                 Name = name,
                 ChatOptions = new() { Instructions = "You are a helpful assistant that can convert units." },
-                AIContextProviders = [skillsProvider],
+                // AIContextProviders = [skillsProvider],
             });
         });
 

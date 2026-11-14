@@ -5,7 +5,7 @@ using Microsoft.SemanticKernel.Data;
 
 namespace SemanticKernelStack.Duckduckgo;
 
-public class DuckduckgoTextSearch : ITextSearch
+public class DuckduckgoTextSearch : ITextSearch<DuckSearchResult>
 {
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
@@ -24,34 +24,31 @@ public class DuckduckgoTextSearch : ITextSearch
         _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
     }
 
-    public async Task<KernelSearchResults<object>> GetSearchResultsAsync(string query, TextSearchOptions? searchOptions = null, CancellationToken cancellationToken = default)
-    {
-        searchOptions ??= new TextSearchOptions();
+    public async Task<KernelSearchResults<DuckSearchResult>>  GetSearchResultsAsync(string query, TextSearchOptions<DuckSearchResult>? searchOptions, CancellationToken cancellationToken)
+    { 
         List<DuckSearchResult> searchResponse = await ExecuteSearchAsync(query, searchOptions, cancellationToken).ConfigureAwait(false);
         long totalCount = searchResponse.Count;
-        return new KernelSearchResults<object>(GetResultsAsWebPageAsync(searchResponse), totalCount);
+        return new KernelSearchResults<DuckSearchResult>(GetResultsAsWebPageAsync(searchResponse), totalCount);
     }
 
-    public async Task<KernelSearchResults<TextSearchResult>> GetTextSearchResultsAsync(string query, TextSearchOptions? searchOptions = null, CancellationToken cancellationToken = default)
-    {
-        searchOptions ??= new TextSearchOptions();
+    public async Task<KernelSearchResults<TextSearchResult>> GetTextSearchResultsAsync(string query, TextSearchOptions<DuckSearchResult>? searchOptions = null, CancellationToken cancellationToken = default)
+    { 
         List<DuckSearchResult> searchResponse = await ExecuteSearchAsync(query, searchOptions, cancellationToken).ConfigureAwait(false);
         long totalCount = searchResponse.Count;
         return new KernelSearchResults<TextSearchResult>(GetResultsAsTextSearchResultAsync(searchResponse), totalCount);
     }
 
-    public async Task<KernelSearchResults<string>> SearchAsync(string query, TextSearchOptions? searchOptions = null, CancellationToken cancellationToken = default)
-    {
-        searchOptions ??= new TextSearchOptions();
+    public async Task<KernelSearchResults<string>> SearchAsync(string query, TextSearchOptions<DuckSearchResult>? searchOptions , CancellationToken cancellationToken = default)
+    { 
         List<DuckSearchResult> searchResponse = await ExecuteSearchAsync(query, searchOptions, cancellationToken).ConfigureAwait(false);
         long totalCount = searchResponse.Count;
         return new KernelSearchResults<string>(GetResultsAsStringAsync(searchResponse), totalCount);
     }
 
-    private async Task<List<DuckSearchResult>> ExecuteSearchAsync(string query, TextSearchOptions searchOptions, CancellationToken cancellationToken)
+    private async Task<List<DuckSearchResult>> ExecuteSearchAsync(string query, TextSearchOptions<DuckSearchResult>? searchOptions, CancellationToken cancellationToken)
     {
         var form = new List<KeyValuePair<string, string>> { new("q", query), new("b", ""), new("kl", ""), new("df", "") };
-        if (searchOptions.Skip > 0)
+        if (searchOptions?.Skip > 0)
         {
             form.Add(new KeyValuePair<string, string>("s", searchOptions.Skip.ToString()));
         }
@@ -92,7 +89,7 @@ public class DuckduckgoTextSearch : ITextSearch
         }
     }
 
-    private static async IAsyncEnumerable<object> GetResultsAsWebPageAsync(List<DuckSearchResult> searchResponse)
+    private static async IAsyncEnumerable<DuckSearchResult> GetResultsAsWebPageAsync(List<DuckSearchResult> searchResponse)
     {
         foreach (var webPage in searchResponse)
         {
@@ -100,4 +97,5 @@ public class DuckduckgoTextSearch : ITextSearch
             await Task.Yield();
         }
     }
+ 
 }

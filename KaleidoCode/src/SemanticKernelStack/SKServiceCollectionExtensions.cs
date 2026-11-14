@@ -35,10 +35,6 @@ public static class SKServiceCollectionExtensions
         // but all my other libraries that depend on MongoDB are 3.3.0 and above.
         switch (config.VectorStoreType)
         {
-            case "memory":
-                services.AddInMemoryVectorStore();
-                services.AddInMemoryVectorStoreRecordCollection<string, SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
-                break;
             case "mongo":
                 services.AddMongoVectorStore(configuration.GetConnectionString("MongoDb")!, config.VectorStoreName);
                 services.AddMongoCollection<SemanticSearchRecord>(SemanticSearchRecord.GetCollectionName());
@@ -181,7 +177,6 @@ public static class SKServiceCollectionExtensions
             });
         #endregion
 
-        services.AddScoped<A2AService>();
         services.AddScoped<AgentService>();
         services.AddScoped<DeclarativeService>();
         services.AddScoped<EmbeddingService>();

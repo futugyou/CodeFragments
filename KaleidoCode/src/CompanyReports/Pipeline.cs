@@ -54,21 +54,21 @@ public class Pipeline
 
                 // write CSV
                 using var writer = new StreamWriter(csvPath);
-                using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+                using var csv = CsvWriter.Create(writer);
 
                 if (data != null && data.Count > 0)
                 {
                     // write header
                     foreach (var key in data[0].Keys)
                         csv.WriteField(key);
-                    csv.NextRecord();
+                    csv.EndRecord();
 
                     // write every row
                     foreach (var row in data)
                     {
                         foreach (var key in row.Keys)
                             csv.WriteField(row[key]);
-                        csv.NextRecord();
+                        csv.EndRecord();
                     }
                 }
             }

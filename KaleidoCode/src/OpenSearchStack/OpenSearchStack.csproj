@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-	  <PackageReference Include="OpenSearch.Client" Version="1.8.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+	  <PackageReference Include="OpenSearch.Client" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
   </ItemGroup>
 
   <ItemGroup>

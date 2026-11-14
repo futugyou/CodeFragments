@@ -4,6 +4,7 @@ using Npgsql;
 
 namespace AgentStack.SessionStore;
 
+// TODO
 public sealed class PostgresAgentSessionStore : AgentSessionStore
 {
     private readonly NpgsqlDataSource _dataSource;
@@ -28,48 +29,55 @@ public sealed class PostgresAgentSessionStore : AgentSessionStore
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public override async ValueTask SaveSessionAsync(AIAgent agent, string conversationId, AgentSession session, CancellationToken cancellationToken = default)
+    public override ValueTask SaveSessionAsync(AIAgent agent, AgentSessionStoreKey key, AgentSession session, CancellationToken cancellationToken = default)
     {
-        var key = GetKey(conversationId, agent.Id);
-        Console.WriteLine($"Saving session: {key}");
-        JsonElement sessionElement = await agent.SerializeSessionAsync(session, cancellationToken: cancellationToken);
-        var jsonString = sessionElement.GetRawText();
+        // var key = GetKey(conversationId, agent.Id);
+        // Console.WriteLine($"Saving session: {key}");
+        // JsonElement sessionElement = await agent.SerializeSessionAsync(session, cancellationToken: cancellationToken);
+        // var jsonString = sessionElement.GetRawText();
 
-        const string sql = $@"
-            INSERT INTO {TableName} (key, session_data)
-            VALUES (@key, @data::jsonb)
-            ON CONFLICT (key) DO UPDATE SET 
-                session_data = EXCLUDED.session_data,
-                updated_at = CURRENT_TIMESTAMP;";
+        // const string sql = $@"
+        //     INSERT INTO {TableName} (key, session_data)
+        //     VALUES (@key, @data::jsonb)
+        //     ON CONFLICT (key) DO UPDATE SET 
+        //         session_data = EXCLUDED.session_data,
+        //         updated_at = CURRENT_TIMESTAMP;";
 
-        await using var command = _dataSource.CreateCommand(sql);
-        command.Parameters.AddWithValue("key", key);
-        command.Parameters.AddWithValue("data", jsonString);
+        // await using var command = _dataSource.CreateCommand(sql);
+        // command.Parameters.AddWithValue("key", key);
+        // command.Parameters.AddWithValue("data", jsonString);
 
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        // await command.ExecuteNonQueryAsync(cancellationToken);
+        throw new NotImplementedException();
     }
 
-    public override async ValueTask<AgentSession> GetSessionAsync(AIAgent agent, string conversationId, CancellationToken cancellationToken = default)
+    public override ValueTask<AgentSession?> GetSessionAsync(AIAgent agent, AgentSessionStoreKey key, CancellationToken cancellationToken = default)
     {
-        var key = GetKey(conversationId, agent.Id);
-        Console.WriteLine($"Getting session: {key}");
+        // var key = GetKey(conversationId, agent.Id);
+        // Console.WriteLine($"Getting session: {key}");
 
-        const string sql = $"SELECT session_data FROM {TableName} WHERE key = @key";
+        // const string sql = $"SELECT session_data FROM {TableName} WHERE key = @key";
 
-        await using var command = _dataSource.CreateCommand(sql);
-        command.Parameters.AddWithValue("key", key);
+        // await using var command = _dataSource.CreateCommand(sql);
+        // command.Parameters.AddWithValue("key", key);
 
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        // await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-        if (await reader.ReadAsync(cancellationToken))
-        {
-            var jsonString = reader.GetString(0);
-            using var doc = JsonDocument.Parse(jsonString);
-            return await agent.DeserializeSessionAsync(doc.RootElement.Clone(), cancellationToken: cancellationToken);
-        }
+        // if (await reader.ReadAsync(cancellationToken))
+        // {
+        //     var jsonString = reader.GetString(0);
+        //     using var doc = JsonDocument.Parse(jsonString);
+        //     return await agent.DeserializeSessionAsync(doc.RootElement.Clone(), cancellationToken: cancellationToken);
+        // }
 
-        return await agent.CreateSessionAsync(cancellationToken);
+        // return await agent.CreateSessionAsync(cancellationToken);
+        throw new NotImplementedException();
     }
 
     private static string GetKey(string conversationId, string agentId) => $"{agentId}:{conversationId}";
+
+    public override ValueTask DeleteSessionAsync(AIAgent agent, AgentSessionStoreKey key, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

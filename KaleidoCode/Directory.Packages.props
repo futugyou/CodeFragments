@@ -1,0 +1,120 @@
+<Project>
+  <ItemGroup>
+    <!-- Core -->
+    <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.ConcurrencyLimiter" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.12.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.23.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="11.0.1" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="11.0.1" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.4.35" />
+    <PackageVersion Include="OpenAI" Version="2.15.0" />
+
+    <!-- Agent -->
+    <PackageVersion Include="Microsoft.Agents.AI.Declarative" Version="1.28.0-rc1" />
+    <PackageVersion Include="Microsoft.Agents.AI.OpenAI" Version="1.28.0" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting.A2A.AspNetCore" Version="1.28.0-preview.261106.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting.AGUI.AspNetCore" Version="1.28.0-preview.261106.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.28.0-preview.261106.1" />
+    <PackageVersion Include="Microsoft.Agents.AI.Hosting.OpenAI" Version="1.28.0-alpha.261106.1" />
+    <PackageVersion Include="CommunityToolkit.VectorData.PgVector" Version="1.0.2" />
+
+    <!-- CompanyReports -->    
+    <PackageVersion Include="AngleSharp" Version="1.10.3" />
+    <PackageVersion Include="CsvHelper" Version="34.0.0" />
+    <PackageVersion Include="FaissMask" Version="0.4.2" />
+    <PackageVersion Include="HtmlTags" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="11.0.0" />
+    <PackageVersion Include="SharpToken" Version="2.0.6" />
+    <PackageVersion Include="Tabula" Version="1.0.1" />
+    <PackageVersion Include="Tiktoken" Version="3.1.5" />
+
+    <!-- GraphQL -->
+    <PackageVersion Include="GraphQL.Server.Ui.Voyager" Version="8.3.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="11.0.0" />
+    <PackageVersion Include="HotChocolate.AspNetCore" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.AspNetCore.Authorization" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Data" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Data.EntityFramework" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Data.MongoDb" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Data.Spatial" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Diagnostics" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Execution.Abstractions" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.PersistedOperations.FileSystem" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.PersistedOperations.InMemory" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.PersistedOperations.Redis" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Subscriptions.InMemory" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Subscriptions.Postgres" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Subscriptions.Redis" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Types.Analyzers" Version="16.7.5" />
+    <PackageVersion Include="HotChocolate.Types.Scalars" Version="16.7.5" />
+
+    <!-- KaleidoCode -->
+    <PackageVersion Include="Hashids.net" Version="1.7.0" />
+    <PackageVersion Include="MQTTnet" Version="5.2.0.1603" />
+    <PackageVersion Include="MQTTnet.AspNetCore" Version="5.2.0.1603" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="16.4.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.21.0" />
+    <PackageVersion Include="Yarp.Telemetry.Consumption" Version="2.3.0" />
+
+    <!-- KaleidoCode.ServiceDefaults -->
+    <PackageVersion Include="KubernetesClient" Version="21.0.8" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.21.0" />
+
+    <!-- KernelMemory -->
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.KernelMemory.AI.OpenAI" Version="0.98.250508.3" />
+    <PackageVersion Include="Microsoft.KernelMemory.Core" Version="0.98.250508.3" />
+    <PackageVersion Include="Microsoft.KernelMemory.WebClient" Version="0.98.250508.3" />
+
+    <!-- Configuration -->
+    <!-- <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.14" />
+    <PackageVersion Include="AWSSDK.SimpleSystemsManagement" Version="4.0.6.4" /> -->
+
+    <!-- OpenSearch -->
+    <PackageVersion Include="OpenSearch.Client" Version="2.3.0" />
+
+    <!-- SemanticKernel -->
+    <PackageVersion Include="A2A.AspNetCore" Version="1.0.0-preview4" />
+    <PackageVersion Include="HtmlAgilityPack" Version="1.13.1" />
+    <PackageVersion Include="MongoDB.EntityFrameworkCore" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.ML.Tokenizers" Version="3.0.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.A2A" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Core" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Orchestration" Version="1.82.0-preview" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Runtime.InProcess" Version="1.82.0-preview" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Agents.Yaml" Version="1.82.0-beta" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.82.0-preview" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Document" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Plugins.OpenApi" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Plugins.Web" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.Abstractions" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.Core" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Process.LocalRuntime" Version="1.82.0-alpha" />
+    <PackageVersion Include="Microsoft.SemanticKernel.PromptTemplates.Handlebars" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.PromptTemplates.Liquid" Version="1.82.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.MongoDB" Version="1.74.0-preview" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Yaml" Version="1.82.0" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.4.0" />
+    <PackageVersion Include="PdfPig" Version="0.1.16" />
+
+  </ItemGroup>
+</Project>

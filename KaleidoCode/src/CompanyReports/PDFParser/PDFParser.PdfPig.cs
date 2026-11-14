@@ -202,12 +202,12 @@ public class PdfPigParser : IPDFParser
         var height = page.Height;
 
         var headerText = page.Letters
-            .Where(l => l.GlyphRectangle.Bottom > height - 50) // top 50 units
+            .Where(l => l.BoundingBox.Bottom > height - 50) // top 50 units
             .Select(l => l.Value)
             .Aggregate("", (a, b) => a + b);
 
         var footerText = page.Letters
-            .Where(l => l.GlyphRectangle.Top < 50) // bottom 50 units
+            .Where(l => l.BoundingBox.Top < 50) // bottom 50 units
             .Select(l => l.Value)
             .Aggregate("", (a, b) => a + b);
 

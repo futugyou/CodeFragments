@@ -11,7 +11,7 @@ public static class DockServiceCollectionExtensions
         string? serviceId = default)
     {
 
-        services.AddKeyedSingleton<ITextSearch>(
+        services.AddKeyedSingleton<ITextSearch<DuckSearchResult>>(
             serviceId,
             (sp, obj) =>
             {

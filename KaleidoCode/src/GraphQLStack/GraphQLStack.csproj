@@ -1,31 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<ItemGroup>
-		<PackageReference Include="GraphQL.Server.Ui.Voyager" Version="8.3.3" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
-		<PackageReference Include="HotChocolate.AspNetCore" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.0.0-p.10.2" />
-		<PackageReference Include="HotChocolate.Data" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Data.MongoDb" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Data.Spatial" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Diagnostics" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Execution" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Execution.Abstractions" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.PersistedOperations.Redis" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Subscriptions.InMemory" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Subscriptions.Postgres" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Subscriptions.Redis" Version="16.0.0-p.10.8" />
-		<PackageReference Include="HotChocolate.Types.Analyzers" Version="16.0.0-p.10.8">
+		<PackageReference Include="GraphQL.Server.Ui.Voyager" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+		<PackageReference Include="HotChocolate.AspNetCore" />
+		<PackageReference Include="HotChocolate.AspNetCore.Authorization" />
+		<PackageReference Include="HotChocolate.Data" />
+		<PackageReference Include="HotChocolate.Data.EntityFramework" />
+		<PackageReference Include="HotChocolate.Data.MongoDb" />
+		<PackageReference Include="HotChocolate.Data.Spatial" />
+		<PackageReference Include="HotChocolate.Diagnostics" />
+		<PackageReference Include="HotChocolate.Execution.Abstractions" />
+		<PackageReference Include="HotChocolate.PersistedOperations.FileSystem" />
+		<PackageReference Include="HotChocolate.PersistedOperations.InMemory" />
+		<PackageReference Include="HotChocolate.PersistedOperations.Redis" />
+		<PackageReference Include="HotChocolate.Subscriptions.InMemory" />
+		<PackageReference Include="HotChocolate.Subscriptions.Postgres" />
+		<PackageReference Include="HotChocolate.Subscriptions.Redis" />
+		<PackageReference Include="HotChocolate.Types.Analyzers" >
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="HotChocolate.Types.Scalars" Version="16.0.0-p.10.8" />
-		<PackageReference Include="StackExchange.Redis" Version="2.10.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
+		<PackageReference Include="HotChocolate.Types.Scalars" />
+		<PackageReference Include="StackExchange.Redis" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
 	</ItemGroup>
 	
 	<ItemGroup>

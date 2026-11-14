@@ -1,4 +1,6 @@
 
+using Tiktoken;
+
 namespace CompanyReports.TokenCounter;
 
 public class TikTokenCounter : ITokenCounter

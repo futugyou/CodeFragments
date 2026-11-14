@@ -29,7 +29,8 @@ public class HttpRequestInterceptor : DefaultHttpRequestInterceptor
         {
             { "testname", "testvalue" }
         };
-        requestBuilder.AddVariableValues(properties);
+
+        requestBuilder.SetVariableValues(properties);
         logger.LogInformation("this log from HttpRequestInterceptor.OnCreateAsync");
         return base.OnCreateAsync(context, requestExecutor, requestBuilder, cancellationToken);
     }

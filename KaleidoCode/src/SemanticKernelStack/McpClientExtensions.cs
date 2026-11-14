@@ -16,7 +16,8 @@ public static class McpClientExtensions
     public static async Task<IReadOnlyList<KernelFunction>> MapToFunctionsAsync(this McpClient mcpClient, CancellationToken cancellationToken = default)
     {
         var functions = new List<KernelFunction>();
-        foreach (var tool in await mcpClient.ListToolsAsync(null, cancellationToken).ConfigureAwait(false))
+        var ops = new ModelContextProtocol.RequestOptions();
+        foreach (var tool in await mcpClient.ListToolsAsync(ops, cancellationToken).ConfigureAwait(false))
         {
             // use SemanticKernel AIFunctionExtensions
             functions.Add(tool.AsKernelFunction());

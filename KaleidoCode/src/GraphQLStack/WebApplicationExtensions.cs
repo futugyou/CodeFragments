@@ -5,18 +5,15 @@ public static class GraphQLApplicationBuilderExtensions
 {
     public static IApplicationBuilder UseGraphQLCustom(this WebApplication app)
     {
-        app.MapGraphQL().WithOptions(new GraphQLServerOptions
+        app.MapGraphQL().WithOptions(ops =>
         {
-            // default is true, http://localhost:5000/graphql?sdl
-            EnableSchemaRequests = true,
+            ops.EnableSchemaRequests = true;
             // default is true
-            EnableGetRequests = true,
+            ops.EnableGetRequests = true;
             // default is Query
-            AllowedGetOperations = AllowedGetOperations.Query,
-            EnableMultipartRequests = true,
-            Tool = {
-                    Enable = true,
-                },
+            ops.AllowedGetOperations = AllowedGetOperations.Query;
+            ops.EnableMultipartRequests = true;
+            ops.Tool.Enable = true;
         });
         // i think this is same as UseGraphQLVoyager
         // app.MapBananaCakePop("/graphql/ui").WithOptions(new GraphQLToolOptions

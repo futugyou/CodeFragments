@@ -1,7 +1,5 @@
 ﻿
 global using global::CsvHelper;
-global using global::CsvHelper.Configuration;
-global using global::CsvHelper.Configuration.Attributes;
 global using global::FaissMask;
 global using global::HtmlTags;
 global using global::Microsoft.Extensions.AI;
@@ -24,7 +22,6 @@ global using global::System.Text.Json;
 global using global::System.Text.Json.Schema;
 global using global::System.Text.Json.Serialization;
 global using global::System.Text.RegularExpressions;
-global using global::Tiktoken;
 global using global::Tabula;
 global using global::UglyToad.PdfPig;
 global using global::UglyToad.PdfPig.Content;
