@@ -11,7 +11,7 @@
 		<PackageReference Include="MassTransit" Version="9.3.0" />
 		<PackageReference Include="MassTransit.AspNetCore" Version="9.2.6" />
 		<PackageReference Include="MassTransit.RabbitMQ" Version="9.3.0" />
-		<PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.3.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="11.0.1" />
 	</ItemGroup>
 
